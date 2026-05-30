@@ -1,0 +1,30 @@
+.stats-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 16px);
+}
+
+.stats-summary {
+  font-size: var(--font-size-sm);
+  color: var(--color-gold);
+  opacity: 0.9;
+  margin: 0;
+}
+
+.stats-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 8px);
+}
+
+.stats-title {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+  font-weight: 500;
+}
+
+.stats-empty {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}

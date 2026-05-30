@@ -1,0 +1,36 @@
+---
+source: src/recommendation/snapshot_tests.rs
+expression: snap
+---
+[
+  {
+    "rank": 1,
+    "champion_key": "Lux",
+    "tier": "C",
+    "confidence": "low"
+  },
+  {
+    "rank": 2,
+    "champion_key": "Ashe",
+    "tier": "C",
+    "confidence": "low"
+  },
+  {
+    "rank": 3,
+    "champion_key": "Vi",
+    "tier": "C",
+    "confidence": "low"
+  },
+  {
+    "rank": 4,
+    "champion_key": "Irelia",
+    "tier": "C",
+    "confidence": "low"
+  },
+  {
+    "rank": 5,
+    "champion_key": "Blitzcrank",
+    "tier": "C",
+    "confidence": "low"
+  }
+]

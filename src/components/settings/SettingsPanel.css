@@ -1,0 +1,223 @@
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-panel {
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  width: 420px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  overflow-y: auto;
+}
+
+.settings-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.settings-panel__header h2 {
+  font-size: 16px;
+  color: var(--color-gold);
+  margin: 0;
+}
+
+.settings-panel__close {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.settings-panel__close:hover {
+  color: var(--color-text);
+}
+
+.sp-section {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sp-section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-gold);
+  margin: 0;
+}
+
+.sp-hint {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.sp-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  color: var(--color-text);
+}
+
+.sp-toggle input[type='checkbox'] {
+  accent-color: var(--color-gold);
+  width: 14px;
+  height: 14px;
+}
+
+.sp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sp-row span {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+.sp-select {
+  background: var(--color-bg-deep);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+}
+
+.sp-weight-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.sp-weight-label {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  width: 110px;
+}
+
+.sp-slider {
+  flex: 1;
+  accent-color: var(--color-gold);
+}
+
+.sp-weight-val {
+  font-size: 11px;
+  color: var(--color-gold);
+  width: 32px;
+  text-align: right;
+}
+
+.sp-footer {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+  padding: var(--space-3) var(--space-4);
+}
+
+.sp-btn {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  border: 1px solid var(--color-border);
+}
+
+.sp-btn--cancel {
+  background: none;
+  color: var(--color-text-muted);
+}
+
+.sp-btn--save {
+  background: var(--color-gold);
+  color: #000;
+  border-color: var(--color-gold);
+  font-weight: 700;
+}
+
+/* Language selector */
+.sp-lang-row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.sp-lang-btn {
+  background: var(--color-bg-deep);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.sp-lang-btn:hover {
+  border-color: var(--color-gold);
+  color: var(--color-text);
+}
+
+.sp-lang-btn--active {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+  font-weight: 600;
+}
+
+/* Meta sync button */
+.sp-btn--meta {
+  background: var(--color-bg-deep);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+.sp-btn--meta:hover:not(:disabled) {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+
+.sp-btn--meta:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.sp-meta-ok {
+  font-size: 11px;
+  color: #4caf50;
+}
+
+.sp-meta-err {
+  font-size: 11px;
+  color: var(--color-danger, #e74c3c);
+}
+
+/* Weight total indicator (used in SettingsPanel footer) */
+.sp-weight-total {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  align-self: center;
+  flex: 1;
+}
+
+.sp-weight-total--invalid {
+  color: var(--color-danger, #e74c3c);
+}

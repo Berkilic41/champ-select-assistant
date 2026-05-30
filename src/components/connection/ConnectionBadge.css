@@ -1,0 +1,24 @@
+.badge {
+  font-size: var(--font-size-sm);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+}
+
+.badge--connected {
+  background: rgba(76, 175, 80, 0.15);
+  color: var(--color-success);
+  border: 1px solid var(--color-success);
+}
+
+.badge--disconnected {
+  background: rgba(244, 67, 54, 0.15);
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+}
+
+.badge--connecting {
+  background: rgba(200, 155, 60, 0.15);
+  color: var(--color-gold);
+  border: 1px solid var(--color-gold);
+}

@@ -1,0 +1,10 @@
+/* Global resets and base styles — variables are in styles/variables.css */
+
+body {
+  font-family: 'Figtree', system-ui, sans-serif;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}

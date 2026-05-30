@@ -1,0 +1,136 @@
+{
+  "app": {
+    "title": "Champ Select Asistanı",
+    "settings": "Ayarlar",
+    "settingsSaved": "Ayarlar kaydedildi.",
+    "welcomeReady": "Hoş geldin! Uygulama hazır."
+  },
+  "connection": {
+    "connecting": "Bağlanıyor...",
+    "disconnected": "League Client bulunamadı",
+    "retry": "Tekrar Dene",
+    "inGame": "Oyun devam ediyor..."
+  },
+  "lobby": {
+    "greeting": "Hoşgeldin, {{name}}!",
+    "hint": "Champion Select'e girince öneriler otomatik görünecek.",
+    "syncBtn": "Maç geçmişini yükle",
+    "refreshBtn": "Yenile",
+    "loading": "Yükleniyor…",
+    "noData": "Henüz veri yok — yukarıdaki butona tıklayarak Riot verilerini senkronize et.",
+    "apiKeyMissing": "Riot API key eksik.",
+    "apiKeyHint": "adresinden key al, ardından",
+    "apiKeyHintEnd": "dosyasına",
+    "tabChampions": "Şampiyonlarım",
+    "tabStats": "İstatistiklerim"
+  },
+  "champSelect": {
+    "yourTeam": "Takımın",
+    "enemyTeam": "Düşman",
+    "banTitle": "BAN SIRAN",
+    "banHintHover": "Rakip hover ediyor — potansiyel ban hedefleri:",
+    "banHintNoHover": "Rakip henüz hover etmiyor. Kompo eksikliğini karşılayan şampiyonları banlama önerilir.",
+    "keyboardHint": "[1-5] Öneri seç  ·  Enter = Hover uygula",
+    "watchingBan": "Takım banlıyor...",
+    "watchingPick": "Takım seçiyor...",
+    "yourOptions": "Seçeneklerin:",
+    "lockingIn": "Seçim kilitlendi — Build planı:",
+    "planningMsg": "Lobi'desin — Champion Select'e girince öneriler otomatik görünecek",
+    "noRecommendation": "Öneri için \"Maç geçmişini yükle\" butonuna tıkla",
+    "phase": {
+      "planning": "Lobi — Kuyruğa hazır ol",
+      "ban_acting": "BAN SIRASI — Tehlikeli şampiyonu banla",
+      "ban_watching": "Takım banlıyor...",
+      "pick_acting": "SENİN SIRAN — Hover önerini seç",
+      "pick_watching": "Takım seçiyor...",
+      "finalization": "Seçim kilitlendi — Build planına bak"
+    }
+  },
+  "heroCard": {
+    "firstTime": "İlk kez oynuyor olabilirsin",
+    "lowConfidence": "Az veri — güven düşük",
+    "keyHint": "[1] Öner  [Enter] Hover uygula",
+    "detail": "Detay ↓",
+    "detailClose": "Detay ↑",
+    "statsLine": "{{wins}}W-{{losses}}L ({{wr}}%) · {{games}} maç"
+  },
+  "quickPick": {
+    "confLow": "Az veri",
+    "confMedium": "Orta veri",
+    "confHigh": "Yüksek veri"
+  },
+  "onboarding": {
+    "step1": {
+      "title": "Hoş geldin!",
+      "body": "Champ Select Asistanı, champion select sırasında sana şampiyon önerileri ve oyun planı gösterir. LCU bağlantısı sayesinde mevcut draft'ı anlık okur.",
+      "hint": "Uygulama yalnızca öneri yapar — otomatik seçim veya kilitleme yapmaz."
+    },
+    "step2": {
+      "title": "Kişisel Veriler",
+      "body": "Uygulama, League Client açıkken maç geçmişinizi ve mastery verilerinizi doğrudan okur. Herhangi bir kayıt veya API key gerekmez.",
+      "hint": "Verilerinizi görmek için sadece League Client'ı açık tutun."
+    },
+    "step3": {
+      "title": "Draft IQ",
+      "body": "Öneriler sadece winrate değil; combo planları, takım dengesi, engage/peel eksikleri ve execution zorluğunu da hesaplar. 'Detay ↓' ile oyun planını görebilirsin.",
+      "hint": "Nocturne + Orianna gibi kombolar, AP/AD dengesi ve blind pick güvenliği otomatik değerlendirilir."
+    },
+    "step4": {
+      "title": "Hazır!",
+      "body": "\"Maç geçmişini yükle\" butonuna bas ve champion select'e gir. Öneriler otomatik açılır.",
+      "hint": "İpucu: Uygulama her zaman üstte kalır, champion select'i kaçırmaz."
+    },
+    "back": "Geri",
+    "next": "İleri",
+    "start": "Başla!",
+    "disclaimer": "Riot Games ile bağlantılı değildir, Riot Games tarafından onaylanmamıştır."
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "windowSection": "Pencere",
+    "alwaysOnTop": "Her zaman üstte",
+    "autoHideInGame": "Oyun başlayınca gizle",
+    "size": "Boyut",
+    "sizeCompact": "Kompakt (320x480)",
+    "sizeStandard": "Standart (800x600)",
+    "sizeWide": "Geniş (1100x700)",
+    "weightsSection": "Öneri Ağırlıkları",
+    "weightsHint": "Toplam otomatik %100'e normalize edilir.",
+    "weightComfort": "Mastery (Comfort)",
+    "weightLaneCounter": "Lane Counter",
+    "weightMatchup": "Lane Matchup",
+    "weightTeamCounter": "Takım Karşılığı",
+    "weightSynergy": "Sinerji",
+    "weightMeta": "Meta",
+    "weightRoleFit": "Rol Uyumu",
+    "serverSection": "Sunucu",
+    "regions": {
+      "tr1":   "TR (Türkiye)",
+      "euw1":  "EUW (Batı Avrupa)",
+      "eune1": "EUNE (Kuzey Doğu Avrupa)",
+      "na1":   "NA (Kuzey Amerika)",
+      "kr":    "KR (Kore)",
+      "jp1":   "JP (Japonya)",
+      "br1":   "BR (Brezilya)",
+      "la1":   "LAN (Latin Amerika Kuzey)",
+      "la2":   "LAS (Latin Amerika Güney)",
+      "oc1":   "OCE (Okyanusya)",
+      "ru":    "RU (Rusya)"
+    },
+    "soundSection": "Ses",
+    "soundsEnabled": "Ses efektleri (hover/öneri)",
+    "metaSection": "Meta Verisi",
+    "syncMetaBtn": "Meta'yı güncelle (Meraki)",
+    "syncMetaDone": "Güncellendi ✓",
+    "syncMetaFail": "Hata — ağ bağlantısını kontrol et",
+    "syncMetaSyncing": "Güncelleniyor…",
+    "languageSection": "Dil / Language",
+    "language": "Dil",
+    "languageTr": "Türkçe",
+    "languageEn": "English",
+    "total": "Toplam: {{total}}",
+    "totalInvalid": "!= 1.00",
+    "cancel": "İptal",
+    "save": "Kaydet"
+  }
+}

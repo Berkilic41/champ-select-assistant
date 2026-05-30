@@ -1,0 +1,25 @@
+.build-summary { padding: var(--space-2); border-top: 1px solid var(--color-border); }
+.build-summary__title { font-size: 11px; color: var(--color-gold); margin-bottom: var(--space-1); }
+.build-summary__section { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-1); }
+.build-label { font-size: 10px; color: var(--color-text-muted); width: 70px; }
+.build-items { display: flex; gap: var(--space-1); }
+.item-icon { width: 32px; height: 32px; border-radius: var(--radius-sm); object-fit: cover; border: 1px solid var(--color-border); }
+.item-icon--empty { width: 32px; height: 32px; background: var(--color-bg-panel); border: 1px dashed var(--color-border); border-radius: var(--radius-sm); }
+.build-empty { font-size: var(--font-size-sm); color: var(--color-text-muted); padding: var(--space-2); }
+.build-skill-order {
+  font-size: 13px;
+  color: var(--color-text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+}
+.build-label { width: 96px; }
+.build-shards { display: flex; gap: var(--space-1); flex-wrap: wrap; }
+.build-shard-chip {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+}

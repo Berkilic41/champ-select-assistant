@@ -1,0 +1,9 @@
+.phase-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-bg-panel);
+  border-bottom: 2px solid var(--color-border);
+}
+.phase-header--acting { border-bottom-color: var(--color-gold); }
+.phase-header__msg { font-size: 12px; font-weight: 600; color: var(--color-text-muted); }
+.phase-header--acting .phase-header__msg { color: var(--color-gold); }

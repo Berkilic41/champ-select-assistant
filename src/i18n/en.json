@@ -1,0 +1,136 @@
+{
+  "app": {
+    "title": "Champ Select Assistant",
+    "settings": "Settings",
+    "settingsSaved": "Settings saved.",
+    "welcomeReady": "Welcome! The app is ready."
+  },
+  "connection": {
+    "connecting": "Connecting...",
+    "disconnected": "League Client not found",
+    "retry": "Retry",
+    "inGame": "Game in progress..."
+  },
+  "lobby": {
+    "greeting": "Welcome, {{name}}!",
+    "hint": "Recommendations will appear automatically when you enter Champion Select.",
+    "syncBtn": "Load match history",
+    "refreshBtn": "Refresh",
+    "loading": "Loading…",
+    "noData": "No data yet — click the button above to sync Riot data.",
+    "apiKeyMissing": "Riot API key is missing.",
+    "apiKeyHint": "get a key from",
+    "apiKeyHintEnd": "and add it to the",
+    "tabChampions": "My Champions",
+    "tabStats": "My Stats"
+  },
+  "champSelect": {
+    "yourTeam": "Your Team",
+    "enemyTeam": "Enemy",
+    "banTitle": "YOUR BAN",
+    "banHintHover": "Opponent is hovering — potential ban targets:",
+    "banHintNoHover": "Opponent isn't hovering yet. Consider banning champions that exploit your team's composition gaps.",
+    "keyboardHint": "[1-5] Select tip  ·  Enter = Apply hover",
+    "watchingBan": "Team is banning...",
+    "watchingPick": "Team is picking...",
+    "yourOptions": "Your options:",
+    "lockingIn": "Locked in — Build plan:",
+    "planningMsg": "You're in lobby — recommendations will appear automatically when you enter Champion Select",
+    "noRecommendation": "Click \"Load match history\" for recommendations",
+    "phase": {
+      "planning": "Lobby — Get ready to queue",
+      "ban_acting": "BAN PHASE — Ban a threatening champion",
+      "ban_watching": "Team is banning...",
+      "pick_acting": "YOUR TURN — Apply your hover suggestion",
+      "pick_watching": "Team is picking...",
+      "finalization": "Locked in — Check your build plan"
+    }
+  },
+  "heroCard": {
+    "firstTime": "You might be playing this for the first time",
+    "lowConfidence": "Low data — low confidence",
+    "keyHint": "[1] Suggest  [Enter] Apply hover",
+    "detail": "Detail ↓",
+    "detailClose": "Detail ↑",
+    "statsLine": "{{wins}}W-{{losses}}L ({{wr}}%) · {{games}} games"
+  },
+  "quickPick": {
+    "confLow": "Low data",
+    "confMedium": "Medium data",
+    "confHigh": "High data"
+  },
+  "onboarding": {
+    "step1": {
+      "title": "Welcome!",
+      "body": "Champ Select Assistant shows champion recommendations and game plans during champion select. The LCU connection reads the current draft in real time.",
+      "hint": "The app only suggests — it never auto-selects or locks champions for you."
+    },
+    "step2": {
+      "title": "Personal Data",
+      "body": "The app reads your match history and mastery data directly from the League Client. No registration or API key required.",
+      "hint": "Just keep the League Client open to see your personalized data."
+    },
+    "step3": {
+      "title": "Draft IQ",
+      "body": "Recommendations go beyond win rates — they analyze combo chains, team composition balance, engage/peel gaps, and execution difficulty. Tap 'Detail ↓' to see the full game plan.",
+      "hint": "Combos like Nocturne + Orianna, AP/AD balance, and blind pick safety are evaluated automatically."
+    },
+    "step4": {
+      "title": "Ready!",
+      "body": "Click \"Load match history\" and enter champion select. Recommendations will appear automatically.",
+      "hint": "Tip: The app always stays on top so you won't miss champion select."
+    },
+    "back": "Back",
+    "next": "Next",
+    "start": "Start!",
+    "disclaimer": "Not affiliated with or endorsed by Riot Games."
+  },
+  "settings": {
+    "title": "Settings",
+    "windowSection": "Window",
+    "alwaysOnTop": "Always on top",
+    "autoHideInGame": "Auto-hide when game starts",
+    "size": "Size",
+    "sizeCompact": "Compact (320x480)",
+    "sizeStandard": "Standard (800x600)",
+    "sizeWide": "Wide (1100x700)",
+    "weightsSection": "Recommendation Weights",
+    "weightsHint": "Total is automatically normalized to 100%.",
+    "weightComfort": "Mastery (Comfort)",
+    "weightLaneCounter": "Lane Counter",
+    "weightMatchup": "Lane Matchup",
+    "weightTeamCounter": "Team Counter",
+    "weightSynergy": "Synergy",
+    "weightMeta": "Meta",
+    "weightRoleFit": "Role Fit",
+    "serverSection": "Server",
+    "regions": {
+      "tr1":   "TR (Turkey)",
+      "euw1":  "EUW (Western Europe)",
+      "eune1": "EUNE (North-East Europe)",
+      "na1":   "NA (North America)",
+      "kr":    "KR (Korea)",
+      "jp1":   "JP (Japan)",
+      "br1":   "BR (Brazil)",
+      "la1":   "LAN (Latin America North)",
+      "la2":   "LAS (Latin America South)",
+      "oc1":   "OCE (Oceania)",
+      "ru":    "RU (Russia)"
+    },
+    "soundSection": "Sound",
+    "soundsEnabled": "Sound effects (hover/recommendation)",
+    "metaSection": "Meta Data",
+    "syncMetaBtn": "Update meta (Meraki)",
+    "syncMetaDone": "Updated ✓",
+    "syncMetaFail": "Error — check network connection",
+    "syncMetaSyncing": "Updating…",
+    "languageSection": "Language",
+    "language": "Language",
+    "languageTr": "Türkçe",
+    "languageEn": "English",
+    "total": "Total: {{total}}",
+    "totalInvalid": "!= 1.00",
+    "cancel": "Cancel",
+    "save": "Save"
+  }
+}

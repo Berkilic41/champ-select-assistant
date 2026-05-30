@@ -1,0 +1,22 @@
+.team-slot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-panel);
+}
+
+.team-slot--me {
+  border: 1px solid var(--color-gold);
+}
+
+.team-slot--locked { opacity: 1; }
+
+.team-slot:not(.team-slot--locked) { opacity: 0.6; }
+
+.team-slot__pos {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  width: 28px;
+}

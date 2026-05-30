@@ -1,0 +1,52 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Secrets, certificates, keys
+.env
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
+
+# Rust build
+src-tauri/target/
+
+# Test/coverage output
+coverage/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Local Claude Code settings
+.claude/settings.local.json
+
+# claude-flow runtime state (local, not app code)
+.claude-flow/
+
+# graphify tool output (not part of the app)
+graphify-out/

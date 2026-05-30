@@ -1,0 +1,23 @@
+.disconnected {
+  text-align: center;
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+.disconnected__msg   { font-size: 16px; color: var(--color-text); }
+.disconnected__error { font-size: 12px; color: var(--color-danger); font-family: monospace; }
+.disconnected__retry {
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-gold);
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: opacity var(--transition-fast);
+}
+.disconnected__retry:hover    { opacity: 0.85; }
+.disconnected__retry:disabled { opacity: 0.5; cursor: not-allowed; }

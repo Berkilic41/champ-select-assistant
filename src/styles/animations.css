@@ -1,0 +1,55 @@
+/* Hero card slide-in */
+@keyframes hero-slide-in {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* Score bar fill */
+@keyframes score-fill {
+  from { width: 0%; }
+  to   { width: var(--target-width, 100%); }
+}
+
+/* Lock pulse */
+@keyframes lock-pulse {
+  0%, 100% { transform: scale(1); box-shadow: none; }
+  50%       { transform: scale(1.04); box-shadow: 0 0 16px rgba(200, 155, 60, 0.6); }
+}
+
+/* Urgency pulse (<10s) */
+@keyframes urgency-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+/* Shimmer skeleton */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+/* Fade in */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Slide up */
+@keyframes slide-up {
+  from { transform: translateY(8px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+
+.animate-hero-in    { animation: hero-slide-in 350ms ease-out; }
+.animate-fade-in    { animation: fade-in 250ms ease-out; }
+.animate-slide-up   { animation: slide-up 300ms ease-out; }
+.animate-lock-pulse { animation: lock-pulse 700ms ease-in-out; }
+.animate-urgency    { animation: urgency-pulse 1s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

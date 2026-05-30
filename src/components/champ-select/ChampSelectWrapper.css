@@ -1,0 +1,13 @@
+.aram-badge {
+  display: inline-block;
+  padding: 2px var(--space-2);
+  background: var(--color-gold);
+  color: var(--color-bg-deep);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  align-self: flex-start;
+  margin-bottom: var(--space-1);
+}

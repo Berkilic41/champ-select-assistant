@@ -1,0 +1,89 @@
+{
+  "games": {
+    "games": [
+      {
+        "gameId": 9876543210,
+        "queueId": 420,
+        "gameDuration": 1823,
+        "gameCreation": 1700000000000,
+        "participants": [
+          {
+            "participantId": 1,
+            "championId": 238,
+            "stats": {
+              "win": true,
+              "kills": 8,
+              "deaths": 2,
+              "assists": 4
+            },
+            "timeline": {
+              "lane": "MIDDLE",
+              "role": "SOLO"
+            }
+          },
+          {
+            "participantId": 2,
+            "championId": 99,
+            "stats": {
+              "win": true,
+              "kills": 3,
+              "deaths": 1,
+              "assists": 12
+            },
+            "timeline": {
+              "lane": "BOTTOM",
+              "role": "DUO_SUPPORT"
+            }
+          }
+        ],
+        "participantIdentities": [
+          {
+            "participantId": 1,
+            "player": {
+              "puuid": "test-puuid-local-player",
+              "summonerId": "abc123"
+            }
+          },
+          {
+            "participantId": 2,
+            "player": {
+              "puuid": "other-player-puuid",
+              "summonerId": "def456"
+            }
+          }
+        ]
+      },
+      {
+        "gameId": 9876543211,
+        "queueId": 420,
+        "gameDuration": 2100,
+        "gameCreation": 1700100000000,
+        "participants": [
+          {
+            "participantId": 3,
+            "championId": 61,
+            "stats": {
+              "win": false,
+              "kills": 2,
+              "deaths": 5,
+              "assists": 8
+            },
+            "timeline": {
+              "lane": "MIDDLE",
+              "role": "SOLO"
+            }
+          }
+        ],
+        "participantIdentities": [
+          {
+            "participantId": 3,
+            "player": {
+              "puuid": "test-puuid-local-player",
+              "summonerId": "abc123"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

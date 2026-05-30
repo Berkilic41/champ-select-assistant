@@ -1,0 +1,95 @@
+.lobby {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4);
+  gap: var(--space-3);
+}
+
+.lobby__header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.lobby__greeting { font-size: var(--font-size-lg); color: var(--color-gold); }
+.lobby__hint     { font-size: var(--font-size-sm); color: var(--color-text-muted); }
+
+.lobby__sync-btn {
+  align-self: flex-start;
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  border: 1px solid var(--color-gold);
+  border-radius: var(--radius-sm);
+  color: var(--color-gold);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.lobby__sync-btn:hover:not(:disabled) {
+  background: var(--color-gold);
+  color: var(--color-bg-deep);
+}
+
+.lobby__sync-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lobby__error {
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+}
+
+.lobby__grid-wrap {
+  width: 100%;
+}
+
+/* Tab bar */
+.lobby-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.lobby-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+  margin-bottom: -1px;
+}
+
+.lobby-tab:hover {
+  color: var(--color-text);
+}
+
+.lobby-tab--active {
+  color: var(--color-gold);
+  border-bottom-color: var(--color-gold);
+  font-weight: 600;
+}
+
+.lobby__no-data {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.lobby__data-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.lobby__data-badge {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm, 4px);
+  background: var(--color-surface-2, rgba(255, 255, 255, 0.06));
+  color: var(--color-text-secondary, rgba(255, 255, 255, 0.5));
+  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.10));
+}

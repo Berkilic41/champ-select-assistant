@@ -1,0 +1,123 @@
+.champ-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+
+.champ-grid__empty {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  padding: var(--space-6);
+}
+
+/* Champion card */
+.champ-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-1);
+  width: 80px;
+  min-height: 90px;
+  position: relative;
+  transition: border-color var(--transition-fast);
+}
+
+.champ-card:hover {
+  border-color: var(--color-gold);
+}
+
+.champ-card__icon-wrap {
+  position: relative;
+  line-height: 0;
+}
+
+.champ-card__mastery-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -4px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  background: var(--color-bg-deep);
+  border-radius: 2px;
+  padding: 1px 2px;
+}
+
+.champ-card__id {
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+.champ-card__footer {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+.champ-card__games {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.champ-card__wr {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.champ-card__wr--high {
+  color: var(--color-success);
+}
+
+.champ-card__kda {
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+/* Skeleton state */
+.champ-card--skeleton {
+  pointer-events: none;
+}
+
+.champ-card__skeleton-icon {
+  width: var(--champ-icon-md);
+  height: var(--champ-icon-md);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-panel) 25%,
+    var(--color-border) 50%,
+    var(--color-bg-panel) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.champ-card__skeleton-line {
+  height: 10px;
+  width: 60%;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-panel) 25%,
+    var(--color-border) 50%,
+    var(--color-bg-panel) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.champ-card__skeleton-line--short {
+  width: 40%;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
