@@ -156,27 +156,26 @@ Her senaryo için: ✅ Geçti · ❌ Başarısız · ⚠ Kısmi
 - Otomatik lock/ban yok · API key gerekmez · telemetry yok
 
 ```
-Champ Select Assistant v0.9.0-beta.1 — Kurulum Adımları
+Champ Select Assistant v0.9.0-beta.1 — 1 dakikada başla
 
-1. MSI veya EXE installer çalıştır.
-   Windows SmartScreen uyarısı çıkarsa: "Yine de çalıştır" seç.
-   Bu imzasız bir beta build'idir — tanımlı publisher yoktur.
+EN KOLAY (portable — kurulum yok):
+1. Release sayfasından "ChampSelectAssistant-portable.exe" dosyasını indir.
+2. Çift tıkla. Windows "Bilgisayarınızı korudu" derse:
+   → "Daha fazla bilgi" → "Yine de çalıştır".
+   (İmzasız beta olduğu için normal; tek seferlik.)
+3. Uygulama açılır. League client'ını aç, "Maç geçmişini yükle"ye tıkla. Bitti.
 
-2. League of Legends client'ını aç ve giriş yap.
+Kurulum istersen: setup.exe (NSIS) veya .msi de release'te — aynı adımlar.
 
-3. Champ Select Assistant'ı başlat.
-
-4. "Maç geçmişini yükle" butonuna tıkla.
-   Riot developer API key gerekmez — verini doğrudan LoL client'tan okur.
+Açılmıyorsa (nadir): bilgisayarında "Microsoft Edge WebView2 Runtime" yoktur.
+https://developer.microsoft.com/microsoft-edge/webview2/ adresinden
+"Evergreen Standalone"u kur, sonra .exe'yi tekrar çift tıkla. (Win11'de hazır gelir.)
 
 Önemli:
-- Uygulama otomatik lock, ban veya pick YAPMAZ.
-- Sadece öneri ve oyun planı gösterir.
-- Kendi seçimini kendin yaparsın.
+- Riot developer API key GEREKMEZ — verini doğrudan LoL client'tan okur.
+- Uygulama otomatik lock/ban/pick YAPMAZ; sadece öneri + oyun planı gösterir.
 
-Hata bildirimi:
-- Ekran görüntüsü veya kısa açıklama yeterli.
-- Hangi aşamada olduğunu yaz (onboarding / lobby / champ select / oyun içi).
+Hata bildirimi: ekran görüntüsü + hangi aşamada olduğun (onboarding/lobby/champ select/oyun içi).
 ```
 
 ---
