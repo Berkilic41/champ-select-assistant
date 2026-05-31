@@ -1,10 +1,31 @@
 name = "champ-select-riot-proxy"
 main = "src/index.ts"
-compatibility_date = "2024-01-01"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
 
+# RIOT_API_KEY is set as a secret (never hardcode):
+#   wrangler secret put RIOT_API_KEY
 [vars]
-# RIOT_API_KEY is set as a secret via: wrangler secret put RIOT_API_KEY
-# Never hardcode it here.
+# Regions to aggregate ranked stats from (platform routing values, comma-separated).
+INGEST_REGIONS = "tr1,euw1,na1,kr"
+# Max match details fetched per cron run — keep well under Riot rate limits.
+# A personal key (20 req/s, 100/2min) needs a small number; a production key can go higher.
+MAX_MATCHES_PER_RUN = "40"
+# Seed players sampled per region per run (Challenger ladder).
+SEED_PLAYERS_PER_REGION = "10"
+# Recent ranked matches pulled per seed player.
+MATCHES_PER_PLAYER = "5"
+
+# Aggregated stats store (create with: wrangler d1 create champ-select-stats,
+# then paste the returned database_id below).
+[[d1_databases]]
+binding = "DB"
+database_name = "champ-select-stats"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+# Scheduled ingestion — runs every 2 hours, accumulating a rolling sample.
+[triggers]
+crons = ["0 */2 * * *"]
 
 [[rate_limiting]]
 namespace_id = "riot-proxy-rl"

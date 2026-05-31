@@ -50,3 +50,8 @@ coverage/
 
 # graphify tool output (not part of the app)
 graphify-out/
+
+# Cloudflare Worker local secrets + cache
+cloudflare-worker/.dev.vars
+.wrangler/
+cloudflare-worker/node_modules/
