@@ -33,7 +33,7 @@
     "banTitle": "BAN SIRAN",
     "banHintHover": "Rakip hover ediyor — potansiyel ban hedefleri:",
     "banHintNoHover": "Rakip henüz hover etmiyor. Kompo eksikliğini karşılayan şampiyonları banlama önerilir.",
-    "keyboardHint": "[1-5] Öneri seç  ·  Enter = Hover uygula",
+    "keyboardHint": "[1-5] Öneri seç  ·  Enter = Hover uygula (yalnız hover — otomatik pick/lock yok)",
     "watchingBan": "Takım banlıyor...",
     "watchingPick": "Takım seçiyor...",
     "yourOptions": "Seçeneklerin:",
@@ -86,7 +86,7 @@
     "back": "Geri",
     "next": "İleri",
     "start": "Başla!",
-    "disclaimer": "Riot Games ile bağlantılı değildir, Riot Games tarafından onaylanmamıştır."
+    "disclaimer": "Champ Select Assistant, Riot Games tarafından onaylanmamıştır ve Riot Games'in ya da Riot Games mülklerini üreten veya yöneten kişilerin görüş ya da düşüncelerini yansıtmaz. Riot Games ve ilgili tüm mülkler, Riot Games, Inc.'in ticari markaları veya tescilli ticari markalarıdır."
   },
   "settings": {
     "title": "Ayarlar",

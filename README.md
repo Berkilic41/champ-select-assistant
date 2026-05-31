@@ -87,6 +87,9 @@ Destek ve hata bildirimi: [GitHub Issues](https://github.com/Berkilic41/champ-se
 
 ## Disclaimer
 
-Champ Select Assistant, Riot Games, Inc. ile bağlantılı değildir ve Riot Games
-tarafından onaylanmamıştır. League of Legends ve Riot Games, Riot Games, Inc.'in
-ticari markalarıdır. Uygulama otomatik lock/ban/pick yapmaz; yalnızca öneri sunar.
+Champ Select Assistant isn't endorsed by Riot Games and doesn't reflect the views
+or opinions of Riot Games or anyone officially involved in producing or managing
+Riot Games properties. Riot Games and all associated properties are trademarks or
+registered trademarks of Riot Games, Inc.
+
+Uygulama otomatik lock/ban/pick **yapmaz**; yalnızca öneri sunar.

@@ -326,7 +326,9 @@ Herhangi biri gerçekleşirse public beta ertelenir:
 - [x] **Windows SmartScreen stratejisi:** Tester talimatı (beta) yazıldı (CB-1 §6); imzalı sertifika public release'e ertelendi
 - [x] **Privacy Policy** hazırlandı — `PRIVACY.md`, README'den linkli
 - [x] **Terms of Service** hazırlandı — `TERMS.md` (recommend-only, otomatik aksiyon yok, Riot ToS uyumu)
-- [x] **Riot Games Third-Party Disclaimer** — `LICENSE`, `TERMS.md`, `README.md` ve `PRIVACY.md`'de mevcut
+- [x] **Riot Games Third-Party Disclaimer** — Riot'un tam zorunlu metniyle hizalandı (in-app onboarding, `LICENSE`, `TERMS.md`, `README.md`, `PRIVACY.md`, tauri bundle)
+- [ ] **Riot Developer Portal kaydı/audit** — public öncesi BLOCKER (`docs/api-key-policy.md`). Closed beta LCU-first ile çalışır; production API key başvurusu + audit public dağıtımdan önce tamamlanmalı
+- [x] **Riot 3. parti uyumluluk denetimi** — recommend-only; `hover_champion` yalnız hover (lock/ban/pick yok, kullanıcı-tetikli); Vanguard-safe (sadece LCU HTTP); LCU resmî-değil/tolere kategori (Blitz/op.gg ile aynı)
 - [x] **Download sayfası** — GitHub Releases yayında: https://github.com/Berkilic41/champ-select-assistant/releases/tag/v0.9.0-beta.1 (MSI + NSIS installer ekli)
 - [x] **CHANGELOG.md** oluşturuldu (0.9.0-beta.1 girişi)
 - [x] **Contact/Support kanalı** — GitHub Issues (tüm legal dosyalarda + README'de linkli)

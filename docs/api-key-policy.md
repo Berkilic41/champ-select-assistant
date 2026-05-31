@@ -43,3 +43,27 @@ All responses are JSON-passthrough from Riot API, optionally cached (TTL: 5 min 
 - [ ] `RIOT_API_KEY` not in any `.github/workflows/` (use secrets only)
 - [ ] Binary scan: `strings target/release/*.exe | grep RGAPI` returns empty
 - [ ] Public release: proxy deployed, app points to proxy URL
+
+## Riot Developer Portal Registration (Public Beta Blocker)
+
+Riot's third-party policy (`developer.riotgames.com/policies/general`) requires
+products to be **registered in and audited through the Developer Portal**.
+
+- **Closed beta (CB-1):** LCU-first flow needs no developer key; personal key is
+  optional for the fallback path. Registration not strictly required to test.
+- **Public release (BLOCKER):** Before public distribution, register the product
+  on `developer.riotgames.com`, apply for a **production API key**, and complete
+  Riot's audit. Until approved, keep the official-API path optional and rely on
+  the LCU-first flow + DDragon/CDragon (officially supported static data).
+
+**Status:** ⏳ Not yet registered — tracked as a public-beta blocker.
+
+### LCU usage note (compliance)
+
+The League Client (LCU) API is **unofficial/undocumented** — Riot does not list it
+as a "supported service." This app uses it read-only plus a single **user-initiated
+hover** action (`hover_champion`, `commands/champ_select.rs`) that never completes
+(locks) a pick. This is the same tolerated category as Blitz / op.gg / Mobalytics.
+No game process/memory is accessed (Vanguard-safe). Because LCU is unofficial, no
+LCU-based tool can claim "officially fully compliant"; this product follows all
+published rules (recommend-only, disclaimer, no key in binary, HTTPS, no telemetry).

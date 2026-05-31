@@ -33,7 +33,7 @@
     "banTitle": "YOUR BAN",
     "banHintHover": "Opponent is hovering — potential ban targets:",
     "banHintNoHover": "Opponent isn't hovering yet. Consider banning champions that exploit your team's composition gaps.",
-    "keyboardHint": "[1-5] Select tip  ·  Enter = Apply hover",
+    "keyboardHint": "[1-5] Select tip  ·  Enter = Apply hover (hover only — never auto pick/lock)",
     "watchingBan": "Team is banning...",
     "watchingPick": "Team is picking...",
     "yourOptions": "Your options:",
@@ -86,7 +86,7 @@
     "back": "Back",
     "next": "Next",
     "start": "Start!",
-    "disclaimer": "Not affiliated with or endorsed by Riot Games."
+    "disclaimer": "Champ Select Assistant isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc."
   },
   "settings": {
     "title": "Settings",

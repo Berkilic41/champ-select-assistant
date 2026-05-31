@@ -19,11 +19,13 @@ oyun planı** sunan bir yardımcı araçtır.
 
 ## 3. Riot Games ile İlişki (Third-Party Disclaimer)
 
-Champ Select Assistant, Riot Games, Inc. ile **bağlantılı değildir, Riot Games
-tarafından onaylanmamış, desteklenmemiş veya özel olarak yetkilendirilmemiştir.**
+Champ Select Assistant **Riot Games tarafından onaylanmamıştır** ve Riot Games'in
+ya da Riot Games mülklerini üreten/yöneten kişilerin görüş veya düşüncelerini
+yansıtmaz.
 
-> "This application is not affiliated with, endorsed, sponsored, or specifically
-> approved by Riot Games, Inc. Riot Games and all associated properties are
+> "Champ Select Assistant isn't endorsed by Riot Games and doesn't reflect the
+> views or opinions of Riot Games or anyone officially involved in producing or
+> managing Riot Games properties. Riot Games and all associated properties are
 > trademarks or registered trademarks of Riot Games, Inc."
 
 League of Legends'ı kullanırken Riot Games'in
