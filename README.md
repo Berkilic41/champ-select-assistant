@@ -5,7 +5,7 @@ League of Legends champ-select overlay. Kendi maç geçmişin, mastery verilerin
 ## Öne Çıkanlar (doğrulanabilir)
 
 - **Tüm roster — eksiksiz:** 172/172 şampiyon için draft analizi (arketip, hasar profili, CC, engage/peel). Kapsam, DDragon'a karşı bir testle zorunlu kılınır (`validate_ddragon_completeness`).
-- **Güncel patch:** Şampiyon/item/rune verisi DDragon, win/pick/ban oranları Meraki Analytics üzerinden her patch otomatik güncellenir (şu an 16.11).
+- **Güncel patch:** Şampiyon/item/rune verisi Data Dragon / Community Dragon üzerinden güncel patch'ten (16.11) otomatik çekilir. Meta (win/pick/ban) oranları yakında kendi Riot API tabanlı veri servisinden gelecek (bkz. `docs/api-key-policy.md`); şu an comfort/matchup/sinerji/arketip sinyalleriyle öneri üretilir.
 - **Draft IQ:** 109 ability-referanslı combo + 80 lane matchup; kapsanmayan her eşleşme arketip-tabanlı counter ile yine de değerlendirilir (boş öneri yok).
 - **Dürüst güven:** Az veri / yeni patch / düşük örneklem durumları "güven" etiketiyle açıkça gösterilir — uydurma kesinlik yok.
 - **Güvenli:** Otomatik lock/ban/pick **yapmaz** (sadece öneri); LCU-first (developer API key gerekmez); telemetry yok.
