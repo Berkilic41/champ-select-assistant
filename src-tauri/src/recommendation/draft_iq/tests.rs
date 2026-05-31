@@ -87,7 +87,7 @@ fn validate_ddragon_completeness() {
 #[test]
 fn combo_count_matches_json() {
     let dir = load_combos(COMBOS_JSON).expect("combos.json parse failed");
-    assert_eq!(dir.len(), 100, "combos.json should have 100 entries");
+    assert_eq!(dir.len(), 109, "combos.json should have 109 entries");
 }
 
 #[test]

@@ -122,6 +122,9 @@ pub async fn get_recommendations(
     puuid: String,
     state: State<'_, AppState>,
 ) -> Result<Vec<Recommendation>, AppError> {
+    // Latency budget: champ-select event → recommendation < 500ms (perf target).
+    // Measured at the command layer so the pure engine stays I/O-free.
+    let started = std::time::Instant::now();
     // Parse the session first — we need `assigned_position` before the DB lock
     // so the lane-scoped meta_rates query knows which position to filter on.
     let session: ChampSelectState = if session_json.is_object() {
@@ -306,6 +309,20 @@ pub async fn get_recommendations(
         }
     }
 
+    let elapsed_ms = started.elapsed().as_millis();
+    if elapsed_ms > 500 {
+        tracing::warn!(
+            "get_recommendations {} öneri / {} ms — <500ms hedefi aşıldı",
+            recs.len(),
+            elapsed_ms
+        );
+    } else {
+        tracing::info!(
+            "get_recommendations {} öneri / {} ms",
+            recs.len(),
+            elapsed_ms
+        );
+    }
     Ok(recs)
 }
 

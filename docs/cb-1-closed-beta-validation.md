@@ -148,6 +148,13 @@ Her senaryo için: ✅ Geçti · ❌ Başarısız · ⚠ Kısmi
 
 ### Tester Kurulum Notu
 
+**Neden denemeye değer (doğrulanabilir iddialar):**
+- 172/172 şampiyon draft analizi (DDragon'a karşı test-zorunlu kapsam)
+- Güncel patch (16.11) — oranlar Meraki, statik veri DDragon ile otomatik
+- 109 ability-referanslı combo + 80 lane matchup + tüm-çift arketip counter
+- Az veri/yeni patch durumları "güven" etiketiyle dürüstçe gösterilir
+- Otomatik lock/ban yok · API key gerekmez · telemetry yok
+
 ```
 Champ Select Assistant v0.9.0-beta.1 — Kurulum Adımları
 

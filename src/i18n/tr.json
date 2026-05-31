@@ -3,7 +3,10 @@
     "title": "Champ Select Asistanı",
     "settings": "Ayarlar",
     "settingsSaved": "Ayarlar kaydedildi.",
-    "welcomeReady": "Hoş geldin! Uygulama hazır."
+    "welcomeReady": "Hoş geldin! Uygulama hazır.",
+    "errorTitle": "Bir şeyler ters gitti",
+    "errorBody": "Uygulama beklenmedik bir hatayla karşılaştı. Yeniden denemeyi deneyebilirsin.",
+    "errorRetry": "Yeniden dene"
   },
   "connection": {
     "connecting": "Bağlanıyor...",

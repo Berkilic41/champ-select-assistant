@@ -3,7 +3,10 @@
     "title": "Champ Select Assistant",
     "settings": "Settings",
     "settingsSaved": "Settings saved.",
-    "welcomeReady": "Welcome! The app is ready."
+    "welcomeReady": "Welcome! The app is ready.",
+    "errorTitle": "Something went wrong",
+    "errorBody": "The app hit an unexpected error. You can try again.",
+    "errorRetry": "Try again"
   },
   "connection": {
     "connecting": "Connecting...",

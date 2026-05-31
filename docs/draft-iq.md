@@ -15,8 +15,8 @@ Winrate/pickrate ötesinde oyun mantığı üreten tavsiye motoru. Yalnızca ist
 
 ```
 resources/draft_iq/
-├── champions.json   ← 80 şampiyon arketip verisi
-├── combos.json      ← 50 kanıtlanmış combo çifti
+├── champions.json   ← 172 şampiyon arketip verisi (tüm canlı roster, DDragon 16.11.1)
+├── combos.json      ← 109 kanıtlanmış combo çifti
 └── SCHEMA.md        ← Alan tanımları ve kaynak disiplini
 
 src-tauri/src/recommendation/draft_iq/

@@ -16,7 +16,7 @@
     "type": "wombo",
     "ability_ref": "Malphite R (Unstoppable Force) AOE knockup → Miss Fortune R (Bullet Time) channels full duration while enemies are airborne/stunned from knockup",
     "tr": "Malphite R AOE knockup → Miss Fortune R full kanal hasar kombosü",
-    "strength": 0.90,
+    "strength": 0.9,
     "confidence": "high"
   },
   {
@@ -26,7 +26,7 @@
     "type": "wombo",
     "ability_ref": "Amumu R (Curse of the Sad Mummy) AOE stun/lockdown → Miss Fortune R (Bullet Time) channels while enemies are stunned and repositioning is costly",
     "tr": "Amumu R AOE stun/lockdown → Miss Fortune R full kanal hasar",
-    "strength": 0.90,
+    "strength": 0.9,
     "confidence": "high"
   },
   {
@@ -36,7 +36,7 @@
     "type": "wombo",
     "ability_ref": "Amumu R (Curse of the Sad Mummy) AOE stun/lockdown groups and holds enemies → Orianna R (Command:Shockwave) AOE knockup burst on stunned clustered enemies",
     "tr": "Amumu R AOE stun/lockdown → Orianna R clustered düşmanlara burst",
-    "strength": 0.90,
+    "strength": 0.9,
     "confidence": "high"
   },
   {
@@ -106,7 +106,7 @@
     "type": "engage_followup",
     "ability_ref": "Vi R (Assault and Battery) dashes to single target, applying knockup/lockdown at their location (does not carry target to team) → Orianna E (Command:Protect) repositions ball + R (Command:Shockwave) at Vi's location for AOE burst",
     "tr": "Vi R hedefe dash + knockup/lockdown → Orianna R Vi'nin konumuna AOE burst",
-    "strength": 0.80,
+    "strength": 0.8,
     "confidence": "high"
   },
   {
@@ -116,7 +116,7 @@
     "type": "engage_followup",
     "ability_ref": "Lee Sin R (Dragon's Rage) kicks enemy backward → Thresh R (The Box) placed behind kicked target traps them in slow zone walls; or Lee Sin kicks target into Thresh Q (Death Sentence) hook position",
     "tr": "Lee Sin R kick → Thresh R kutu içine veya Thresh Q hook pozisyonuna fırlat",
-    "strength": 0.80,
+    "strength": 0.8,
     "confidence": "high"
   },
   {
@@ -126,7 +126,7 @@
     "type": "engage_followup",
     "ability_ref": "Morgana E (Black Shield) protects Nautilus from peel CC during his engage → Nautilus Q (Dredge Line) hook locks target → Morgana Q (Dark Binding) 3-second root extends lockdown",
     "tr": "Morgana E kalkan Nautilus'u korur → Nautilus Q+R engage → Morgana Q root chain",
-    "strength": 0.80,
+    "strength": 0.8,
     "confidence": "high"
   },
   {
@@ -196,7 +196,7 @@
     "type": "pick_potential",
     "ability_ref": "Blitzcrank Q (Rocket Grab) pulls target to ally location → Caitlyn W (Yordle Snap Trap) pre-placed at landing zone roots and procs headshot on arrival",
     "tr": "Blitzcrank Q pull → Caitlyn W tuzak + headshot proc geliş anında",
-    "strength": 0.80,
+    "strength": 0.8,
     "confidence": "high"
   },
   {
@@ -256,7 +256,7 @@
     "type": "wombo",
     "ability_ref": "Malphite R (Unstoppable Force) AOE knockup groups and enables multi-kills → Katarina R (Death Lotus) channels and resets off kills triggered by knockup setup",
     "tr": "Malphite R AOE knockup → Katarina R full kanal + reset zinciri",
-    "strength": 0.80,
+    "strength": 0.8,
     "confidence": "high"
   },
   {
@@ -286,7 +286,7 @@
     "type": "engage_followup",
     "ability_ref": "Diana R (Moonfall) pulls enemies toward Diana and applies slow (no knockup) → Syndra E (Scatter the Weak) can stun targets it displaces; then Syndra R (Unleashed Power) executes",
     "tr": "Diana R pull + slow → Syndra E CC window; Syndra R execute",
-    "strength": 0.80,
+    "strength": 0.8,
     "confidence": "high"
   },
   {
@@ -296,7 +296,7 @@
     "type": "peel_chain",
     "ability_ref": "Vi R (Assault and Battery) dash applies CC immunity to Vi during engage → Lulu R (Wild Growth) knocks up divers targeting Vi; Vi has increased survivability during engage window",
     "tr": "Vi R engage CC immunity → Lulu R knockup koruma; coordinated dive",
-    "strength": 0.80,
+    "strength": 0.8,
     "confidence": "high"
   },
   {
@@ -356,7 +356,7 @@
     "type": "wombo",
     "ability_ref": "Kennen R (Slicing Maelstrom) AOE lightning stun hits on grouped enemies; Yasuo R (Last Breath) requires airborne targets — Kennen stuns alone do not trigger airborne state needed for Yasuo R. Synergy works if enemies are knocked airborne by another source during Kennen R.",
     "tr": "Kennen R AOE stun + Yasuo R airborne şartlı follow-up; koşullu combo",
-    "strength": 0.60,
+    "strength": 0.6,
     "confidence": "low"
   },
   {
@@ -366,7 +366,7 @@
     "type": "pick_potential",
     "ability_ref": "Jarvan IV R (Cataclysm) arena traps single target → Vi R (Assault and Battery) dashes to trapped target applying knockup/lockdown inside the cage; coordinated kill (Vi does not carry target)",
     "tr": "Jarvan IV R kafes → Vi R kafesteki hedefe knockup/lockdown; koordineli katl",
-    "strength": 0.80,
+    "strength": 0.8,
     "confidence": "high"
   },
   {
@@ -406,7 +406,7 @@
     "type": "engage_followup",
     "ability_ref": "Leona E (Zenith Blade) + Q (Shield of Daybreak) stun applies Solar Flare mark → Cassiopeia E (Twin Fang) reset spam on stunned/poisoned marked target for maximum burst",
     "tr": "Leona E+Q stun → Cassiopeia E spam stunlanmış hedefe reset hasar",
-    "strength": 0.80,
+    "strength": 0.8,
     "confidence": "high"
   },
   {
@@ -466,7 +466,7 @@
     "type": "wombo",
     "ability_ref": "Sejuani R (Glacial Prison) primary target stun + ice storm slow zone on enemy cluster → Jinx R (Super Mega Death Rocket) global execution on low-HP target in the cluster",
     "tr": "Sejuani R stun + slow zone → Jinx R clustera global execute",
-    "strength": 0.80,
+    "strength": 0.8,
     "confidence": "high"
   },
   {
@@ -496,7 +496,7 @@
     "type": "peel_chain",
     "ability_ref": "Lulu R (Wild Growth) + W (Whimsy) protect Evelynn during all-in → Evelynn R (Last Caress) execute blink to safety; Lulu absorbs collapse so Evelynn can reset",
     "tr": "Lulu R+W Evelynn all-in koruması → Evelynn R execute + blink; Lulu collapse emer",
-    "strength": 0.80,
+    "strength": 0.8,
     "confidence": "medium"
   },
   {
@@ -966,7 +966,7 @@
     "type": "wombo",
     "ability_ref": "Renata R (Hostile Takeover) berserk effects cause chaotic teamfight; if Jinx receives a takedown/assist contribution during this window, passive (Get Excited!) reset can trigger. Synergy is indirect and conditional — berserk producing kill credit for Jinx is not guaranteed.",
     "tr": "Renata R berserk kaos → Jinx takedown/assist katkısıyla reset; koşullu",
-    "strength": 0.60,
+    "strength": 0.6,
     "confidence": "low"
   },
   {
@@ -996,6 +996,96 @@
     "type": "engage_followup",
     "ability_ref": "Sion R (Unstoppable Onslaught) creates knockup window on enemies contacted at impact zone → Orianna R (Command:Shockwave) follow-up burst at Sion's landing point. Not all enemies are guaranteed to be knocked up — only those in Sion's path are affected.",
     "tr": "Sion R impact knockup penceresi → Orianna R landing noktasına follow-up burst",
+    "strength": 0.85,
+    "confidence": "high"
+  },
+  {
+    "a": "MonkeyKing",
+    "b": "Orianna",
+    "name": "Cyclone Shockwave",
+    "type": "wombo",
+    "ability_ref": "Wukong R (Cyclone) AOE knockup spin → Orianna R (Command: Shockwave) burst on grouped airborne enemies",
+    "tr": "Wukong R AOE knockup → Orianna R grup burst",
+    "strength": 0.85,
+    "confidence": "high"
+  },
+  {
+    "a": "Diana",
+    "b": "Orianna",
+    "name": "Moonfall Shockwave",
+    "type": "wombo",
+    "ability_ref": "Diana R (Lunar Rush / Moonfall) pulls enemies together → Orianna R (Command: Shockwave) on the clumped group",
+    "tr": "Diana R grup toplama → Orianna R burst",
+    "strength": 0.85,
+    "confidence": "high"
+  },
+  {
+    "a": "Leona",
+    "b": "Lucian",
+    "name": "Solar Flare Combo",
+    "type": "engage_followup",
+    "ability_ref": "Leona E (Zenith Blade) dash + R (Solar Flare) stun + Q (Shield of Daybreak) → Lucian burst on locked target",
+    "tr": "Leona E+R+Q lockdown → Lucian burst",
+    "strength": 0.85,
+    "confidence": "high"
+  },
+  {
+    "a": "Galio",
+    "b": "Zed",
+    "name": "Hero's Entrance",
+    "type": "engage_followup",
+    "ability_ref": "Galio R (Hero's Entrance) channels to ally then AOE knockup + taunt on landing → Zed R (Death Mark) burst follow-up",
+    "tr": "Galio R AOE knockup+taunt → Zed R burst",
+    "strength": 0.85,
+    "confidence": "high"
+  },
+  {
+    "a": "Thresh",
+    "b": "Caitlyn",
+    "name": "Death Sentence Trap",
+    "type": "pick_potential",
+    "ability_ref": "Thresh Q (Death Sentence) hook isolates target → Caitlyn W (Yordle Snap Trap) / R (Ace in the Hole) execute on the held target",
+    "tr": "Thresh Q hook → Caitlyn trap/R execute",
+    "strength": 0.85,
+    "confidence": "high"
+  },
+  {
+    "a": "Nautilus",
+    "b": "Jinx",
+    "name": "Dredge Line Lockdown",
+    "type": "engage_followup",
+    "ability_ref": "Nautilus Q (Dredge Line) hook + R (Depth Charge) knockup → Jinx free auto-attack reset and R follow-up",
+    "tr": "Nautilus Q hook + R knockup → Jinx serbest hasar",
+    "strength": 0.85,
+    "confidence": "high"
+  },
+  {
+    "a": "Kalista",
+    "b": "Thresh",
+    "name": "Fate's Call Engage",
+    "type": "engage_followup",
+    "ability_ref": "Thresh stands as Kalista's Soul-bound ally; Kalista R (Fate's Call) launches Thresh into the enemy backline → Thresh Q hook / E (Flay) + Box on landing",
+    "tr": "Kalista R Thresh'i fırlatır → Thresh hook+Flay engage",
+    "strength": 0.85,
+    "confidence": "high"
+  },
+  {
+    "a": "Sett",
+    "b": "Galio",
+    "name": "Showstopper Entrance",
+    "type": "engage_followup",
+    "ability_ref": "Galio R (Hero's Entrance) AOE knockup+taunt groups enemies → Sett R (The Show Stopper) slams a carried enemy into the clustered group for AOE slow+damage",
+    "tr": "Galio R grup taunt → Sett R AOE slam",
+    "strength": 0.85,
+    "confidence": "high"
+  },
+  {
+    "a": "Yasuo",
+    "b": "Gnar",
+    "name": "Mega Knockup Tempest",
+    "type": "wombo",
+    "ability_ref": "Gnar R (GNAR!) AOE knockup/stun when enemies are pinned against terrain → Yasuo R (Last Breath) on airborne enemies",
+    "tr": "Gnar R AOE knockup → Yasuo R havadakilere",
     "strength": 0.85,
     "confidence": "high"
   }

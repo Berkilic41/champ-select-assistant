@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { useTranslation } from 'react-i18next';
 import { AppShell } from './components/AppShell';
 import { SettingsPanel } from './components/settings/SettingsPanel';
 import { OnboardingWizard } from './components/onboarding/OnboardingWizard';
@@ -11,6 +12,7 @@ import { useToast } from './hooks/useToast';
 import { AppStatus } from './types/app';
 
 function App(): React.ReactElement {
+  const { t } = useTranslation();
   const { status: lcuStatus, retry } = useLcuStatus();
   const { isActive } = useChampSelect();
   const [status, setStatus] = useState<AppStatus>(lcuStatus);
@@ -45,7 +47,7 @@ function App(): React.ReactElement {
 
   const handleSaveSettings = async (next: typeof settings) => {
     await saveSettings(next);
-    addToast('Ayarlar kaydedildi.', 'success');
+    addToast(t('app.settingsSaved'), 'success');
   };
 
   if (!onboardingDone) {
@@ -53,7 +55,7 @@ function App(): React.ReactElement {
       <OnboardingWizard
         onComplete={() => {
           setOnboardingDone(true);
-          addToast('Hoş geldin! Uygulama hazır.', 'success');
+          addToast(t('app.welcomeReady'), 'success');
         }}
       />
     );
