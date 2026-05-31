@@ -31,8 +31,14 @@ const HTTP_TIMEOUT_SECS: u64 = 15;
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MerakiPositionStats {
+    // Meraki sometimes ships position entries with only `playRate` (and 0 at that)
+    // for unplayed lanes; the win/ban fields are then absent. Default-on-missing so
+    // the whole payload still parses, and skip such empty rows in `build_rate_rows`.
+    #[serde(default)]
     pub play_rate: f64,
+    #[serde(default)]
     pub win_rate: f64,
+    #[serde(default)]
     pub ban_rate: f64,
     #[serde(default)]
     pub count: Option<u64>,
@@ -119,7 +125,14 @@ pub fn build_rate_rows(
     let mut out = Vec::with_capacity(meraki.data.len() * 2);
 
     for (champ_key, positions) in &meraki.data {
-        let Some(record) = all_champions.iter().find(|c| c.key == *champ_key) else {
+        // Meraki keys its `data` map by champion ID ("266") in current exports, but
+        // older ones used the DDragon key ("Aatrox"). Match either form.
+        let Some(record) = champ_key
+            .parse::<i64>()
+            .ok()
+            .and_then(|id| all_champions.iter().find(|c| c.champion_id == id))
+            .or_else(|| all_champions.iter().find(|c| c.key == *champ_key))
+        else {
             continue;
         };
 
@@ -127,6 +140,11 @@ pub fn build_rate_rows(
             let Some(position) = normalize_position(raw_pos) else {
                 continue;
             };
+            // Skip entries with no usable signal (Meraki ships {playRate:0} stubs
+            // for unplayed lanes). Storing 0% win-rate would poison the meta score.
+            if stats.win_rate <= 0.0 {
+                continue;
+            }
             let confidence = confidence_from_count(stats.count);
 
             out.push(ChampionRateRow {
