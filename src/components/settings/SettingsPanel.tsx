@@ -13,11 +13,12 @@ interface Props {
 
 interface WeightSliderProps {
   label: string;
-  value: number;
+  value: number;        // raw relative importance 0..1 (slider position)
+  effectivePct: number; // normalized share of the final score (%)
   onChange: (v: number) => void;
 }
 
-function WeightSlider({ label, value, onChange }: WeightSliderProps) {
+function WeightSlider({ label, value, effectivePct, onChange }: WeightSliderProps) {
   return (
     <div className="sp-weight-row">
       <span className="sp-weight-label">{label}</span>
@@ -30,7 +31,7 @@ function WeightSlider({ label, value, onChange }: WeightSliderProps) {
         onChange={e => onChange(parseInt(e.target.value) / 100)}
         className="sp-slider"
       />
-      <span className="sp-weight-val">{Math.round(value * 100)}%</span>
+      <span className="sp-weight-val">{effectivePct}%</span>
     </div>
   );
 }
@@ -39,6 +40,13 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
   const { t } = useTranslation();
   const [draft, setDraft] = React.useState<AppSettings>(settings);
   const update = (patch: Partial<AppSettings>) => setDraft(d => ({ ...d, ...patch }));
+
+  // Weights are RELATIVE — the engine normalizes by their sum, so they never
+  // need to add up to 100%. Show each factor's live effective share instead.
+  const weightSum =
+    draft.weight_comfort + draft.weight_matchup + draft.weight_team_counter +
+    draft.weight_synergy + draft.weight_meta + draft.weight_role_fit;
+  const effPct = (v: number) => (weightSum > 0 ? Math.round((v / weightSum) * 100) : 0);
 
   type SyncState = 'idle' | 'syncing' | 'done' | 'error';
   const [metaSync, setMetaSync] = React.useState<SyncState>('idle');
@@ -143,31 +151,37 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
           <WeightSlider
             label={t('settings.weightComfort')}
             value={draft.weight_comfort}
+            effectivePct={effPct(draft.weight_comfort)}
             onChange={v => update({ weight_comfort: v })}
           />
           <WeightSlider
             label={t('settings.weightMatchup')}
             value={draft.weight_matchup}
+            effectivePct={effPct(draft.weight_matchup)}
             onChange={v => update({ weight_matchup: v })}
           />
           <WeightSlider
             label={t('settings.weightTeamCounter')}
             value={draft.weight_team_counter}
+            effectivePct={effPct(draft.weight_team_counter)}
             onChange={v => update({ weight_team_counter: v })}
           />
           <WeightSlider
             label={t('settings.weightSynergy')}
             value={draft.weight_synergy}
+            effectivePct={effPct(draft.weight_synergy)}
             onChange={v => update({ weight_synergy: v })}
           />
           <WeightSlider
             label={t('settings.weightMeta')}
             value={draft.weight_meta}
+            effectivePct={effPct(draft.weight_meta)}
             onChange={v => update({ weight_meta: v })}
           />
           <WeightSlider
             label={t('settings.weightRoleFit')}
             value={draft.weight_role_fit}
+            effectivePct={effPct(draft.weight_role_fit)}
             onChange={v => update({ weight_role_fit: v })}
           />
         </section>
@@ -205,29 +219,16 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
         </section>
 
         <div className="sp-footer">
-          {(() => {
-            const total = draft.weight_comfort + draft.weight_matchup +
-              draft.weight_team_counter + draft.weight_synergy + draft.weight_meta +
-              draft.weight_role_fit;
-            const valid = Math.abs(total - 1.0) <= 0.01;
-            return (
-              <>
-                <span className={`sp-weight-total ${valid ? '' : 'sp-weight-total--invalid'}`}>
-                  {t('settings.total', { total: total.toFixed(2) })}{!valid && ` ${t('settings.totalInvalid')}`}
-                </span>
-                <button className="sp-btn sp-btn--cancel" onClick={onClose}>
-                  {t('settings.cancel')}
-                </button>
-                <button
-                  className="sp-btn sp-btn--save"
-                  disabled={!valid}
-                  onClick={() => { onSave(draft); onClose(); }}
-                >
-                  {t('settings.save')}
-                </button>
-              </>
-            );
-          })()}
+          <span className="sp-weight-total">{t('settings.weightsRelativeNote')}</span>
+          <button className="sp-btn sp-btn--cancel" onClick={onClose}>
+            {t('settings.cancel')}
+          </button>
+          <button
+            className="sp-btn sp-btn--save"
+            onClick={() => { onSave(draft); onClose(); }}
+          >
+            {t('settings.save')}
+          </button>
         </div>
       </div>
     </div>
