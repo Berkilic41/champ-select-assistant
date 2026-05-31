@@ -252,6 +252,30 @@ mod tests {
         );
     }
 
+    /// Regression: the live flow is raw LCU → parse_session → emit (serialize) →
+    /// frontend → get_recommendations (deserialize). The serialized ChampSelectState
+    /// must NOT look like a raw LCU session (no "actions") and must round-trip back
+    /// via `from_value`. Guards the get_recommendations parse-branch (Bug: live sent
+    /// a serialized state into parse_session → "Geçersiz session JSON").
+    #[test]
+    fn parsed_state_roundtrips_for_get_recommendations() {
+        let raw: serde_json::Value =
+            serde_json::from_str(include_str!("../../tests/fixtures/pick_acting.json")).unwrap();
+        let state = parse_session(&raw).expect("raw parse");
+
+        let serialized = serde_json::to_value(&state).expect("serialize state");
+        assert!(
+            serialized.get("actions").is_none(),
+            "serialized ChampSelectState must not carry raw LCU 'actions' (would mis-route to parse_session)"
+        );
+
+        let roundtripped: ChampSelectState =
+            serde_json::from_value(serialized).expect("serialized state must deserialize back");
+        assert_eq!(roundtripped.queue_id, state.queue_id);
+        assert_eq!(roundtripped.action_type, state.action_type);
+        assert_eq!(roundtripped.my_cell_id, state.my_cell_id);
+    }
+
     #[test]
     fn parse_ban_acting_fixture() {
         let v: serde_json::Value =

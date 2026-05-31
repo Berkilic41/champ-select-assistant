@@ -32,6 +32,13 @@ pub struct AppState {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Install a process-default rustls CryptoProvider BEFORE any TLS use.
+    // Both `aws-lc-rs` and `ring` are in the dependency tree (aws-lc-rs via our
+    // LCU websocket, ring transitively), so rustls 0.23 cannot auto-pick one;
+    // without this, reqwest's `use_rustls_tls()` fails on the first HTTPS request
+    // (Meraki / DDragon / CDragon) at runtime. Idempotent / harmless if already set.
+    let _ = rustls::crypto::aws_lc_rs::default_provider().install_default();
+
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::from_default_env()

@@ -127,7 +127,11 @@ pub async fn get_recommendations(
     let started = std::time::Instant::now();
     // Parse the session first — we need `assigned_position` before the DB lock
     // so the lane-scoped meta_rates query knows which position to filter on.
-    let session: ChampSelectState = if session_json.is_object() {
+    // The frontend round-trips the already-parsed ChampSelectState (snake_case)
+    // back to us via the `champ-select-session` event. Raw LCU sessions (tests,
+    // direct passthrough) carry an "actions" array + camelCase fields — only those
+    // go through `parse_session`; everything else deserializes as ChampSelectState.
+    let session: ChampSelectState = if session_json.get("actions").is_some() {
         parse_session(&session_json)
             .ok_or_else(|| AppError::Other("Geçersiz session JSON".to_string()))?
     } else {
@@ -423,7 +427,11 @@ pub async fn get_ban_suggestions(
     puuid: String,
     state: State<'_, AppState>,
 ) -> Result<Vec<BanSuggestion>, AppError> {
-    let session: ChampSelectState = if session_json.is_object() {
+    // The frontend round-trips the already-parsed ChampSelectState (snake_case)
+    // back to us via the `champ-select-session` event. Raw LCU sessions (tests,
+    // direct passthrough) carry an "actions" array + camelCase fields — only those
+    // go through `parse_session`; everything else deserializes as ChampSelectState.
+    let session: ChampSelectState = if session_json.get("actions").is_some() {
         parse_session(&session_json)
             .ok_or_else(|| AppError::Other("Geçersiz session JSON".to_string()))?
     } else {
