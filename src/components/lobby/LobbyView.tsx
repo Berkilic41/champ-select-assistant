@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { useSummonerData } from '../../hooks/useSummonerData';
 import { ChampionGrid } from '../ChampionGrid';
 import { StatsView } from './StatsView';
@@ -31,14 +32,14 @@ function ErrorBanner({ error }: { error: string }) {
   );
 }
 
-function relativeTime(ts: number): string {
+function relativeTime(ts: number, t: TFunction): string {
   const diffMs = Date.now() - ts;
   const diffMins = Math.floor(diffMs / 60_000);
-  if (diffMins < 1) return 'az önce';
-  if (diffMins < 60) return `${diffMins} dk önce`;
+  if (diffMins < 1) return t('time.justNow');
+  if (diffMins < 60) return t('time.minsAgo', { n: diffMins });
   const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours} sa önce`;
-  return `${Math.floor(diffHours / 24)} gün önce`;
+  if (diffHours < 24) return t('time.hoursAgo', { n: diffHours });
+  return t('time.daysAgo', { n: Math.floor(diffHours / 24) });
 }
 
 export const LobbyView: React.FC<Props> = ({ summonerName, platformRegion }) => {
@@ -92,10 +93,10 @@ export const LobbyView: React.FC<Props> = ({ summonerName, platformRegion }) => 
       {(patchVersion || lastMetaSync) && (
         <div className="lobby__data-badges">
           {patchVersion && (
-            <span className="lobby__data-badge">Patch {patchVersion}</span>
+            <span className="lobby__data-badge">{t('lobby.patchBadge', { version: patchVersion })}</span>
           )}
           {lastMetaSync && (
-            <span className="lobby__data-badge">Meta: {relativeTime(lastMetaSync)}</span>
+            <span className="lobby__data-badge">{t('lobby.metaBadge', { rel: relativeTime(lastMetaSync, t) })}</span>
           )}
         </div>
       )}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   itemIconUrl,
   perkIconUrl,
@@ -30,8 +31,9 @@ export const BuildSummary: React.FC<Props> = ({
   secondaryRunes = [],
   statShards = [],
 }) => {
+  const { t } = useTranslation();
   if (coreItems.length === 0 && keystone === 0) {
-    return <p className="build-empty">Build verisi yükleniyor…</p>;
+    return <p className="build-empty">{t('build.loading')}</p>;
   }
   const hasSummoners = summonerSpells.length >= 2;
   const hasSecondary = secondaryRunes.length >= 1;
@@ -39,10 +41,10 @@ export const BuildSummary: React.FC<Props> = ({
 
   return (
     <div className="build-summary">
-      <p className="build-summary__title">{championName} Build</p>
+      <p className="build-summary__title">{t('build.title', { champ: championName })}</p>
 
       <div className="build-summary__section">
-        <span className="build-label">Core</span>
+        <span className="build-label">{t('build.core')}</span>
         <div className="build-items">
           {coreItems.map((id) => (
             <ItemIcon key={id} id={id} />
@@ -52,7 +54,7 @@ export const BuildSummary: React.FC<Props> = ({
 
       {situationalItems.length > 0 && (
         <div className="build-summary__section">
-          <span className="build-label">Duruma Göre</span>
+          <span className="build-label">{t('build.situational')}</span>
           <div className="build-items">
             {situationalItems.map((id) => (
               <ItemIcon key={id} id={id} />
@@ -63,14 +65,14 @@ export const BuildSummary: React.FC<Props> = ({
 
       {skillOrder && (
         <div className="build-summary__section">
-          <span className="build-label">Skill Order</span>
+          <span className="build-label">{t('build.skillOrder')}</span>
           <span className="build-skill-order">{skillOrder}</span>
         </div>
       )}
 
       {hasSummoners && (
         <div className="build-summary__section">
-          <span className="build-label">Summoners</span>
+          <span className="build-label">{t('build.summoners')}</span>
           <div className="build-items">
             {summonerSpells.map((id) => (
               <SummonerIcon key={id} id={id} />
@@ -81,7 +83,7 @@ export const BuildSummary: React.FC<Props> = ({
 
       {hasSecondary && (
         <div className="build-summary__section">
-          <span className="build-label">Secondary Runes</span>
+          <span className="build-label">{t('build.secondaryRunes')}</span>
           <div className="build-items">
             {secondaryRunes.map((id) => (
               <PerkIcon key={id} id={id} />
@@ -92,7 +94,7 @@ export const BuildSummary: React.FC<Props> = ({
 
       {hasShards && (
         <div className="build-summary__section">
-          <span className="build-label">Stat Shards</span>
+          <span className="build-label">{t('build.statShards')}</span>
           <div className="build-shards">
             {statShards.map((id, i) => (
               <span key={`${id}-${i}`} className="build-shard-chip">

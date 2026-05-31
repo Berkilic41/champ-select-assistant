@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChampionStats, MasteryEntry } from '../types/riot';
 import { ChampionIcon } from './shared/ChampionIcon';
 import './ChampionGrid.css';
@@ -32,7 +33,9 @@ interface CardProps {
   champKey?: string;
 }
 
-const ChampionCard: React.FC<CardProps> = ({ stat, mastery, champKey }) => (
+const ChampionCard: React.FC<CardProps> = ({ stat, mastery, champKey }) => {
+  const { t } = useTranslation();
+  return (
   <div className="champ-card">
     <div className="champ-card__icon-wrap">
       <ChampionIcon size="md" championKey={champKey} />
@@ -40,7 +43,7 @@ const ChampionCard: React.FC<CardProps> = ({ stat, mastery, champKey }) => (
         <span
           className="champ-card__mastery-badge"
           style={{ color: masteryColor(mastery.mastery_level) }}
-          title={`Mastery ${mastery.mastery_level}`}
+          title={t('lobby.masteryTitle', { level: mastery.mastery_level })}
         >
           {mastery.mastery_level}
         </span>
@@ -57,7 +60,8 @@ const ChampionCard: React.FC<CardProps> = ({ stat, mastery, champKey }) => (
     </div>
     <span className="champ-card__kda">KDA {stat.kda_avg.toFixed(2)}</span>
   </div>
-);
+  );
+};
 
 const SkeletonCard: React.FC = () => (
   <div className="champ-card champ-card--skeleton">
@@ -70,6 +74,7 @@ const SkeletonCard: React.FC = () => (
 const SKELETON_COUNT = 10;
 
 export const ChampionGrid: React.FC<ChampionGridProps> = ({ stats, masteries, champMap, isLoading }) => {
+  const { t } = useTranslation();
   const masteryMap = new Map<number, MasteryEntry>(
     masteries.map(m => [m.champion_id, m])
   );
@@ -87,9 +92,7 @@ export const ChampionGrid: React.FC<ChampionGridProps> = ({ stats, masteries, ch
   // Maç istatistiği yoksa mastery'den sentetik kart oluştur
   if (stats.length === 0 && masteries.length === 0) {
     return (
-      <p className="champ-grid__empty">
-        Henüz veri yok — "Maç geçmişini yükle" butonuna tıkla.
-      </p>
+      <p className="champ-grid__empty">{t('lobby.gridEmpty')}</p>
     );
   }
 

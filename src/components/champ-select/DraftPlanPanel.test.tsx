@@ -47,7 +47,7 @@ describe('DraftPlanPanel', () => {
 
   it('renders all four sections when plan is full', () => {
     render(<DraftPlanPanel plan={fullPlan} />);
-    expect(screen.getByText('Win Condition')).toBeInTheDocument();
+    expect(screen.getByText('Galibiyet Koşulu')).toBeInTheDocument();
     expect(screen.getByText('Combo Planları')).toBeInTheDocument();
     expect(screen.getByText('Takım İhtiyacı')).toBeInTheDocument();
     expect(screen.getByText('Riskler')).toBeInTheDocument();

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   BarChart,
   Bar,
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export const StatsView: React.FC<Props> = ({ stats, masteries, champMap }) => {
+  const { t } = useTranslation();
   const masteryData = masteries
     .slice()
     .sort((a, b) => b.mastery_points - a.mastery_points)
@@ -47,21 +49,21 @@ export const StatsView: React.FC<Props> = ({ stats, masteries, champMap }) => {
     .map(m => champMap.get(m.champion_id) ?? `#${m.champion_id}`);
 
   if (!masteries.length && !stats.length) {
-    return <p className="stats-empty">Veri yok — önce senkronize et.</p>;
+    return <p className="stats-empty">{t('stats.empty')}</p>;
   }
 
   return (
     <div className="stats-view">
       {totalGames > 0 && (
         <p className="stats-summary">
-          {totalGames} maç · %{overallWinRate} kazanma oranı
-          {top5Keys.length > 0 && <> · Top 5: {top5Keys.join(', ')}</>}
+          {t('stats.summary', { games: totalGames, wr: overallWinRate })}
+          {top5Keys.length > 0 && <> · {t('stats.top5', { names: top5Keys.join(', ') })}</>}
         </p>
       )}
 
       {masteryData.length > 0 && (
         <div className="stats-section">
-          <h3 className="stats-title">Mastery (Top 10)</h3>
+          <h3 className="stats-title">{t('stats.masteryTitle')}</h3>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={masteryData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
               <XAxis dataKey="name" tick={{ fontSize: 9, fill: 'var(--color-text-muted)' }} />
@@ -78,7 +80,7 @@ export const StatsView: React.FC<Props> = ({ stats, masteries, champMap }) => {
 
       {wrData.length > 0 && (
         <div className="stats-section">
-          <h3 className="stats-title">Kazanma Oranı % (min 3 maç)</h3>
+          <h3 className="stats-title">{t('stats.winRateTitle')}</h3>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={wrData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
               <XAxis dataKey="name" tick={{ fontSize: 9, fill: 'var(--color-text-muted)' }} />
@@ -86,7 +88,7 @@ export const StatsView: React.FC<Props> = ({ stats, masteries, champMap }) => {
               <Tooltip
                 contentStyle={{ background: 'var(--color-bg-panel)', border: '1px solid var(--color-border)', fontSize: 12 }}
                 cursor={{ fill: 'rgba(200,170,80,0.08)' }}
-                formatter={(value: number) => [`${value}%`, 'Kazanma']}
+                formatter={(value: number) => [`${value}%`, t('stats.winLabel')]}
               />
               <Bar dataKey="wr" fill="var(--color-success, #3498DB)" radius={[3, 3, 0, 0]} />
             </BarChart>

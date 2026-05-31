@@ -12,7 +12,14 @@
     "connecting": "Connecting...",
     "disconnected": "League Client not found",
     "retry": "Retry",
-    "inGame": "Game in progress..."
+    "inGame": "Game in progress...",
+    "badgeConnecting": "Connecting...",
+    "badgeDisconnected": "Disconnected",
+    "badgeConnected": "Connected",
+    "gameInProgress": "Game in progress",
+    "hide": "Hide",
+    "goodLuck": "Good luck!",
+    "afterGameStats": "Stats will appear here after the game."
   },
   "lobby": {
     "greeting": "Welcome, {{name}}!",
@@ -25,7 +32,11 @@
     "apiKeyHint": "get a key from",
     "apiKeyHintEnd": "and add it to the",
     "tabChampions": "My Champions",
-    "tabStats": "My Stats"
+    "tabStats": "My Stats",
+    "gridEmpty": "No data yet — click \"Load match history\".",
+    "patchBadge": "Patch {{version}}",
+    "metaBadge": "Meta: {{rel}}",
+    "masteryTitle": "Mastery {{level}}"
   },
   "champSelect": {
     "yourTeam": "Your Team",
@@ -34,12 +45,18 @@
     "banHintHover": "Opponent is hovering — potential ban targets:",
     "banHintNoHover": "Opponent isn't hovering yet. Consider banning champions that exploit your team's composition gaps.",
     "keyboardHint": "[1-5] Select tip  ·  Enter = Apply hover (hover only — never auto pick/lock)",
+    "keyboardHintShort": "[1-5] Select tip  ·  Enter = Apply hover",
     "watchingBan": "Team is banning...",
     "watchingPick": "Team is picking...",
     "yourOptions": "Your options:",
     "lockingIn": "Locked in — Build plan:",
     "planningMsg": "You're in lobby — recommendations will appear automatically when you enter Champion Select",
     "noRecommendation": "Click \"Load match history\" for recommendations",
+    "waiting": "Waiting for Champion Select…",
+    "hoverFailed": "Hover failed: {{err}}",
+    "banComputing": "Calculating ban suggestions…",
+    "banSuggestions": "Ban suggestions:",
+    "banOtp": "enemy OTP ({{pct}}%)",
     "phase": {
       "planning": "Lobby — Get ready to queue",
       "ban_acting": "BAN PHASE — Ban a threatening champion",
@@ -53,9 +70,70 @@
     "firstTime": "You might be playing this for the first time",
     "lowConfidence": "Low data — low confidence",
     "keyHint": "[1] Suggest  [Enter] Apply hover",
+    "selectHint": "[1-5] select · Enter hover",
     "detail": "Detail ↓",
     "detailClose": "Detail ↑",
-    "statsLine": "{{wins}}W-{{losses}}L ({{wr}}%) · {{games}} games"
+    "detailBtn": "Detail",
+    "hoverApply": "Apply hover",
+    "statsLine": "{{wins}}W-{{losses}}L ({{wr}}%) · {{games}} games",
+    "earlyAdvantage": "Early-game advantage",
+    "blindSafe": "Blind pick safe",
+    "comboStrong": "Strong combo with {{ally}}",
+    "scoreMatchup": "Lane Matchup",
+    "scoreTeamCounter": "Team Counter",
+    "scoreSynergy": "Synergy",
+    "scoreMeta": "Meta",
+    "phaseLine": "Early {{early}}% · Mid {{mid}}% · Late {{late}}%",
+    "enemyLabel": "Enemy: {{summary}}"
+  },
+  "build": {
+    "loading": "Loading build data…",
+    "title": "{{champ}} Build",
+    "core": "Core",
+    "situational": "Situational",
+    "skillOrder": "Skill Order",
+    "summoners": "Summoners",
+    "secondaryRunes": "Secondary Runes",
+    "statShards": "Stat Shards"
+  },
+  "draftPlan": {
+    "winCondition": "Win Condition",
+    "lanePhase": "Lane Micro",
+    "powerSpike": "Power Spike",
+    "compClash": "Comp Clash",
+    "damageProfile": "Damage Profile",
+    "pickSafety": "Pick Safety",
+    "execDifficulty": "Execution Difficulty",
+    "comboPlans": "Combo Plans",
+    "teamNeed": "Team Need",
+    "risks": "Risks",
+    "pickPosition": "Pick Position",
+    "safetySafe": "Blind pick safe",
+    "safetyMedium": "Medium pick safety",
+    "safetyRisky": "Not safe (blind)",
+    "execEasy": "Easy",
+    "execMedium": "Medium",
+    "execHard": "Hard ({{n}}/5)"
+  },
+  "stats": {
+    "empty": "No data — sync first.",
+    "summary": "{{games}} games · {{wr}}% win rate",
+    "top5": "Top 5: {{names}}",
+    "masteryTitle": "Mastery (Top 10)",
+    "winRateTitle": "Win Rate % (min 3 games)",
+    "winLabel": "Win"
+  },
+  "time": {
+    "justNow": "just now",
+    "minsAgo": "{{n}}m ago",
+    "hoursAgo": "{{n}}h ago",
+    "daysAgo": "{{n}}d ago"
+  },
+  "timer": {
+    "yourTurn": "YOUR TURN",
+    "waiting": "WAITING",
+    "lobby": "LOBBY",
+    "locking": "LOCKING IN"
   },
   "quickPick": {
     "confLow": "Low data",

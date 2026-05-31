@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { useTranslation } from 'react-i18next';
+import i18n from './i18n';
 import { AppShell } from './components/AppShell';
 import { SettingsPanel } from './components/settings/SettingsPanel';
 import { OnboardingWizard } from './components/onboarding/OnboardingWizard';
@@ -31,6 +32,14 @@ function App(): React.ReactElement {
   useEffect(() => {
     setStatus(lcuStatus);
   }, [lcuStatus]);
+
+  // Apply the saved UI language to i18n once settings load / change.
+  useEffect(() => {
+    const lang = settings.language ?? 'tr';
+    if (loaded && i18n.language !== lang) {
+      i18n.changeLanguage(lang);
+    }
+  }, [settings.language, loaded]);
 
   useEffect(() => {
     if (isActive && lcuStatus.kind === 'lobby') {

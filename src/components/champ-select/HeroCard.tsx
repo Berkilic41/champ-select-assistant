@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { DraftPlan, Recommendation } from '../../types/recommendation';
 import { ChampionIcon } from '../shared/ChampionIcon';
 import { TierBadge } from '../../lib/tier';
@@ -12,6 +14,7 @@ interface QuickTagsProps {
 }
 
 const QuickTags: React.FC<QuickTagsProps> = ({ plan, phaseMatchup }) => {
+  const { t } = useTranslation();
   if (!plan) return null;
 
   type Variant = 'risk' | 'safe' | 'info';
@@ -23,7 +26,7 @@ const QuickTags: React.FC<QuickTagsProps> = ({ plan, phaseMatchup }) => {
   }
   // 2. Early-phase lane dominance
   if (chips.length < 3 && phaseMatchup && phaseMatchup[0] >= 0.65) {
-    chips.push({ text: 'Erken baskı avantajı', variant: 'safe' });
+    chips.push({ text: t('heroCard.earlyAdvantage'), variant: 'safe' });
   }
   // 3. Counter-pick window (late pick + counters visible enemy)
   if (chips.length < 3 && plan.pick_window_note) {
@@ -31,14 +34,14 @@ const QuickTags: React.FC<QuickTagsProps> = ({ plan, phaseMatchup }) => {
   }
   // 4. Combo hint
   if (chips.length < 3 && plan.combo_with.length > 0) {
-    chips.push({ text: `${plan.combo_with[0].ally_champion_key} ile güçlü combo`, variant: 'info' });
+    chips.push({ text: t('heroCard.comboStrong', { ally: plan.combo_with[0].ally_champion_key }), variant: 'info' });
   }
   // 5. Team gap fill OR blind safety
   if (chips.length < 3) {
     if (plan.fills_team_need.length > 0) {
       chips.push({ text: plan.fills_team_need[0], variant: 'info' });
     } else if (plan.blind_pick_safety >= 0.75) {
-      chips.push({ text: 'Blind pick güvenli', variant: 'safe' });
+      chips.push({ text: t('heroCard.blindSafe'), variant: 'safe' });
     }
   }
 
@@ -85,13 +88,19 @@ function confidenceDots(conf: string, games: number): string {
   return '●○○○○';
 }
 
-function personalStatsLine(rec: Recommendation): string {
-  if (rec.games_on_champ === 0) return 'İlk kez oynuyor olabilirsin';
+function personalStatsLine(rec: Recommendation, t: TFunction): string {
+  if (rec.games_on_champ === 0) return t('heroCard.firstTime');
   const wr = rec.wins_on_champ / rec.games_on_champ;
-  return `${rec.wins_on_champ}W-${rec.games_on_champ - rec.wins_on_champ}L (${Math.round(wr * 100)}%) · ${rec.games_on_champ} maç`;
+  return t('heroCard.statsLine', {
+    wins: rec.wins_on_champ,
+    losses: rec.games_on_champ - rec.wins_on_champ,
+    wr: Math.round(wr * 100),
+    games: rec.games_on_champ,
+  });
 }
 
 export const HeroCard: React.FC<Props> = ({ rec, onHover, onExpand }) => {
+  const { t } = useTranslation();
   const [imgError, setImgError] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const splashSrc = !imgError ? splashUrl(rec.champion_key) : undefined;
@@ -126,7 +135,7 @@ export const HeroCard: React.FC<Props> = ({ rec, onHover, onExpand }) => {
           <span className="hero-card__confidence">{confidenceDots(rec.confidence, rec.games_on_champ)}</span>
         </div>
         {rec.confidence === 'low' && (
-          <div className="hero-card__low-confidence">Az veri — güven düşük</div>
+          <div className="hero-card__low-confidence">{t('heroCard.lowConfidence')}</div>
         )}
 
         <div className="hero-card__body">
@@ -137,12 +146,12 @@ export const HeroCard: React.FC<Props> = ({ rec, onHover, onExpand }) => {
           </div>
         </div>
 
-        <div className="hero-card__stats">{personalStatsLine(rec)}</div>
+        <div className="hero-card__stats">{personalStatsLine(rec, t)}</div>
 
         <QuickTags plan={rec.draft_plan} phaseMatchup={rec.phase_matchup} />
 
         <div className="hero-card__footer">
-          <span className="hero-card__key-hint">[1-5] seç · Enter hover</span>
+          <span className="hero-card__key-hint">{t('heroCard.selectHint')}</span>
           <div className="hero-card__footer-actions">
             {onHover && (
               <button
@@ -150,7 +159,7 @@ export const HeroCard: React.FC<Props> = ({ rec, onHover, onExpand }) => {
                 onClick={onHover}
                 type="button"
               >
-                Hover Uygula
+                {t('heroCard.hoverApply')}
               </button>
             )}
             <button
@@ -159,7 +168,7 @@ export const HeroCard: React.FC<Props> = ({ rec, onHover, onExpand }) => {
               type="button"
               aria-expanded={expanded}
             >
-              {expanded ? '↑' : 'Detay'}
+              {expanded ? '↑' : t('heroCard.detailBtn')}
             </button>
           </div>
         </div>
@@ -184,19 +193,23 @@ export const HeroCard: React.FC<Props> = ({ rec, onHover, onExpand }) => {
             onClick={e => e.stopPropagation()}
           >
             <div className="hero-detail-scores">
-              <ScoreBar label="Lane Matchup" value={rec.matchup_score} />
-              <ScoreBar label="Takım Kontr"  value={rec.team_counter_score} />
-              <ScoreBar label="Sinerji"      value={rec.synergy_score} />
-              <ScoreBar label="Meta"         value={rec.meta_score} />
+              <ScoreBar label={t('heroCard.scoreMatchup')}     value={rec.matchup_score} />
+              <ScoreBar label={t('heroCard.scoreTeamCounter')} value={rec.team_counter_score} />
+              <ScoreBar label={t('heroCard.scoreSynergy')}     value={rec.synergy_score} />
+              <ScoreBar label={t('heroCard.scoreMeta')}        value={rec.meta_score} />
             </div>
             {rec.phase_matchup && (
               <p className="hero-detail-phase">
-                {`Erken ${Math.round(rec.phase_matchup[0] * 100)}% · Orta ${Math.round(rec.phase_matchup[1] * 100)}% · Geç ${Math.round(rec.phase_matchup[2] * 100)}%`}
+                {t('heroCard.phaseLine', {
+                  early: Math.round(rec.phase_matchup[0] * 100),
+                  mid: Math.round(rec.phase_matchup[1] * 100),
+                  late: Math.round(rec.phase_matchup[2] * 100),
+                })}
               </p>
             )}
             <DraftPlanPanel plan={rec.draft_plan} />
             {(rec.enemy_team_summary ?? '') !== '' && (
-              <p className="hero-detail-enemy">Düşman: {rec.enemy_team_summary}</p>
+              <p className="hero-detail-enemy">{t('heroCard.enemyLabel', { summary: rec.enemy_team_summary })}</p>
             )}
           </div>
         </div>

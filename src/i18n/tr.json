@@ -12,7 +12,14 @@
     "connecting": "Bağlanıyor...",
     "disconnected": "League Client bulunamadı",
     "retry": "Tekrar Dene",
-    "inGame": "Oyun devam ediyor..."
+    "inGame": "Oyun devam ediyor...",
+    "badgeConnecting": "Bağlanıyor...",
+    "badgeDisconnected": "Bağlantı yok",
+    "badgeConnected": "Bağlandı",
+    "gameInProgress": "Oyun devam ediyor",
+    "hide": "Gizle",
+    "goodLuck": "İyi şanslar!",
+    "afterGameStats": "Oyun bittikten sonra istatistikler burada görünecek."
   },
   "lobby": {
     "greeting": "Hoşgeldin, {{name}}!",
@@ -25,7 +32,11 @@
     "apiKeyHint": "adresinden key al, ardından",
     "apiKeyHintEnd": "dosyasına",
     "tabChampions": "Şampiyonlarım",
-    "tabStats": "İstatistiklerim"
+    "tabStats": "İstatistiklerim",
+    "gridEmpty": "Henüz veri yok — \"Maç geçmişini yükle\" butonuna tıkla.",
+    "patchBadge": "Patch {{version}}",
+    "metaBadge": "Meta: {{rel}}",
+    "masteryTitle": "Mastery {{level}}"
   },
   "champSelect": {
     "yourTeam": "Takımın",
@@ -34,12 +45,18 @@
     "banHintHover": "Rakip hover ediyor — potansiyel ban hedefleri:",
     "banHintNoHover": "Rakip henüz hover etmiyor. Kompo eksikliğini karşılayan şampiyonları banlama önerilir.",
     "keyboardHint": "[1-5] Öneri seç  ·  Enter = Hover uygula (yalnız hover — otomatik pick/lock yok)",
+    "keyboardHintShort": "[1-5] Öneri seç  ·  Enter = Hover uygula",
     "watchingBan": "Takım banlıyor...",
     "watchingPick": "Takım seçiyor...",
     "yourOptions": "Seçeneklerin:",
     "lockingIn": "Seçim kilitlendi — Build planı:",
     "planningMsg": "Lobi'desin — Champion Select'e girince öneriler otomatik görünecek",
     "noRecommendation": "Öneri için \"Maç geçmişini yükle\" butonuna tıkla",
+    "waiting": "Champion Select bekleniyor…",
+    "hoverFailed": "Hover başarısız: {{err}}",
+    "banComputing": "Ban önerisi hesaplanıyor…",
+    "banSuggestions": "Ban önerileri:",
+    "banOtp": "rakip OTP (%{{pct}})",
     "phase": {
       "planning": "Lobi — Kuyruğa hazır ol",
       "ban_acting": "BAN SIRASI — Tehlikeli şampiyonu banla",
@@ -53,9 +70,70 @@
     "firstTime": "İlk kez oynuyor olabilirsin",
     "lowConfidence": "Az veri — güven düşük",
     "keyHint": "[1] Öner  [Enter] Hover uygula",
+    "selectHint": "[1-5] seç · Enter hover",
     "detail": "Detay ↓",
     "detailClose": "Detay ↑",
-    "statsLine": "{{wins}}W-{{losses}}L ({{wr}}%) · {{games}} maç"
+    "detailBtn": "Detay",
+    "hoverApply": "Hover Uygula",
+    "statsLine": "{{wins}}W-{{losses}}L ({{wr}}%) · {{games}} maç",
+    "earlyAdvantage": "Erken baskı avantajı",
+    "blindSafe": "Blind pick güvenli",
+    "comboStrong": "{{ally}} ile güçlü combo",
+    "scoreMatchup": "Lane Matchup",
+    "scoreTeamCounter": "Takım Kontr",
+    "scoreSynergy": "Sinerji",
+    "scoreMeta": "Meta",
+    "phaseLine": "Erken {{early}}% · Orta {{mid}}% · Geç {{late}}%",
+    "enemyLabel": "Düşman: {{summary}}"
+  },
+  "build": {
+    "loading": "Build verisi yükleniyor…",
+    "title": "{{champ}} Build",
+    "core": "Core",
+    "situational": "Duruma Göre",
+    "skillOrder": "Skill Order",
+    "summoners": "Summoners",
+    "secondaryRunes": "Secondary Runes",
+    "statShards": "Stat Shards"
+  },
+  "draftPlan": {
+    "winCondition": "Galibiyet Koşulu",
+    "lanePhase": "Lane Mikrosu",
+    "powerSpike": "Güç Tepesi",
+    "compClash": "Kompo Çakışması",
+    "damageProfile": "Hasar Profili",
+    "pickSafety": "Pick Güvenliği",
+    "execDifficulty": "Execution Zorluğu",
+    "comboPlans": "Combo Planları",
+    "teamNeed": "Takım İhtiyacı",
+    "risks": "Riskler",
+    "pickPosition": "Pick Pozisyonu",
+    "safetySafe": "Blind pick güvenli",
+    "safetyMedium": "Orta pick güvenliği",
+    "safetyRisky": "Güvenli değil (blind)",
+    "execEasy": "Kolay",
+    "execMedium": "Orta",
+    "execHard": "Zor ({{n}}/5)"
+  },
+  "stats": {
+    "empty": "Veri yok — önce senkronize et.",
+    "summary": "{{games}} maç · %{{wr}} kazanma oranı",
+    "top5": "Top 5: {{names}}",
+    "masteryTitle": "Mastery (Top 10)",
+    "winRateTitle": "Kazanma Oranı % (min 3 maç)",
+    "winLabel": "Kazanma"
+  },
+  "time": {
+    "justNow": "az önce",
+    "minsAgo": "{{n}} dk önce",
+    "hoursAgo": "{{n}} sa önce",
+    "daysAgo": "{{n}} gün önce"
+  },
+  "timer": {
+    "yourTurn": "SIRANIZ",
+    "waiting": "BEKLIYORSUNUZ",
+    "lobby": "LOBI",
+    "locking": "KİLİTLENİYOR"
   },
   "quickPick": {
     "confLow": "Az veri",

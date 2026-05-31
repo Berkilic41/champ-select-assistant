@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Recommendation } from '../../types/recommendation';
 import { ChampionIcon } from '../shared/ChampionIcon';
 import { TIER_COLORS } from '../../lib/tier';
@@ -10,7 +11,9 @@ interface Props {
   onSelect: (index: number) => void;
 }
 
-export const QuickPickList: React.FC<Props> = ({ recommendations, activeIndex, onSelect }) => (
+export const QuickPickList: React.FC<Props> = ({ recommendations, activeIndex, onSelect }) => {
+  const { t } = useTranslation();
+  return (
   <div className="quick-pick-list">
     {recommendations.slice(0, 5).map((rec, i) => (
       <div
@@ -26,11 +29,12 @@ export const QuickPickList: React.FC<Props> = ({ recommendations, activeIndex, o
         <span className="quick-pick-reason">{rec.reason}</span>
         <span
           className="quick-pick-conf"
-          title={rec.confidence === 'low' ? 'Az veri' : rec.confidence === 'medium' ? 'Orta veri' : 'Yüksek veri'}
+          title={rec.confidence === 'low' ? t('quickPick.confLow') : rec.confidence === 'medium' ? t('quickPick.confMedium') : t('quickPick.confHigh')}
         >
           {rec.confidence === 'high' ? '●●●' : rec.confidence === 'medium' ? '●●○' : '●○○'}
         </span>
       </div>
     ))}
   </div>
-);
+  );
+};

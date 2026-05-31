@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import './Timer.css';
 
 interface Props {
@@ -12,6 +13,7 @@ const RADIUS = 22;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export const Timer: React.FC<Props> = ({ timeLeftMs, phase, isActing }) => {
+  const { t } = useTranslation();
   const [timeLeft, setTimeLeft] = useState(timeLeftMs);
 
   useEffect(() => { setTimeLeft(timeLeftMs); }, [timeLeftMs]);
@@ -30,9 +32,9 @@ export const Timer: React.FC<Props> = ({ timeLeftMs, phase, isActing }) => {
   const colors = { ok: '#4CAF50', warning: '#F5A623', critical: '#F44336' };
 
   const phaseLabel: Record<string, string> = {
-    BAN_PICK: isActing ? 'SIRANIZ' : 'BEKLIYORSUNUZ',
-    PLANNING: 'LOBI',
-    FINALIZATION: 'KİLİTLENİYOR',
+    BAN_PICK: isActing ? t('timer.yourTurn') : t('timer.waiting'),
+    PLANNING: t('timer.lobby'),
+    FINALIZATION: t('timer.locking'),
   };
   const label = phaseLabel[phase] ?? phase;
 

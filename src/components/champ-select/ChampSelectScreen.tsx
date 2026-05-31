@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AlertTriangle } from 'lucide-react';
 import { ChampSelectSession, Recommendation, BanSuggestion, EnemyPoolSummary } from '../../types/recommendation';
 import { PhaseView } from '../../hooks/useChampSelectPhase';
@@ -31,6 +32,7 @@ export const ChampSelectScreen: React.FC<Props> = ({
   enemyPools = [],
   onHoverChampion,
 }) => {
+  const { t } = useTranslation();
   const [activeIdx, setActiveIdx] = useState(0);
   const isActing = phaseView === 'pick_acting' || phaseView === 'ban_acting';
   const activeRec = recommendations[activeIdx];
@@ -62,7 +64,7 @@ export const ChampSelectScreen: React.FC<Props> = ({
       <div className="cs-screen__body">
         {/* Sol: Takım */}
         <aside className="cs-screen__team-col">
-          <p className="cs-col-label">Takımın</p>
+          <p className="cs-col-label">{t('champSelect.yourTeam')}</p>
           {session.my_team.map(slot => (
             <TeamSlotView key={slot.cell_id} slot={slot} champMap={champMap}
               isLocalPlayer={slot.cell_id === session.my_cell_id} />
@@ -98,7 +100,7 @@ export const ChampSelectScreen: React.FC<Props> = ({
                 <div className="cs-empty">
                   {recError
                     ? <p className="cs-empty__error"><AlertTriangle size={14} /> {recError}</p>
-                    : <p>Öneri için "Maç geçmişini yükle" butonuna tıkla</p>}
+                    : <p>{t('champSelect.noRecommendation')}</p>}
                 </div>
               )}
               {recommendations.length > 0 && (
@@ -127,10 +129,10 @@ export const ChampSelectScreen: React.FC<Props> = ({
           {/* ── Ban: Sıram ── */}
           {phaseView === 'ban_acting' && (
             <div className="cs-ban-view animate-fade-in">
-              <p className="cs-ban-title">BAN SIRAN</p>
+              <p className="cs-ban-title">{t('champSelect.banTitle')}</p>
               {enemyThreats.length > 0 ? (
                 <>
-                  <p className="cs-ban-hint">Rakip hover ediyor — potansiyel ban hedefleri:</p>
+                  <p className="cs-ban-hint">{t('champSelect.banHintHover')}</p>
                   <div className="cs-ban-candidates">
                     {enemyThreats.map(t => (
                       <div key={t.champId} className="cs-ban-candidate">
@@ -143,12 +145,10 @@ export const ChampSelectScreen: React.FC<Props> = ({
                   </div>
                 </>
               ) : (
-                <p className="cs-ban-hint">
-                  Rakip henüz hover etmiyor. Kompo eksikliğini karşılayan şampiyonları banlama önerilir.
-                </p>
+                <p className="cs-ban-hint">{t('champSelect.banHintNoHover')}</p>
               )}
               <BanSuggestionList suggestions={banSuggestions} enemyPools={enemyPools} />
-              <p className="cs-keyboard-hint">[1-5] Öneri seç  ·  Enter = Hover uygula</p>
+              <p className="cs-keyboard-hint">{t('champSelect.keyboardHintShort')}</p>
             </div>
           )}
 
@@ -156,11 +156,11 @@ export const ChampSelectScreen: React.FC<Props> = ({
           {(phaseView === 'ban_watching' || phaseView === 'pick_watching') && (
             <div className="cs-watch-view animate-fade-in">
               <p className="cs-watch-msg">
-                {phaseView === 'ban_watching' ? 'Takım banlıyor...' : 'Takım seçiyor...'}
+                {phaseView === 'ban_watching' ? t('champSelect.watchingBan') : t('champSelect.watchingPick')}
               </p>
               {recommendations.length > 0 && (
                 <>
-                  <p className="cs-watch-hint">Seçeneklerin:</p>
+                  <p className="cs-watch-hint">{t('champSelect.yourOptions')}</p>
                   <QuickPickList
                     recommendations={recommendations}
                     activeIndex={activeIdx}
@@ -174,7 +174,7 @@ export const ChampSelectScreen: React.FC<Props> = ({
           {/* ── Kilit fazı ── */}
           {phaseView === 'finalization' && (
             <div className="cs-finalization animate-slide-up">
-              <p className="cs-finalize-title">Seçim kilitlendi — Build planı:</p>
+              <p className="cs-finalize-title">{t('champSelect.lockingIn')}</p>
               {session.local_player.champion_id > 0 && activeRec && (
                 <BuildSummary
                   coreItems={activeRec.core_items}
@@ -194,16 +194,14 @@ export const ChampSelectScreen: React.FC<Props> = ({
           {/* ── Lobi ── */}
           {phaseView === 'planning' && (
             <div className="cs-planning animate-fade-in">
-              <p className="cs-planning-msg">
-                Lobi'desin — Champion Select'e girince öneriler otomatik görünecek
-              </p>
+              <p className="cs-planning-msg">{t('champSelect.planningMsg')}</p>
             </div>
           )}
         </main>
 
         {/* Sağ: Düşman */}
         <aside className="cs-screen__enemy-col">
-          <p className="cs-col-label">Düşman</p>
+          <p className="cs-col-label">{t('champSelect.enemyTeam')}</p>
           {session.their_team.map(slot => (
             <TeamSlotView key={slot.cell_id} slot={slot} champMap={champMap} />
           ))}

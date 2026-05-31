@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { useTranslation } from 'react-i18next';
 import { useChampSelect } from '../../hooks/useChampSelect';
 import { detectPhaseView } from '../../hooks/useChampSelectPhase';
 import { ChampSelectScreen } from './ChampSelectScreen';
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export const ChampSelectWrapper: React.FC<Props> = ({ addToast }) => {
+  const { t } = useTranslation();
   const [puuid, setPuuid] = useState<string>('');
   const { session, recommendations, loading, error } = useChampSelect(puuid);
   const [champMap, setChampMap] = useState<Map<number, string>>(new Map());
@@ -65,14 +67,14 @@ export const ChampSelectWrapper: React.FC<Props> = ({ addToast }) => {
       try {
         await invoke<void>('hover_champion', { championId });
       } catch (err) {
-        addToast('Hover başarısız: ' + String(err), 'error');
+        addToast(t('champSelect.hoverFailed', { err: String(err) }), 'error');
       }
     },
-    [addToast],
+    [addToast, t],
   );
 
   if (!session) {
-    return <div className="status-placeholder">Champion Select bekleniyor…</div>;
+    return <div className="status-placeholder">{t('champSelect.waiting')}</div>;
   }
 
   const phaseView = detectPhaseView(session);
