@@ -1,10 +1,70 @@
-/* Global resets and base styles — variables are in styles/variables.css */
+/* Global base styles — design tokens live in styles/variables.css */
 
-body {
-  font-family: 'Figtree', system-ui, sans-serif;
+#root {
+  min-height: 100vh;
 }
 
+/* Headings use the display font; numeric/stat text opts into tabular figures. */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.01em;
+  line-height: var(--line-height-tight);
+}
+
+.tabular,
+.stat,
+[data-numeric] {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+a {
+  color: var(--teal);
+}
+
+/* Visible keyboard focus everywhere. */
 :focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
+  border-radius: var(--radius-sm);
+}
+
+/* Custom scrollbars (premium dark) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--surface-3);
+  border-radius: var(--radius-pill);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--surface-4); }
+
+::selection {
+  background: rgba(45, 212, 191, 0.3);
+  color: var(--text-primary);
+}
+
+/* Respect reduced-motion: kill non-essential animation/transition. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -2,21 +2,27 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-1);
-  border-radius: var(--radius-sm);
-  background: var(--color-bg-panel);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  border: 1px solid transparent;
 }
 
 .team-slot--me {
-  border: 1px solid var(--color-gold);
+  border-color: var(--gold-dim);
+  background: linear-gradient(90deg, rgba(200, 155, 60, 0.1), var(--surface-2));
+  box-shadow: var(--glow-gold);
 }
 
 .team-slot--locked { opacity: 1; }
 
-.team-slot:not(.team-slot--locked) { opacity: 0.6; }
+.team-slot:not(.team-slot--locked) { opacity: 0.55; }
 
 .team-slot__pos {
-  font-size: 10px;
-  color: var(--color-text-muted);
-  width: 28px;
+  font-family: var(--font-display);
+  font-size: var(--font-size-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--text-muted);
+  width: 30px;
+  text-transform: uppercase;
 }

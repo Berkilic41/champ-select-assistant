@@ -1,5 +1,6 @@
 import React from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { Minus } from 'lucide-react';
 import './IngameView.css';
 
 interface Props {
@@ -16,8 +17,9 @@ export const IngameView: React.FC<Props> = ({ summonerName }) => (
         className="ingame-minimize"
         onClick={() => invoke('hide_window')}
         title="Gizle"
+        aria-label="Gizle"
       >
-        −
+        <Minus size={16} />
       </button>
     </div>
     <div className="ingame-tip">

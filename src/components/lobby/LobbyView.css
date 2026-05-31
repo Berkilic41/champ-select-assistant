@@ -1,8 +1,8 @@
 .lobby {
   display: flex;
   flex-direction: column;
-  padding: var(--space-4);
-  gap: var(--space-3);
+  padding: var(--space-2);
+  gap: var(--space-4);
 }
 
 .lobby__header {
@@ -11,85 +11,94 @@
   gap: var(--space-3);
 }
 
-.lobby__greeting { font-size: var(--font-size-lg); color: var(--color-gold); }
-.lobby__hint     { font-size: var(--font-size-sm); color: var(--color-text-muted); }
+.lobby__greeting {
+  font-family: var(--font-display);
+  font-size: var(--font-size-xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+.lobby__hint { font-size: var(--font-size-sm); color: var(--text-secondary); }
 
 .lobby__sync-btn {
   align-self: flex-start;
-  padding: var(--space-2) var(--space-4);
-  background: transparent;
-  border: 1px solid var(--color-gold);
-  border-radius: var(--radius-sm);
-  color: var(--color-gold);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--text-on-accent);
+  font-family: var(--font-display);
   font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  font-weight: var(--weight-semibold);
+  box-shadow: var(--glow-gold);
+  transition: all var(--motion-normal);
 }
-
-.lobby__sync-btn:hover:not(:disabled) {
-  background: var(--color-gold);
-  color: var(--color-bg-deep);
-}
-
-.lobby__sync-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+.lobby__sync-btn:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
+.lobby__sync-btn:disabled { opacity: 0.55; cursor: not-allowed; filter: none; transform: none; }
 
 .lobby__error {
+  font-family: var(--font-mono);
   font-size: var(--font-size-sm);
-  color: var(--color-danger);
+  color: var(--danger);
+  background: rgba(240, 80, 110, 0.08);
+  border: 1px solid rgba(240, 80, 110, 0.25);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
 }
 
-.lobby__grid-wrap {
-  width: 100%;
-}
+.lobby__grid-wrap { width: 100%; }
 
 /* Tab bar */
 .lobby-tabs {
   display: flex;
-  gap: 0;
-  border-bottom: 1px solid var(--color-border);
+  gap: var(--space-1);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .lobby-tab {
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
+  font-family: var(--font-display);
   font-size: var(--font-size-sm);
-  padding: var(--space-2) var(--space-3);
-  cursor: pointer;
-  transition: color var(--transition-fast), border-color var(--transition-fast);
+  font-weight: var(--weight-medium);
+  padding: var(--space-3) var(--space-4);
   margin-bottom: -1px;
+  transition: color var(--motion-normal), border-color var(--motion-normal);
 }
-
-.lobby-tab:hover {
-  color: var(--color-text);
-}
-
+.lobby-tab:hover { color: var(--text-primary); }
 .lobby-tab--active {
-  color: var(--color-gold);
-  border-bottom-color: var(--color-gold);
-  font-weight: 600;
+  color: var(--teal-bright);
+  border-bottom-color: var(--teal);
+  font-weight: var(--weight-semibold);
 }
 
 .lobby__no-data {
   font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
+  color: var(--text-secondary);
+  padding: var(--space-4);
+  text-align: center;
+  background: var(--surface-1);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
 }
 
 .lobby__data-badges {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--space-2);
 }
 
 .lobby__data-badge {
-  font-size: 10px;
-  padding: 2px 7px;
-  border-radius: var(--radius-sm, 4px);
-  background: var(--color-surface-2, rgba(255, 255, 255, 0.06));
-  color: var(--color-text-secondary, rgba(255, 255, 255, 0.5));
-  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.10));
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  padding: 3px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
 }

@@ -1,4 +1,5 @@
 import React from 'react';
+import { CheckCircle2, AlertTriangle, XCircle, Info, X } from 'lucide-react';
 import { Toast as ToastType } from '../../hooks/useToast';
 import './Toast.css';
 
@@ -7,23 +8,26 @@ interface Props {
   onRemove: (id: string) => void;
 }
 
-const ICONS: Record<ToastType['type'], string> = {
-  info: 'i',
-  success: '✓',
-  warning: '⚠',
-  error: '✗',
+const ICONS: Record<ToastType['type'], React.ComponentType<{ size?: number }>> = {
+  info: Info,
+  success: CheckCircle2,
+  warning: AlertTriangle,
+  error: XCircle,
 };
 
 export const ToastContainer: React.FC<Props> = ({ toasts, onRemove }) => (
   <div className="toast-container">
-    {toasts.map(t => (
-      <div key={t.id} className={`toast toast--${t.type} animate-slide-up`}>
-        <span className="toast__icon">{ICONS[t.type]}</span>
-        <span className="toast__msg">{t.message}</span>
-        <button className="toast__close" onClick={() => onRemove(t.id)}>
-          &times;
-        </button>
-      </div>
-    ))}
+    {toasts.map(t => {
+      const Icon = ICONS[t.type];
+      return (
+        <div key={t.id} className={`toast toast--${t.type} animate-slide-up`}>
+          <span className="toast__icon"><Icon size={16} /></span>
+          <span className="toast__msg">{t.message}</span>
+          <button className="toast__close" onClick={() => onRemove(t.id)} aria-label="Kapat">
+            <X size={14} />
+          </button>
+        </div>
+      );
+    })}
   </div>
 );

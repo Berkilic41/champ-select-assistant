@@ -1,23 +1,65 @@
 .disconnected {
   text-align: center;
-  padding: var(--space-6);
+  padding: var(--space-8) var(--space-6);
+  margin: var(--space-6) auto;
+  max-width: 420px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-4);
+  background: linear-gradient(180deg, var(--surface-1), var(--bg-base));
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
 }
-.disconnected__msg   { font-size: 16px; color: var(--color-text); }
-.disconnected__error { font-size: 12px; color: var(--color-danger); font-family: monospace; }
+
+.disconnected__icon {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+}
+
+.disconnected__msg {
+  font-family: var(--font-display);
+  font-size: var(--font-size-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+}
+
+.disconnected__error {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--danger);
+  background: rgba(240, 80, 110, 0.08);
+  border: 1px solid rgba(240, 80, 110, 0.25);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  max-width: 100%;
+  word-break: break-word;
+}
+
 .disconnected__retry {
-  padding: var(--space-2) var(--space-4);
-  background: var(--color-gold);
-  color: #000;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  color: var(--text-on-accent);
   border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 13px;
-  transition: opacity var(--transition-fast);
+  border-radius: var(--radius-md);
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: var(--font-size-sm);
+  box-shadow: var(--glow-gold);
+  transition: all var(--motion-normal);
 }
-.disconnected__retry:hover    { opacity: 0.85; }
-.disconnected__retry:disabled { opacity: 0.5; cursor: not-allowed; }
+.disconnected__retry:hover    { filter: brightness(1.08); transform: translateY(-1px); }
+.disconnected__retry:disabled { opacity: 0.55; cursor: not-allowed; filter: none; transform: none; }
+
+.spin { animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }

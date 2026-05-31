@@ -6,10 +6,12 @@
 }
 
 .ban-suggestion-title {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
+  font-family: var(--font-display);
+  font-size: var(--font-size-xs);
+  color: var(--danger);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.12em;
+  font-weight: var(--weight-semibold);
   margin-bottom: var(--space-1);
 }
 
@@ -17,38 +19,47 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-1) var(--space-2);
-  background: var(--color-surface-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--danger);
+  border-radius: var(--radius-md);
+  transition: background var(--motion-normal);
 }
+.ban-suggestion-row:hover { background: var(--surface-3); }
 
 .ban-suggestion-name {
   flex: 1;
+  font-family: var(--font-display);
   font-size: var(--font-size-sm);
-  color: var(--color-text);
-  font-weight: 500;
+  color: var(--text-primary);
+  font-weight: var(--weight-medium);
 }
 
 .ban-suggestion-threat {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--font-size-sm);
-  color: var(--color-danger);
-  font-weight: 600;
-  min-width: 36px;
+  color: var(--danger);
+  font-weight: var(--weight-semibold);
+  min-width: 38px;
   text-align: right;
 }
 
 .ban-suggestion-empty {
   font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-style: italic;
   margin-top: var(--space-3);
+  padding: var(--space-3);
+  background: var(--surface-1);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
 }
 
 .ban-suggestion-reason {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-  font-style: italic;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
   max-width: 160px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -56,7 +67,7 @@
 }
 
 .ban-suggestion-otp {
-  color: var(--color-warning, #F59E0B);
+  color: var(--warning);
   font-style: normal;
-  font-weight: 500;
+  font-weight: var(--weight-medium);
 }

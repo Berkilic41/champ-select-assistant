@@ -1,14 +1,13 @@
 .ingame-view {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-4);
-  padding: var(--space-8);
-  min-height: 200px;
-  background: var(--color-bg-panel);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  gap: var(--space-5);
+  padding: var(--space-5);
+  min-height: 180px;
+  background: linear-gradient(180deg, var(--surface-1), var(--bg-base));
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
 }
 
 .ingame-header {
@@ -17,30 +16,33 @@
   justify-content: space-between;
   width: 100%;
   gap: var(--space-2);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .ingame-title {
+  font-family: var(--font-display);
   font-size: var(--font-size-lg);
-  font-weight: 600;
-  color: var(--color-gold);
-  letter-spacing: 0.04em;
+  font-weight: var(--weight-bold);
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
 .ingame-minimize {
-  background: transparent;
-  border: 1px solid var(--color-border);
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  color: var(--color-text-muted);
-  cursor: pointer;
-  font-size: var(--font-size-lg);
-  line-height: 1;
-  padding: 0 var(--space-2);
-  transition: color var(--transition-fast), border-color var(--transition-fast);
+  color: var(--text-secondary);
+  transition: all var(--motion-normal);
 }
-
 .ingame-minimize:hover {
-  color: var(--color-text);
-  border-color: var(--color-text-muted);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+  background: var(--surface-3);
 }
 
 .ingame-tip {
@@ -49,14 +51,19 @@
   align-items: center;
   gap: var(--space-2);
   text-align: center;
+  padding: var(--space-4) 0;
 }
 
 .ingame-tip p {
-  color: var(--color-text);
-  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: var(--font-size-lg);
+  font-weight: var(--weight-semibold);
 }
 
 .ingame-tip-sub {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
+  color: var(--text-muted) !important;
+  font-family: var(--font-body) !important;
+  font-size: var(--font-size-sm) !important;
+  font-weight: var(--weight-regular) !important;
 }

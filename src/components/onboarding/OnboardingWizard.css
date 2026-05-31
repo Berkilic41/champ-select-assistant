@@ -1,49 +1,77 @@
 .onboarding-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background:
+    radial-gradient(800px 400px at 50% 0%, rgba(45, 212, 191, 0.08), transparent 60%),
+    rgba(7, 9, 13, 0.92);
+  backdrop-filter: blur(6px);
   z-index: 2000;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: var(--space-4);
 }
 
 .onboarding-card {
-  background: var(--color-bg-panel);
-  border: 1px solid var(--color-gold);
-  border-radius: var(--radius-md);
-  padding: var(--space-6);
-  width: 360px;
+  position: relative;
+  background:
+    linear-gradient(180deg, var(--surface-2), var(--surface-1));
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8) var(--space-6) var(--space-6);
+  width: 380px;
+  max-width: 100%;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-4);
+  box-shadow: var(--shadow-lg);
+}
+
+/* top accent hairline */
+.onboarding-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 24px; right: 24px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--teal), transparent);
 }
 
 .onboarding-icon {
-  font-size: 48px;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-lg);
+  color: var(--gold-bright);
+  background:
+    radial-gradient(circle at 50% 30%, rgba(200, 155, 60, 0.22), transparent 70%),
+    var(--surface-3);
+  box-shadow: var(--glow-gold);
 }
 
 .onboarding-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--color-gold);
+  font-family: var(--font-display);
+  font-size: var(--font-size-xl);
+  font-weight: var(--weight-bold);
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
   margin: 0;
 }
 
 .onboarding-body {
-  font-size: var(--font-size-sm);
-  color: var(--color-text);
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
   margin: 0;
-  line-height: 1.5;
+  line-height: var(--line-height-normal);
 }
 
 .onboarding-hint {
-  font-size: 11px;
-  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
   margin: 0;
-  line-height: 1.4;
+  line-height: var(--line-height-normal);
 }
 
 .onboarding-dots {
@@ -52,49 +80,62 @@
 }
 
 .onboarding-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-border);
-  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-4);
+  transition: all var(--motion-normal);
 }
 
 .onboarding-dot--active {
-  background: var(--color-gold);
+  width: 22px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-bright));
 }
 
 .onboarding-footer {
   display: flex;
-  gap: var(--space-2);
+  gap: var(--space-3);
   width: 100%;
   justify-content: center;
+  margin-top: var(--space-2);
 }
 
 .onboarding-btn {
-  padding: var(--space-2) var(--space-6);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  border: 1px solid;
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  font-family: var(--font-display);
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
+  transition: all var(--motion-normal);
 }
 
 .onboarding-btn--back {
-  background: none;
-  color: var(--color-text-muted);
-  border-color: var(--color-border);
+  background: var(--surface-3);
+  color: var(--text-secondary);
+  border-color: var(--border-strong);
+}
+.onboarding-btn--back:hover {
+  background: var(--surface-4);
+  color: var(--text-primary);
 }
 
 .onboarding-btn--next {
-  background: var(--color-gold);
-  color: #000;
-  border-color: var(--color-gold);
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  color: var(--text-on-accent);
+  box-shadow: var(--glow-gold);
+}
+.onboarding-btn--next:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
 }
 
 .onboarding-disclaimer {
-  margin-top: var(--space-4);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
   text-align: center;
-  opacity: 0.7;
+  line-height: var(--line-height-normal);
 }

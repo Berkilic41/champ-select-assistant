@@ -1,69 +1,132 @@
+/* ============================================================================
+   Premium Dark Esports — Design Tokens
+   Blue-black layered surfaces · gold + teal accents · Sora/Inter/JetBrains Mono
+   Old token names are kept as aliases so every component picks up the new look.
+   ============================================================================ */
 :root {
-  --color-gold:       #C89B3C;
-  --color-bg-deep:    #0A0A0A;
-  --color-bg-panel:   #141414;
-  --color-border:     #2A2A2A;
-  --color-success:    #4CAF50;
-  --color-danger:     #F44336;
-  --color-text:       #E8E0D0;
-  --color-text-muted: #7A7060;
+  /* ── Typography ─────────────────────────────────────────────────────────── */
+  --font-display: "Sora", system-ui, sans-serif;     /* headings / hero */
+  --font-body:    "Inter", system-ui, sans-serif;    /* UI / body */
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace; /* stats / numbers */
 
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-6: 24px;
-  --space-8: 32px;
-
+  --font-size-xs:   11px;
   --font-size-sm:   12px;
   --font-size-base: 14px;
   --font-size-lg:   18px;
   --font-size-xl:   24px;
+  --font-size-2xl:  32px;
 
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --transition-fast: 120ms ease;
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-semibold:600;
+  --weight-bold:    700;
+  --weight-black:   800;
 
-  --champ-icon-sm: 32px;
-  --champ-icon-md: 48px;
-  --card-height: 48px;
-
-  /* ── Shadows ── */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.75);
-
-  /* ── Z-index ── */
-  --z-overlay: 100;
-  --z-modal:   200;
-  --z-toast:   300;
-
-  /* ── Focus ring ── */
-  --focus-ring: 0 0 0 2px rgba(200, 155, 60, 0.6);
-
-  /* ── Motion ── */
-  --motion-fast:   80ms ease;
-  --motion-normal: 200ms ease;
-  --motion-slow:   350ms ease;
-
-  /* ── Line heights ── */
   --line-height-tight:  1.2;
   --line-height-normal: 1.5;
-  --line-height-loose:  1.8;
+  --line-height-loose:  1.7;
 
-  /* ── Semantic surfaces ── */
-  --color-surface-1:      #141414;
-  --color-surface-2:      #1C1C1C;
-  --color-text-primary:   #E8E0D0;
-  --color-text-secondary: #7A7060;
-  --radius-lg: 12px;
+  /* ── Surfaces / elevation (blue-black) ─────────────────────────────────── */
+  --bg-deep:    #0B0E14;   /* app background */
+  --bg-base:    #0D1118;
+  --surface-1:  #12161F;   /* panels */
+  --surface-2:  #181D28;   /* cards */
+  --surface-3:  #1F2533;   /* raised / hover */
+  --surface-4:  #283041;   /* popover / active */
+
+  --border-subtle: #232A38;
+  --border-strong: #2E3647;
+  --border-glow:   rgba(45, 212, 191, 0.25); /* teal hairline glow */
+
+  /* ── Accents ───────────────────────────────────────────────────────────── */
+  --gold:        #C89B3C;
+  --gold-bright: #E4C168;
+  --gold-dim:    #8A6D2C;
+  --teal:        #2DD4BF;
+  --teal-bright: #5EEAD4;
+  --teal-dim:    #1B8A7E;
+
+  /* ── State ─────────────────────────────────────────────────────────────── */
+  --success: #3FB950;
+  --danger:  #F0506E;
+  --warning: #E3B341;
+  --info:    #58A6FF;
+
+  /* ── Text ──────────────────────────────────────────────────────────────── */
+  --text-primary:   #E6E9EF;
+  --text-secondary: #97A0B0;
+  --text-muted:     #5C6679;
+  --text-on-accent: #0B0E14;
+
+  /* ── Tier colors (S/A/B/C) ─────────────────────────────────────────────── */
+  --tier-s: #E4C168;
+  --tier-a: #2DD4BF;
+  --tier-b: #58A6FF;
+  --tier-c: #97A0B0;
+
+  /* ── Spacing ───────────────────────────────────────────────────────────── */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px;
+  --space-4: 16px; --space-5: 20px; --space-6: 24px; --space-8: 32px;
+
+  /* ── Radius ────────────────────────────────────────────────────────────── */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  /* ── Shadows + glows ───────────────────────────────────────────────────── */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.65);
+  --glow-gold: 0 0 0 1px rgba(200, 155, 60, 0.35), 0 0 16px rgba(200, 155, 60, 0.18);
+  --glow-teal: 0 0 0 1px rgba(45, 212, 191, 0.35), 0 0 16px rgba(45, 212, 191, 0.18);
+
+  /* ── Sizing ────────────────────────────────────────────────────────────── */
+  --champ-icon-sm: 32px;
+  --champ-icon-md: 48px;
+  --card-height:   52px;
+
+  /* ── Motion ────────────────────────────────────────────────────────────── */
+  --motion-fast:   100ms cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-slow:   320ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: var(--motion-fast);
+
+  /* ── Focus ─────────────────────────────────────────────────────────────── */
+  --focus-ring: 0 0 0 2px var(--bg-deep), 0 0 0 4px rgba(45, 212, 191, 0.7);
+
+  /* ── Z-index ───────────────────────────────────────────────────────────── */
+  --z-overlay: 100; --z-modal: 200; --z-toast: 300;
+
+  /* ── Backward-compat aliases (existing component CSS) ──────────────────── */
+  --color-gold:           var(--gold);
+  --color-bg-deep:        var(--bg-deep);
+  --color-bg-panel:       var(--surface-1);
+  --color-border:         var(--border-subtle);
+  --color-success:        var(--success);
+  --color-danger:         var(--danger);
+  --color-text:           var(--text-primary);
+  --color-text-muted:     var(--text-muted);
+  --color-surface-1:      var(--surface-1);
+  --color-surface-2:      var(--surface-2);
+  --color-text-primary:   var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-warning:        var(--warning);
+  --color-info:           var(--info);
+  --color-bg-base:        var(--bg-base);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background: var(--color-bg-deep);
-  color: var(--color-text);
-  font-family: system-ui, sans-serif;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(45, 212, 191, 0.05), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(200, 155, 60, 0.05), transparent 55%),
+    var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-body);
   font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }

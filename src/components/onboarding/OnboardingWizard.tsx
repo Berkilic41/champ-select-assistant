@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { useTranslation } from 'react-i18next';
+import { Swords, ShieldCheck, BrainCircuit, Gamepad2 } from 'lucide-react';
 import './OnboardingWizard.css';
 
 interface Props {
   onComplete: () => void;
 }
 
-const STEP_ICONS = ['⚔', '🔑', '🧠', '🎮'];
+const STEP_ICONS = [Swords, ShieldCheck, BrainCircuit, Gamepad2];
 const STEP_KEYS = ['step1', 'step2', 'step3', 'step4'] as const;
 
 export const OnboardingWizard: React.FC<Props> = ({ onComplete }) => {
@@ -21,11 +22,12 @@ export const OnboardingWizard: React.FC<Props> = ({ onComplete }) => {
   };
 
   const key = STEP_KEYS[step];
+  const StepIcon = STEP_ICONS[step];
 
   return (
     <div className="onboarding-overlay">
       <div className="onboarding-card animate-hero-in">
-        <div className="onboarding-icon">{STEP_ICONS[step]}</div>
+        <div className="onboarding-icon"><StepIcon size={28} strokeWidth={2} /></div>
         <h2 className="onboarding-title">{t(`onboarding.${key}.title`)}</h2>
         <p className="onboarding-body">{t(`onboarding.${key}.body`)}</p>
         <p className="onboarding-hint">{t(`onboarding.${key}.hint`)}</p>

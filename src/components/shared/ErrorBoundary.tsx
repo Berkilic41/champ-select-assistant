@@ -1,4 +1,5 @@
 import React from "react";
+import { AlertTriangle } from "lucide-react";
 import i18n from "../../i18n";
 import "./ErrorBoundary.css";
 
@@ -50,7 +51,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
     return (
       <div className="error-boundary" role="alert">
         <div className="error-boundary__card">
-          <div className="error-boundary__icon">⚠</div>
+          <div className="error-boundary__icon"><AlertTriangle size={28} /></div>
           <h2 className="error-boundary__title">{i18n.t("app.errorTitle")}</h2>
           <p className="error-boundary__body">{i18n.t("app.errorBody")}</p>
           {this.state.message && (

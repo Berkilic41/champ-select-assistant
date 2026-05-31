@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AlertTriangle } from 'lucide-react';
 import { ChampSelectSession, Recommendation, BanSuggestion, EnemyPoolSummary } from '../../types/recommendation';
 import { PhaseView } from '../../hooks/useChampSelectPhase';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
@@ -96,7 +97,7 @@ export const ChampSelectScreen: React.FC<Props> = ({
               ) : (
                 <div className="cs-empty">
                   {recError
-                    ? <p className="cs-empty__error">⚠ {recError}</p>
+                    ? <p className="cs-empty__error"><AlertTriangle size={14} /> {recError}</p>
                     : <p>Öneri için "Maç geçmişini yükle" butonuna tıkla</p>}
                 </div>
               )}

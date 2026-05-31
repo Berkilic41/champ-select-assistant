@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
 import { useTranslation } from 'react-i18next';
+import { Settings } from 'lucide-react';
 import { AppSettings } from '../hooks/useSettings';
 import { AppStatus } from '../types/app';
 import { ConnectionBadge } from './connection/ConnectionBadge';
@@ -94,8 +95,9 @@ export const AppShell: React.FC<Props> = ({ status, onRetry, onSettingsOpen, add
             className="appshell-settings-btn"
             onClick={onSettingsOpen}
             title={t('app.settings')}
+            aria-label={t('app.settings')}
           >
-            ⚙
+            <Settings size={18} />
           </button>
         </div>
       </header>

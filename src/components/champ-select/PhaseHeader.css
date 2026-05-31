@@ -1,9 +1,18 @@
 .phase-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: var(--space-2) var(--space-4);
-  background: var(--color-bg-panel);
-  border-bottom: 2px solid var(--color-border);
+  padding: var(--space-3) var(--space-4);
+  background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+  border-bottom: 2px solid var(--border-subtle);
 }
-.phase-header--acting { border-bottom-color: var(--color-gold); }
-.phase-header__msg { font-size: 12px; font-weight: 600; color: var(--color-text-muted); }
-.phase-header--acting .phase-header__msg { color: var(--color-gold); }
+.phase-header--acting {
+  border-bottom-color: var(--gold);
+  box-shadow: 0 1px 16px rgba(200, 155, 60, 0.18);
+}
+.phase-header__msg {
+  font-family: var(--font-display);
+  font-size: var(--font-size-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.01em;
+  color: var(--text-secondary);
+}
+.phase-header--acting .phase-header__msg { color: var(--gold-bright); }

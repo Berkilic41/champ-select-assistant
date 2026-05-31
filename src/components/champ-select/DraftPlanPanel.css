@@ -1,23 +1,24 @@
 .draft-plan {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-2) 0 0;
-  border-top: 1px solid var(--color-border);
+  gap: var(--space-3);
+  padding: var(--space-3) 0 0;
+  border-top: 1px solid var(--border-subtle);
 }
 
 .draft-plan__section {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: var(--space-1);
 }
 
 .draft-plan__label {
-  font-size: 10px;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: var(--font-size-xs);
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-secondary, rgba(255, 255, 255, 0.5));
+  letter-spacing: 0.12em;
+  color: var(--teal-bright);
 }
 
 .draft-plan__text {
@@ -53,12 +54,12 @@
 }
 
 .draft-plan__chip {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: var(--radius-sm, 4px);
-  background: var(--color-surface-2, rgba(255, 255, 255, 0.08));
-  color: var(--color-text-secondary, rgba(255, 255, 255, 0.5));
-  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.12));
+  font-size: var(--font-size-xs);
+  padding: 3px var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-strong);
   white-space: nowrap;
 }
 
@@ -66,10 +67,11 @@
 .draft-plan__safety-badge,
 .draft-plan__exec-badge {
   display: inline-block;
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: var(--radius-sm, 4px);
-  font-weight: 500;
+  font-family: var(--font-display);
+  font-size: var(--font-size-xs);
+  padding: 3px var(--space-3);
+  border-radius: var(--radius-pill);
+  font-weight: var(--weight-semibold);
 }
 
 .draft-plan__safety-badge--safe {

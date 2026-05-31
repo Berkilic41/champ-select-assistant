@@ -18,18 +18,20 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-1);
-  background: var(--color-bg-panel);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: var(--space-2) var(--space-1);
+  background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-1);
   width: 80px;
-  min-height: 90px;
+  min-height: 92px;
   position: relative;
-  transition: border-color var(--transition-fast);
+  transition: border-color var(--motion-normal), transform var(--motion-normal), box-shadow var(--motion-normal);
 }
 
 .champ-card:hover {
-  border-color: var(--color-gold);
+  border-color: var(--gold-dim);
+  transform: translateY(-2px);
+  box-shadow: var(--glow-gold);
 }
 
 .champ-card__icon-wrap {
@@ -61,23 +63,29 @@
 }
 
 .champ-card__games {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
 }
 
 .champ-card__wr {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
 }
 
 .champ-card__wr--high {
-  color: var(--color-success);
+  color: var(--success);
 }
 
 .champ-card__kda {
-  font-size: 10px;
-  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
 }
 
 /* Skeleton state */

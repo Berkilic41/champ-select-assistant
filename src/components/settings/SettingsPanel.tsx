@@ -1,6 +1,7 @@
 import React from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { useTranslation } from 'react-i18next';
+import { X } from 'lucide-react';
 import { AppSettings } from '../../hooks/useSettings';
 import './SettingsPanel.css';
 
@@ -56,8 +57,8 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
       <div className="settings-panel" onClick={e => e.stopPropagation()}>
         <div className="settings-panel__header">
           <h2>{t('settings.title')}</h2>
-          <button className="settings-panel__close" onClick={onClose}>
-            &times;
+          <button className="settings-panel__close" onClick={onClose} aria-label="Kapat">
+            <X size={18} />
           </button>
         </div>
 
