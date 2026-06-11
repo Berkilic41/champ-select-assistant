@@ -18,6 +18,7 @@ import {
   parseDraftRows,
   parseUggMatchups,
   parseUggOverview,
+  syncEdgeRates,
   syncLeaguepedia,
   syncUgg,
   toUggPatch,
@@ -281,5 +282,138 @@ describe("sync runners write canonical rows (sync_*_inner parity)", () => {
         error: { code: "ratelimited" },
       })),
     ).rejects.toThrow("ratelimited");
+  });
+});
+
+describe("edge rates source (cloudflare-worker /v1/rates app-wiring)", () => {
+  it("syncEdgeRates pulls aggregate rates + matchups and upserts as cloud_edge", async () => {
+    const db = migratedDb();
+    db.prepare(
+      "INSERT INTO summoners (puuid, game_name, tag_line, region, cached_at) VALUES ('p1', 'Me', 'TR', 'eun1', 5)",
+    ).run();
+
+    const calls: string[] = [];
+    const n = await syncEdgeRates(db, "https://edge.example/", async (url) => {
+      calls.push(url);
+      if (url.includes("/v1/matchups")) {
+        return {
+          patch: "16.11",
+          region: "eun1",
+          matchups: [
+            { champion_id: 86, opponent_id: 103, role: "top", games: 30, wins: 17, win_rate: 17 / 30 },
+            { champion_id: 86, opponent_id: 0, role: "top", games: 5, wins: 3, win_rate: 0.6 }, // geçersiz opponent → atılır
+          ],
+        };
+      }
+      if (url.includes("/v1/builds")) {
+        return {
+          patch: "16.11",
+          region: "eun1",
+          builds: [
+            {
+              champion_id: 86,
+              role: "top",
+              item_ids: [3078, 3071, 3053],
+              rune_ids: [8000, 8010, 9111],
+              summoner_spells: [4, 12],
+              games: 25,
+              wins: 14,
+              win_rate: 14 / 25,
+            },
+            // boş loadout → atılır
+            { champion_id: 99, role: "middle", item_ids: [], rune_ids: [], summoner_spells: [], games: 9, wins: 5, win_rate: 5 / 9 },
+          ],
+        };
+      }
+      return {
+        patch: "16.11",
+        region: "eun1",
+        total_games: 120,
+        rates: [
+          { champion_id: 86, role: "top", games: 120, win_rate: 0.52, pick_rate: 0.1, ban_rate: 0.05 },
+          { champion_id: 0, role: "top", games: 50, win_rate: 0.5, pick_rate: 0, ban_rate: 0 }, // geçersiz id → atılır
+        ],
+      };
+    });
+
+    expect(n).toEqual({ rates: 1, matchups: 1, builds: 1 });
+    // Bölge aktif summoner'dan; base URL'deki sondaki / temizlenir.
+    expect(calls[0]).toBe("https://edge.example/v1/rates?region=eun1");
+    expect(calls[1]).toBe("https://edge.example/v1/matchups?region=eun1");
+    expect(calls[2]).toBe("https://edge.example/v1/builds?region=eun1");
+    const row = db
+      .prepare(
+        "SELECT position, patch, region, sample_size, confidence FROM champion_rates WHERE source = 'cloud_edge'",
+      )
+      .get() as unknown as Record<string, unknown>;
+    expect(row).toMatchObject({
+      position: "top",
+      patch: "16.11",
+      region: "eun1",
+      sample_size: 120,
+      confidence: "low", // 120 < 200
+    });
+    const mu = db
+      .prepare(
+        "SELECT champion_id, opponent_id, position, games, wins, patch_version, region, confidence FROM champion_matchups WHERE source = 'cloud_edge'",
+      )
+      .get() as unknown as Record<string, unknown>;
+    expect(mu).toMatchObject({
+      champion_id: 86,
+      opponent_id: 103,
+      position: "top",
+      games: 30,
+      wins: 17,
+      patch_version: "16.11",
+      region: "eun1",
+      confidence: "low", // 30 < 200
+    });
+    const bu = db
+      .prepare(
+        "SELECT champion_id, position, item_ids, rune_ids, summoner_spells, games, confidence FROM builds WHERE source = 'cloud_edge'",
+      )
+      .get() as unknown as Record<string, unknown>;
+    expect(bu).toMatchObject({
+      champion_id: 86,
+      position: "top",
+      item_ids: JSON.stringify([3078, 3071, 3053]),
+      rune_ids: JSON.stringify([8000, 8010, 9111]),
+      summoner_spells: JSON.stringify([4, 12]),
+      games: 25,
+      confidence: "low", // 25 < 200
+    });
+  });
+
+  it("syncEdgeRates keeps rates when matchups/builds endpoints fail (best-effort)", async () => {
+    const db = migratedDb();
+    const n = await syncEdgeRates(db, "https://edge.example", async (url) => {
+      if (url.includes("/v1/matchups") || url.includes("/v1/builds")) {
+        throw new Error("HTTP 500");
+      }
+      return {
+        patch: "16.11",
+        region: "tr1",
+        total_games: 10,
+        rates: [
+          { champion_id: 86, role: "top", games: 10, win_rate: 0.5, pick_rate: 1, ban_rate: 0 },
+        ],
+      };
+    });
+    expect(n).toEqual({ rates: 1, matchups: 0, builds: 0 });
+    const count = db
+      .prepare("SELECT COUNT(*) AS c FROM champion_matchups WHERE source = 'cloud_edge'")
+      .get() as unknown as { c: number };
+    expect(Number(count.c)).toBe(0);
+    const bcount = db
+      .prepare("SELECT COUNT(*) AS c FROM builds WHERE source = 'cloud_edge'")
+      .get() as unknown as { c: number };
+    expect(Number(bcount.c)).toBe(0);
+  });
+
+  it("syncEdgeRates rejects a malformed response honestly", async () => {
+    const db = migratedDb();
+    await expect(
+      syncEdgeRates(db, "https://edge.example", async () => ({ rates: "bozuk" })),
+    ).rejects.toThrow("geçersiz /v1/rates yanıtı");
   });
 });

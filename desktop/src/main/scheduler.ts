@@ -26,10 +26,12 @@ import type { LcuService } from "./commands/lcu";
 import { syncDdragonChampions, type DdragonCaches, type FetchJson } from "./ddragon";
 import type { Engine } from "./engine";
 import { syncMatchV5Ingestion } from "./match-v5";
-import { runtimeClientFromEnv, type RiotClient } from "./riot/client";
+import { runtimeClientFromEnv, runtimeEnv, type RiotClient } from "./riot/client";
 import {
+  defaultEdgeFetch,
   defaultLeaguepediaFetch,
   defaultUggFetch,
+  syncEdgeRates,
   syncLeaguepedia,
   syncUgg,
 } from "./sources";
@@ -136,6 +138,9 @@ export interface SchedulerDeps {
   merakiFetch?: FetchJson;
   uggFetch?: FetchJson;
   leaguepediaFetch?: FetchJson;
+  edgeFetch?: FetchJson;
+  /** undefined = env'den çöz (EDGE_BASE_URL); null = edge yok (testler ağa çıkmaz). */
+  edgeBaseUrl?: string | null;
   /** undefined = her tick'te env'den çöz; null = key yok (testler ağa çıkmaz). */
   riotClient?: RiotClient | null;
   initialDelayMs?: number;
@@ -219,11 +224,16 @@ export class PipelineScheduler {
         : this.deps.riotClient;
     const hasSummoner =
       db.prepare("SELECT 1 FROM summoners LIMIT 1").get() !== undefined;
+    const edgeBase =
+      this.deps.edgeBaseUrl === undefined
+        ? (runtimeEnv().EDGE_BASE_URL ?? "").trim() || null
+        : this.deps.edgeBaseUrl;
 
     const status = engine.pipelineRefreshPlan<RefreshPlanStatus>({
       now_secs: now,
       champ_select_active: champSelectActive,
       riot_enabled: riot !== null && hasSummoner,
+      edge_enabled: edgeBase !== null,
       matchup_count: count(db, "SELECT COUNT(*) FROM champion_matchups"),
       logs: readFetchLogs(db, now - FETCH_LOG_WINDOW_SECS),
       request_timestamps: recentRequestTimestamps(db, now - RATE_WINDOW_SECS),
@@ -246,7 +256,7 @@ export class PipelineScheduler {
         continue;
       }
       try {
-        const message = await this.runScheduledSource(decision.source, riot);
+        const message = await this.runScheduledSource(decision.source, riot, edgeBase);
         anySuccess = true;
         recordFetchLog(
           db,
@@ -302,6 +312,7 @@ export class PipelineScheduler {
   private async runScheduledSource(
     source: string,
     riot: RiotClient | null,
+    edgeBase: string | null,
   ): Promise<string> {
     const { engine, db, caches } = this.deps;
     switch (source) {
@@ -324,6 +335,11 @@ export class PipelineScheduler {
           this.deps.leaguepediaFetch ?? defaultLeaguepediaFetch,
         );
         return `${n} pro champions`;
+      }
+      case "cloud_edge": {
+        if (!edgeBase) throw new Error("EDGE_BASE_URL yapılandırılmamış");
+        const n = await syncEdgeRates(db, edgeBase, this.deps.edgeFetch ?? defaultEdgeFetch);
+        return `${n.rates} rates, ${n.matchups} matchups, ${n.builds} builds`;
       }
       case "match_v5": {
         const o = await syncMatchV5Ingestion(engine, db, caches, riot);

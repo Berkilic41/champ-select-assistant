@@ -455,3 +455,168 @@ export async function syncLeaguepedia(
   upsertCanonicalRows(db, { rates, matchups: [], builds: [] });
   return rates.length;
 }
+
+// ── Edge rates (cloudflare-worker /v1/rates — P2 app-wiring) ──────────────────
+// Worker, Match-V5 maçlarını server-side prod-key ile toplar; desktop yalnız
+// aggregate sonucu çeker. Base URL `EDGE_BASE_URL` env/.env anahtarından gelir;
+// yoksa kaynak scheduler planında dürüst skip_disabled kalır (Riot-key deseni).
+
+export interface EdgeRateRow {
+  champion_id: number;
+  role: string;
+  games: number;
+  win_rate: number;
+  pick_rate: number;
+  ban_rate: number;
+}
+
+export interface EdgeMatchupRow {
+  champion_id: number;
+  opponent_id: number;
+  role: string;
+  games: number;
+  wins: number;
+  win_rate: number;
+}
+
+export interface EdgeBuildRow {
+  champion_id: number;
+  role: string;
+  item_ids: number[];
+  rune_ids: number[];
+  summoner_spells: number[];
+  games: number;
+  wins: number;
+  win_rate: number;
+}
+
+export function edgeRatesUrl(baseUrl: string, region: string): string {
+  return `${baseUrl.replace(/\/+$/, "")}/v1/rates?region=${encodeURIComponent(region)}`;
+}
+
+export function edgeMatchupsUrl(baseUrl: string, region: string): string {
+  return `${baseUrl.replace(/\/+$/, "")}/v1/matchups?region=${encodeURIComponent(region)}`;
+}
+
+export function edgeBuildsUrl(baseUrl: string, region: string): string {
+  return `${baseUrl.replace(/\/+$/, "")}/v1/builds?region=${encodeURIComponent(region)}`;
+}
+
+/** Varsayılan edge fetch'i (15s timeout). */
+export const defaultEdgeFetch: FetchJson = async (url) => {
+  const res = await fetch(url, { signal: AbortSignal.timeout(15_000) });
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
+  return res.json();
+};
+
+/** Edge worker'dan aggregate rate + matchup + build'leri çek ve canonical
+ *  upsert et. Bölge aktif summoner'dan (en yeni cached_at), yoksa "tr1". Patch
+ *  worker yanıtından gelir (worker en son gördüğü patch'i çözer). Rates
+ *  zorunlu, matchups/builds best-effort (u.gg deseni). Satır sayılarını döner. */
+export async function syncEdgeRates(
+  db: DatabaseSync,
+  baseUrl: string,
+  fetchJson: FetchJson = defaultEdgeFetch,
+): Promise<{ rates: number; matchups: number; builds: number }> {
+  const summoner = db
+    .prepare("SELECT region FROM summoners ORDER BY cached_at DESC LIMIT 1")
+    .get() as unknown as { region?: string } | undefined;
+  const region =
+    typeof summoner?.region === "string" && summoner.region ? summoner.region : "tr1";
+
+  const resp = (await fetchJson(edgeRatesUrl(baseUrl, region))) as {
+    patch?: string;
+    region?: string;
+    rates?: EdgeRateRow[];
+  };
+  if (!resp || !Array.isArray(resp.rates) || typeof resp.patch !== "string") {
+    throw new Error("edge: geçersiz /v1/rates yanıtı");
+  }
+
+  const rates = resp.rates
+    .filter((r) => Number(r.games) > 0 && Number(r.champion_id) > 0)
+    .map((r) => ({
+      region: resp.region ?? region,
+      patch: resp.patch as string,
+      champion_id: Number(r.champion_id),
+      position: String(r.role),
+      win_rate: Number(r.win_rate),
+      pick_rate: Number(r.pick_rate),
+      ban_rate: Number(r.ban_rate),
+      sample_size: Number(r.games),
+      source: "cloud_edge",
+      confidence: confidenceFromMatches(Number(r.games)),
+    }));
+
+  // Matchups best-effort: endpoint/tablo henüz boşsa veya hata dönerse rates
+  // yine de yazılır (u.gg sync'indeki matchup deseniyle aynı dürüstlük).
+  let matchups: Record<string, unknown>[] = [];
+  try {
+    const mu = (await fetchJson(edgeMatchupsUrl(baseUrl, region))) as {
+      patch?: string;
+      matchups?: EdgeMatchupRow[];
+    };
+    if (mu && Array.isArray(mu.matchups)) {
+      matchups = mu.matchups
+        .filter(
+          (m) =>
+            Number(m.games) > 0 && Number(m.champion_id) > 0 && Number(m.opponent_id) > 0,
+        )
+        .map((m) => ({
+          region: resp.region ?? region,
+          patch: typeof mu.patch === "string" && mu.patch ? mu.patch : (resp.patch as string),
+          champion_id: Number(m.champion_id),
+          opponent_id: Number(m.opponent_id),
+          position: String(m.role),
+          games: Number(m.games),
+          wins: Number(m.wins),
+          win_rate: Number(m.win_rate),
+          sample_size: Number(m.games),
+          source: "cloud_edge",
+          confidence: confidenceFromMatches(Number(m.games)),
+        }));
+    }
+  } catch {
+    /* matchups best-effort */
+  }
+
+  // Builds best-effort: en popüler loadout (champ, rol) başına tek satır.
+  let builds: Record<string, unknown>[] = [];
+  try {
+    const bu = (await fetchJson(edgeBuildsUrl(baseUrl, region))) as {
+      patch?: string;
+      builds?: EdgeBuildRow[];
+    };
+    if (bu && Array.isArray(bu.builds)) {
+      builds = bu.builds
+        .filter(
+          (b) =>
+            Number(b.champion_id) > 0 &&
+            Number(b.games) > 0 &&
+            (Array.isArray(b.item_ids) ? b.item_ids.length : 0) +
+              (Array.isArray(b.rune_ids) ? b.rune_ids.length : 0) >
+              0,
+        )
+        .map((b) => ({
+          region: resp.region ?? region,
+          patch: typeof bu.patch === "string" && bu.patch ? bu.patch : (resp.patch as string),
+          champion_id: Number(b.champion_id),
+          position: String(b.role),
+          item_ids: (b.item_ids ?? []).map(Number).filter((n) => n > 0),
+          rune_ids: (b.rune_ids ?? []).map(Number).filter((n) => n > 0),
+          summoner_spells: (b.summoner_spells ?? []).map(Number).filter((n) => n > 0),
+          games: Number(b.games),
+          win_rate: Number(b.win_rate),
+          pick_rate: 0,
+          sample_size: Number(b.games),
+          source: "cloud_edge",
+          confidence: confidenceFromMatches(Number(b.games)),
+        }));
+    }
+  } catch {
+    /* builds best-effort */
+  }
+
+  upsertCanonicalRows(db, { rates, matchups, builds });
+  return { rates: rates.length, matchups: matchups.length, builds: builds.length };
+}

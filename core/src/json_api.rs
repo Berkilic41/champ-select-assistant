@@ -2495,6 +2495,9 @@ pub struct PipelineRefreshPlanInput {
     /// Riot key var VE aktif summoner sync'li (match_v5 kaynağını açar).
     #[serde(default)]
     pub riot_enabled: bool,
+    /// Edge worker base URL'i yapılandırılmış (cloud_edge kaynağını açar).
+    #[serde(default)]
+    pub edge_enabled: bool,
     /// `COUNT(*) FROM champion_matchups` — match_v5 warmup/stable TTL seçimi.
     #[serde(default)]
     pub matchup_count: u32,
@@ -2533,6 +2536,8 @@ pub fn pipeline_refresh_plan_from_json(input_json: &str) -> Result<String, Strin
     const MATCH_V5_TARGET_MATCHUPS: u32 = 25_000;
     const MATCH_V5_WARMUP_TTL_SECS: i64 = 3 * 60;
     const MATCH_V5_STABLE_TTL_SECS: i64 = 60 * 60;
+    /// Edge worker (cloudflare /v1/rates) — Match-V5 türevi, u_gg kadansında.
+    const EDGE_TTL_SECS: i64 = 6 * 60 * 60;
 
     let input: PipelineRefreshPlanInput = serde_json::from_str(input_json)
         .map_err(|e| format!("invalid pipeline refresh plan input: {e}"))?;
@@ -2594,6 +2599,7 @@ pub fn pipeline_refresh_plan_from_json(input_json: &str) -> Result<String, Strin
             source("u_gg", true, UGG_TTL_SECS),
             source("leaguepedia", true, PACK_TTL_SECS),
             source("match_v5", input.riot_enabled, match_v5_ttl),
+            source("cloud_edge", input.edge_enabled, EDGE_TTL_SECS),
         ],
     });
 
@@ -3686,7 +3692,23 @@ mod tests {
         assert_eq!(decision("u_gg"), "skip_disabled");
         assert_eq!(decision("leaguepedia"), "skip_disabled");
         assert_eq!(decision("match_v5"), "skip_disabled");
+        // Edge worker yapılandırılmadı (edge_enabled default false) → dürüst skip.
+        assert_eq!(decision("cloud_edge"), "skip_disabled");
         assert_eq!(out["rate_limit"]["max_requests"], 60);
+
+        // Edge yapılandırıldığında (boş log → insufficient) refresh'e girer.
+        let edge_on = serde_json::json!({ "now_secs": now, "edge_enabled": true,
+            "disabled_sources": ["u_gg", "leaguepedia", "meraki", "ddragon"] });
+        let out_edge: serde_json::Value =
+            serde_json::from_str(&pipeline_refresh_plan_from_json(&edge_on.to_string()).unwrap())
+                .unwrap();
+        let edge = out_edge["plan"]["decisions"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|d| d["source"] == "cloud_edge")
+            .unwrap();
+        assert_eq!(edge["decision"], "refresh");
 
         // Taze ddragon başarısı → skip_fresh (TTL 24h içinde, sağlık healthy).
         let fresh = serde_json::json!({

@@ -132,6 +132,7 @@ describe("PipelineScheduler.tick (run_scheduler_tick paritesi)", () => {
       uggFetch: uggStub,
       leaguepediaFetch: leaguepediaStub,
       riotClient: null, // key yok → match_v5 plan'da skip_disabled
+      edgeBaseUrl: null, // edge worker yapılandırılmadı → cloud_edge skip_disabled
     });
 
     // İlk tick öncesi trajectory dürüstçe "unknown".
@@ -153,6 +154,11 @@ describe("PipelineScheduler.tick (run_scheduler_tick paritesi)", () => {
     });
     // Riot key yok → match_v5 dürüst skip_disabled.
     expect(logFor(logs, "match_v5")).toMatchObject({
+      status: "skipped",
+      decision: "skip_disabled",
+    });
+    // Edge worker URL'i yok → cloud_edge dürüst skip_disabled.
+    expect(logFor(logs, "cloud_edge")).toMatchObject({
       status: "skipped",
       decision: "skip_disabled",
     });
@@ -234,7 +240,7 @@ describe("PipelineScheduler.tick (run_scheduler_tick paritesi)", () => {
     await scheduler.tick();
 
     const logs = fetchLogs(db);
-    for (const source of ["ddragon", "meraki", "u_gg", "leaguepedia", "match_v5"]) {
+    for (const source of ["ddragon", "meraki", "u_gg", "leaguepedia", "match_v5", "cloud_edge"]) {
       expect(logFor(logs, source)).toMatchObject({
         status: "skipped",
         decision: "skip_champ_select",
@@ -259,6 +265,7 @@ describe("PipelineScheduler.tick (run_scheduler_tick paritesi)", () => {
       db,
       lcu,
       caches: { version: undefined, items: [], runeTrees: [] },
+      edgeBaseUrl: null,
       initialDelayMs: 1_000,
       intervalMs: 5_000,
     });
