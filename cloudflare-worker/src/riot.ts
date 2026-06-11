@@ -85,8 +85,26 @@ export async function recentRankedMatchIds(
 
 export interface MatchParticipant {
   championId: number;
+  teamId: number; // 100 (blue) | 200 (red) — used to pair lane opponents
   teamPosition: string; // TOP | JUNGLE | MIDDLE | BOTTOM | UTILITY | ""
   win: boolean;
+  // Build aggregation (Phase 3) — final item slots (item6 = trinket, excluded),
+  // summoner spells and the rune page. All optional: older cached fixtures may
+  // omit them, and ingest treats missing as "no build data".
+  item0?: number;
+  item1?: number;
+  item2?: number;
+  item3?: number;
+  item4?: number;
+  item5?: number;
+  summoner1Id?: number;
+  summoner2Id?: number;
+  perks?: {
+    styles?: {
+      style?: number;
+      selections?: { perk?: number }[];
+    }[];
+  };
 }
 export interface MatchInfo {
   gameVersion: string; // e.g. "16.11.581.0000"

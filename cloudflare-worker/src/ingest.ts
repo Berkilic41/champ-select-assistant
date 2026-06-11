@@ -105,6 +105,52 @@ async function aggregateMatch(
          DO UPDATE SET games = games + 1, wins = wins + excluded.wins`,
       ).bind(patch, region, p.championId, role, p.win ? 1 : 0),
     );
+
+    // Lane matchup: the enemy-team participant in the same position. Iterating
+    // all 10 participants records both directions (A vs B and B vs A).
+    const opp = match.info.participants.find(
+      (q) => q.teamId !== p.teamId && q.teamPosition === p.teamPosition,
+    );
+    if (opp && opp.championId > 0) {
+      stmts.push(
+        env.DB.prepare(
+          `INSERT INTO champion_matchups (patch, region, champion_id, opponent_id, role, games, wins)
+           VALUES (?, ?, ?, ?, ?, 1, ?)
+           ON CONFLICT(patch, region, champion_id, opponent_id, role)
+           DO UPDATE SET games = games + 1, wins = wins + excluded.wins`,
+        ).bind(patch, region, p.championId, opp.championId, role, p.win ? 1 : 0),
+      );
+    }
+
+    // Build aggregation (Phase 3): per-item counters (final slots 0-5; trinket
+    // excluded) + whole rune-page/spells combo counters.
+    const win = p.win ? 1 : 0;
+    const items = [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5]
+      .map((it) => Number(it ?? 0))
+      .filter((it) => it > 0);
+    for (const itemId of new Set(items)) {
+      stmts.push(
+        env.DB.prepare(
+          `INSERT INTO champion_build_items (patch, region, champion_id, role, item_id, games, wins)
+           VALUES (?, ?, ?, ?, ?, 1, ?)
+           ON CONFLICT(patch, region, champion_id, role, item_id)
+           DO UPDATE SET games = games + 1, wins = wins + excluded.wins`,
+        ).bind(patch, region, p.championId, role, itemId, win),
+      );
+    }
+
+    const runeIds = flattenRunePage(p);
+    const spells = [Number(p.summoner1Id ?? 0), Number(p.summoner2Id ?? 0)].filter((s) => s > 0);
+    if (runeIds.length > 0 || spells.length > 0) {
+      stmts.push(
+        env.DB.prepare(
+          `INSERT INTO champion_build_pages (patch, region, champion_id, role, rune_ids, spells, games, wins)
+           VALUES (?, ?, ?, ?, ?, ?, 1, ?)
+           ON CONFLICT(patch, region, champion_id, role, rune_ids, spells)
+           DO UPDATE SET games = games + 1, wins = wins + excluded.wins`,
+        ).bind(patch, region, p.championId, role, JSON.stringify(runeIds), JSON.stringify(spells), win),
+      );
+    }
   }
 
   for (const team of match.info.teams) {
@@ -137,6 +183,25 @@ async function aggregateMatch(
   );
 
   await env.DB.batch(stmts);
+}
+
+/** Rune page → flat id array [primaryStyle, keystone, p2, p3, p4, subStyle, s1, s2].
+ *  Missing/malformed perks (old fixtures, remakes) → []. */
+function flattenRunePage(p: {
+  perks?: { styles?: { style?: number; selections?: { perk?: number }[] }[] };
+}): number[] {
+  const styles = p.perks?.styles;
+  if (!Array.isArray(styles) || styles.length === 0) return [];
+  const out: number[] = [];
+  for (const s of styles) {
+    const style = Number(s?.style ?? 0);
+    if (style > 0) out.push(style);
+    for (const sel of s?.selections ?? []) {
+      const perk = Number(sel?.perk ?? 0);
+      if (perk > 0) out.push(perk);
+    }
+  }
+  return out;
 }
 
 export interface RateRow {
@@ -199,4 +264,144 @@ export async function readRates(
   }));
 
   return { patch: resolvedPatch, region, total_games: total, rates };
+}
+
+export interface MatchupRow {
+  champion_id: number;
+  opponent_id: number;
+  role: string;
+  games: number;
+  wins: number;
+  win_rate: number;
+}
+
+/** Read aggregated lane matchups for a (patch, region). Patch defaults to the
+ *  latest seen (same resolution as readRates). Both directions are stored, so
+ *  consumers can index by champion_id directly. */
+export async function readMatchups(
+  env: Env,
+  region: string,
+  patch?: string,
+): Promise<{ patch: string; region: string; matchups: MatchupRow[] }> {
+  const resolvedPatch =
+    patch ??
+    (
+      await env.DB.prepare(
+        "SELECT patch FROM ingest_meta WHERE region = ? ORDER BY patch DESC LIMIT 1",
+      )
+        .bind(region)
+        .first<{ patch: string }>()
+    )?.patch ??
+    "";
+
+  const rows = await env.DB.prepare(
+    `SELECT champion_id, opponent_id, role, games, wins
+     FROM champion_matchups WHERE patch = ? AND region = ?`,
+  )
+    .bind(resolvedPatch, region)
+    .all<{ champion_id: number; opponent_id: number; role: string; games: number; wins: number }>();
+
+  const matchups: MatchupRow[] = rows.results.map((r) => ({
+    champion_id: r.champion_id,
+    opponent_id: r.opponent_id,
+    role: r.role,
+    games: r.games,
+    wins: r.wins,
+    win_rate: r.games > 0 ? r.wins / r.games : 0,
+  }));
+
+  return { patch: resolvedPatch, region, matchups };
+}
+
+export interface BuildRow {
+  champion_id: number;
+  role: string;
+  item_ids: number[]; // top items by games (most popular first, max 6)
+  rune_ids: number[]; // most popular rune page (flat id array)
+  summoner_spells: number[]; // spells of that page
+  games: number; // games behind the rune page (the build's sample)
+  wins: number;
+  win_rate: number;
+}
+
+/** Read the most popular build per (champion, role) for a (patch, region):
+ *  top-6 items by game count + the most played rune page/spells combo. The
+ *  served games/win_rate are the rune page's own counters (honest sample). */
+export async function readBuilds(
+  env: Env,
+  region: string,
+  patch?: string,
+): Promise<{ patch: string; region: string; builds: BuildRow[] }> {
+  const resolvedPatch =
+    patch ??
+    (
+      await env.DB.prepare(
+        "SELECT patch FROM ingest_meta WHERE region = ? ORDER BY patch DESC LIMIT 1",
+      )
+        .bind(region)
+        .first<{ patch: string }>()
+    )?.patch ??
+    "";
+
+  const items = await env.DB.prepare(
+    `SELECT champion_id, role, item_id, games
+     FROM champion_build_items WHERE patch = ? AND region = ?
+     ORDER BY games DESC, item_id ASC`,
+  )
+    .bind(resolvedPatch, region)
+    .all<{ champion_id: number; role: string; item_id: number; games: number }>();
+
+  const pages = await env.DB.prepare(
+    `SELECT champion_id, role, rune_ids, spells, games, wins
+     FROM champion_build_pages WHERE patch = ? AND region = ?
+     ORDER BY games DESC`,
+  )
+    .bind(resolvedPatch, region)
+    .all<{
+      champion_id: number;
+      role: string;
+      rune_ids: string;
+      spells: string;
+      games: number;
+      wins: number;
+    }>();
+
+  // Compose per (champion, role): rows are pre-sorted by games DESC, so the
+  // first page seen per key is the most played one and items append in order.
+  const itemMap = new Map<string, number[]>();
+  for (const r of items.results) {
+    const key = `${r.champion_id}:${r.role}`;
+    const list = itemMap.get(key) ?? [];
+    if (list.length < 6) {
+      list.push(r.item_id);
+      itemMap.set(key, list);
+    }
+  }
+
+  const parseIds = (s: string): number[] => {
+    try {
+      const v = JSON.parse(s);
+      return Array.isArray(v) ? v.map(Number).filter((n) => n > 0) : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const builds = new Map<string, BuildRow>();
+  for (const pg of pages.results) {
+    const key = `${pg.champion_id}:${pg.role}`;
+    if (builds.has(key)) continue; // games DESC → ilk görülen en popüler sayfa
+    builds.set(key, {
+      champion_id: pg.champion_id,
+      role: pg.role,
+      item_ids: itemMap.get(key) ?? [],
+      rune_ids: parseIds(pg.rune_ids),
+      summoner_spells: parseIds(pg.spells),
+      games: pg.games,
+      wins: pg.wins,
+      win_rate: pg.games > 0 ? pg.wins / pg.games : 0,
+    });
+  }
+
+  return { patch: resolvedPatch, region, builds: [...builds.values()] };
 }

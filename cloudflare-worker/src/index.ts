@@ -1,4 +1,4 @@
-import { runIngestion, readRates, type Env } from "./ingest";
+import { runIngestion, readRates, readMatchups, readBuilds, type Env } from "./ingest";
 
 export type { Env };
 
@@ -40,6 +40,26 @@ export default {
       const patch = url.searchParams.get("patch") ?? undefined;
       try {
         return json(await readRates(env, region, patch));
+      } catch (e) {
+        return json({ error: String(e) }, 500);
+      }
+    }
+    if (path === "/v1/matchups") {
+      const region = url.searchParams.get("region");
+      if (!region) return json({ error: "region required" }, 400);
+      const patch = url.searchParams.get("patch") ?? undefined;
+      try {
+        return json(await readMatchups(env, region, patch));
+      } catch (e) {
+        return json({ error: String(e) }, 500);
+      }
+    }
+    if (path === "/v1/builds") {
+      const region = url.searchParams.get("region");
+      if (!region) return json({ error: "region required" }, 400);
+      const patch = url.searchParams.get("patch") ?? undefined;
+      try {
+        return json(await readBuilds(env, region, patch));
       } catch (e) {
         return json({ error: String(e) }, 500);
       }
