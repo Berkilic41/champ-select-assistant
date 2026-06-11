@@ -6,7 +6,26 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 
 ## [Unreleased]
 
+## [0.10.0-beta.1] — 2026-06-12
+
+Electron çağı: masaüstü host tamamen değişti, veri tabanı bulut destekli derinleşti.
+
+### Değişti
+- **Electron'a tam geçiş** — Tauri host emekli edildi; masaüstü artık
+  Electron + Rust/WASM core (csa-core). Tüm komutlar parite ile taşındı,
+  öneri motoru aynı saf çekirdekte çalışıyor.
+
 ### Eklendi
+- **Otomatik güncelleme** — electron-updater + GitHub Releases; paketli
+  uygulama açılışta sessizce kontrol eder, indirir, kapanışta kurar.
+- **Cloud edge veri kaynağı** — Cloudflare Worker, Match-V5 maçlarından
+  win/pick/ban + lane matchup + build agregasyonu toplar; uygulama
+  `EDGE_BASE_URL` ayarlıysa bu kaynağı kendiliğinden kullanır.
+- **Maç sonrası derin istatistikler** — farm@10, erken ölüm (ilk 14 dk) ve
+  vizyon skoru ortalamaları; yeterli örneklemde erken-ölüm dersi.
+- **In-game güç penceresi** — senin ve rakip laner'ın güç eğrileri
+  karşılaştırılarak baskı/sabır penceresi okuması.
+- **i18n tamamlandı** — champ-select / lobi / bağlantı bileşenleri TR/EN.
 - Public beta hazırlığı: LICENSE (proprietary), PRIVACY, TERMS, CHANGELOG.
 
 ## [0.9.0-beta.1] — 2026-05-22
