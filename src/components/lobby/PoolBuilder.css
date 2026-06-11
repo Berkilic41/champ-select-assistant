@@ -1,0 +1,272 @@
+.pool-builder { display: flex; flex-direction: column; gap: var(--space-3); }
+
+.pool-builder__roles { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.pool-builder__role {
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+  border-radius: var(--radius-pill);
+  padding: 4px var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--font-size-sm);
+  font-weight: var(--weight-medium);
+  transition: all var(--motion-normal);
+}
+.pool-builder__role:hover { border-color: var(--teal-dim); color: var(--text-primary); }
+.pool-builder__role--active { border-color: var(--teal); color: var(--teal-bright); background: rgba(45, 212, 191, 0.08); }
+
+.pool-builder__empty {
+  font-size: var(--font-size-sm); color: var(--text-secondary);
+  padding: var(--space-4); text-align: center;
+  background: var(--surface-1); border: 1px dashed var(--border-strong); border-radius: var(--radius-md);
+}
+
+.pool-coach {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+.pool-coach__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.pool-coach__eyebrow {
+  font-family: var(--font-display);
+  font-size: var(--font-size-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+}
+.pool-coach__state,
+.pool-coach__chip,
+.pool-coach__severity,
+.pool-coach__target small {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--weight-semibold);
+}
+.pool-coach__state {
+  padding: 2px var(--space-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+}
+.pool-coach__state--thin { color: var(--gold-bright); border-color: rgba(245, 158, 11, 0.35); }
+.pool-coach__state--rich { color: var(--teal-bright); border-color: rgba(45, 212, 191, 0.35); }
+.pool-coach__summary,
+.pool-coach__thin,
+.pool-coach__muted {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-normal);
+}
+.pool-coach__thin {
+  color: var(--gold-bright);
+}
+.pool-coach__coverage {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.pool-coach__chip {
+  padding: 3px var(--space-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  background: var(--surface-2);
+}
+.pool-coach__chip--ok { color: var(--teal-bright); border-color: rgba(45, 212, 191, 0.28); }
+.pool-coach__chip--gap { color: var(--gold-bright); border-color: rgba(245, 158, 11, 0.32); }
+.pool-coach__risk--high { color: var(--danger); border-color: rgba(248, 113, 113, 0.36); }
+.pool-coach__risk--medium { color: var(--gold-bright); border-color: rgba(245, 158, 11, 0.32); }
+.pool-coach__risk--low { color: var(--teal-bright); border-color: rgba(45, 212, 191, 0.28); }
+.pool-coach__split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3);
+}
+.pool-coach__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.pool-coach__panel h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+.pool-coach__gaps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pool-coach__gaps li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+.pool-coach__gaps strong {
+  color: var(--text-primary);
+}
+.pool-coach__gaps li > span:last-child {
+  grid-column: 2;
+  line-height: var(--line-height-normal);
+}
+.pool-coach__severity {
+  align-self: start;
+  padding: 1px var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+}
+.pool-coach__severity--high { color: var(--danger); }
+.pool-coach__severity--medium { color: var(--gold-bright); }
+.pool-coach__severity--low { color: var(--text-muted); }
+.pool-coach__training {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-2);
+}
+.pool-coach__target {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px var(--space-2);
+  padding: var(--space-2);
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+.pool-coach__target div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.pool-coach__target strong {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+.pool-coach__target span {
+  font-size: var(--font-size-xs);
+  color: var(--teal-bright);
+}
+.pool-coach__target p {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  line-height: var(--line-height-normal);
+}
+.pool-coach__target small {
+  grid-column: 1 / -1;
+  color: var(--text-muted);
+}
+
+/* Training-mode practice drills under each learn-target. */
+.pool-coach__drills {
+  grid-column: 1 / -1;
+  gap: 2px;
+}
+.pool-coach__drills-title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--teal-bright);
+}
+.pool-coach__drills ul {
+  margin: 2px 0 0;
+  padding-left: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  list-style: disc;
+}
+.pool-coach__drills li {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+/* Mastery progress strip (training mode — "you improved"). */
+.pool-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+}
+.pool-progress__title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--teal-bright);
+}
+.pool-progress__items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-4);
+}
+.pool-progress__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.pool-progress__copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.pool-progress__copy strong {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+.pool-progress__copy span {
+  font-size: var(--font-size-xs);
+  color: var(--color-success, #22c55e);
+}
+
+.pool-builder__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-2);
+}
+.pool-builder__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: var(--space-3) var(--space-2);
+  background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+.pool-builder__name { font-family: var(--font-display); font-size: var(--font-size-sm); font-weight: var(--weight-semibold); color: var(--text-primary); }
+.pool-builder__arch { font-family: var(--font-display); font-size: 10px; font-weight: var(--weight-semibold); color: var(--teal-bright); }
+.pool-builder__ease { font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--gold-bright); }
+.pool-builder__badges { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; justify-content: center; }
+.pool-builder__tier {
+  font-family: var(--font-mono); font-size: var(--font-size-xs); font-weight: var(--weight-semibold);
+  padding: 1px var(--space-1); border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle); color: var(--text-secondary);
+}
+.pool-builder__tier--s { color: var(--tier-s); border-color: color-mix(in srgb, var(--tier-s) 36%, transparent); }
+.pool-builder__tier--a { color: var(--tier-a); border-color: color-mix(in srgb, var(--tier-a) 36%, transparent); }
+.pool-builder__tier--b { color: var(--tier-b); border-color: color-mix(in srgb, var(--tier-b) 32%, transparent); }
+.pool-builder__tier--c { color: var(--tier-c); border-color: color-mix(in srgb, var(--tier-c) 28%, transparent); }
+.pool-builder__reason { font-size: var(--font-size-xs); color: var(--text-muted); line-height: var(--line-height-normal); }

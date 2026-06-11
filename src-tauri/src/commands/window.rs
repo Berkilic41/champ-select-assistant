@@ -1,4 +1,4 @@
-use tauri::{Emitter, Window};
+use tauri::{Emitter, PhysicalPosition, PhysicalSize, Window};
 
 #[tauri::command]
 pub async fn set_always_on_top(window: Window, enabled: bool) -> Result<(), String> {
@@ -25,6 +25,35 @@ pub async fn set_window_size(window: Window, preset: String) -> Result<(), Strin
 #[tauri::command]
 pub async fn hide_window(window: Window) -> Result<(), String> {
     window.hide().map_err(|e| e.to_string())
+}
+
+/// In-game overlay mode: a compact side panel pinned to the top-right corner and kept
+/// always-on-top, so the game plan floats over a **borderless** game without covering
+/// the minimap / ability bar. On disable, just re-centers (the frontend restores the
+/// user's preferred size). Exclusive-fullscreen games hide all overlays — borderless
+/// is required (this is a ToS-safe overlay, no game injection).
+#[tauri::command]
+pub async fn set_overlay_mode(window: Window, enabled: bool) -> Result<(), String> {
+    window.set_always_on_top(true).map_err(|e| e.to_string())?;
+    if enabled {
+        let (w, h) = (400u32, 720u32);
+        window
+            .set_size(PhysicalSize {
+                width: w,
+                height: h,
+            })
+            .map_err(|e| e.to_string())?;
+        if let Ok(Some(monitor)) = window.current_monitor() {
+            let screen = monitor.size();
+            let x = (screen.width as i32 - w as i32 - 16).max(0);
+            window
+                .set_position(PhysicalPosition { x, y: 16 })
+                .map_err(|e| e.to_string())?;
+        }
+    } else {
+        window.center().map_err(|e| e.to_string())?;
+    }
+    Ok(())
 }
 
 #[tauri::command]

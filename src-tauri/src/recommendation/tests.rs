@@ -50,6 +50,7 @@ mod scoring_tests {
             meta_rates,
             matchups: None,
             power_curves: None,
+            feedback_signals: None,
         }
     }
 
@@ -224,7 +225,7 @@ mod scoring_tests {
 #[cfg(test)]
 mod build_advisor_tests {
     use crate::ddragon::cdragon::ItemData;
-    use crate::recommendation::build_advisor::situational_item_ids;
+    use crate::recommendation::build_advisor::{counter_item_advice, situational_item_ids};
     use crate::recommendation::team_analysis::TeamComposition;
 
     fn make_item(id: u32, tags: &[&str]) -> ItemData {
@@ -297,6 +298,64 @@ mod build_advisor_tests {
             "Balanced enemy should yield no situational items"
         );
     }
+
+    // ── counter_item_advice ────────────────────────────────────────────────
+
+    #[test]
+    fn counter_items_ap_heavy_suggests_mr() {
+        let enemy = TeamComposition {
+            is_ap_heavy: true,
+            ..Default::default()
+        };
+        let items = vec![make_item(10, &["SpellBlock"]), make_item(11, &["Armor"])];
+        let advice = counter_item_advice(&enemy, false, 0, &items, false);
+        let mr = advice.iter().find(|h| h.category == "MR").expect("MR hint");
+        assert!(
+            mr.item_ids.contains(&10),
+            "MR should include the SpellBlock item"
+        );
+    }
+
+    #[test]
+    fn counter_items_squishy_carry_is_text_only_not_tank_icons() {
+        // An ADC vs AP must NOT be told to build a tank MR item — text-only advice
+        // naming carry-survival items instead.
+        let enemy = TeamComposition {
+            is_ap_heavy: true,
+            ..Default::default()
+        };
+        let items = vec![make_item(10, &["SpellBlock"])];
+        let advice = counter_item_advice(&enemy, false, 0, &items, true);
+        let mr = advice.iter().find(|h| h.category == "MR").expect("MR hint");
+        assert!(mr.item_ids.is_empty(), "squishy carry → no tank-item icons");
+        assert!(
+            mr.reason.contains("carry"),
+            "names carry survival: {}",
+            mr.reason
+        );
+    }
+
+    #[test]
+    fn counter_items_sustain_suggests_anti_heal_text_only() {
+        let enemy = TeamComposition::default();
+        let advice = counter_item_advice(&enemy, true, 0, &[], false);
+        let ah = advice
+            .iter()
+            .find(|h| h.category == "Anti-heal")
+            .expect("anti-heal hint");
+        assert!(
+            ah.item_ids.is_empty(),
+            "anti-heal is text-only (no reliable tag)"
+        );
+        assert!(ah.reason.contains("anti-heal"));
+    }
+
+    #[test]
+    fn counter_items_no_threat_is_empty() {
+        let enemy = TeamComposition::default();
+        let advice = counter_item_advice(&enemy, false, 0, &[], false);
+        assert!(advice.is_empty());
+    }
 }
 
 #[cfg(test)]
@@ -304,6 +363,7 @@ mod engine_di4b_tests {
     use crate::db::champion_repo::ChampionRecord;
     use crate::lcu::session::{ChampSelectState, TeamSlot};
     use crate::recommendation::draft_iq::DraftKnowledgeBase;
+    use crate::recommendation::feedback_signal::FeedbackSignal;
     use crate::recommendation::{
         compute_recommendations,
         scoring::{MetaRate, ScoringContext, ScoringWeights},
@@ -384,6 +444,7 @@ mod engine_di4b_tests {
             weights: ScoringWeights::default(),
             matchups: None,
             power_curves: None,
+            feedback_signals: None,
         }
     }
 
@@ -628,6 +689,66 @@ mod engine_di4b_tests {
             "Champion not in KB should have no draft_plan (no analyzer ran)"
         );
     }
+
+    #[test]
+    fn feedback_signal_is_tiny_personalization_tiebreaker() {
+        let kb = DraftKnowledgeBase::load().expect("KB load failed");
+        let champs = vec![
+            make_champ(9001, "NeutralA", "NeutralA"),
+            make_champ(9002, "NeutralB", "NeutralB"),
+        ];
+        let mastery = vec![make_mastery(9001, 5, 80_000), make_mastery(9002, 5, 80_000)];
+        let stats = vec![make_stats(9001, 8, 4), make_stats(9002, 8, 4)];
+        let session = base_session(0);
+        let role_map = HashMap::new();
+        let meta_rates = HashMap::new();
+        let mut feedback_signals = HashMap::new();
+        feedback_signals.insert(
+            9002,
+            FeedbackSignal {
+                champion_id: 9002,
+                positive: 8,
+                negative: 0,
+                sample: 8,
+                net_sentiment: 1.0,
+                confidence: "high",
+                suggested_delta: 0.03,
+            },
+        );
+        let ctx = ScoringContext {
+            session: &session,
+            mastery: &mastery,
+            stats: &stats,
+            role_map: &role_map,
+            meta_rates: &meta_rates,
+            weights: ScoringWeights::default(),
+            matchups: None,
+            power_curves: None,
+            feedback_signals: Some(&feedback_signals),
+        };
+
+        let recs = compute_recommendations(&ctx, &champs, &[], &[], &kb);
+        let boosted = recs
+            .iter()
+            .find(|r| r.champion_id == 9002)
+            .expect("boosted candidate");
+        let neutral = recs
+            .iter()
+            .find(|r| r.champion_id == 9001)
+            .expect("neutral candidate");
+
+        assert!(
+            boosted.total_score > neutral.total_score,
+            "feedback should only break close ties, boosted={:.3} neutral={:.3}",
+            boosted.total_score,
+            neutral.total_score
+        );
+        assert!(
+            boosted.total_score - neutral.total_score <= 0.031,
+            "feedback delta must stay tiny, diff={:.3}",
+            boosted.total_score - neutral.total_score
+        );
+    }
 }
 
 #[cfg(test)]
@@ -727,6 +848,7 @@ mod e2e_tests {
             weights: ScoringWeights::default(),
             matchups: None,
             power_curves: None,
+            feedback_signals: None,
         };
 
         let recs = compute_recommendations(&ctx, &champs, &[], &[], &kb);
@@ -763,5 +885,209 @@ mod e2e_tests {
                 "Orianna ({os:.3}) should outscore Veigar ({vs:.3}) due to Nocturne combo"
             );
         }
+    }
+}
+
+#[cfg(test)]
+mod analyze_champion_tests {
+    use crate::db::champion_repo::ChampionRecord;
+    use crate::db::mastery_repo::MasteryRow;
+    use crate::lcu::session::{ChampSelectState, TeamSlot};
+    use crate::recommendation::draft_iq::DraftKnowledgeBase;
+    use crate::recommendation::{
+        analyze_champion, compute_recommendations,
+        scoring::{MetaRate, ScoringContext, ScoringWeights},
+    };
+    use crate::riot::client::ChampionStats;
+    use std::collections::HashMap;
+
+    fn champ(id: i64, key: &str) -> ChampionRecord {
+        ChampionRecord {
+            champion_id: id,
+            key: key.to_string(),
+            name: key.to_string(),
+            title: String::new(),
+        }
+    }
+    fn slot(cell: i32, champion_id: u32, pos: &str, locked: bool) -> TeamSlot {
+        TeamSlot {
+            cell_id: cell,
+            champion_id,
+            intent_champion_id: 0,
+            assigned_position: pos.to_string(),
+            is_locked: locked,
+        }
+    }
+    fn mastery(id: i64) -> MasteryRow {
+        MasteryRow {
+            champion_id: id,
+            level: 5,
+            points: 80_000,
+            last_play_time: None,
+        }
+    }
+    fn stat(id: i64) -> ChampionStats {
+        ChampionStats {
+            champion_id: id,
+            games: 8,
+            wins: 4,
+            kda_avg: 3.0,
+        }
+    }
+
+    /// Post-lock pinning: the locked champion is excluded from
+    /// `compute_recommendations` (it's "picked") but MUST still be returnable via
+    /// `analyze_champion` so the UI can show *its* build/plan after lock.
+    #[test]
+    fn analyze_champion_returns_locked_pick_excluded_from_recs() {
+        let kb = DraftKnowledgeBase::load().expect("KB load");
+        let champs = vec![champ(103, "Ahri"), champ(99, "Lux"), champ(45, "Veigar")];
+
+        // Local player locked Ahri (103) mid; Lux/Veigar have mastery so the pool
+        // is non-empty and the exclusion assertion is non-vacuous.
+        let session = ChampSelectState {
+            my_cell_id: 0,
+            local_player: slot(0, 103, "middle", true),
+            my_team: vec![slot(0, 103, "middle", true)],
+            their_team: vec![],
+            my_bans: vec![],
+            their_bans: vec![],
+            phase: "FINALIZATION".into(),
+            time_left_ms: 30_000,
+            action_type: "".into(),
+            queue_id: 420,
+            pick_order: 1,
+        };
+        let role_map: HashMap<u32, Vec<String>> = HashMap::new();
+        let meta_rates: HashMap<(u32, String), MetaRate> = HashMap::new();
+        let mastery = vec![mastery(103), mastery(99), mastery(45)];
+        let stats = vec![stat(103), stat(99), stat(45)];
+        let ctx = ScoringContext {
+            session: &session,
+            mastery: &mastery,
+            stats: &stats,
+            role_map: &role_map,
+            weights: ScoringWeights::default(),
+            meta_rates: &meta_rates,
+            matchups: None,
+            power_curves: None,
+            feedback_signals: None,
+        };
+
+        let recs = compute_recommendations(&ctx, &champs, &[], &[], &kb);
+        assert!(
+            !recs.is_empty(),
+            "Lux/Veigar should still be recommended (non-vacuous exclusion check)"
+        );
+        assert!(
+            recs.iter().all(|r| r.champion_id != 103),
+            "locked Ahri must be excluded from the recommendation pool"
+        );
+
+        let locked = analyze_champion(103, &ctx, &champs, &[], &[], &kb);
+        assert!(
+            locked.is_some(),
+            "analyze_champion must return the locked champion even though it's picked"
+        );
+        assert_eq!(locked.unwrap().champion_id, 103);
+    }
+
+    /// Unknown champion id → None, no panic.
+    #[test]
+    fn analyze_champion_unknown_id_returns_none() {
+        let kb = DraftKnowledgeBase::load().expect("KB load");
+        let champs = vec![champ(103, "Ahri")];
+        let session = ChampSelectState {
+            my_cell_id: 0,
+            local_player: slot(0, 0, "middle", false),
+            my_team: vec![],
+            their_team: vec![],
+            my_bans: vec![],
+            their_bans: vec![],
+            phase: "BAN_PICK".into(),
+            time_left_ms: 30_000,
+            action_type: "pick".into(),
+            queue_id: 420,
+            pick_order: 0,
+        };
+        let role_map: HashMap<u32, Vec<String>> = HashMap::new();
+        let meta_rates: HashMap<(u32, String), MetaRate> = HashMap::new();
+        let mastery: Vec<MasteryRow> = vec![];
+        let stats: Vec<ChampionStats> = vec![];
+        let ctx = ScoringContext {
+            session: &session,
+            mastery: &mastery,
+            stats: &stats,
+            role_map: &role_map,
+            weights: ScoringWeights::default(),
+            meta_rates: &meta_rates,
+            matchups: None,
+            power_curves: None,
+            feedback_signals: None,
+        };
+        assert!(analyze_champion(9999, &ctx, &champs, &[], &[], &kb).is_none());
+    }
+
+    /// Hard off-role pick (role data present, zero overlap) is demoted below an
+    /// on-role pick of equal comfort/meta in a non-brawl queue. Uses ids absent
+    /// from the KB so the result depends only on role_fit + the mismatch penalty
+    /// (no analyzer/combo noise).
+    #[test]
+    fn hard_off_role_demoted_below_on_role() {
+        let kb = DraftKnowledgeBase::load().expect("KB load");
+        let champs = vec![champ(9001, "OffRoleTank"), champ(9002, "OnRoleMage")];
+
+        let mut role_map: HashMap<u32, Vec<String>> = HashMap::new();
+        role_map.insert(9001, vec!["fighter".into(), "tank".into()]); // off-role at mid
+        role_map.insert(9002, vec!["mage".into()]); // on-role at mid
+
+        let mastery = vec![mastery(9001), mastery(9002)];
+        let stats = vec![stat(9001), stat(9002)];
+
+        let session = ChampSelectState {
+            my_cell_id: 0,
+            local_player: slot(0, 0, "middle", false),
+            my_team: vec![],
+            their_team: vec![],
+            my_bans: vec![],
+            their_bans: vec![],
+            phase: "BAN_PICK".into(),
+            time_left_ms: 30_000,
+            action_type: "pick".into(),
+            queue_id: 420,
+            pick_order: 0,
+        };
+        let meta_rates: HashMap<(u32, String), MetaRate> = HashMap::new();
+        let ctx = ScoringContext {
+            session: &session,
+            mastery: &mastery,
+            stats: &stats,
+            role_map: &role_map,
+            weights: ScoringWeights::default(),
+            meta_rates: &meta_rates,
+            matchups: None,
+            power_curves: None,
+            feedback_signals: None,
+        };
+
+        let recs = compute_recommendations(&ctx, &champs, &[], &[], &kb);
+        let off = recs
+            .iter()
+            .find(|r| r.champion_id == 9001)
+            .map(|r| r.total_score)
+            .expect("off-role scored");
+        let on = recs
+            .iter()
+            .find(|r| r.champion_id == 9002)
+            .map(|r| r.total_score)
+            .expect("on-role scored");
+        assert!(
+            on > off,
+            "on-role mage ({on:.3}) must outrank off-role tank ({off:.3})"
+        );
+        assert_eq!(
+            recs[0].champion_id, 9002,
+            "on-role pick should rank first in a non-brawl queue"
+        );
     }
 }

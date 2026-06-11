@@ -27,6 +27,7 @@
   position: relative;
   transition: border-color var(--motion-normal), transform var(--motion-normal), box-shadow var(--motion-normal);
 }
+.champ-card--clickable { cursor: pointer; }
 
 .champ-card:hover {
   border-color: var(--gold-dim);
@@ -54,6 +55,19 @@
 .champ-card__id {
   font-size: 10px;
   color: var(--color-text-muted);
+}
+
+.champ-card__archetype {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.02em;
+  color: var(--teal-bright);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .champ-card__footer {

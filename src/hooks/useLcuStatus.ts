@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from '../lib/host';
 import { AppStatus } from '../types/app';
 
 interface LcuStatus {
@@ -29,6 +29,27 @@ export function useLcuStatus(): { status: AppStatus; retry: () => void } {
   useEffect(() => {
     connect();
   }, [connect]);
+
+  // Auto-reconnect: while disconnected, quietly retry every 4s so the app picks
+  // up League the moment it launches — no manual "Retry" needed. A quiet probe
+  // (no 'connecting' flash); flips to 'lobby' on success and the effect tears down.
+  useEffect(() => {
+    if (status.kind !== 'disconnected') return;
+    const id = setInterval(() => {
+      invoke<LcuStatus>('connect_lcu')
+        .then((r) => {
+          if (r.connected) {
+            setStatus({
+              kind: 'lobby',
+              summonerName: r.summoner_name ?? 'Summoner',
+              port: r.port ?? 0,
+            });
+          }
+        })
+        .catch(() => {});
+    }, 4000);
+    return () => clearInterval(id);
+  }, [status.kind]);
 
   return { status, retry: connect };
 }

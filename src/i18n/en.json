@@ -2,8 +2,13 @@
   "app": {
     "title": "Champ Select Assistant",
     "settings": "Settings",
+    "close": "Close",
+    "unsavedConfirm": "You have unsaved changes. Leave without saving?",
+    "feedbackSent": "Feedback received, thanks.",
+    "feedbackFailed": "Couldn't send feedback.",
     "settingsSaved": "Settings saved.",
-    "welcomeReady": "Welcome! The app is ready.",
+    "welcomeReady": "Welcome! Your data is loaded and the app is ready.",
+    "welcomeNoLeague": "Welcome! League isn't running — open it and sync your data from Settings.",
     "errorTitle": "Something went wrong",
     "errorBody": "The app hit an unexpected error. You can try again.",
     "errorRetry": "Try again"
@@ -11,7 +16,9 @@
   "connection": {
     "connecting": "Connecting...",
     "disconnected": "League Client not found",
+    "autoSearching": "Will connect automatically when League opens…",
     "retry": "Retry",
+    "reconnecting": "Connection dropped — reconnecting, keeping your picks…",
     "inGame": "Game in progress...",
     "badgeConnecting": "Connecting...",
     "badgeDisconnected": "Disconnected",
@@ -20,6 +27,54 @@
     "hide": "Hide",
     "goodLuck": "Good luck!",
     "afterGameStats": "Stats will appear here after the game."
+  },
+  "overlay": {
+    "title": "Macro coach",
+    "waiting": "Waiting for a game…",
+    "reminders": "Reminders",
+    "now": "now",
+    "objective": {
+      "dragon": "Dragon",
+      "baron": "Baron",
+      "herald": "Herald",
+      "grubs": "Voidgrub"
+    },
+    "state": {
+      "up": "up",
+      "soon": "soon",
+      "respawning": "respawning",
+      "pending_first": "first spawn"
+    },
+    "phase": {
+      "early": "early",
+      "mid": "mid",
+      "late": "late"
+    },
+    "position": {
+      "top": "Top",
+      "jungle": "Jungle",
+      "middle": "Mid",
+      "bottom": "Bot",
+      "utility": "Support"
+    },
+    "plan": {
+      "title": "Your Game Plan",
+      "win": "Win condition",
+      "role": "Team role",
+      "spike": "Power spike",
+      "lane": "Early (lane)",
+      "matchup": "Matchup",
+      "mid": "Mid game",
+      "late": "Late game",
+      "vs": "vs {{name}}",
+      "cs": "{{cs}} CS",
+      "csPace": "{{cs}} CS ({{pace}}/min)"
+    }
+  },
+  "pickClarity": {
+    "clear": "Clear pick",
+    "edge": "Slight edge over {{b}}",
+    "close": "Close call: {{a}} / {{b}}"
   },
   "lobby": {
     "greeting": "Welcome, {{name}}!",
@@ -33,6 +88,7 @@
     "apiKeyHintEnd": "and add it to the",
     "tabChampions": "My Champions",
     "tabStats": "My Stats",
+    "tabPool": "Build Pool",
     "gridEmpty": "No data yet — click \"Load match history\".",
     "patchBadge": "Patch {{version}}",
     "metaBadge": "Meta: {{rel}}",
@@ -52,11 +108,82 @@
     "lockingIn": "Locked in — Build plan:",
     "planningMsg": "You're in lobby — recommendations will appear automatically when you enter Champion Select",
     "noRecommendation": "Click \"Load match history\" for recommendations",
+    "noRecommendationCoach": "When data is too thin, DraftBrain may return no safe candidate. Pick your role, load match history, or refresh meta data.",
     "waiting": "Waiting for Champion Select…",
     "hoverFailed": "Hover failed: {{err}}",
     "banComputing": "Calculating ban suggestions…",
     "banSuggestions": "Ban suggestions:",
     "banOtp": "enemy OTP ({{pct}}%)",
+    "scoutingTitle": "Lobby scouting",
+    "scoutingPartial": "thin data",
+    "scoutingBanTargets": "Scouting ban targets",
+    "scoutingProfiles": "Enemy profiles",
+    "scoutGameplan": "Enemy gameplan",
+    "scoutPrimaryThreat": "Primary threat: {{champ}}",
+    "scoutWinCondition": {
+      "pick": "Pick comp",
+      "teamfight": "Teamfight comp",
+      "protect": "Protect comp",
+      "poke": "Poke comp",
+      "split": "Split push comp",
+      "mixed": "Mixed comp"
+    },
+    "dataNoMeta": "No live meta · general ranking",
+    "dataNoMetaHint": "Champion win/pick/ban rates aren't connected yet — ranking uses comfort + matchup + synergy",
+    "dataNoMastery": "Match history not loaded",
+    "dataNoMasteryHint": "No mastery/match data — comfort signal is weak. Click \"Load match history\" in the lobby",
+    "packStale": "Data pack stale",
+    "packStaleHint": "Last generated: {{time}}",
+    "packNoTimestamp": "No generated_at",
+    "packConfidence": "Pack {{conf}}",
+    "localFallback": "Local fallback",
+    "localFallbackHint": "Running on local seed instead of a live/cloud source",
+    "noRiotKey": "No Riot key · live match data off",
+    "noRiotKeyHint": "No Riot production key configured — Match-V5 live-match ingestion is off; recommendations rely on u.gg/Meraki/seed data",
+    "liveDataAge": "Live data: {{age}}",
+    "liveDataAgeHint": "Last successful Match-V5 sync was {{age}} ago — data may be stale",
+    "dataConfidence": "Data {{conf}}",
+    "dataCoverageHint": "{{matchups}} matchups · {{builds}} builds",
+    "missingSignal": {
+      "meta": "no meta data",
+      "matchup": "no matchup data",
+      "build": "build: generic"
+    },
+    "analyzing": "Computing recommendation…",
+    "personalization": {
+      "no_signal": "No personal signal",
+      "warming_up": "Personalization warming up",
+      "active": "Personal recommendations active",
+      "needs_sync": "Feedback sync pending"
+    },
+    "personalizationHint": {
+      "no_signal": "Give feedback and DraftBrain will make small personal adjustments",
+      "warming_up": "{{polar}} polar feedback rows exist; once a champion clears the sample gate, score gets a small nudge",
+      "active": "{{active}} champions have a personal signal nudging score slightly",
+      "needs_sync": "{{pending}} feedback rows are waiting for cloud sync; local personalization still works"
+    },
+    "confidence": {
+      "high": "high",
+      "medium": "medium",
+      "low": "low",
+      "unknown": "unknown"
+    },
+    "threat": {
+      "high": "high",
+      "medium": "medium",
+      "low": "low"
+    },
+    "rolePrompt": "Pick your role — picks and bans adjust to it",
+    "roleAutoHint": "Role auto-detected",
+    "roleManualHint": "Role set by you",
+    "roleTitle": "Your role",
+    "roles": {
+      "top": "Top",
+      "jungle": "Jungle",
+      "middle": "Mid",
+      "bottom": "Bot",
+      "utility": "Support"
+    },
     "phase": {
       "planning": "Lobby — Get ready to queue",
       "ban_acting": "BAN PHASE — Ban a threatening champion",
@@ -68,7 +195,10 @@
   },
   "heroCard": {
     "firstTime": "You might be playing this for the first time",
+    "mechanicalNoDraft": "Mechanically strong · no draft data this season",
     "lowConfidence": "Low data — low confidence",
+    "proHeat": "Pro {{pct}}%",
+    "proHeatHint": "Pro-scene pick + ban presence (Leaguepedia)",
     "keyHint": "[1] Suggest  [Enter] Apply hover",
     "selectHint": "[1-5] select · Enter hover",
     "detail": "Detail ↓",
@@ -84,7 +214,285 @@
     "scoreSynergy": "Synergy",
     "scoreMeta": "Meta",
     "phaseLine": "Early {{early}}% · Mid {{mid}}% · Late {{late}}%",
-    "enemyLabel": "Enemy: {{summary}}"
+    "enemyLabel": "Enemy: {{summary}}",
+    "planLabel": "Game Plan",
+    "scoresLabel": "Scores",
+    "planLane": "Lane",
+    "planMid": "Mid game",
+    "planFight": "Teamfight",
+    "planFallback": "Fallback",
+    "planWin": "Win condition",
+    "planSpike": "Spike",
+    "planCombo": "Combo",
+    "planClash": "Comp risk",
+    "lossRiskLabel": "Lose condition",
+    "detailCoachTitle": "Coach read",
+    "pillarWhy": "Why",
+    "pillarLane": "Lane plan",
+    "pillarMidGame": "Mid game",
+    "pillarTeamfight": "Teamfight job",
+    "pillarFallback": "Fallback plan",
+    "pillarRisk": "How you lose",
+    "pillarData": "Data trust",
+    "dataSourceSummary": "{{source}} · {{conf}} confidence · {{risk}} risk",
+    "matchupConfidence": "Matchup data: {{conf}}",
+    "buildConfidence": "Build data: {{conf}}",
+    "feedbackLabel": "Recommendation feedback",
+    "feedbackThanks": "Feedback saved",
+    "feedbackGood": "Makes sense",
+    "feedbackBad": "Bad",
+    "feedbackPool": "Outside pool",
+    "feedbackRisk": "Risky"
+  },
+  "gamePlan": {
+    "title": "Team Game Plan",
+    "partial": "Sharpens as the draft completes",
+    "timeline": "Timeline",
+    "winConditions": "Win Conditions",
+    "objectives": "Objectives",
+    "enemyThreat": "Enemy Threat",
+    "altPlan": "Alternative Plan",
+    "stanceAdvantage": "Advantage",
+    "stanceEven": "Even",
+    "stanceDisadvantage": "Behind"
+  },
+  "performance": {
+    "eyebrow": "Post-game coach",
+    "title": "Main lesson from recent games",
+    "thinData": "thin data",
+    "tiltRisk": "tilt risk",
+    "games": "{{n}} games",
+    "form": "Form {{delta}}",
+    "csPerMin": "{{cs}} CS/min",
+    "champLine": "{{games}} games · {{wr}} WR · {{kda}} KDA",
+    "unknownRole": "Unknown"
+  },
+  "feedbackAnalytics": {
+    "eyebrow": "Feedback analytics",
+    "title": "Recommendation quality",
+    "window": "Last {{n}} days",
+    "recentSignals": "{{n}} new signals",
+    "totalEvents": "{{n}} feedback",
+    "trackedChampions": "{{n}} champions tracked",
+    "dislikedTitle": "Recommendations needing attention",
+    "dislikedLine": "{{sample}} signals · sentiment {{sentiment}}",
+    "noDisliked": "No recommendation has built up a negative trend"
+  },
+  "draftSimulator": {
+    "eyebrow": "Draft simulator",
+    "title": "How does this move change the composition?",
+    "localOnly": "Local",
+    "scoreDelta": "Delta {{score}}",
+    "risk": "Risk {{level}}",
+    "whyNot": "Why alternative?",
+    "riskLevel": {
+      "low": "low",
+      "medium": "medium",
+      "high": "high"
+    },
+    "factor": {
+      "damage_balance": "Damage balance",
+      "engage": "Engage",
+      "disengage": "Disengage",
+      "frontline": "Frontline",
+      "peel": "Peel",
+      "scaling": "Scaling",
+      "lane_pressure": "Lane pressure",
+      "objective_identity": "Objective identity",
+      "execution_risk": "Execution risk",
+      "blind_safety": "Blind safety",
+      "synergy": "Synergy"
+    }
+  },
+  "draftFork": {
+    "eyebrow": "Draft fork",
+    "title": "Choosing between two picks",
+    "optionLine": "{{score}} · risk {{risk}}",
+    "shared": "Both improve",
+    "diverging": "Diverging factors"
+  },
+  "dataPipeline": {
+    "chip": "Pipeline {{status}}",
+    "gaps": "Gaps",
+    "actions": "Actions",
+    "status": {
+      "healthy": "healthy",
+      "degraded": "degraded",
+      "stale": "stale",
+      "insufficient": "insufficient"
+    },
+    "confidence": {
+      "high": "high",
+      "medium": "medium",
+      "low": "low"
+    },
+    "gap": {
+      "matchup_coverage_low": "Matchup coverage low",
+      "build_coverage_low": "Build coverage low",
+      "rate_coverage_low": "Meta rate coverage low",
+      "role_coverage_low": "Role coverage low",
+      "patch_stale": "Patch stale",
+      "source_stale": "Source stale",
+      "high_risk_source": "High-risk source"
+    },
+    "severity": {
+      "low": "low",
+      "medium": "medium",
+      "high": "high"
+    },
+    "action": {
+      "refresh_rates": "Refresh meta rates",
+      "refresh_builds": "Refresh builds",
+      "refresh_matchups": "Refresh matchups",
+      "use_last_good_cache": "Use last-good cache",
+      "manual_seed_required": "Manual seed required"
+    },
+    "cacheAction": {
+      "promote": "promoted",
+      "keep_current": "kept",
+      "reject": "rejected"
+    },
+    "dataTrajectory": {
+      "healthy": "Data healthy",
+      "enriching": "Data healthy, still enriching",
+      "warming_up": "Data growing toward target",
+      "stagnant": "Data stagnant",
+      "regressing": "Data regressed",
+      "deferred": "Measurement deferred",
+      "unknown": "Not measured yet"
+    },
+    "coverageExpansion": {
+      "risk": {
+        "champ_select_active": "Champ-select active (deferred)",
+        "single_player_overload": "Single-player overload",
+        "thin_data": "Thin data",
+        "no_open_frontier": "No open frontier"
+      },
+      "level": {
+        "low": "low",
+        "medium": "medium",
+        "high": "high"
+      },
+      "dataState": {
+        "rich": "rich",
+        "thin": "thin",
+        "insufficient": "insufficient"
+      }
+    }
+  },
+  "counterPick": {
+    "title": "Your pool vs opponent",
+    "games": "{{n}} games",
+    "strongPhase": "strong: {{phase}}",
+    "phase": { "early": "early", "mid": "mid", "late": "late" }
+  },
+  "teamComp": {
+    "title": "Team Composition",
+    "ally": "Your Team",
+    "enemy": "Enemy Team",
+    "tank": "Tank",
+    "fighter": "Fighter",
+    "mage": "Mage",
+    "marksman": "Marksman",
+    "assassin": "Assassin",
+    "support": "Support"
+  },
+  "comboBoard": {
+    "title": "Combos",
+    "type_engage_followup": "Engage follow-up",
+    "type_pick_potential": "Pick",
+    "type_zone_control": "Zone control",
+    "type_peel_chain": "Peel chain",
+    "type_wombo": "Wombo"
+  },
+  "champDetail": {
+    "noData": "No detail data for this champion",
+    "difficulty": "Difficulty",
+    "hasCc": "Has hard CC",
+    "noCc": "No hard CC",
+    "powerCurve": "Power curve",
+    "early": "Early",
+    "mid": "Mid",
+    "late": "Late"
+  },
+  "draftFlow": {
+    "title": "Draft Flow",
+    "yourPick": "Your pick: {{n}}/10"
+  },
+  "verdict": {
+    "favorable": "Favorable",
+    "even": "Even",
+    "risky": "Risky",
+    "topAction": "First move:",
+    "teamNeeds": "Tell team:"
+  },
+  "counterItems": {
+    "title": "Counter Items"
+  },
+  "laneMatchup": {
+    "title": "Lane Matchup",
+    "inferred": "Inferred opponent",
+    "inferredHint": "No position data — opponent guessed from archetype fit"
+  },
+  "poolBuilder": {
+    "empty": "No suggestions for this role",
+    "ease": "Ease {{n}}/5",
+    "metaTier": "Meta {{tier}}",
+    "role_top": "Top",
+    "role_jungle": "Jungle",
+    "role_middle": "Mid",
+    "role_bottom": "Bot (ADC)",
+    "role_utility": "Support"
+  },
+  "poolCoach": {
+    "eyebrow": "Pool coach",
+    "title": "Champion Pool Coach",
+    "coverageTitle": "Pool coverage",
+    "dataState": {
+      "rich": "enough data",
+      "thin": "thin data"
+    },
+    "thinHint": "Comfort signal is weak; the plan sharpens with more matches/mastery. This screen does not fabricate comfort.",
+    "coverage": {
+      "ok": "covered",
+      "missing": "missing",
+      "role_covered": "Role coverage",
+      "has_blind_safe": "Blind-safe",
+      "has_counter_flex": "Counter flexibility",
+      "has_comfort": "Comfort pick",
+      "identity_variety": "Identity variety",
+      "execution_risk": "Execution risk"
+    },
+    "executionRisk": {
+      "low": "low",
+      "medium": "medium",
+      "high": "high"
+    },
+    "gapsTitle": "Priority gaps",
+    "noGaps": "No clear coverage gap.",
+    "noTraining": "No clear 3-champion plan for this role.",
+    "severity": {
+      "low": "low",
+      "medium": "medium",
+      "high": "high"
+    },
+    "gap": {
+      "role_coverage": "Role coverage",
+      "blind_safe": "Blind-safe pick",
+      "counter_flex": "Counter/flex answer",
+      "comfort": "Comfort pick",
+      "execution_risk": "Mechanical consistency",
+      "identity_variety": "Team identity"
+    },
+    "trainingTitle": "3-champion growth plan",
+    "drillsTitle": "Practice",
+    "progressTitle": "Last 30 days progress",
+    "progressGain": "+{{pts}} mastery points",
+    "training": {
+      "blind_safe": "Blind-safe anchor",
+      "counter_pick": "Reactive counter pick",
+      "meta_pick": "Meta + easy entry"
+    }
   },
   "build": {
     "loading": "Loading build data…",
@@ -94,7 +502,9 @@
     "skillOrder": "Skill Order",
     "summoners": "Summoners",
     "secondaryRunes": "Secondary Runes",
-    "statShards": "Stat Shards"
+    "statShards": "Stat Shards",
+    "generalBadge": "General",
+    "generalHint": "General archetype build — not a proven winrate build"
   },
   "draftPlan": {
     "winCondition": "Win Condition",
@@ -105,6 +515,7 @@
     "pickSafety": "Pick Safety",
     "execDifficulty": "Execution Difficulty",
     "comboPlans": "Combo Plans",
+    "comboMechanics": "Mechanics (how to execute)",
     "teamNeed": "Team Need",
     "risks": "Risks",
     "pickPosition": "Pick Position",
@@ -158,12 +569,13 @@
     },
     "step4": {
       "title": "Ready!",
-      "body": "Click \"Load match history\" and enter champion select. Recommendations will appear automatically.",
+      "body": "Hit \"Start!\" — if League is running your match history loads automatically. Then enter champion select and recommendations appear on their own.",
       "hint": "Tip: The app always stays on top so you won't miss champion select."
     },
     "back": "Back",
     "next": "Next",
     "start": "Start!",
+    "preparing": "Preparing your data…",
     "disclaimer": "Champ Select Assistant isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc."
   },
   "settings": {
@@ -177,6 +589,11 @@
     "sizeWide": "Wide (1100x700)",
     "weightsSection": "Recommendation Weights",
     "weightsHint": "Adjust each factor independently — lower what you don't care about, raise what you do. Percentages auto-balance against the rest.",
+    "presetsLabel": "Presets",
+    "preset_balanced": "Balanced",
+    "preset_soloq": "SoloQ",
+    "preset_flex": "Flex",
+    "preset_otp": "OTP",
     "weightsRelativeNote": "Weights are relative · auto-balanced",
     "weightComfort": "Mastery (Comfort)",
     "weightLaneCounter": "Lane Counter",
@@ -202,10 +619,18 @@
     "soundSection": "Sound",
     "soundsEnabled": "Sound effects (hover/recommendation)",
     "metaSection": "Meta Data",
-    "syncMetaBtn": "Update meta (Meraki)",
-    "syncMetaDone": "Updated ✓",
+    "syncMetaBtn": "Refresh data pipeline",
+    "syncMetaDone": "Pipeline refreshed ✓",
     "syncMetaFail": "Error — check network connection",
     "syncMetaSyncing": "Updating…",
+    "syncPipelineSummary": "Riot {{riot}} matches · DDragon {{ddragon}} · meta {{rates}} · builds {{builds}} · matchups {{matchups}} · cache {{cache}} · status {{status}}",
+    "syncPipelineFail": "Pipeline refresh error · {{errors}} errors",
+    "syncFeedbackBtn": "Send feedback to cloud",
+    "syncFeedbackSyncing": "Sending feedback…",
+    "syncFeedbackSummary": "{{synced}} sent · {{failed}} failed · {{skipped}} without hash",
+    "syncFeedbackOffline": "No cloud endpoint; feedback stays local",
+    "syncFeedbackNothing": "No feedback due for sync",
+    "syncFeedbackFail": "Feedback sync error — retryable",
     "languageSection": "Language",
     "language": "Language",
     "languageTr": "Türkçe",

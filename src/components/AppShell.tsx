@@ -1,6 +1,4 @@
-import React, { useEffect, useRef } from 'react';
-import { listen } from '@tauri-apps/api/event';
-import { invoke } from '@tauri-apps/api/core';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Settings } from 'lucide-react';
 import { AppSettings } from '../hooks/useSettings';
@@ -19,6 +17,8 @@ interface Props {
   onSettingsOpen: () => void;
   addToast: (message: string, type?: 'info' | 'success' | 'warning' | 'error') => void;
   settings: AppSettings;
+  /** Briefly true after an LCU hiccup — shows a reconnect banner over the kept view. */
+  reconnecting?: boolean;
 }
 
 function renderMain(
@@ -60,30 +60,12 @@ function renderMain(
   }
 }
 
-export const AppShell: React.FC<Props> = ({ status, onRetry, onSettingsOpen, addToast, settings }) => {
+export const AppShell: React.FC<Props> = ({ status, onRetry, onSettingsOpen, addToast, settings, reconnecting }) => {
   const { t } = useTranslation();
-  // Stores the user's window_size preference before switching to the in-game
-  // overlay so it can be restored when the game ends.
-  const savedWindowSize = useRef<'compact' | 'standard' | 'wide'>(settings.window_size);
-
-  useEffect(() => {
-    savedWindowSize.current = settings.window_size;
-  }, [settings.window_size]);
-
-  useEffect(() => {
-    const unlisten = listen<string>('gameflow-phase', (e) => {
-      if (e.payload === 'InProgress') {
-        // Snapshot the user's current preference before switching to overlay
-        savedWindowSize.current = settings.window_size;
-        invoke('set_window_size', { preset: 'overlay' }).catch(() => {});
-      } else if (e.payload === 'Lobby' || e.payload === 'EndOfGame') {
-        // Restore the user's preference instead of forcing 'standard'
-        invoke('set_window_size', { preset: savedWindowSize.current }).catch(() => {});
-      }
-    });
-    return () => { unlisten.then(fn => fn()); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // The window stays at the user's chosen `window_size` throughout — including
+  // in-game. We deliberately do NOT shrink to a tiny overlay on game start, so
+  // the user can alt-tab back to a full-size window and review their game plan
+  // during the match.
 
   return (
     <div className="app-shell">
@@ -102,6 +84,11 @@ export const AppShell: React.FC<Props> = ({ status, onRetry, onSettingsOpen, add
         </div>
       </header>
       <main className="app-main">
+        {reconnecting && (
+          <div className="app-reconnect-banner" role="status">
+            {t('connection.reconnecting')}
+          </div>
+        )}
         {renderMain(status, onRetry, addToast, t('connection.inGame'), settings.platform_region)}
       </main>
     </div>

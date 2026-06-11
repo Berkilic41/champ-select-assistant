@@ -1,0 +1,444 @@
+// IPC surface — the Electron equivalent of src-tauri's `commands/`. The renderer
+// calls everything through ONE dispatcher channel ("cmd", Tauri-invoke parity);
+// handlers register into the command registry one at a time as the ~70 Tauri
+// commands migrate. Unmigrated commands fail loudly + honestly.
+
+import type { DatabaseSync } from "node:sqlite";
+
+import { BrowserWindow, ipcMain } from "electron";
+
+import {
+  completeOnboarding,
+  getSettings,
+  isOnboardingComplete,
+  saveSettings,
+  type AppSettings,
+} from "./commands/settings";
+import {
+  getBanSuggestions,
+  getChampionAnalysis,
+  getChampionArchetypes,
+  getChampionDetail,
+  getComboBoard,
+  getCounterItems,
+  getCounterPicks,
+  getDraftFork,
+  getDraftSimulation,
+  getDraftVerdict,
+  getGamePlan,
+  getLaneMatchup,
+  getTeamComp,
+} from "./commands/analysis";
+import { getIngamePlan, getMacroState } from "./commands/overlay";
+import { syncDataPipeline } from "./commands/data-pipeline";
+import {
+  getDataSourceRegistry,
+  getDataTrajectory,
+  getPipelineQualityReport,
+} from "./commands/data-quality";
+import { syncRecommendationFeedback } from "./commands/feedback-flush";
+import {
+  getEnemyChampionPools,
+  syncLcuPlayerData,
+} from "./commands/player-data";
+import { getDraftBrainQualityReport } from "./commands/quality";
+import {
+  syncMasteries,
+  syncMatchHistory,
+  syncRiotPlayer,
+} from "./commands/riot-sync";
+import { getChampions } from "./commands/champions";
+import {
+  getChampionPoolPlan,
+  getFeedbackAnalytics,
+  getFeedbackObservability,
+  getLobbyScouting,
+  getPoolSuggestions,
+} from "./commands/insights";
+import type { LcuService } from "./commands/lcu";
+import {
+  getActiveSummonerPuuid,
+  getMasteries,
+  getMasteryProgress,
+  getPerformanceReport,
+  getPlayerStats,
+  submitRecommendationFeedback,
+  type RecommendationFeedbackInput,
+} from "./commands/player";
+import { getRecommendations } from "./commands/recommendations";
+import {
+  getDdragonVersion,
+  syncCdragonMeta,
+  syncDdragonChampions,
+  type DdragonCaches,
+} from "./ddragon";
+import {
+  hideWindow,
+  setAlwaysOnTop,
+  setOverlayMode,
+  setWindowOpacity,
+  setWindowSize,
+  showWindow,
+} from "./commands/window";
+import type { Engine } from "./engine";
+import type { FetchAllGameData } from "./live-client";
+import type { PipelineScheduler } from "./scheduler";
+
+export interface AppStatus {
+  engine: "ready" | "failed";
+  db: { migrated: number; error?: string };
+  lcu: "connected" | "disconnected" | "auth-failed" | "searching";
+}
+
+export type CommandHandler = (
+  args: Record<string, unknown> | undefined,
+) => Promise<unknown> | unknown;
+
+export interface IpcContext {
+  engine: Engine | undefined;
+  db: DatabaseSync | undefined;
+  lcu: LcuService | undefined;
+  /** DDragon item/rune/version bellek-içi cache'i (AppState paritesi). */
+  caches: DdragonCaches;
+  /** Live Client Data (port 2999) fetch'i — null = canlı oyun yok (sessiz). */
+  fetchAllGameData: FetchAllGameData;
+  /** Arka plan pipeline scheduler'ı (ramp ölçümü trajectory'ye akar);
+   *  boot başarısızsa undefined olabilir. */
+  scheduler?: PipelineScheduler;
+  getMainWindow: () => BrowserWindow | undefined;
+  status: () => AppStatus;
+}
+
+function requireDb(ctx: IpcContext): DatabaseSync {
+  if (!ctx.db) throw new Error("veritabanı açılamadı (boot hatası)");
+  return ctx.db;
+}
+
+function requireWindow(ctx: IpcContext): BrowserWindow {
+  const win = ctx.getMainWindow();
+  if (!win) throw new Error("ana pencere yok");
+  return win;
+}
+
+function requireLcu(ctx: IpcContext): LcuService {
+  if (!ctx.lcu) throw new Error("LCU servisi başlatılamadı");
+  return ctx.lcu;
+}
+
+function requireEngine(ctx: IpcContext): Engine {
+  if (!ctx.engine) throw new Error("csa-core motoru yüklenemedi");
+  return ctx.engine;
+}
+
+/** Tauri komut adı → Node handler. Göç ettikçe genişler. */
+export function buildCommandRegistry(
+  ctx: IpcContext,
+): Map<string, CommandHandler> {
+  const commands = new Map<string, CommandHandler>();
+
+  commands.set("get_app_status", () => ctx.status());
+
+  // settings.rs
+  commands.set("get_settings", () => getSettings(requireDb(ctx)));
+  commands.set("save_settings", (args) =>
+    saveSettings(requireDb(ctx), args?.settings as AppSettings),
+  );
+  commands.set("is_onboarding_complete", () =>
+    isOnboardingComplete(requireDb(ctx)),
+  );
+  commands.set("complete_onboarding", () => completeOnboarding(requireDb(ctx)));
+
+  // window.rs
+  commands.set("set_always_on_top", (args) =>
+    setAlwaysOnTop(requireWindow(ctx), Boolean(args?.enabled)),
+  );
+  commands.set("set_window_size", (args) =>
+    setWindowSize(requireWindow(ctx), String(args?.preset ?? "standard")),
+  );
+  commands.set("hide_window", () => hideWindow(requireWindow(ctx)));
+  commands.set("show_window", () => showWindow(requireWindow(ctx)));
+  commands.set("set_overlay_mode", (args) =>
+    setOverlayMode(requireWindow(ctx), Boolean(args?.enabled)),
+  );
+  commands.set("set_window_opacity", (args) =>
+    setWindowOpacity(requireWindow(ctx), Number(args?.opacity ?? 1)),
+  );
+
+  // lcu.rs (durum dilimi)
+  commands.set("connect_lcu", () => requireLcu(ctx).connect());
+  commands.set("get_lcu_status", () => requireLcu(ctx).status());
+  commands.set("start_ws_listener", () => requireLcu(ctx).startWsListener());
+
+  // champ_select.rs:110 hover_champion — LCU pick action PATCH.
+  commands.set("hover_champion", (args) =>
+    requireLcu(ctx).hoverChampion(Number(args?.championId ?? 0)),
+  );
+
+  // ddragon.rs
+  commands.set("get_champions", () => getChampions(requireDb(ctx)));
+  commands.set("get_ddragon_version", () => getDdragonVersion(ctx.caches));
+  commands.set("sync_ddragon_champions", () =>
+    syncDdragonChampions(requireDb(ctx), ctx.caches),
+  );
+  commands.set("sync_cdragon_meta", () => syncCdragonMeta(requireDb(ctx)));
+
+  // champ_select.rs (öneri dilimi) — get_draft_brain_recommendations Rust'ta da
+  // get_recommendations'a delege eden bir alias (champ_select.rs:584).
+  const recommendations = (args: Record<string, unknown> | undefined) =>
+    getRecommendations(
+      requireEngine(ctx),
+      requireDb(ctx),
+      args?.sessionJson,
+      String(args?.puuid ?? ""),
+      ctx.caches,
+    );
+  commands.set("get_recommendations", recommendations);
+  commands.set("get_draft_brain_recommendations", recommendations);
+
+  // champ_select.rs (analiz kümesi) — tüm karar mantığı core WASM'da.
+  commands.set("get_champion_analysis", (args) =>
+    getChampionAnalysis(
+      requireEngine(ctx),
+      requireDb(ctx),
+      args?.sessionJson,
+      Number(args?.championId ?? 0),
+      String(args?.puuid ?? ""),
+      ctx.caches,
+    ),
+  );
+  commands.set("get_counter_picks", (args) =>
+    getCounterPicks(
+      requireEngine(ctx),
+      requireDb(ctx),
+      args?.sessionJson,
+      String(args?.puuid ?? ""),
+      ctx.caches,
+    ),
+  );
+  commands.set("get_draft_verdict", (args) =>
+    getDraftVerdict(
+      requireEngine(ctx),
+      requireDb(ctx),
+      args?.sessionJson,
+      String(args?.puuid ?? ""),
+      ctx.caches,
+    ),
+  );
+  commands.set("get_ban_suggestions", (args) =>
+    getBanSuggestions(
+      requireEngine(ctx),
+      requireDb(ctx),
+      args?.sessionJson,
+      String(args?.puuid ?? ""),
+    ),
+  );
+  commands.set("get_team_comp", (args) =>
+    getTeamComp(requireEngine(ctx), requireDb(ctx), args?.sessionJson),
+  );
+  commands.set("get_game_plan", (args) =>
+    getGamePlan(requireEngine(ctx), requireDb(ctx), args?.sessionJson),
+  );
+  commands.set("get_combo_board", (args) =>
+    getComboBoard(requireEngine(ctx), requireDb(ctx), args?.sessionJson),
+  );
+  commands.set("get_lane_matchup", (args) =>
+    getLaneMatchup(requireEngine(ctx), requireDb(ctx), args?.sessionJson),
+  );
+  commands.set("get_counter_items", (args) =>
+    getCounterItems(
+      requireEngine(ctx),
+      requireDb(ctx),
+      args?.sessionJson,
+      ctx.caches,
+    ),
+  );
+  commands.set("get_champion_archetypes", () =>
+    getChampionArchetypes(requireEngine(ctx)),
+  );
+  commands.set("get_champion_detail", (args) =>
+    getChampionDetail(requireEngine(ctx), Number(args?.championId ?? 0)),
+  );
+
+  // commands/draft_simulator.rs — aday filtreleme + sim/fork kararları core'da.
+  commands.set("get_draft_simulation", (args) =>
+    getDraftSimulation(
+      requireEngine(ctx),
+      requireDb(ctx),
+      args?.sessionJson,
+      (args?.candidateIds as number[]) ?? [],
+    ),
+  );
+  commands.set("get_draft_fork", (args) =>
+    getDraftFork(
+      requireEngine(ctx),
+      requireDb(ctx),
+      args?.sessionJson,
+      Number(args?.optionAId ?? 0),
+      Number(args?.optionBId ?? 0),
+    ),
+  );
+
+  // commands/overlay.rs — "canlı oyun yok" hata DEĞİL (sessiz polling).
+  commands.set("get_ingame_plan", () =>
+    getIngamePlan(requireEngine(ctx), requireDb(ctx), ctx.fetchAllGameData),
+  );
+  commands.set("get_macro_state", () =>
+    getMacroState(requireEngine(ctx), ctx.fetchAllGameData),
+  );
+
+  // commands/riot.rs — Riot API sync üçlüsü (key .env'den her çağrıda tazelenir).
+  commands.set("sync_riot_player", (args) =>
+    syncRiotPlayer(
+      requireDb(ctx),
+      String(args?.gameName ?? ""),
+      String(args?.tagLine ?? ""),
+      String(args?.region ?? ""),
+    ),
+  );
+  commands.set("sync_match_history", (args) =>
+    syncMatchHistory(
+      requireDb(ctx),
+      String(args?.puuid ?? ""),
+      Number(args?.count ?? 20),
+    ),
+  );
+  commands.set("sync_masteries", (args) =>
+    syncMasteries(requireDb(ctx), String(args?.puuid ?? "")),
+  );
+
+  // commands/lcu.rs sync_lcu_player_data + champ_select.rs get_enemy_champion_pools.
+  commands.set("sync_lcu_player_data", (args) =>
+    syncLcuPlayerData(
+      requireDb(ctx),
+      requireLcu(ctx),
+      typeof args?.region === "string" ? args.region : undefined,
+    ),
+  );
+  commands.set("get_enemy_champion_pools", (args) =>
+    getEnemyChampionPools(requireDb(ctx), requireLcu(ctx), args?.sessionJson),
+  );
+
+  // commands/feedback_flush.rs + draft_brain.rs quality raporu.
+  commands.set("sync_recommendation_feedback", () =>
+    syncRecommendationFeedback(requireEngine(ctx), requireDb(ctx)),
+  );
+  commands.set("get_draft_brain_quality_report", () =>
+    getDraftBrainQualityReport(requireDb(ctx)),
+  );
+
+  // data_quality.rs okuma üçlüsü — tüm türetimler core WASM'da, ağ YOK.
+  commands.set("get_data_source_registry", () =>
+    getDataSourceRegistry(requireEngine(ctx), requireDb(ctx)),
+  );
+  commands.set("get_pipeline_quality_report", () =>
+    getPipelineQualityReport(requireEngine(ctx), requireDb(ctx), ctx.caches),
+  );
+  commands.set("get_data_trajectory", () =>
+    getDataTrajectory(
+      requireEngine(ctx),
+      requireDb(ctx),
+      ctx.caches,
+      ctx.scheduler?.lastCoverageRamp() ?? null,
+    ),
+  );
+
+  // data_quality.rs sync_data_pipeline — manuel refresh; Match-V5 adımı henüz
+  // taşınmadı, özet errors'ta dürüstçe raporlanır.
+  commands.set("sync_data_pipeline", () =>
+    syncDataPipeline(
+      requireEngine(ctx),
+      requireDb(ctx),
+      requireLcu(ctx),
+      ctx.caches,
+    ),
+  );
+
+  // riot.rs / postgame.rs / draft_brain.rs (DB dilimleri)
+  commands.set("get_player_stats", (args) =>
+    getPlayerStats(requireDb(ctx), String(args?.puuid ?? "")),
+  );
+  commands.set("get_masteries", (args) =>
+    getMasteries(requireDb(ctx), String(args?.puuid ?? "")),
+  );
+  commands.set("get_active_summoner_puuid", () =>
+    getActiveSummonerPuuid(requireDb(ctx)),
+  );
+  commands.set("get_mastery_progress", (args) =>
+    getMasteryProgress(
+      requireDb(ctx),
+      String(args?.puuid ?? ""),
+      Number(args?.days ?? 7),
+    ),
+  );
+  commands.set("get_performance_report", (args) =>
+    getPerformanceReport(
+      requireEngine(ctx),
+      requireDb(ctx),
+      String(args?.puuid ?? ""),
+    ),
+  );
+  commands.set("submit_recommendation_feedback", (args) =>
+    submitRecommendationFeedback(
+      requireDb(ctx),
+      args?.feedback as RecommendationFeedbackInput,
+    ),
+  );
+
+  // pool_coach.rs / champ_select.rs:1283 / scouting.rs / data_quality.rs (insight dilimi)
+  commands.set("get_pool_suggestions", (args) =>
+    getPoolSuggestions(
+      requireEngine(ctx),
+      requireDb(ctx),
+      String(args?.role ?? ""),
+      String(args?.puuid ?? ""),
+    ),
+  );
+  commands.set("get_champion_pool_plan", (args) =>
+    getChampionPoolPlan(
+      requireEngine(ctx),
+      requireDb(ctx),
+      String(args?.role ?? ""),
+      String(args?.puuid ?? ""),
+    ),
+  );
+  commands.set("get_lobby_scouting", (args) =>
+    getLobbyScouting(
+      requireEngine(ctx),
+      requireDb(ctx),
+      (args?.pools as unknown[]) ?? [],
+    ),
+  );
+  commands.set("get_feedback_observability", () =>
+    getFeedbackObservability(requireEngine(ctx), requireDb(ctx)),
+  );
+  commands.set("get_feedback_analytics", (args) =>
+    getFeedbackAnalytics(
+      requireEngine(ctx),
+      requireDb(ctx),
+      args?.windowDays === undefined ? undefined : Number(args.windowDays),
+    ),
+  );
+
+  return commands;
+}
+
+export function registerIpcHandlers(ctx: IpcContext): void {
+  const commands = buildCommandRegistry(ctx);
+
+  ipcMain.handle("cmd", (_event, cmd: unknown, args: unknown) => {
+    if (typeof cmd !== "string") throw new Error("geçersiz komut çağrısı");
+    const handler = commands.get(cmd);
+    if (!handler) {
+      // Dürüst hata: UI sessizce boş veri görmesin (silent-fallback yasak).
+      throw new Error(`komut henüz Electron host'a taşınmadı: ${cmd}`);
+    }
+    return handler(args as Record<string, unknown> | undefined);
+  });
+
+  ipcMain.handle("core:smoke", () => {
+    if (!ctx.engine) throw new Error("csa-core motoru yüklenemedi");
+    return "csa-core wasm alive";
+  });
+
+  ipcMain.handle("app:status", (): AppStatus => ctx.status());
+}

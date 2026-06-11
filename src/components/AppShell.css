@@ -7,6 +7,18 @@
   margin: 0 auto;
 }
 
+.app-reconnect-banner {
+  font-size: var(--font-size-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--warning, #e3b341);
+  background: rgba(227, 179, 65, 0.12);
+  border: 1px solid rgba(227, 179, 65, 0.3);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  margin: var(--space-2);
+  text-align: center;
+}
+
 .app-header {
   position: sticky;
   top: 0;

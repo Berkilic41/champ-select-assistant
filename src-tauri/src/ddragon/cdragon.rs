@@ -15,15 +15,9 @@ pub struct CdragonChampion {
 // Item data
 // ---------------------------------------------------------------------------
 
-#[derive(Debug, Clone)]
-pub struct ItemData {
-    pub id: u32,
-    pub name: String,
-    pub tags: Vec<String>,
-    pub total_gold: u32,
-    /// true when `into` list is absent or empty (fully completed item)
-    pub is_completed: bool,
-}
+// ItemData is now a shared pure DTO in `csa-core`. Re-exported; `fetch_items` below
+// still builds it via a struct literal.
+pub use csa_core::types::ItemData;
 
 /// DDragon raw item.json structures (only the fields we need)
 #[derive(Debug, Deserialize)]
@@ -113,18 +107,9 @@ pub async fn fetch_items(version: &str) -> anyhow::Result<Vec<ItemData>> {
 // Rune data
 // ---------------------------------------------------------------------------
 
-#[derive(Debug, Clone)]
-pub struct RuneTree {
-    pub id: u32,
-    pub key: String,
-    pub slots: Vec<Vec<RuneEntry>>,
-}
-
-#[derive(Debug, Clone)]
-pub struct RuneEntry {
-    pub id: u32,
-    pub key: String,
-}
+// RuneTree + RuneEntry are now shared pure DTOs in `csa-core`. Re-exported; the
+// runesReforged fetcher below still builds them via struct literals.
+pub use csa_core::types::{RuneEntry, RuneTree};
 
 /// DDragon raw runesReforged.json structures
 #[derive(Debug, Deserialize)]

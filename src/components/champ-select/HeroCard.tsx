@@ -1,95 +1,37 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { DraftPlan, Recommendation } from '../../types/recommendation';
+import { Recommendation } from '../../types/recommendation';
 import { ChampionIcon } from '../shared/ChampionIcon';
 import { TierBadge } from '../../lib/tier';
+import { ConfidenceRing, StatBar, Button } from '../shared/ui';
 import { splashUrl } from '../../lib/ddragon';
-import { DraftPlanPanel } from './DraftPlanPanel';
 import './HeroCard.css';
-
-interface QuickTagsProps {
-  plan?: DraftPlan;
-  phaseMatchup?: [number, number, number];
-}
-
-const QuickTags: React.FC<QuickTagsProps> = ({ plan, phaseMatchup }) => {
-  const { t } = useTranslation();
-  if (!plan) return null;
-
-  type Variant = 'risk' | 'safe' | 'info';
-  const chips: Array<{ text: string; variant: Variant }> = [];
-
-  // 1. Stretch pick risk — always show first
-  if (plan.risk_note) {
-    chips.push({ text: plan.risk_note, variant: 'risk' });
-  }
-  // 2. Early-phase lane dominance
-  if (chips.length < 3 && phaseMatchup && phaseMatchup[0] >= 0.65) {
-    chips.push({ text: t('heroCard.earlyAdvantage'), variant: 'safe' });
-  }
-  // 3. Counter-pick window (late pick + counters visible enemy)
-  if (chips.length < 3 && plan.pick_window_note) {
-    chips.push({ text: plan.pick_window_note, variant: 'safe' });
-  }
-  // 4. Combo hint
-  if (chips.length < 3 && plan.combo_with.length > 0) {
-    chips.push({ text: t('heroCard.comboStrong', { ally: plan.combo_with[0].ally_champion_key }), variant: 'info' });
-  }
-  // 5. Team gap fill OR blind safety
-  if (chips.length < 3) {
-    if (plan.fills_team_need.length > 0) {
-      chips.push({ text: plan.fills_team_need[0], variant: 'info' });
-    } else if (plan.blind_pick_safety >= 0.75) {
-      chips.push({ text: t('heroCard.blindSafe'), variant: 'safe' });
-    }
-  }
-
-  if (chips.length === 0) return null;
-
-  return (
-    <div className="hero-card__quick-tags">
-      {chips.map((chip, i) => (
-        <span key={i} className={`hero-card__quick-tag hero-card__quick-tag--${chip.variant}`}>
-          {chip.text}
-        </span>
-      ))}
-    </div>
-  );
-};
 
 interface Props {
   rec: Recommendation;
   onHover?: () => void;
   onExpand?: () => void;
+  /** Render as the locked/finalized pick: hides the "[1-5] select" hint (there's
+   *  nothing to choose anymore). Used by the post-lock view for one unified card. */
+  pinned?: boolean;
 }
 
-interface ScoreBarProps {
+interface PlanLine {
+  key: string;
   label: string;
-  value: number;
-}
-
-const ScoreBar: React.FC<ScoreBarProps> = ({ label, value }) => (
-  <div className="score-bar-row">
-    <span className="score-bar-label">{label}</span>
-    <div className="score-bar-track">
-      <div
-        className="score-bar-fill"
-        style={{ width: `${Math.round(Math.max(0, Math.min(1, value)) * 100)}%` }}
-      />
-    </div>
-    <span className="score-bar-pct">{Math.round(Math.max(0, Math.min(1, value)) * 100)}%</span>
-  </div>
-);
-
-function confidenceDots(conf: string, games: number): string {
-  if (conf === 'high' || games >= 20) return '●●●●●';
-  if (conf === 'medium' || games >= 5) return '●●●○○';
-  return '●○○○○';
+  text: string;
+  tone?: 'neutral' | 'risk' | 'safe';
 }
 
 function personalStatsLine(rec: Recommendation, t: TFunction): string {
-  if (rec.games_on_champ === 0) return t('heroCard.firstTime');
+  if (rec.games_on_champ === 0) {
+    // High mastery but no recent ranked games: honest split — the player can pilot
+    // the kit, there's just no draft win-rate signal. Beats a misleading "first
+    // time" for a high-mastery OTP who hasn't queued it this season.
+    if ((rec.mechanical_comfort ?? 0) >= 0.5) return t('heroCard.mechanicalNoDraft');
+    return t('heroCard.firstTime');
+  }
   const wr = rec.wins_on_champ / rec.games_on_champ;
   return t('heroCard.statsLine', {
     wins: rec.wins_on_champ,
@@ -99,121 +41,164 @@ function personalStatsLine(rec: Recommendation, t: TFunction): string {
   });
 }
 
-export const HeroCard: React.FC<Props> = ({ rec, onHover, onExpand }) => {
+function firstText(...values: Array<string | null | undefined>): string | null {
+  for (const value of values) {
+    const clean = (value ?? '').trim();
+    if (clean) return clean;
+  }
+  return null;
+}
+
+/**
+ * Decision card: everything you need in the 30-second pick window is visible
+ * WITHOUT clicking — why this champion, the score breakdown, the game plan, and
+ * (below, via BuildSummary) the build. "Detay" opens the Deep-Dive tab (one depth
+ * surface) for the extras (coach read, data sources, threats, phase numbers).
+ */
+export const HeroCard: React.FC<Props> = ({ rec, onHover, onExpand, pinned }) => {
   const { t } = useTranslation();
   const [imgError, setImgError] = useState(false);
-  const [expanded, setExpanded] = useState(false);
   const splashSrc = !imgError ? splashUrl(rec.champion_key) : undefined;
+  const plan = rec.draft_plan;
 
-  function handleExpandClick() {
-    setExpanded(prev => !prev);
-    onExpand?.();
+  // Inline game-plan essentials — the handful of lines that drive the decision.
+  const planLines: PlanLine[] = [];
+  const pushPlan = (
+    key: string,
+    label: string,
+    line?: string | null,
+    tone: PlanLine['tone'] = 'neutral',
+  ) => {
+    const clean = (line ?? '').trim();
+    if (clean && !planLines.some((item) => item.text === clean)) {
+      planLines.push({ key, label, text: clean, tone });
+    }
+  };
+  pushPlan('lane', t('heroCard.planLane'), rec.lane_plan);
+  pushPlan('mid', t('heroCard.planMid'), rec.mid_game_plan);
+  pushPlan('teamfight', t('heroCard.planFight'), rec.teamfight_job ?? rec.teamfight_plan);
+  pushPlan('fallback', t('heroCard.planFallback'), rec.fallback_plan, 'safe');
+  if (plan) {
+    pushPlan('win', t('heroCard.planWin'), plan.win_condition);
+    pushPlan('spike', t('heroCard.planSpike'), plan.spike_note);
+    if (plan.combo_with.length > 0) {
+      const c = plan.combo_with[0];
+      pushPlan('combo', t('heroCard.planCombo'), `${c.ally_champion_key}: ${c.combo_text}`);
+    }
+    pushPlan('lane-advice', t('heroCard.planLane'), plan.lane_phase_advice);
+    pushPlan('clash', t('heroCard.planClash'), plan.comp_clash_note, 'risk');
   }
+
+  const decisionText = (rec.decision_sentence ?? '').trim() || rec.reason;
+  // Crisp hero line: the punchy headline if present, else the full decision sentence.
+  const headlineText = (rec.headline ?? '').trim() || decisionText;
+  const lossRiskText = firstText(rec.risk_summary, plan?.risk_note, plan?.threats?.[0]);
 
   return (
     <div className="hero-card animate-hero-in">
-      {/* Splash art arka plan */}
+      {/* Splash art background */}
       {splashSrc && (
-        <div
-          className="hero-card__splash"
-          style={{ backgroundImage: `url(${splashSrc})` }}
-        >
-          <img
-            src={splashSrc}
-            alt=""
-            style={{ display: 'none' }}
-            onError={() => setImgError(true)}
-          />
+        <div className="hero-card__splash" style={{ backgroundImage: `url(${splashSrc})` }}>
+          <img src={splashSrc} alt="" style={{ display: 'none' }} onError={() => setImgError(true)} />
         </div>
       )}
       <div className="hero-card__overlay" />
 
-      {/* İçerik */}
       <div className="hero-card__content">
-        <div className="hero-card__top">
-          <TierBadge tier={rec.tier} large />
-          <span className="hero-card__confidence">{confidenceDots(rec.confidence, rec.games_on_champ)}</span>
+        {/* THE answer: champion + grounded why headline + the confidence ring */}
+        <div className="hero-card__headline">
+          <ChampionIcon championKey={rec.champion_key} size="md" />
+          <div className="hero-card__info">
+            <div className="hero-card__name-row">
+              <h2 className="hero-card__name">{rec.champion_name || rec.champion_key}</h2>
+              <TierBadge tier={rec.tier} large />
+              {rec.pro_presence != null && rec.pro_presence > 0 && (
+                <span
+                  className="hero-card__pro"
+                  title={t('heroCard.proHeatHint', {
+                    defaultValue: 'Pro sahnesinde pick + ban oranı (Leaguepedia)',
+                  })}
+                >
+                  {t('heroCard.proHeat', {
+                    pct: Math.round(rec.pro_presence * 100),
+                    defaultValue: 'Pro %{{pct}}',
+                  })}
+                </span>
+              )}
+            </div>
+            <p className="hero-card__reason">{headlineText}</p>
+            <span className="hero-card__stats">{personalStatsLine(rec, t)}</span>
+          </div>
+          <ConfidenceRing
+            score={rec.total_score}
+            confidence={rec.confidence}
+            size={68}
+            ariaLabel={t('heroCard.confidenceRingLabel', {
+              defaultValue: 'Skor %{{pct}}',
+              pct: Math.round(rec.total_score * 100),
+            })}
+          />
         </div>
         {rec.confidence === 'low' && (
           <div className="hero-card__low-confidence">{t('heroCard.lowConfidence')}</div>
         )}
 
-        <div className="hero-card__body">
-          <ChampionIcon championKey={rec.champion_key} size="md" />
-          <div className="hero-card__info">
-            <h2 className="hero-card__name">{rec.champion_name || rec.champion_key}</h2>
-            <p className="hero-card__reason">{rec.reason}</p>
+        {/* Honest "missing data" flags — this pick lacks real X data (no fake score) */}
+        {rec.missing_signals && rec.missing_signals.length > 0 && (
+          <div className="hero-card__missing">
+            {rec.missing_signals.map((sig) => (
+              <span key={sig} className="hero-card__missing-chip">
+                {t(`champSelect.missingSignal.${sig}`, { defaultValue: sig })}
+              </span>
+            ))}
           </div>
+        )}
+
+        {/* Score breakdown — inline, no click needed */}
+        <div className="hero-card__scores">
+          <StatBar label={t('heroCard.scoreMatchup')} value={rec.matchup_score} />
+          <StatBar label={t('heroCard.scoreSynergy')} value={rec.synergy_score} />
+          <StatBar label={t('heroCard.scoreMeta')} value={rec.meta_score} />
         </div>
 
-        <div className="hero-card__stats">{personalStatsLine(rec, t)}</div>
-
-        <QuickTags plan={rec.draft_plan} phaseMatchup={rec.phase_matchup} />
+        {/* Game plan — inline */}
+        {planLines.length > 0 && (
+          <div className="hero-card__plan">
+            <span className="hero-card__plan-label">{t('heroCard.planLabel')}</span>
+            <ul className="hero-card__plan-list">
+              {planLines.slice(0, 5).map((line) => (
+                <li
+                  key={`${line.key}-${line.text}`}
+                  className={`hero-card__plan-item hero-card__plan-item--${line.tone ?? 'neutral'}`}
+                >
+                  <span className="hero-card__plan-item-label">{line.label}</span>
+                  <span>{line.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {lossRiskText && (
+          <div className="hero-card__risk" role="alert">
+            <span className="hero-card__risk-label">{t('heroCard.lossRiskLabel')}</span>
+            <span>{lossRiskText}</span>
+          </div>
+        )}
 
         <div className="hero-card__footer">
-          <span className="hero-card__key-hint">{t('heroCard.selectHint')}</span>
+          {!pinned && <span className="hero-card__key-hint">{t('heroCard.selectHint')}</span>}
           <div className="hero-card__footer-actions">
             {onHover && (
-              <button
-                className="hero-card__hover-btn"
-                onClick={onHover}
-                type="button"
-              >
+              <Button variant="primary" onClick={onHover}>
                 {t('heroCard.hoverApply')}
-              </button>
+              </Button>
             )}
-            <button
-              className={`hero-card__expand${expanded ? ' hero-card__expand--open' : ''}`}
-              onClick={handleExpandClick}
-              type="button"
-              aria-expanded={expanded}
-            >
-              {expanded ? '↑' : t('heroCard.detailBtn')}
-            </button>
+            <Button variant="ghost" onClick={() => onExpand?.()}>
+              {t('heroCard.detailBtn')}
+            </Button>
           </div>
-        </div>
-
-        {/* Score bar */}
-        <div className="hero-card__score-bar">
-          <div
-            className="hero-card__score-fill"
-            style={{ '--target-width': `${Math.round(rec.total_score * 100)}%` } as React.CSSProperties}
-          />
         </div>
       </div>
-
-      {/* Detail overlay */}
-      {expanded && (
-        <div
-          className="hero-detail-overlay"
-          onClick={() => setExpanded(false)}
-        >
-          <div
-            className="hero-detail-panel"
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="hero-detail-scores">
-              <ScoreBar label={t('heroCard.scoreMatchup')}     value={rec.matchup_score} />
-              <ScoreBar label={t('heroCard.scoreTeamCounter')} value={rec.team_counter_score} />
-              <ScoreBar label={t('heroCard.scoreSynergy')}     value={rec.synergy_score} />
-              <ScoreBar label={t('heroCard.scoreMeta')}        value={rec.meta_score} />
-            </div>
-            {rec.phase_matchup && (
-              <p className="hero-detail-phase">
-                {t('heroCard.phaseLine', {
-                  early: Math.round(rec.phase_matchup[0] * 100),
-                  mid: Math.round(rec.phase_matchup[1] * 100),
-                  late: Math.round(rec.phase_matchup[2] * 100),
-                })}
-              </p>
-            )}
-            <DraftPlanPanel plan={rec.draft_plan} />
-            {(rec.enemy_team_summary ?? '') !== '' && (
-              <p className="hero-detail-enemy">{t('heroCard.enemyLabel', { summary: rec.enemy_team_summary })}</p>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

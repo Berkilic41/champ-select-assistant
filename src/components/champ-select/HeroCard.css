@@ -5,15 +5,16 @@
   overflow: hidden;
   min-height: 184px;
   background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
-  box-shadow: var(--shadow-md);
+  /* THE decision: elevate + a teal halo so it visibly outranks the panels below. */
+  box-shadow: var(--shadow-lg), var(--glow-teal);
 }
 
 .hero-card__splash {
   position: absolute; inset: 0;
   background-size: cover;
   background-position: center top;
-  opacity: 0.22;
-  filter: saturate(1.1);
+  opacity: 0.34;
+  filter: saturate(1.15);
   pointer-events: none;
 }
 
@@ -32,28 +33,20 @@
   gap: var(--space-3);
 }
 
-.hero-card__top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.hero-card__confidence {
-  font-family: var(--font-display);
-  font-size: var(--font-size-xs);
-  font-weight: var(--weight-bold);
-  color: var(--teal-bright);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
-
-.hero-card__body {
+/* THE answer: champion icon + name/why/stats + the confidence ring (right). */
+.hero-card__headline {
   display: flex;
   align-items: center;
   gap: var(--space-4);
 }
 
 .hero-card__info { flex: 1; min-width: 0; }
+
+.hero-card__name-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
 
 .hero-card__name {
   font-family: var(--font-display);
@@ -64,22 +57,163 @@
   margin: 0;
 }
 
+/* The grounded "why" is the hero line — primary color, a touch larger. */
 .hero-card__reason {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  margin: var(--space-1) 0 0;
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  margin: var(--space-2) 0 0;
   line-height: var(--line-height-normal);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
 .hero-card__stats {
+  display: block;
+  margin-top: var(--space-1);
   font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* Inline score breakdown */
+.hero-card__scores { display: flex; flex-direction: column; gap: 5px; }
+
+/* Inline game plan */
+.hero-card__plan { display: flex; flex-direction: column; gap: var(--space-1); }
+.hero-card__plan-label {
+  font-family: var(--font-display);
+  font-size: var(--font-size-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--teal-bright);
+}
+.hero-card__plan-list { list-style: none; display: flex; flex-direction: column; gap: 3px; }
+.hero-card__plan-item {
   font-size: var(--font-size-sm);
-  color: var(--gold-bright);
+  color: var(--text-secondary);
+  line-height: var(--line-height-normal);
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--border-glow);
+  display: grid;
+  gap: 2px;
+}
+
+.hero-card__plan-item--risk {
+  border-left-color: rgba(240, 80, 110, 0.55);
+}
+
+.hero-card__plan-item--safe {
+  border-left-color: rgba(63, 185, 80, 0.55);
+}
+
+.hero-card__plan-item-label {
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--font-size-xs);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+}
+
+/* Stretch-pick / risk alert (inline) */
+.hero-card__risk {
+  font-size: var(--font-size-xs);
+  color: var(--danger);
+  background: rgba(240, 80, 110, 0.1);
+  border: 1px solid rgba(240, 80, 110, 0.4);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  display: grid;
+  gap: 2px;
+}
+
+.hero-card__risk-label {
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+}
+
+/* Detail-panel grouped sections */
+.hero-detail-section { display: flex; flex-direction: column; gap: var(--space-1); }
+
+.hero-detail-coach-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+  gap: var(--space-2);
+}
+
+.hero-detail-coach-card {
+  display: grid;
+  gap: 4px;
+  padding: var(--space-2);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--border-glow);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.hero-detail-coach-card--risk {
+  border-left-color: rgba(240, 80, 110, 0.65);
+  background: rgba(240, 80, 110, 0.08);
+}
+
+.hero-detail-coach-card--data {
+  border-left-color: rgba(227, 179, 65, 0.7);
+}
+
+.hero-detail-coach-label {
+  color: var(--teal-bright);
+  font-family: var(--font-display);
+  font-size: var(--font-size-xs);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+}
+
+.hero-detail-coach-card p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+}
+
+.hero-detail-threats { list-style: none; display: flex; flex-direction: column; gap: 3px; }
+.hero-detail-threat {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-normal);
+  padding-left: var(--space-3);
+  border-left: 2px solid rgba(240, 80, 110, 0.4);
+}
+
+.hero-detail-sources {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.hero-detail-source {
+  display: grid;
+  grid-template-columns: minmax(92px, 1fr) auto;
+  gap: 2px var(--space-2);
+  align-items: center;
+  color: var(--text-secondary);
+  border-left: 2px solid var(--border-glow);
+  padding-left: var(--space-3);
+}
+
+.hero-detail-source strong {
+  min-width: 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  text-transform: capitalize;
+}
+
+.hero-detail-source span,
+.hero-detail-source small {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.hero-detail-source small {
+  grid-column: 1 / -1;
 }
 
 .hero-card__footer {
@@ -141,21 +275,6 @@
   background: rgba(63, 185, 80, 0.1);
 }
 
-.hero-card__score-bar {
-  height: 4px;
-  background: var(--surface-3);
-  border-radius: var(--radius-pill);
-  overflow: hidden;
-}
-
-.hero-card__score-fill {
-  height: 100%;
-  width: var(--target-width, 0%);
-  background: linear-gradient(90deg, var(--gold), var(--gold-bright), var(--teal));
-  border-radius: var(--radius-pill);
-  animation: score-fill 600ms ease-out;
-}
-
 .hero-card__expand--open {
   border-color: var(--teal-dim);
   color: var(--teal-bright);
@@ -165,6 +284,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  margin-left: auto;
 }
 
 .hero-card__hover-btn {
@@ -183,33 +303,11 @@
 .hero-card__hover-btn:hover  { filter: brightness(1.08); transform: translateY(-1px); }
 .hero-card__hover-btn:active { transform: translateY(0); }
 
-/* Detail overlay (slide-up bottom sheet) */
-.hero-detail-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(7, 9, 13, 0.6);
-  backdrop-filter: blur(3px);
-  z-index: var(--z-overlay, 10);
-  display: flex;
-  align-items: flex-end;
-}
-
+/* Deep-dive content — now rendered inline inside the Deep-Dive tab (not a modal). */
 .hero-detail-panel {
-  width: 100%;
-  background: linear-gradient(180deg, var(--surface-3), var(--surface-2));
-  border-top: 1px solid var(--border-glow);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  padding: var(--space-4);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  box-shadow: var(--shadow-lg);
-  animation: detail-sheet-up 200ms ease-out;
-}
-
-@keyframes detail-sheet-up {
-  from { transform: translateY(100%); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
 }
 
 .hero-detail-scores {
@@ -282,4 +380,59 @@
   border-radius: var(--radius-sm);
   align-self: flex-start;
   margin-bottom: var(--space-1);
+}
+
+.hero-card__pro {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--info);
+  background: color-mix(in srgb, var(--info) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--info) 38%, transparent);
+  padding: 1px var(--space-1);
+  border-radius: var(--radius-pill);
+}
+
+.hero-card__missing {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: var(--space-1);
+}
+.hero-card__missing-chip {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px dashed var(--border-strong);
+  padding: 1px var(--space-1);
+  border-radius: var(--radius-pill);
+}
+
+/* Combo mechanics — collapsible "how to execute" detail (used in the deep-dive
+   combo list; lives here because the deep-dive loads HeroCard.css). */
+.draft-plan__combo-detail {
+  margin-top: 2px;
+}
+.draft-plan__combo-detail > summary {
+  font-size: 11px;
+  color: var(--teal-bright);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  opacity: 0.85;
+}
+.draft-plan__combo-detail > summary::before {
+  content: '▸ ';
+  font-size: 9px;
+}
+.draft-plan__combo-detail[open] > summary::before {
+  content: '▾ ';
+}
+.draft-plan__combo-detail > span {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.6));
 }

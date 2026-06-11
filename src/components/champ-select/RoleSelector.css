@@ -1,0 +1,62 @@
+.role-selector {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-2);
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+/* Highlight when the role is unknown — the user must choose for relevant advice. */
+.role-selector--prompt {
+  border-color: var(--gold-dim);
+  background: color-mix(in srgb, var(--gold) 8%, var(--surface-1));
+}
+
+.role-selector__label {
+  font-size: 0.72rem;
+  font-weight: var(--weight-bold, 600);
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.role-selector--prompt .role-selector__label {
+  color: var(--gold-bright);
+}
+
+.role-selector__btns {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.role-selector__btn {
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.role-selector__btn:hover {
+  background: var(--surface-3);
+  color: var(--text-primary);
+}
+
+.role-selector__btn--active {
+  color: var(--text-on-accent);
+  background: var(--gold);
+  border-color: var(--gold-bright);
+  font-weight: var(--weight-bold, 600);
+}
+
+.role-selector__hint {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-left: auto;
+}

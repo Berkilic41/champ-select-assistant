@@ -1,6 +1,8 @@
 use crate::db::{champion_repo, mastery_repo, match_repo, summoner_repo};
 use crate::errors::AppError;
-use crate::riot::client::{routing_for_region, ChampionStats, SummonerInfo, SyncResult};
+use crate::riot::client::{
+    routing_for_region, runtime_client_from_env, ChampionStats, SummonerInfo, SyncResult,
+};
 use crate::riot::endpoints::{mastery as mastery_ep, matches as match_ep, summoner as summoner_ep};
 use crate::AppState;
 use tauri::State;
@@ -12,12 +14,10 @@ pub async fn sync_riot_player(
     region: String,
     state: State<'_, AppState>,
 ) -> Result<SummonerInfo, AppError> {
-    let riot = state
-        .riot
-        .as_ref()
+    let riot = runtime_client_from_env()
         .ok_or_else(|| AppError::NotConfigured("Riot API key yapılandırılmamış".to_string()))?;
 
-    let info = summoner_ep::get_by_riot_id(riot, &game_name, &tag_line, &region).await?;
+    let info = summoner_ep::get_by_riot_id(riot.as_ref(), &game_name, &tag_line, &region).await?;
 
     let db = state.db.lock().await;
     summoner_repo::upsert_summoner(&db, &info)?;
@@ -37,9 +37,7 @@ pub async fn sync_match_history(
     count: u8,
     state: State<'_, AppState>,
 ) -> Result<SyncResult, AppError> {
-    let riot = state
-        .riot
-        .as_ref()
+    let riot = runtime_client_from_env()
         .ok_or_else(|| AppError::NotConfigured("Riot API key yapılandırılmamış".to_string()))?;
 
     let routing = {
@@ -50,7 +48,7 @@ pub async fn sync_match_history(
     }; // DB lock released here
 
     let ids = match_ep::list_ids(
-        riot,
+        riot.as_ref(),
         &puuid,
         &routing,
         Some("ranked"),
@@ -71,6 +69,7 @@ pub async fn sync_match_history(
         duration_secs: i64,
         queue_id: i64,
         played_at: i64,
+        cs: i64,
     }
 
     let mut parsed: Vec<ParsedMatch> = Vec::with_capacity(ids.len());
@@ -78,7 +77,7 @@ pub async fn sync_match_history(
     let mut skipped = 0u32;
 
     for id in &ids {
-        let detail = match match_ep::get_detail(riot, id, &routing).await {
+        let detail = match match_ep::get_detail(riot.as_ref(), id, &routing).await {
             Ok(d) => d,
             Err(_) => {
                 errors += 1;
@@ -116,6 +115,9 @@ pub async fn sync_match_history(
             duration_secs: detail["info"]["gameDuration"].as_i64().unwrap_or(0),
             queue_id: detail["info"]["queueId"].as_i64().unwrap_or(0),
             played_at: detail["info"]["gameStartTimestamp"].as_i64().unwrap_or(0) / 1000,
+            // CS = lane minions + neutral monsters (standard Match-V5 participant fields).
+            cs: p["totalMinionsKilled"].as_i64().unwrap_or(0)
+                + p["neutralMinionsKilled"].as_i64().unwrap_or(0),
         });
     }
 
@@ -147,6 +149,7 @@ pub async fn sync_match_history(
             m.duration_secs,
             m.queue_id,
             m.played_at,
+            Some(m.cs),
         )?;
 
         if inserted {
@@ -168,9 +171,7 @@ pub async fn sync_masteries(
     puuid: String,
     state: State<'_, AppState>,
 ) -> Result<SyncResult, AppError> {
-    let riot = state
-        .riot
-        .as_ref()
+    let riot = runtime_client_from_env()
         .ok_or_else(|| AppError::NotConfigured("Riot API key yapılandırılmamış".to_string()))?;
 
     let platform = {
@@ -180,7 +181,7 @@ pub async fn sync_masteries(
             .unwrap_or_else(|| "euw1".to_string())
     }; // DB lock released
 
-    let entries = mastery_ep::top_by_puuid(riot, &puuid, &platform, 20).await?;
+    let entries = mastery_ep::top_by_puuid(riot.as_ref(), &puuid, &platform, 20).await?;
 
     let db = state.db.lock().await;
     let mut synced = 0u32;
@@ -206,6 +207,12 @@ pub async fn sync_masteries(
             Ok(()) => synced += 1,
             Err(_) => errors += 1,
         }
+        // Progress tracking: snapshot when points changed (training mode).
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_secs() as i64)
+            .unwrap_or(0);
+        let _ = mastery_repo::record_mastery_snapshot(&db, &puuid, champion_id, level, points, now);
     }
 
     Ok(SyncResult {

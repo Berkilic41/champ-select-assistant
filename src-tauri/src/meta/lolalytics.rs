@@ -1,27 +1,27 @@
-// dead_code is allowed at the module level (see meta/mod.rs).
+//! Lolalytics aggregate-stats source.
+//!
+//! Lolalytics aggregate-stats source — **registered but not scheduled**.
+//!
+//! Lolalytics' `api.lolalytics.com/mega` endpoint and its pages sit behind a
+//! Cloudflare browser challenge: working community scrapers drive it with a
+//! headless browser (Selenium), not a plain HTTP client. Bundling a headless
+//! browser would bloat this intentionally-lightweight app and add a fragile
+//! dependency, so we keep the variant registered (provenance/risk are wired) but
+//! `all_sources()` does not schedule it. `fetch` returns `Err` so that, if ever
+//! called, it degrades gracefully and other sources carry coverage. Lane
+//! matchups/builds instead come from u.gg (open CDN) + Match-V5 (real games).
+#![allow(dead_code)]
 
+use crate::meta::source::FetchCtx;
+use crate::recommendation::ingestion_contract::CanonicalRowSet;
 use anyhow::Result;
-use reqwest::Client;
 
-const LOLALYTICS_UA: &str =
+/// A real browser UA — kept for a future headless/residential path.
+pub(crate) const LOLALYTICS_UA: &str =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120";
 
-/// Lolalytics'ten belirli bir şampiyonun matchup win rate verilerini dene.
-/// Cloudflare koruma varsa Err döner — engine fallback yaparak devam eder.
-pub async fn fetch_matchups(_champion_key: &str, _position: &str) -> Result<Vec<MatchupEntry>> {
-    let _client = Client::builder()
-        .use_rustls_tls()
-        .user_agent(LOLALYTICS_UA)
-        .build()?;
-
-    // HTML sayfa döner, JSON extract etmek gerekir — Sprint 4 basit yaklaşım:
-    // Şimdilik başarısız dön, gelecekte full scraper implement edilir.
-    anyhow::bail!("Lolalytics scraper henüz implementasyonsuz — CDragon fallback kullanılıyor")
-}
-
-#[derive(Debug)]
-pub struct MatchupEntry {
-    pub opponent_key: String,
-    pub win_rate: f32,
-    pub games: u32,
+pub async fn fetch(_ctx: &FetchCtx) -> Result<CanonicalRowSet> {
+    anyhow::bail!(
+        "Lolalytics Cloudflare-gated (headless tarayıcı gerekir); hafiflik için bağlanmadı"
+    )
 }

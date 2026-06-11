@@ -13,18 +13,41 @@ use super::session::parse_session;
 const MAX_CONSECUTIVE_ERRORS: u32 = 5;
 
 /// Polls `/lol-gameflow/v1/gameflow-phase` every 2 seconds.
-/// Emits `gameflow-phase` event when the phase changes.
-pub async fn start_gameflow_watcher(app: AppHandle, client: Arc<LcuClient>) {
-    let mut ticker = tokio::time::interval(Duration::from_millis(2_000));
+/// Emits `gameflow-phase` event when the phase changes. Stops on cancel (new
+/// connection replaces it) or after too many consecutive errors (League closed),
+/// so watchers never accumulate.
+pub async fn start_gameflow_watcher(
+    app: AppHandle,
+    client: Arc<LcuClient>,
+    cancel: CancellationToken,
+) {
+    let mut ticker = interval(Duration::from_millis(2_000));
     let mut last_phase = String::new();
+    let mut consecutive_errors = 0u32;
     loop {
-        ticker.tick().await;
-        if let Ok(json) = client.get_raw("/lol-gameflow/v1/gameflow-phase").await {
-            let phase = json.as_str().unwrap_or("").to_string();
-            if phase != last_phase {
-                last_phase = phase.clone();
-                let _ = app.emit("gameflow-phase", &phase);
-                tracing::info!("Gameflow phase: {}", phase);
+        tokio::select! {
+            _ = cancel.cancelled() => {
+                tracing::info!("Gameflow watcher: iptal sinyali alındı, duruluyor");
+                break;
+            }
+            _ = ticker.tick() => {}
+        }
+        match client.get_raw("/lol-gameflow/v1/gameflow-phase").await {
+            Ok(json) => {
+                consecutive_errors = 0;
+                let phase = json.as_str().unwrap_or("").to_string();
+                if phase != last_phase {
+                    last_phase = phase.clone();
+                    let _ = app.emit("gameflow-phase", &phase);
+                    tracing::info!("Gameflow phase: {}", phase);
+                }
+            }
+            Err(_) => {
+                consecutive_errors += 1;
+                if consecutive_errors >= MAX_CONSECUTIVE_ERRORS {
+                    tracing::info!("Gameflow watcher: LoL client kapalı, duruluyor");
+                    break;
+                }
             }
         }
     }
@@ -54,9 +77,13 @@ pub async fn start_session_poller(
                     let _ = app.emit("champ-select-session", serde_json::Value::Null);
                 }
             }
-            Err(_) => {
+            Err(err) => {
                 consecutive_errors += 1;
                 let _ = app.emit("champ-select-session", serde_json::Value::Null);
+                // Distinct, observable error signal: lets the UI tell a real LCU
+                // failure apart from "not in champ-select" (both clear the session).
+                tracing::warn!("Poller LCU hatası ({consecutive_errors}): {err}");
+                let _ = app.emit("lcu-error", consecutive_errors);
                 if consecutive_errors >= MAX_CONSECUTIVE_ERRORS {
                     tracing::info!(
                         "Poller: {} ardışık hata — LoL client kapanmış, duruluyor",

@@ -10,6 +10,8 @@ pub mod summoner_repo;
 pub use connection::{open_db, run_migrations};
 
 #[cfg(test)]
+mod schema_parity;
+#[cfg(test)]
 mod tests;
 
 refinery::embed_migrations!("migrations");

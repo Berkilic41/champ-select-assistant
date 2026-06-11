@@ -1,7 +1,15 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { invoke } from '@tauri-apps/api/core';
-import { useSettings, normalizeWeights, DEFAULT_SETTINGS, type AppSettings } from './useSettings';
+import {
+  useSettings,
+  normalizeWeights,
+  DEFAULT_SETTINGS,
+  WEIGHT_PRESETS,
+  matchesPreset,
+  type AppSettings,
+  type WeightPresetName,
+} from './useSettings';
 
 const mockInvoke = invoke as ReturnType<typeof vi.fn>;
 
@@ -68,5 +76,22 @@ describe('useSettings', () => {
       'save_settings',
       expect.objectContaining({ settings: expect.objectContaining({ language: 'en' }) }),
     );
+  });
+});
+
+describe('weight presets', () => {
+  it('every preset sums to ~1.0', () => {
+    (Object.keys(WEIGHT_PRESETS) as WeightPresetName[]).forEach((name) => {
+      const p = WEIGHT_PRESETS[name];
+      const sum =
+        p.weight_comfort + p.weight_matchup + p.weight_team_counter +
+        p.weight_synergy + p.weight_meta + p.weight_role_fit;
+      expect(Math.abs(sum - 1)).toBeLessThan(0.001);
+    });
+  });
+
+  it('matchesPreset detects an exact match and rejects a different one', () => {
+    expect(matchesPreset(WEIGHT_PRESETS.soloq, WEIGHT_PRESETS.soloq)).toBe(true);
+    expect(matchesPreset(WEIGHT_PRESETS.otp, WEIGHT_PRESETS.balanced)).toBe(false);
   });
 });

@@ -1,0 +1,65 @@
+{
+  "session": {
+    "my_cell_id": 0,
+    "local_player": {
+      "cell_id": 0,
+      "champion_id": 0,
+      "intent_champion_id": 0,
+      "assigned_position": "top",
+      "is_locked": false
+    },
+    "my_team": [
+      { "cell_id": 0, "champion_id": 0, "intent_champion_id": 0, "assigned_position": "top", "is_locked": false },
+      { "cell_id": 1, "champion_id": 103, "intent_champion_id": 0, "assigned_position": "middle", "is_locked": true }
+    ],
+    "their_team": [
+      { "cell_id": 5, "champion_id": 122, "intent_champion_id": 0, "assigned_position": "top", "is_locked": true }
+    ],
+    "my_bans": [],
+    "their_bans": [],
+    "phase": "BAN_PICK",
+    "time_left_ms": 30000,
+    "action_type": "pick",
+    "queue_id": 420,
+    "pick_order": 3
+  },
+  "weights": {
+    "comfort": 0.30,
+    "matchup": 0.20,
+    "team_counter": 0.10,
+    "synergy": 0.10,
+    "meta": 0.15,
+    "role_fit": 0.10,
+    "risk": 0.05
+  },
+  "all_champions": [
+    { "champion_id": 86, "key": "Garen", "name": "Garen", "title": "Demacia'nın Gücü" },
+    { "champion_id": 54, "key": "Malphite", "name": "Malphite", "title": "Monolitin Parçası" },
+    { "champion_id": 122, "key": "Darius", "name": "Darius", "title": "Noxus'un Eli" },
+    { "champion_id": 103, "key": "Ahri", "name": "Ahri", "title": "Dokuz Kuyruklu Tilki" }
+  ],
+  "mastery": [
+    { "champion_id": 86, "mastery_level": 7, "mastery_points": 120000, "last_play_time": null },
+    { "champion_id": 54, "mastery_level": 5, "mastery_points": 40000, "last_play_time": null }
+  ],
+  "stats": [
+    { "champion_id": 86, "games": 40, "wins": 24, "kda_avg": 2.8 },
+    { "champion_id": 54, "games": 12, "wins": 6, "kda_avg": 2.1 }
+  ],
+  "role_map": {
+    "86": ["fighter", "tank"],
+    "54": ["tank", "fighter"],
+    "122": ["fighter", "tank"],
+    "103": ["mage", "assassin"]
+  },
+  "meta_rates": [
+    { "champion_id": 86, "position": "top", "win_rate": 0.52, "ban_rate": 0.03, "sample_size": 18000 },
+    { "champion_id": 54, "position": "top", "win_rate": 0.51, "ban_rate": 0.05, "sample_size": 9000 }
+  ],
+  "matchups": [
+    { "champion_id": 86, "opponent_id": 122, "win_rate": 0.48, "games": 2200 },
+    { "champion_id": 54, "opponent_id": 122, "win_rate": 0.53, "games": 1500 }
+  ],
+  "items": [],
+  "rune_trees": []
+}

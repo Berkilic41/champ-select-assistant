@@ -39,12 +39,14 @@ fn default_platform_region() -> String {
 impl Default for AppSettings {
     fn default() -> Self {
         Self {
-            weight_comfort: 0.25, // sum = 1.00 (was 0.95)
+            // sum = 1.00. role_fit raised 0.10 → 0.15 (comfort 0.25 → 0.20) so the
+            // assigned lane matters more in SoloQ — fewer off-role suggestions.
+            weight_comfort: 0.20,
             weight_matchup: 0.25,
             weight_team_counter: 0.15,
             weight_synergy: 0.10,
             weight_meta: 0.15,
-            weight_role_fit: 0.10,
+            weight_role_fit: 0.15,
             always_on_top: true,
             window_size: "standard".to_string(),
             auto_hide_in_game: false,

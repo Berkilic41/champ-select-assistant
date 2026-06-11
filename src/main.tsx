@@ -13,13 +13,17 @@ import "./styles/variables.css";
 import "./styles/animations.css";
 import "./index.css";
 import "./i18n";
+import { MotionConfig } from "framer-motion";
 import App from "./App";
 import { ErrorBoundary } from "./components/shared/ErrorBoundary";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <App />
+      {/* Honour the OS "reduce motion" preference for all framer-motion animations. */}
+      <MotionConfig reducedMotion="user">
+        <App />
+      </MotionConfig>
     </ErrorBoundary>
   </React.StrictMode>,
 );

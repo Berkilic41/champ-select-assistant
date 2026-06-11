@@ -1,0 +1,37 @@
+.data-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+}
+
+.data-status__chip {
+  font-size: 0.66rem;
+  font-weight: var(--weight-semibold, 600);
+  letter-spacing: 0;
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill, 999px);
+  padding: 2px 9px;
+  cursor: help;
+  white-space: nowrap;
+}
+
+.data-status__chip--good {
+  color: var(--success);
+  border-color: rgba(63, 185, 80, 0.35);
+  background: rgba(63, 185, 80, 0.1);
+}
+
+.data-status__chip--warning {
+  color: var(--warning);
+  border-color: rgba(227, 179, 65, 0.35);
+  background: rgba(227, 179, 65, 0.1);
+}
+
+.data-status__chip--danger {
+  color: var(--danger);
+  border-color: rgba(240, 80, 110, 0.4);
+  background: rgba(240, 80, 110, 0.1);
+}

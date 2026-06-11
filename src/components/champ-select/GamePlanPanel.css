@@ -1,0 +1,77 @@
+.game-plan {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+.game-plan__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.game-plan__title {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--teal-bright);
+}
+.game-plan__identity {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--font-size-base);
+  color: var(--gold-bright);
+  text-align: right;
+}
+
+.game-plan__note { font-size: var(--font-size-sm); color: var(--text-secondary); line-height: var(--line-height-normal); }
+.game-plan__partial { font-size: var(--font-size-xs); color: var(--text-muted); font-style: italic; }
+
+.game-plan__section { display: flex; flex-direction: column; gap: var(--space-1); }
+.game-plan__label {
+  font-family: var(--font-display);
+  font-size: var(--font-size-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Timeline bands */
+.game-plan__timeline { display: flex; flex-direction: column; gap: var(--space-2); }
+.game-plan__band {
+  display: flex; flex-direction: column; gap: 3px;
+  padding-left: var(--space-3);
+  border-left: 3px solid var(--border-strong);
+}
+.game-plan__band--advantage { border-left-color: var(--success); }
+.game-plan__band--disadvantage { border-left-color: var(--danger); }
+.game-plan__band--even { border-left-color: var(--text-muted); }
+
+.game-plan__band-head { display: flex; align-items: center; justify-content: space-between; }
+.game-plan__band-label { font-size: var(--font-size-sm); font-weight: var(--weight-semibold); color: var(--text-primary); }
+.game-plan__band-stance { font-size: var(--font-size-xs); font-family: var(--font-mono); letter-spacing: 0.04em; }
+.game-plan__band--advantage .game-plan__band-stance { color: var(--success); }
+.game-plan__band--disadvantage .game-plan__band-stance { color: var(--danger); }
+.game-plan__band--even .game-plan__band-stance { color: var(--text-muted); }
+
+.game-plan__band-track { height: 5px; background: var(--surface-4); border-radius: var(--radius-pill); overflow: hidden; }
+.game-plan__band-fill { height: 100%; border-radius: var(--radius-pill); background: linear-gradient(90deg, var(--gold), var(--teal)); }
+.game-plan__band--advantage .game-plan__band-fill { background: linear-gradient(90deg, var(--teal), var(--success)); }
+.game-plan__band--disadvantage .game-plan__band-fill { background: linear-gradient(90deg, var(--warning), var(--danger)); }
+
+.game-plan__band-advice { font-size: var(--font-size-sm); color: var(--text-secondary); line-height: var(--line-height-normal); }
+
+.game-plan__list { list-style: none; display: flex; flex-direction: column; gap: 3px; }
+.game-plan__item {
+  font-size: var(--font-size-sm); color: var(--text-secondary); line-height: var(--line-height-normal);
+  padding-left: var(--space-3); border-left: 2px solid var(--border-glow);
+}
+.game-plan__text { font-size: var(--font-size-sm); color: var(--text-secondary); line-height: var(--line-height-normal); }
+.game-plan__text--threat { color: var(--warning); }

@@ -24,9 +24,8 @@ export const QuickPickList: React.FC<Props> = ({ recommendations, activeIndex, o
         <span className="quick-pick-num">{i + 1}</span>
         <ChampionIcon championKey={rec.champion_key} size="sm" />
         <span className="quick-pick-name">{rec.champion_name || rec.champion_key}</span>
-        <span className="quick-pick-score">{Math.round(rec.total_score * 100)}%</span>
         <span className="quick-pick-tier" style={{ color: TIER_COLORS[rec.tier] }}>{rec.tier.toUpperCase()}</span>
-        <span className="quick-pick-reason">{rec.reason}</span>
+        <span className="quick-pick-score">{Math.round(rec.total_score * 100)}%</span>
         <span
           className="quick-pick-conf"
           title={rec.confidence === 'low' ? t('quickPick.confLow') : rec.confidence === 'medium' ? t('quickPick.confMedium') : t('quickPick.confHigh')}

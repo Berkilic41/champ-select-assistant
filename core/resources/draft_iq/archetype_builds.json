@@ -1,0 +1,17 @@
+{
+  "_comment": "General per-archetype baseline builds (source: general_archetype). NOT pro/winrate data — a sensible default so every champion shows a build. Item/rune/shard/summoner IDs are real DDragon IDs reused from builds_seed.json (known-good in this app). secondary_runes = [tree_id, rune1_id, rune2_id]. Labeled 'genel' in the UI; never presented as a proven build.",
+  "builds": {
+    "marksman":    {"core_items": [6672, 3031, 3085, 6671], "keystone": 8008, "primary_tree": 8000, "secondary_runes": [8100, 8139, 8135], "stat_shards": [5005, 5008, 5002], "summoner_spells": [4, 7]},
+    "vanguard":    {"core_items": [3068, 3083, 3190, 3076], "keystone": 8439, "primary_tree": 8400, "secondary_runes": [8300, 8345, 8347], "stat_shards": [5008, 5008, 5003], "summoner_spells": [4, 12]},
+    "diver":       {"core_items": [3078, 3071, 3053, 3748], "keystone": 8010, "primary_tree": 8000, "secondary_runes": [8400, 8473, 8453], "stat_shards": [5005, 5008, 5002], "summoner_spells": [4, 12]},
+    "skirmisher":  {"core_items": [3078, 3053, 3071, 3091], "keystone": 8010, "primary_tree": 8000, "secondary_runes": [8400, 8473, 8242], "stat_shards": [5005, 5008, 5002], "summoner_spells": [4, 12]},
+    "juggernaut":  {"core_items": [3078, 3071, 3053, 3083], "keystone": 8437, "primary_tree": 8400, "secondary_runes": [8000, 9111, 8014], "stat_shards": [5005, 5008, 5002], "summoner_spells": [4, 12]},
+    "assassin":    {"core_items": [6691, 6692, 4645, 3157], "keystone": 8112, "primary_tree": 8100, "secondary_runes": [8000, 9111, 8014], "stat_shards": [5008, 5008, 5002], "summoner_spells": [4, 14]},
+    "enchanter":   {"core_items": [2065, 3107, 3109, 3190], "keystone": 8214, "primary_tree": 8200, "secondary_runes": [8300, 8345, 8347], "stat_shards": [5007, 5008, 5002], "summoner_spells": [4, 14]},
+    "burst_mage":  {"core_items": [6655, 4645, 3089, 3157], "keystone": 8214, "primary_tree": 8200, "secondary_runes": [8100, 8139, 8135], "stat_shards": [5008, 5008, 5003], "summoner_spells": [4, 14]},
+    "control_mage":{"core_items": [6655, 4645, 3089, 3135], "keystone": 8229, "primary_tree": 8200, "secondary_runes": [8400, 8473, 8453], "stat_shards": [5008, 5008, 5003], "summoner_spells": [4, 14]},
+    "catcher":     {"core_items": [2065, 3190, 3068, 3107], "keystone": 8439, "primary_tree": 8400, "secondary_runes": [8300, 8345, 8347], "stat_shards": [5007, 5008, 5002], "summoner_spells": [4, 14]},
+    "artillery":   {"core_items": [6655, 4645, 3089, 3135], "keystone": 8229, "primary_tree": 8200, "secondary_runes": [8100, 8139, 8135], "stat_shards": [5008, 5008, 5003], "summoner_spells": [4, 14]},
+    "specialist":  {"core_items": [3078, 3071, 3053, 3091], "keystone": 8010, "primary_tree": 8000, "secondary_runes": [8400, 8473, 8242], "stat_shards": [5005, 5008, 5002], "summoner_spells": [4, 12]}
+  }
+}

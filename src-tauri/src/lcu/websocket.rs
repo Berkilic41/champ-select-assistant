@@ -14,7 +14,7 @@ use rustls::client::danger::{HandshakeSignatureValid, ServerCertVerified, Server
 use rustls::pki_types::{CertificateDer, ServerName, UnixTime};
 use rustls::{DigitallySignedStruct, SignatureScheme};
 use tauri::{AppHandle, Emitter};
-use tokio::time::{sleep, Duration};
+use tokio::time::{sleep, timeout, Duration};
 use tokio_tungstenite::{
     connect_async_tls_with_config,
     tungstenite::{http::StatusCode, Error as WsError, Message},
@@ -192,8 +192,17 @@ async fn run_ws_loop(
     // non-101 response (including 401 Unauthorized), so we don't need to
     // re-check the status here. The caller's `is_auth_failure(&WsError)`
     // catches that case from the propagated error.
-    let (mut ws, _response) =
-        connect_async_tls_with_config(request, None, false, Some(connector)).await?;
+    // Timeout the TLS handshake: a half-open LCU socket must not hang the watcher
+    // forever. On elapse we bail → the caller's backoff reconnects.
+    let (mut ws, _response) = match timeout(
+        Duration::from_secs(5),
+        connect_async_tls_with_config(request, None, false, Some(connector)),
+    )
+    .await
+    {
+        Ok(result) => result?,
+        Err(_) => anyhow::bail!("LCU WebSocket bağlantısı 5s içinde kurulamadı"),
+    };
 
     tracing::info!("LCU WS bağlantısı kuruldu");
 

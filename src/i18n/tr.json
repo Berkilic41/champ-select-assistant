@@ -2,8 +2,13 @@
   "app": {
     "title": "Champ Select Asistanı",
     "settings": "Ayarlar",
+    "close": "Kapat",
+    "unsavedConfirm": "Kaydedilmemiş değişiklikler var. Çıkmak istediğine emin misin?",
+    "feedbackSent": "Geri bildirim alındı, teşekkürler.",
+    "feedbackFailed": "Geri bildirim gönderilemedi.",
     "settingsSaved": "Ayarlar kaydedildi.",
-    "welcomeReady": "Hoş geldin! Uygulama hazır.",
+    "welcomeReady": "Hoş geldin! Verilerin yüklendi, uygulama hazır.",
+    "welcomeNoLeague": "Hoş geldin! League açık değil — açıp Ayarlar'dan verilerini senkronize edebilirsin.",
     "errorTitle": "Bir şeyler ters gitti",
     "errorBody": "Uygulama beklenmedik bir hatayla karşılaştı. Yeniden denemeyi deneyebilirsin.",
     "errorRetry": "Yeniden dene"
@@ -11,7 +16,9 @@
   "connection": {
     "connecting": "Bağlanıyor...",
     "disconnected": "League Client bulunamadı",
+    "autoSearching": "League açılınca otomatik bağlanılacak…",
     "retry": "Tekrar Dene",
+    "reconnecting": "Bağlantı koptu — yeniden bağlanılıyor, öneriler korunuyor…",
     "inGame": "Oyun devam ediyor...",
     "badgeConnecting": "Bağlanıyor...",
     "badgeDisconnected": "Bağlantı yok",
@@ -20,6 +27,54 @@
     "hide": "Gizle",
     "goodLuck": "İyi şanslar!",
     "afterGameStats": "Oyun bittikten sonra istatistikler burada görünecek."
+  },
+  "overlay": {
+    "title": "Makro koç",
+    "waiting": "Oyun bekleniyor…",
+    "reminders": "Hatırlatmalar",
+    "now": "şimdi",
+    "objective": {
+      "dragon": "Ejder",
+      "baron": "Baron",
+      "herald": "Herald",
+      "grubs": "Voidgrub"
+    },
+    "state": {
+      "up": "hazır",
+      "soon": "yakında",
+      "respawning": "doğuyor",
+      "pending_first": "ilk doğum"
+    },
+    "phase": {
+      "early": "erken",
+      "mid": "orta",
+      "late": "geç"
+    },
+    "position": {
+      "top": "Üst",
+      "jungle": "Orman",
+      "middle": "Orta",
+      "bottom": "Alt",
+      "utility": "Destek"
+    },
+    "plan": {
+      "title": "Oyun Planın",
+      "win": "Kazanma koşulu",
+      "role": "Takım rolü",
+      "spike": "Güç tepesi",
+      "lane": "Erken (lane)",
+      "matchup": "Matchup",
+      "mid": "Orta oyun",
+      "late": "Geç oyun",
+      "vs": "vs {{name}}",
+      "cs": "{{cs}} CS",
+      "csPace": "{{cs}} CS ({{pace}}/dk)"
+    }
+  },
+  "pickClarity": {
+    "clear": "Net seçim",
+    "edge": "Hafif önde · {{b}}'a karşı",
+    "close": "Yakın yarış: {{a}} / {{b}}"
   },
   "lobby": {
     "greeting": "Hoşgeldin, {{name}}!",
@@ -33,6 +88,7 @@
     "apiKeyHintEnd": "dosyasına",
     "tabChampions": "Şampiyonlarım",
     "tabStats": "İstatistiklerim",
+    "tabPool": "Havuz Geliştir",
     "gridEmpty": "Henüz veri yok — \"Maç geçmişini yükle\" butonuna tıkla.",
     "patchBadge": "Patch {{version}}",
     "metaBadge": "Meta: {{rel}}",
@@ -52,11 +108,82 @@
     "lockingIn": "Seçim kilitlendi — Build planı:",
     "planningMsg": "Lobi'desin — Champion Select'e girince öneriler otomatik görünecek",
     "noRecommendation": "Öneri için \"Maç geçmişini yükle\" butonuna tıkla",
+    "noRecommendationCoach": "Veri çok inceyse DraftBrain güvenli aday bulamayabilir. Rolünü seç, maç geçmişini yükle veya meta verisini güncelle.",
     "waiting": "Champion Select bekleniyor…",
     "hoverFailed": "Hover başarısız: {{err}}",
     "banComputing": "Ban önerisi hesaplanıyor…",
     "banSuggestions": "Ban önerileri:",
     "banOtp": "rakip OTP (%{{pct}})",
+    "scoutingTitle": "Lobby scouting",
+    "scoutingPartial": "ince veri",
+    "scoutingBanTargets": "Scouting ban hedefleri",
+    "scoutingProfiles": "Rakip profilleri",
+    "scoutGameplan": "Düşman planı",
+    "scoutPrimaryThreat": "Ana tehdit: {{champ}}",
+    "scoutWinCondition": {
+      "pick": "Pick komp",
+      "teamfight": "Teamfight komp",
+      "protect": "Protect komp",
+      "poke": "Poke komp",
+      "split": "Split push komp",
+      "mixed": "Karma komp"
+    },
+    "dataNoMeta": "Canlı meta yok · genel sıralama",
+    "dataNoMetaHint": "Şampiyon win/pick/ban oranları henüz bağlı değil — sıralama konfor + eşleşme + sinerjiye dayanıyor",
+    "dataNoMastery": "Maç geçmişi yüklenmedi",
+    "dataNoMasteryHint": "Mastery/maç verisi yok — konfor sinyali zayıf. Lobi'de \"Maç geçmişini yükle\"ye tıkla",
+    "packStale": "Veri paketi eski",
+    "packStaleHint": "Son üretim: {{time}}",
+    "packNoTimestamp": "Üretim zamanı bilinmiyor",
+    "packConfidence": "Paket {{conf}}",
+    "localFallback": "Yerel yedek",
+    "localFallbackHint": "Canlı/cloud kaynak yerine yerel seed sinyali aktif",
+    "noRiotKey": "Riot anahtarı yok · canlı maç verisi kapalı",
+    "noRiotKeyHint": "Riot prod anahtarı tanımlı değil — Match-V5 canlı maç toplama devre dışı; öneriler u.gg/Meraki/seed verisine dayanıyor",
+    "liveDataAge": "Canlı veri: {{age}}",
+    "liveDataAgeHint": "Son başarılı Match-V5 senkronu {{age}} önce — veri eskimiş olabilir",
+    "dataConfidence": "Veri {{conf}}",
+    "dataCoverageHint": "{{matchups}} matchup · {{builds}} build",
+    "missingSignal": {
+      "meta": "meta verisi yok",
+      "matchup": "matchup verisi yok",
+      "build": "build: genel"
+    },
+    "analyzing": "Öneri hesaplanıyor…",
+    "personalization": {
+      "no_signal": "Kişisel sinyal yok",
+      "warming_up": "Kişiselleştirme ısınıyor",
+      "active": "Kişisel öneriler aktif",
+      "needs_sync": "Feedback sync bekliyor"
+    },
+    "personalizationHint": {
+      "no_signal": "Feedback verdikçe DraftBrain küçük kişisel ayar yapar",
+      "warming_up": "{{polar}} polar feedback var; şampiyon bazlı eşik dolunca skora küçük etki eder",
+      "active": "{{active}} şampiyonda kişisel sinyal skora küçük etki ediyor",
+      "needs_sync": "{{pending}} feedback cloud sync bekliyor; yerel kişiselleştirme yine çalışır"
+    },
+    "confidence": {
+      "high": "yüksek",
+      "medium": "orta",
+      "low": "düşük",
+      "unknown": "bilinmiyor"
+    },
+    "threat": {
+      "high": "yüksek",
+      "medium": "orta",
+      "low": "düşük"
+    },
+    "rolePrompt": "Rolünü seç — öneriler ve ban'lar buna göre düzenlenir",
+    "roleAutoHint": "Rol otomatik algılandı",
+    "roleManualHint": "Rolü sen seçtin",
+    "roleTitle": "Rolün",
+    "roles": {
+      "top": "Üst",
+      "jungle": "Orman",
+      "middle": "Orta",
+      "bottom": "Alt",
+      "utility": "Destek"
+    },
     "phase": {
       "planning": "Lobi — Kuyruğa hazır ol",
       "ban_acting": "BAN SIRASI — Tehlikeli şampiyonu banla",
@@ -68,7 +195,10 @@
   },
   "heroCard": {
     "firstTime": "İlk kez oynuyor olabilirsin",
+    "mechanicalNoDraft": "Mekanik güçlü · bu sezon draft verisi yok",
     "lowConfidence": "Az veri — güven düşük",
+    "proHeat": "Pro %{{pct}}",
+    "proHeatHint": "Pro sahnesinde pick + ban oranı (Leaguepedia)",
     "keyHint": "[1] Öner  [Enter] Hover uygula",
     "selectHint": "[1-5] seç · Enter hover",
     "detail": "Detay ↓",
@@ -84,7 +214,285 @@
     "scoreSynergy": "Sinerji",
     "scoreMeta": "Meta",
     "phaseLine": "Erken {{early}}% · Orta {{mid}}% · Geç {{late}}%",
-    "enemyLabel": "Düşman: {{summary}}"
+    "enemyLabel": "Düşman: {{summary}}",
+    "planLabel": "Oyun Planı",
+    "scoresLabel": "Skorlar",
+    "planLane": "Lane",
+    "planMid": "Mid game",
+    "planFight": "Teamfight",
+    "planFallback": "Fallback",
+    "planWin": "Win condition",
+    "planSpike": "Spike",
+    "planCombo": "Combo",
+    "planClash": "Kompo riski",
+    "lossRiskLabel": "Kaybetme riski",
+    "detailCoachTitle": "Koç okuması",
+    "pillarWhy": "Neden",
+    "pillarLane": "Lane planı",
+    "pillarMidGame": "Mid game",
+    "pillarTeamfight": "Teamfight işi",
+    "pillarFallback": "Geriden plan",
+    "pillarRisk": "Nasıl kaybedersin",
+    "pillarData": "Veri güveni",
+    "dataSourceSummary": "{{source}} · {{conf}} güven · {{risk}} risk",
+    "matchupConfidence": "Matchup verisi: {{conf}}",
+    "buildConfidence": "Build verisi: {{conf}}",
+    "feedbackLabel": "Öneri feedback",
+    "feedbackThanks": "Feedback kaydedildi",
+    "feedbackGood": "Mantıklı",
+    "feedbackBad": "Kötü",
+    "feedbackPool": "Pool dışı",
+    "feedbackRisk": "Riskli"
+  },
+  "gamePlan": {
+    "title": "Takım Oyun Planı",
+    "partial": "Taslak tamamlandıkça netleşir",
+    "timeline": "Zaman Çizelgesi",
+    "winConditions": "Kazanma Koşulu",
+    "objectives": "Hedef Öncelikleri",
+    "enemyThreat": "Rakip Tehdidi",
+    "altPlan": "Alternatif Plan",
+    "stanceAdvantage": "Avantaj",
+    "stanceEven": "Eşit",
+    "stanceDisadvantage": "Dezavantaj"
+  },
+  "performance": {
+    "eyebrow": "Maç sonrası koç",
+    "title": "Son maçlardan ana ders",
+    "thinData": "ince veri",
+    "tiltRisk": "tilt riski",
+    "games": "{{n}} maç",
+    "form": "Form {{delta}}",
+    "csPerMin": "{{cs}} CS/dk",
+    "champLine": "{{games}} maç · {{wr}} WR · {{kda}} KDA",
+    "unknownRole": "Bilinmiyor"
+  },
+  "feedbackAnalytics": {
+    "eyebrow": "Feedback analizi",
+    "title": "Öneri kalitesi",
+    "window": "Son {{n}} gün",
+    "recentSignals": "{{n}} yeni sinyal",
+    "totalEvents": "{{n}} feedback",
+    "trackedChampions": "{{n}} şampiyon izleniyor",
+    "dislikedTitle": "Dikkat isteyen öneriler",
+    "dislikedLine": "{{sample}} sinyal · duygu {{sentiment}}",
+    "noDisliked": "Negatif trend biriken öneri yok"
+  },
+  "draftSimulator": {
+    "eyebrow": "Draft simülatörü",
+    "title": "Bu hamle kompozisyonu nasıl değiştirir?",
+    "localOnly": "Yerel",
+    "scoreDelta": "Delta {{score}}",
+    "risk": "Risk {{level}}",
+    "whyNot": "Neden alternatif?",
+    "riskLevel": {
+      "low": "düşük",
+      "medium": "orta",
+      "high": "yüksek"
+    },
+    "factor": {
+      "damage_balance": "Hasar dengesi",
+      "engage": "Engage",
+      "disengage": "Disengage",
+      "frontline": "Ön saf",
+      "peel": "Peel",
+      "scaling": "Scaling",
+      "lane_pressure": "Koridor baskısı",
+      "objective_identity": "Obje kimliği",
+      "execution_risk": "Uygulama riski",
+      "blind_safety": "Blind güvenliği",
+      "synergy": "Sinerji"
+    }
+  },
+  "draftFork": {
+    "eyebrow": "Draft fork",
+    "title": "İki pick arasında karar",
+    "optionLine": "{{score}} · risk {{risk}}",
+    "shared": "İkisi de güçlendirir",
+    "diverging": "Ayrışan faktörler"
+  },
+  "dataPipeline": {
+    "chip": "Pipeline {{status}}",
+    "gaps": "Açıklar",
+    "actions": "Aksiyonlar",
+    "status": {
+      "healthy": "sağlıklı",
+      "degraded": "eksik",
+      "stale": "eski",
+      "insufficient": "yetersiz"
+    },
+    "confidence": {
+      "high": "yüksek",
+      "medium": "orta",
+      "low": "düşük"
+    },
+    "gap": {
+      "matchup_coverage_low": "Matchup kapsaması düşük",
+      "build_coverage_low": "Build kapsaması düşük",
+      "rate_coverage_low": "Meta oran kapsaması düşük",
+      "role_coverage_low": "Rol kapsaması düşük",
+      "patch_stale": "Patch eski",
+      "source_stale": "Kaynak eski",
+      "high_risk_source": "Yüksek riskli kaynak"
+    },
+    "severity": {
+      "low": "düşük",
+      "medium": "orta",
+      "high": "yüksek"
+    },
+    "action": {
+      "refresh_rates": "Meta oranlarını yenile",
+      "refresh_builds": "Build verisini yenile",
+      "refresh_matchups": "Matchup verisini yenile",
+      "use_last_good_cache": "Son iyi cache'i kullan",
+      "manual_seed_required": "Manuel seed gerekli"
+    },
+    "cacheAction": {
+      "promote": "promote edildi",
+      "keep_current": "korundu",
+      "reject": "reddedildi"
+    },
+    "dataTrajectory": {
+      "healthy": "Veri sağlıklı",
+      "enriching": "Veri sağlıklı, zenginleşiyor",
+      "warming_up": "Veri büyüyor, hedefe yaklaşıyor",
+      "stagnant": "Veri durağan",
+      "regressing": "Veri geriledi",
+      "deferred": "Ölçüm ertelendi",
+      "unknown": "Henüz ölçülmedi"
+    },
+    "coverageExpansion": {
+      "risk": {
+        "champ_select_active": "Champ-select aktif (ertelendi)",
+        "single_player_overload": "Tek oyuncuya aşırı yük",
+        "thin_data": "İnce veri",
+        "no_open_frontier": "Açık frontier yok"
+      },
+      "level": {
+        "low": "düşük",
+        "medium": "orta",
+        "high": "yüksek"
+      },
+      "dataState": {
+        "rich": "zengin",
+        "thin": "ince",
+        "insufficient": "yetersiz"
+      }
+    }
+  },
+  "counterPick": {
+    "title": "Rakibe karşı havuzun",
+    "games": "{{n}} maç",
+    "strongPhase": "güçlü: {{phase}}",
+    "phase": { "early": "erken", "mid": "orta", "late": "geç" }
+  },
+  "teamComp": {
+    "title": "Takım Kompozisyonu",
+    "ally": "Bizim Takım",
+    "enemy": "Rakip Takım",
+    "tank": "Tank",
+    "fighter": "Dövüşçü",
+    "mage": "Büyücü",
+    "marksman": "Nişancı",
+    "assassin": "Suikastçı",
+    "support": "Destek"
+  },
+  "comboBoard": {
+    "title": "Kombolar",
+    "type_engage_followup": "Engage takibi",
+    "type_pick_potential": "Pick",
+    "type_zone_control": "Zone kontrol",
+    "type_peel_chain": "Peel zinciri",
+    "type_wombo": "Wombo"
+  },
+  "champDetail": {
+    "noData": "Bu şampiyon için detay verisi yok",
+    "difficulty": "Zorluk",
+    "hasCc": "Sert CC var",
+    "noCc": "Sert CC yok",
+    "powerCurve": "Güç Eğrisi",
+    "early": "Erken",
+    "mid": "Orta",
+    "late": "Geç"
+  },
+  "draftFlow": {
+    "title": "Draft Akışı",
+    "yourPick": "Senin sıran: {{n}}/10"
+  },
+  "verdict": {
+    "favorable": "Lehte",
+    "even": "Dengeli",
+    "risky": "Riskli",
+    "topAction": "İlk hamle:",
+    "teamNeeds": "Takıma öner:"
+  },
+  "counterItems": {
+    "title": "Karşı Item"
+  },
+  "laneMatchup": {
+    "title": "Lane Eşleşmesi",
+    "inferred": "Tahmini rakip",
+    "inferredHint": "Pozisyon bilgisi yok — rakip arketipe göre tahmin edildi"
+  },
+  "poolBuilder": {
+    "empty": "Bu rol için öneri yok",
+    "ease": "Kolaylık {{n}}/5",
+    "metaTier": "Meta {{tier}}",
+    "role_top": "Üst",
+    "role_jungle": "Orman",
+    "role_middle": "Orta",
+    "role_bottom": "Alt (ADC)",
+    "role_utility": "Destek"
+  },
+  "poolCoach": {
+    "eyebrow": "Havuz koçu",
+    "title": "Champion Pool Coach",
+    "coverageTitle": "Havuz kapsaması",
+    "dataState": {
+      "rich": "veri yeterli",
+      "thin": "ince veri"
+    },
+    "thinHint": "Konfor sinyali zayıf; daha çok maç/mastery geldikçe plan netleşir. Bu ekranda konfor uydurulmaz.",
+    "coverage": {
+      "ok": "var",
+      "missing": "eksik",
+      "role_covered": "Rol kapsaması",
+      "has_blind_safe": "Blind güvenli",
+      "has_counter_flex": "Counter esnekliği",
+      "has_comfort": "Konfor pick'i",
+      "identity_variety": "Kimlik çeşitliliği",
+      "execution_risk": "Uygulama riski"
+    },
+    "executionRisk": {
+      "low": "düşük",
+      "medium": "orta",
+      "high": "yüksek"
+    },
+    "gapsTitle": "Öncelikli açıklar",
+    "noGaps": "Belirgin kapsama açığı yok.",
+    "noTraining": "Bu rol için net 3 şampiyon planı çıkmadı.",
+    "severity": {
+      "low": "düşük",
+      "medium": "orta",
+      "high": "yüksek"
+    },
+    "gap": {
+      "role_coverage": "Rol kapsaması",
+      "blind_safe": "Blind güvenli pick",
+      "counter_flex": "Counter/flex cevap",
+      "comfort": "Konfor pick'i",
+      "execution_risk": "Mekanik tutarlılık",
+      "identity_variety": "Takım kimliği"
+    },
+    "trainingTitle": "3 şampiyonluk gelişim planı",
+    "drillsTitle": "Antrenman",
+    "progressTitle": "Son 30 günde ilerleme",
+    "progressGain": "+{{pts}} mastery puanı",
+    "training": {
+      "blind_safe": "Blind-safe temel",
+      "counter_pick": "Tepki/counter pick",
+      "meta_pick": "Meta + kolay giriş"
+    }
   },
   "build": {
     "loading": "Build verisi yükleniyor…",
@@ -94,7 +502,9 @@
     "skillOrder": "Skill Order",
     "summoners": "Summoners",
     "secondaryRunes": "Secondary Runes",
-    "statShards": "Stat Shards"
+    "statShards": "Stat Shards",
+    "generalBadge": "Genel öneri",
+    "generalHint": "Arketibe göre genel build — kanıtlanmış winrate değil"
   },
   "draftPlan": {
     "winCondition": "Galibiyet Koşulu",
@@ -105,6 +515,7 @@
     "pickSafety": "Pick Güvenliği",
     "execDifficulty": "Execution Zorluğu",
     "comboPlans": "Combo Planları",
+    "comboMechanics": "Mekanik (nasıl yapılır)",
     "teamNeed": "Takım İhtiyacı",
     "risks": "Riskler",
     "pickPosition": "Pick Pozisyonu",
@@ -158,12 +569,13 @@
     },
     "step4": {
       "title": "Hazır!",
-      "body": "\"Maç geçmişini yükle\" butonuna bas ve champion select'e gir. Öneriler otomatik açılır.",
+      "body": "\"Başla!\"a bas — League açıksa maç geçmişin otomatik yüklenir. Sonra champion select'e gir, öneriler kendiliğinden açılır.",
       "hint": "İpucu: Uygulama her zaman üstte kalır, champion select'i kaçırmaz."
     },
     "back": "Geri",
     "next": "İleri",
     "start": "Başla!",
+    "preparing": "Verilerin hazırlanıyor…",
     "disclaimer": "Champ Select Assistant, Riot Games tarafından onaylanmamıştır ve Riot Games'in ya da Riot Games mülklerini üreten veya yöneten kişilerin görüş ya da düşüncelerini yansıtmaz. Riot Games ve ilgili tüm mülkler, Riot Games, Inc.'in ticari markaları veya tescilli ticari markalarıdır."
   },
   "settings": {
@@ -177,6 +589,11 @@
     "sizeWide": "Geniş (1100x700)",
     "weightsSection": "Öneri Ağırlıkları",
     "weightsHint": "Her etkeni bağımsız ayarla — önemsemediğini düşür, istediğini yükselt. Yüzdeler kalanına göre otomatik dengelenir.",
+    "presetsLabel": "Hazır profiller",
+    "preset_balanced": "Dengeli",
+    "preset_soloq": "SoloQ",
+    "preset_flex": "Flex",
+    "preset_otp": "OTP",
     "weightsRelativeNote": "Ağırlıklar göreceli · otomatik dengelenir",
     "weightComfort": "Mastery (Comfort)",
     "weightLaneCounter": "Lane Counter",
@@ -202,10 +619,18 @@
     "soundSection": "Ses",
     "soundsEnabled": "Ses efektleri (hover/öneri)",
     "metaSection": "Meta Verisi",
-    "syncMetaBtn": "Meta'yı güncelle (Meraki)",
-    "syncMetaDone": "Güncellendi ✓",
+    "syncMetaBtn": "Veri pipeline'ını yenile",
+    "syncMetaDone": "Pipeline yenilendi ✓",
     "syncMetaFail": "Hata — ağ bağlantısını kontrol et",
     "syncMetaSyncing": "Güncelleniyor…",
+    "syncPipelineSummary": "Riot {{riot}} maç · DDragon {{ddragon}} · meta {{rates}} · build {{builds}} · matchup {{matchups}} · cache {{cache}} · durum {{status}}",
+    "syncPipelineFail": "Pipeline yenileme hatası · {{errors}} hata",
+    "syncFeedbackBtn": "Feedback'i cloud'a gönder",
+    "syncFeedbackSyncing": "Feedback gönderiliyor…",
+    "syncFeedbackSummary": "{{synced}} gönderildi · {{failed}} hata · {{skipped}} hash yok",
+    "syncFeedbackOffline": "Cloud endpoint yok; feedback yerelde bekliyor",
+    "syncFeedbackNothing": "Gönderilecek feedback yok",
+    "syncFeedbackFail": "Feedback sync hatası — tekrar denenebilir",
     "languageSection": "Dil / Language",
     "language": "Dil",
     "languageTr": "Türkçe",

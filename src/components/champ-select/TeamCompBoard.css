@@ -1,0 +1,57 @@
+.team-comp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+}
+
+.team-comp__label {
+  font-family: var(--font-display);
+  font-size: var(--font-size-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--teal-bright);
+}
+
+.team-comp__cols { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.team-comp__col { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+.team-comp__col-title {
+  font-family: var(--font-display);
+  font-size: var(--font-size-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+}
+
+.team-comp__roles { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.team-comp__chip {
+  font-size: var(--font-size-xs);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+.team-comp__muted { font-size: var(--font-size-xs); color: var(--text-muted); }
+
+/* AP/AD split bar */
+.team-comp__dmg { display: flex; height: 6px; border-radius: var(--radius-pill); overflow: hidden; background: var(--surface-4); }
+.team-comp__dmg-ap { background: linear-gradient(90deg, var(--info), var(--teal)); }
+.team-comp__dmg-ad { background: linear-gradient(90deg, var(--gold), var(--gold-bright)); }
+
+.team-comp__summary { font-size: var(--font-size-xs); color: var(--text-secondary); line-height: var(--line-height-normal); }
+
+.team-comp__gaps { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.team-comp__gap {
+  font-size: var(--font-size-xs);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  color: var(--danger);
+  background: rgba(240, 80, 110, 0.1);
+  border: 1px solid rgba(240, 80, 110, 0.35);
+  white-space: nowrap;
+}

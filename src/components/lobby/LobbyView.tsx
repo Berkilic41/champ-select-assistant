@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from '../../lib/host';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { useSummonerData } from '../../hooks/useSummonerData';
 import { ChampionGrid } from '../ChampionGrid';
 import { StatsView } from './StatsView';
+import { PoolBuilder } from './PoolBuilder';
 import './LobbyView.css';
 
 interface Props {
@@ -13,7 +14,7 @@ interface Props {
   platformRegion: string;
 }
 
-type Tab = 'champions' | 'stats';
+type Tab = 'champions' | 'stats' | 'pool';
 
 function parseSummoner(summonerName: string): { gameName: string; tagLine: string } {
   const sep = summonerName.indexOf('#');
@@ -26,7 +27,7 @@ function parseSummoner(summonerName: string): { gameName: string; tagLine: strin
 
 function ErrorBanner({ error }: { error: string }) {
   return (
-    <div className="lobby__error-banner">
+    <div className="lobby__error">
       {error}
     </div>
   );
@@ -120,13 +121,25 @@ export const LobbyView: React.FC<Props> = ({ summonerName, platformRegion }) => 
         >
           {t('lobby.tabStats')}
         </button>
+        <button
+          role="tab"
+          aria-selected={activeTab === 'pool'}
+          className={`lobby-tab${activeTab === 'pool' ? ' lobby-tab--active' : ''}`}
+          onClick={() => setActiveTab('pool')}
+          type="button"
+        >
+          {t('lobby.tabPool')}
+        </button>
       </div>
 
       <div className="lobby__grid-wrap">
-        {activeTab === 'champions'
-          ? <ChampionGrid stats={stats} masteries={masteries} champMap={champMap} isLoading={loading} />
-          : <StatsView stats={stats} masteries={masteries} champMap={champMap} />
-        }
+        {activeTab === 'champions' ? (
+          <ChampionGrid stats={stats} masteries={masteries} champMap={champMap} isLoading={loading} />
+        ) : activeTab === 'stats' ? (
+          <StatsView stats={stats} masteries={masteries} champMap={champMap} />
+        ) : (
+          <PoolBuilder />
+        )}
       </div>
     </div>
   );

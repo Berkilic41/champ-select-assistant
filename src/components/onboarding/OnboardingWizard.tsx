@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from '../../lib/host';
 import { useTranslation } from 'react-i18next';
 import { Swords, ShieldCheck, BrainCircuit, Gamepad2 } from 'lucide-react';
 import './OnboardingWizard.css';
 
 interface Props {
-  onComplete: () => void;
+  /** Called when the wizard finishes. `syncOk` is true when the best-effort LCU
+   *  data pull succeeded (League running), false when it failed (League closed). */
+  onComplete: (syncOk: boolean) => void;
 }
 
 const STEP_ICONS = [Swords, ShieldCheck, BrainCircuit, Gamepad2];
@@ -14,11 +16,20 @@ const STEP_KEYS = ['step1', 'step2', 'step3', 'step4'] as const;
 export const OnboardingWizard: React.FC<Props> = ({ onComplete }) => {
   const { t } = useTranslation();
   const [step, setStep] = useState(0);
+  const [preparing, setPreparing] = useState(false);
   const isLast = step === STEP_KEYS.length - 1;
 
   const handleDone = async () => {
     await invoke('complete_onboarding').catch(() => {});
-    onComplete();
+    // Best-effort: pull mastery + match history from the running LCU so a brand-new
+    // user lands with personalized data instead of an empty champ-select (Faz C).
+    // Fails fast (and silently) if League isn't running — lobby still offers sync.
+    setPreparing(true);
+    const syncOk = await invoke('sync_lcu_player_data', {})
+      .then(() => true)
+      .catch(() => false);
+    setPreparing(false);
+    onComplete(syncOk);
   };
 
   const key = STEP_KEYS[step];
@@ -51,8 +62,13 @@ export const OnboardingWizard: React.FC<Props> = ({ onComplete }) => {
           <button
             className="onboarding-btn onboarding-btn--next"
             onClick={isLast ? handleDone : () => setStep(prev => prev + 1)}
+            disabled={preparing}
           >
-            {isLast ? t('onboarding.start') : t('onboarding.next')}
+            {preparing
+              ? t('onboarding.preparing')
+              : isLast
+                ? t('onboarding.start')
+                : t('onboarding.next')}
           </button>
         </div>
         <p className="onboarding-disclaimer">{t('onboarding.disclaimer')}</p>

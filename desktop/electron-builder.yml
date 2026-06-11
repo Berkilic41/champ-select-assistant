@@ -1,0 +1,50 @@
+# electron-builder — Windows paketleme (NSIS). Doğrulama: `pnpm dist:dir` ile
+# unpacked build üret + exe'yi CSA_SMOKE=1 ile koştur (paketli yol çözümlemesi
+# findUp'ın resources/ fallback'lerini kullanır — paths.ts).
+#
+# Updater BİLİNÇLİ yok: electron-updater publish hedefi (GitHub Releases vb.)
+# ister; release altyapısı kurulunca ayrı dilimde eklenecek (sahte wiring yok).
+
+appId: com.champ-select-assistant.desktop
+productName: Champ Select Assistant
+directories:
+  output: dist
+
+files:
+  - out/**/*
+  - package.json
+
+# Native modül yok (node:sqlite builtin; ws saf JS) → rebuild adımı gereksiz.
+npmRebuild: false
+
+extraResources:
+  # csa-core WASM paketi (dev: ../core/pkg → paketli: resources/core-pkg).
+  - from: ../core/pkg
+    to: core-pkg
+    filter:
+      - "**/*"
+      - "!.gitignore"
+  # refinery migration'ları — artık desktop sahipliğinde (src-tauri emekli).
+  - from: resources/migrations
+    to: migrations
+  # Bundled seed'ler (paketli: resources/seeds/**) — data-pipeline seedFile().
+  - from: resources/seeds
+    to: seeds
+  # Pinned Riot kök CA + placeholder + tray/pencere ikonu (resources kökü).
+  - from: resources/riotgames.pem
+    to: riotgames.pem
+  - from: resources/placeholder.html
+    to: placeholder.html
+  - from: resources/icon.ico
+    to: icon.ico
+
+win:
+  icon: resources/icon.ico
+  target:
+    - target: nsis
+      arch:
+        - x64
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true

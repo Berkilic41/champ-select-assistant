@@ -1,0 +1,146 @@
+.draft-sim {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  box-shadow: var(--shadow-sm);
+}
+
+.draft-sim__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.draft-sim__eyebrow {
+  margin: 0;
+  color: var(--teal-bright);
+  font-size: var(--font-size-xs);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.draft-sim__title {
+  margin: 2px 0 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
+  font-weight: var(--weight-bold);
+}
+
+.draft-sim__badge,
+.draft-sim__score {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  background: var(--surface-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 2px var(--space-2);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.draft-sim__list {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.draft-sim__row {
+  display: grid;
+  grid-template-columns: 20px auto 1fr;
+  gap: var(--space-2);
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.draft-sim__rank {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  background: var(--surface-3);
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--weight-bold);
+}
+
+.draft-sim__body {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.draft-sim__row-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.draft-sim__row-head strong {
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  line-height: 1.2;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.draft-sim__coach,
+.draft-sim__why-not {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  line-height: 1.35;
+}
+
+.draft-sim__why-not span {
+  color: var(--text-primary);
+  font-weight: var(--weight-semibold);
+}
+
+.draft-sim__meta,
+.draft-sim__factors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.draft-sim__meta span,
+.draft-sim__factor {
+  color: var(--text-muted);
+  background: var(--surface-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 2px var(--space-2);
+  font-size: var(--font-size-xs);
+  line-height: 1.25;
+}
+
+.draft-sim__risk--low {
+  color: var(--success);
+}
+
+.draft-sim__risk--medium {
+  color: var(--warning);
+}
+
+.draft-sim__risk--high {
+  color: var(--danger);
+}
+
+.draft-sim__factor--up {
+  color: var(--success);
+}
+
+.draft-sim__factor--down {
+  color: var(--warning);
+}

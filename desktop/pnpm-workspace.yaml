@@ -1,0 +1,6 @@
+allowBuilds:
+  better-sqlite3: true
+  electron: true
+  # Squirrel.Windows kullanılmıyor (hedef NSIS) → build script'i gereksiz.
+  electron-winstaller: false
+  esbuild: true

@@ -29,10 +29,6 @@
   font-family: var(--font-display); font-size: var(--font-size-sm);
   font-weight: var(--weight-black); width: 18px; text-align: center;
 }
-.quick-pick-reason {
-  font-size: var(--font-size-xs); color: var(--text-muted);
-  max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
 .quick-pick-conf {
   font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--teal-bright);
   letter-spacing: 0.08em; min-width: 30px; text-align: right;

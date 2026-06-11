@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>CSA Electron Host — P1.2</title>
+    <style>
+      body { font-family: system-ui, sans-serif; background: #0f1218; color: #e8e8ea; margin: 3rem; }
+      h1 { font-size: 1.2rem; }
+      code { background: #1b2030; padding: 2px 6px; border-radius: 4px; }
+      .ok { color: #5dd97c; } .bad { color: #ff6b6b; }
+      pre { background: #151a26; padding: 1rem; border-radius: 8px; }
+    </style>
+  </head>
+  <body>
+    <h1>champ-select-assistant — Electron host (P1.2 iskelet)</h1>
+    <p>Gerçek arayüz P1.3'te taşınacak. Bu sayfa main → preload → IPC hattını doğrular.</p>
+    <p>core.wasm: <code id="smoke">bekleniyor…</code></p>
+    <pre id="status">durum bekleniyor…</pre>
+    <script>
+      (async () => {
+        const smokeEl = document.getElementById("smoke");
+        const statusEl = document.getElementById("status");
+        try {
+          smokeEl.textContent = await window.api.coreSmoke();
+          smokeEl.className = "ok";
+        } catch (err) {
+          smokeEl.textContent = String(err);
+          smokeEl.className = "bad";
+        }
+        const render = (s) => (statusEl.textContent = JSON.stringify(s, null, 2));
+        render(await window.api.appStatus());
+        window.api.on("lcu:status", async () => render(await window.api.appStatus()));
+      })();
+    </script>
+  </body>
+</html>

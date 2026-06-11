@@ -1,0 +1,38 @@
+[package]
+name = "csa-core"
+version = "0.1.0"
+edition = "2021"
+description = "Pure, I/O-free recommendation engine core — shared by the desktop (Electron, via WASM) and the Cloudflare edge worker (via WASM)."
+
+[lib]
+name = "csa_core"
+# rlib: linked natively by the desktop crate + `cargo test`.
+# cdylib: required by wasm-pack / wasm-bindgen for the WASM artifact.
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# anyhow: ergonomic error type for KB loading (DraftKnowledgeBase::load) and other
+# fallible-but-pure engine paths. wasm-compatible (no I/O).
+anyhow = "1"
+tracing = "0.1"
+# ts-rs: shared Rust→TypeScript DTO codegen for engine output types. The generated
+# `.ts` is the single source of truth for the desktop renderer (and later the edge
+# worker). Its export machinery is `#[cfg(test)]`-only, so the WASM artifact stays
+# I/O-free; only the lightweight `TS` trait impl ships in WASM.
+ts-rs = "10"
+
+# wasm-bindgen is only needed when compiling to WASM; native builds (desktop
+# crate, `cargo test`) must NOT pull it in.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+
+[dev-dependencies]
+# insta: snapshot testleri (src-tauri'den göçen snapshot_tests.rs) — yalnız test
+# derlemesinde; WASM artefaktına girmez.
+insta = { version = "1", features = ["json"] }
+
+[profile.release]
+opt-level = "z"
+lto = true

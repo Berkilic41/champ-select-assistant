@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import React, { useEffect, useRef, useState } from 'react';
+import { invoke } from './lib/host';
+import { listen } from './lib/host';
 import { useTranslation } from 'react-i18next';
 import i18n from './i18n';
 import { AppShell } from './components/AppShell';
@@ -12,6 +13,9 @@ import { useSettings } from './hooks/useSettings';
 import { useToast } from './hooks/useToast';
 import { AppStatus } from './types/app';
 
+// LCU gameflow phases that mean "a match is live" → show the in-game overlay.
+const IN_GAME_PHASES = ['GameStart', 'InProgress', 'Reconnect'];
+
 function App(): React.ReactElement {
   const { t } = useTranslation();
   const { status: lcuStatus, retry } = useLcuStatus();
@@ -21,6 +25,11 @@ function App(): React.ReactElement {
   const { toasts, addToast, removeToast } = useToast();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [onboardingDone, setOnboardingDone] = useState(true);
+  // True while we briefly hold the champ-select view after an LCU hiccup, so a
+  // momentary disconnect doesn't wipe the live coaching mid-draft (Faz B).
+  const [reconnecting, setReconnecting] = useState(false);
+  const [gamePhase, setGamePhase] = useState<string>('');
+  const lcuErrorAtRef = useRef(0);
 
   // Check onboarding status on mount
   useEffect(() => {
@@ -41,18 +50,105 @@ function App(): React.ReactElement {
     }
   }, [settings.language, loaded]);
 
+  // Remember when the backend last reported an LCU communication error, to tell a
+  // transient hiccup apart from a clean champ-select end.
   useEffect(() => {
+    const un = listen('lcu-error', () => {
+      lcuErrorAtRef.current = Date.now();
+    });
+    return () => {
+      un.then((fn) => fn());
+    };
+  }, []);
+
+  // Track the LCU gameflow phase so we can switch to the in-game overlay when a match
+  // starts and back to the lobby when it ends. The backend's gameflow watcher emits
+  // this on every phase change.
+  useEffect(() => {
+    const un = listen<string>('gameflow-phase', (e) => setGamePhase(e.payload ?? ''));
+    return () => {
+      un.then((fn) => fn());
+    };
+  }, []);
+
+  useEffect(() => {
+    // 1) A live match takes precedence over everything → show the in-game overlay
+    //    (game plan + macro timers). This is what makes alt-tab review work.
+    if (IN_GAME_PHASES.includes(gamePhase)) {
+      if (status.kind !== 'in-game') {
+        const summonerName =
+          status.kind === 'champ-select'
+            ? status.summonerName
+            : lcuStatus.kind === 'lobby'
+              ? lcuStatus.summonerName
+              : 'Summoner';
+        setReconnecting(false);
+        setStatus({ kind: 'in-game', summonerName });
+      }
+      return;
+    }
+
+    // 2) Champ-select is active → live draft coaching.
     if (isActive && lcuStatus.kind === 'lobby') {
       setStatus({
         kind: 'champ-select',
         summonerName: lcuStatus.summonerName,
         port: lcuStatus.port,
       });
-    } else if (!isActive && status.kind === 'champ-select') {
+      setReconnecting(false);
+      return;
+    }
+
+    // 3) Leaving champ-select: a momentary LCU drop holds the coaching for a grace
+    //    window so a hiccup doesn't wipe the draft mid-pick.
+    if (!isActive && status.kind === 'champ-select') {
+      const transientDrop = Date.now() - lcuErrorAtRef.current < 2000;
+      if (transientDrop) {
+        setReconnecting(true);
+        const id = setTimeout(() => {
+          setReconnecting(false);
+          setStatus(lcuStatus);
+        }, 8000);
+        return () => clearTimeout(id);
+      }
+      setStatus(lcuStatus); // clean session end (dodge / finished) → leave at once
+      return;
+    }
+
+    // 4) The match just ended (we were in-game) → drop back to the lobby/LCU status.
+    if (status.kind === 'in-game') {
       setStatus(lcuStatus);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isActive, lcuStatus]);
+  }, [isActive, lcuStatus, gamePhase]);
+
+  // In-game window behaviour, fired once per transition:
+  //   • auto_hide_in_game ON  → hide the window entirely (zero distraction).
+  //   • auto_hide_in_game OFF → compact overlay pinned top-right, always-on-top, so
+  //     the detailed game plan floats over a BORDERLESS game (no alt-tab needed).
+  // On match end we restore the user's window size + center.
+  const inGameWindowRef = useRef<'none' | 'hidden' | 'overlay'>('none');
+  useEffect(() => {
+    const inGame = IN_GAME_PHASES.includes(gamePhase);
+    if (inGame && inGameWindowRef.current === 'none') {
+      if (settings.auto_hide_in_game) {
+        inGameWindowRef.current = 'hidden';
+        invoke('hide_window').catch(() => {});
+      } else {
+        inGameWindowRef.current = 'overlay';
+        invoke('set_overlay_mode', { enabled: true }).catch(() => {});
+      }
+    } else if (!inGame && inGameWindowRef.current !== 'none') {
+      const was = inGameWindowRef.current;
+      inGameWindowRef.current = 'none';
+      if (was === 'hidden') {
+        invoke('show_window').catch(() => {});
+      } else {
+        invoke('set_overlay_mode', { enabled: false }).catch(() => {});
+        invoke('set_window_size', { preset: settings.window_size }).catch(() => {});
+      }
+    }
+  }, [gamePhase, settings.auto_hide_in_game, settings.window_size]);
 
   const handleSaveSettings = async (next: typeof settings) => {
     await saveSettings(next);
@@ -62,9 +158,13 @@ function App(): React.ReactElement {
   if (!onboardingDone) {
     return (
       <OnboardingWizard
-        onComplete={() => {
+        onComplete={(syncOk) => {
           setOnboardingDone(true);
-          addToast(t('app.welcomeReady'), 'success');
+          if (syncOk) {
+            addToast(t('app.welcomeReady'), 'success');
+          } else {
+            addToast(t('app.welcomeNoLeague'), 'info');
+          }
         }}
       />
     );
@@ -78,6 +178,7 @@ function App(): React.ReactElement {
         onSettingsOpen={() => setSettingsOpen(true)}
         addToast={addToast}
         settings={settings}
+        reconnecting={reconnecting}
       />
       {settingsOpen && loaded && (
         <SettingsPanel

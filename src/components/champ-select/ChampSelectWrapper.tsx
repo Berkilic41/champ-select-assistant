@@ -1,10 +1,19 @@
 import React, { useEffect, useCallback, useState } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from '../../lib/host';
 import { useTranslation } from 'react-i18next';
 import { useChampSelect } from '../../hooks/useChampSelect';
 import { detectPhaseView } from '../../hooks/useChampSelectPhase';
 import { ChampSelectScreen } from './ChampSelectScreen';
 import { BanSuggestion, EnemyPoolSummary } from '../../types/recommendation';
+import type { ScoutingReport } from '../../types/generated/ScoutingReport';
+import type { DataSourceRegistryReport } from '../../types/generated/DataSourceRegistryReport';
+import type { DraftBrainQualityReport } from '../../types/generated/DraftBrainQualityReport';
+import type { FeedbackAnalytics } from '../../types/generated/FeedbackAnalytics';
+import type { FeedbackObservabilityReport } from '../../types/generated/FeedbackObservabilityReport';
+import type { PerformanceReport } from '../../types/generated/PerformanceReport';
+import type { DraftSimResult } from '../../types/generated/DraftSimResult';
+import type { PipelineQualityReport } from '../../types/generated/PipelineQualityReport';
+import type { DataTrajectoryView } from '../../types/generated/DataTrajectoryView';
 import './ChampSelectWrapper.css';
 
 interface ChampionRecord {
@@ -21,10 +30,19 @@ interface Props {
 export const ChampSelectWrapper: React.FC<Props> = ({ addToast }) => {
   const { t } = useTranslation();
   const [puuid, setPuuid] = useState<string>('');
-  const { session, recommendations, loading, error } = useChampSelect(puuid);
+  const { session, recommendations, lockedAnalysis, gamePlan, counterPicks, teamComp, comboBoard, draftVerdict, counterItems, laneMatchup, role, roleSource, setRole, loading, error } = useChampSelect(puuid);
   const [champMap, setChampMap] = useState<Map<number, string>>(new Map());
   const [banSuggestions, setBanSuggestions] = useState<BanSuggestion[]>([]);
   const [enemyPools, setEnemyPools] = useState<EnemyPoolSummary[]>([]);
+  const [scoutingReport, setScoutingReport] = useState<ScoutingReport | null>(null);
+  const [dataRegistryReport, setDataRegistryReport] = useState<DataSourceRegistryReport | null>(null);
+  const [pipelineQualityReport, setPipelineQualityReport] = useState<PipelineQualityReport | null>(null);
+  const [dataTrajectory, setDataTrajectory] = useState<DataTrajectoryView | null>(null);
+  const [draftBrainQualityReport, setDraftBrainQualityReport] = useState<DraftBrainQualityReport | null>(null);
+  const [feedbackObservabilityReport, setFeedbackObservabilityReport] = useState<FeedbackObservabilityReport | null>(null);
+  const [feedbackAnalytics, setFeedbackAnalytics] = useState<FeedbackAnalytics | null>(null);
+  const [performanceReport, setPerformanceReport] = useState<PerformanceReport | null>(null);
+  const [draftSimulation, setDraftSimulation] = useState<DraftSimResult[] | null>(null);
 
   // Resolve the active player's puuid once on mount. Empty string is acceptable
   // — backend gracefully returns empty mastery/stats — but causes empty recs.
@@ -40,13 +58,64 @@ export const ChampSelectWrapper: React.FC<Props> = ({ addToast }) => {
       .catch(() => setChampMap(new Map()));
   }, []);
 
+  const refreshQualityReports = useCallback(() => {
+    invoke<DraftBrainQualityReport>('get_draft_brain_quality_report')
+      .then(setDraftBrainQualityReport)
+      .catch(() => setDraftBrainQualityReport(null));
+    invoke<DataSourceRegistryReport>('get_data_source_registry')
+      .then(setDataRegistryReport)
+      .catch(() => setDataRegistryReport(null));
+    invoke<PipelineQualityReport>('get_pipeline_quality_report')
+      .then(setPipelineQualityReport)
+      .catch(() => setPipelineQualityReport(null));
+    invoke<DataTrajectoryView>('get_data_trajectory')
+      .then(setDataTrajectory)
+      .catch(() => setDataTrajectory(null));
+    invoke<FeedbackObservabilityReport>('get_feedback_observability')
+      .then(setFeedbackObservabilityReport)
+      .catch(() => setFeedbackObservabilityReport(null));
+    invoke<FeedbackAnalytics>('get_feedback_analytics', { windowDays: 7 })
+      .then(setFeedbackAnalytics)
+      .catch(() => setFeedbackAnalytics(null));
+  }, []);
+
+  useEffect(() => {
+    refreshQualityReports();
+  }, [session?.phase, recommendations.length, refreshQualityReports]);
+
+  useEffect(() => {
+    if (!puuid) {
+      setPerformanceReport(null);
+      return;
+    }
+    invoke<PerformanceReport>('get_performance_report', { puuid })
+      .then(setPerformanceReport)
+      .catch(() => setPerformanceReport(null));
+  }, [puuid]);
+
+  useEffect(() => {
+    if (!session || recommendations.length === 0) {
+      setDraftSimulation(null);
+      return;
+    }
+    const candidateIds = recommendations.slice(0, 5).map((rec) => rec.champion_id);
+    invoke<DraftSimResult[]>('get_draft_simulation', {
+      sessionJson: session,
+      candidateIds,
+    })
+      .then(setDraftSimulation)
+      .catch(() => setDraftSimulation(null));
+  }, [session, recommendations]);
+
   // Fetch ban suggestions and enemy pools when it is the local player's ban turn.
   useEffect(() => {
     if (!session || session.action_type !== 'ban') {
       setBanSuggestions([]);
       setEnemyPools([]);
+      setScoutingReport(null);
       return;
     }
+    setScoutingReport(null);
     invoke<BanSuggestion[]>('get_ban_suggestions', {
       sessionJson: session,
       puuid,
@@ -54,8 +123,24 @@ export const ChampSelectWrapper: React.FC<Props> = ({ addToast }) => {
 
     invoke<EnemyPoolSummary[]>('get_enemy_champion_pools', {
       sessionJson: session,
-    }).then(setEnemyPools).catch(() => setEnemyPools([]));
-  }, [session?.action_type, session?.my_bans.length, session?.their_bans.length, puuid]);
+    }).then(async (pools) => {
+      setEnemyPools(pools);
+      if (!pools.length) {
+        setScoutingReport(null);
+        return;
+      }
+      try {
+        const report = await invoke<ScoutingReport>('get_lobby_scouting', { pools });
+        setScoutingReport(report);
+      } catch {
+        setScoutingReport(null);
+      }
+    }).catch(() => {
+      setEnemyPools([]);
+      setScoutingReport(null);
+    });
+    // Re-fetch on role change too — bans key off the lane meta + pool counters.
+  }, [session?.action_type, session?.my_bans.length, session?.their_bans.length, session?.local_player.assigned_position, puuid]);
 
   // Surface recommendation errors as toasts (non-blocking).
   useEffect(() => {
@@ -85,13 +170,34 @@ export const ChampSelectWrapper: React.FC<Props> = ({ addToast }) => {
       {session.queue_id === 1700 && <span className="aram-badge">ARENA</span>}
       <ChampSelectScreen
         session={session}
+        role={role}
+        roleSource={roleSource}
+        onRoleChange={setRole}
         recommendations={recommendations}
+        lockedRec={lockedAnalysis}
+        gamePlan={gamePlan}
+        counterPicks={counterPicks}
+        teamComp={teamComp}
+        comboBoard={comboBoard}
+        draftVerdict={draftVerdict}
+        counterItems={counterItems}
+        laneMatchup={laneMatchup}
+        dataRegistryReport={dataRegistryReport}
+        pipelineQualityReport={pipelineQualityReport}
+        dataTrajectory={dataTrajectory}
+        draftBrainQualityReport={draftBrainQualityReport}
+        feedbackObservabilityReport={feedbackObservabilityReport}
+        feedbackAnalytics={feedbackAnalytics}
+        draftSimulation={draftSimulation}
+        performanceReport={performanceReport}
         champMap={champMap}
         loading={loading}
         phaseView={phaseView}
         recError={error}
         banSuggestions={banSuggestions}
         enemyPools={enemyPools}
+        scoutingReport={scoutingReport}
+        onFeedbackSubmitted={refreshQualityReports}
         onHoverChampion={handleHoverChampion}
       />
     </>

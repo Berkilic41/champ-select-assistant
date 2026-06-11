@@ -1,15 +1,11 @@
 use anyhow::Result;
 use rusqlite::{params, Connection};
-use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ChampionRecord {
-    pub champion_id: i64,
-    pub key: String,
-    pub name: String,
-    pub title: String,
-}
+// ChampionRecord is now a shared pure DTO in `csa-core`. Re-exported so
+// `crate::db::champion_repo::ChampionRecord` paths keep working; the repo fns below
+// still construct it via struct literals.
+pub use csa_core::types::ChampionRecord;
 
 fn now_secs() -> i64 {
     SystemTime::now()

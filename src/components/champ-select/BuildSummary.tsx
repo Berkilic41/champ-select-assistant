@@ -18,6 +18,10 @@ interface Props {
   summonerSpells?: number[];
   secondaryRunes?: number[];
   statShards?: number[];
+  /** "seed" | "general" | "none" — drives the honest "Genel öneri" badge. */
+  buildSource?: string;
+  /** Short honest rationale for the build (core intent + lane-opponent counter). */
+  buildNote?: string;
 }
 
 export const BuildSummary: React.FC<Props> = ({
@@ -30,6 +34,8 @@ export const BuildSummary: React.FC<Props> = ({
   summonerSpells = [],
   secondaryRunes = [],
   statShards = [],
+  buildSource,
+  buildNote,
 }) => {
   const { t } = useTranslation();
   if (coreItems.length === 0 && keystone === 0) {
@@ -38,10 +44,20 @@ export const BuildSummary: React.FC<Props> = ({
   const hasSummoners = summonerSpells.length >= 2;
   const hasSecondary = secondaryRunes.length >= 1;
   const hasShards = statShards.length >= 1;
+  const isGeneral = buildSource === 'general';
 
   return (
     <div className="build-summary">
-      <p className="build-summary__title">{t('build.title', { champ: championName })}</p>
+      <p className="build-summary__title">
+        {t('build.title', { champ: championName })}
+        {isGeneral && (
+          <span className="build-summary__general-badge" title={t('build.generalHint')}>
+            {t('build.generalBadge')}
+          </span>
+        )}
+      </p>
+
+      {buildNote && <p className="build-summary__note">{buildNote}</p>}
 
       <div className="build-summary__section">
         <span className="build-label">{t('build.core')}</span>

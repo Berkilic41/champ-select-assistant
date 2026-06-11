@@ -20,6 +20,7 @@ pub struct ParsedLcuMatch {
     pub duration_secs: i64,
     pub queue_id: i64,
     pub played_at: i64, // Unix timestamp in seconds
+    pub cs: i64,        // lane minions + neutral monsters
 }
 
 /// A single parsed mastery entry for the `mastery` DB table.
@@ -83,6 +84,8 @@ fn parse_single_game(game: &serde_json::Value, puuid: &str) -> Option<ParsedLcuM
     let kills = p["stats"]["kills"].as_i64().unwrap_or(0);
     let deaths = p["stats"]["deaths"].as_i64().unwrap_or(0);
     let assists = p["stats"]["assists"].as_i64().unwrap_or(0);
+    let cs = p["stats"]["totalMinionsKilled"].as_i64().unwrap_or(0)
+        + p["stats"]["neutralMinionsKilled"].as_i64().unwrap_or(0);
 
     // Position derived from timeline.lane (e.g., "MIDDLE", "BOTTOM", "TOP", "JUNGLE")
     let position = p["timeline"]["lane"]
@@ -101,6 +104,7 @@ fn parse_single_game(game: &serde_json::Value, puuid: &str) -> Option<ParsedLcuM
         duration_secs,
         queue_id,
         played_at,
+        cs,
     })
 }
 
@@ -214,6 +218,7 @@ mod tests {
         assert_eq!(first.assists, 4);
         assert_eq!(first.duration_secs, 1823);
         assert_eq!(first.queue_id, 420);
+        assert_eq!(first.cs, 192, "180 minions + 12 neutral");
     }
 
     #[test]

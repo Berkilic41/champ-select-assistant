@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { HeroCard } from './HeroCard';
 import type { Recommendation, DraftPlan } from '../../types/recommendation';
@@ -51,32 +51,17 @@ describe('HeroCard', () => {
     expect(screen.getByText(/Az veri/)).toBeInTheDocument();
   });
 
-  it('expand button toggles detail panel', () => {
-    render(<HeroCard rec={mockRec} />);
-    const expandBtn = screen.getByRole('button', { name: /Detay/i });
-    // Detail panel not visible initially
+  it('the Detay button requests the deep-dive (fires onExpand)', () => {
+    const onExpand = vi.fn();
+    render(<HeroCard rec={mockRec} onExpand={onExpand} />);
+    // The in-card detail overlay is gone — depth now lives in the Deep-Dive tab.
     expect(screen.queryByText(/AP ağırlıklı/)).not.toBeInTheDocument();
-    fireEvent.click(expandBtn);
-    expect(screen.getByText(/AP ağırlıklı/)).toBeInTheDocument();
-  });
-
-  it('expand panel shows score rows', () => {
-    render(<HeroCard rec={mockRec} />);
     fireEvent.click(screen.getByRole('button', { name: /Detay/i }));
-    expect(screen.getByText('Lane Matchup')).toBeInTheDocument();
-    expect(screen.getByText('Meta')).toBeInTheDocument();
-  });
-
-  it('hides detail panel on overlay click', () => {
-    render(<HeroCard rec={mockRec} />);
-    fireEvent.click(screen.getByRole('button', { name: /Detay/i }));
-    expect(screen.getByText(/AP ağırlıklı/)).toBeInTheDocument();
-    const overlay = document.querySelector('.hero-detail-overlay')!;
-    fireEvent.click(overlay);
+    expect(onExpand).toHaveBeenCalledOnce();
     expect(screen.queryByText(/AP ağırlıklı/)).not.toBeInTheDocument();
   });
 
-  it('QuickTags renders at most 3 chips', () => {
+  it('shows game plan essentials inline (win condition + combo + risk)', () => {
     const fullPlan: DraftPlan = {
       combo_with: [{
         ally_champion_id: 61,
@@ -84,7 +69,7 @@ describe('HeroCard', () => {
         combo_text: 'Strong wombo',
         combo_type: 'wombo',
       }],
-      win_condition: 'teamfight',
+      win_condition: 'Teamfight odaklı',
       team_role: 'carry',
       damage_profile: 'AP burst',
       blind_pick_safety: 0.9,
@@ -94,10 +79,39 @@ describe('HeroCard', () => {
       risk_note: 'Stretch pick — sınırlı mastery',
     };
     render(<HeroCard rec={{ ...mockRec, draft_plan: fullPlan }} />);
-    const tags = document.querySelectorAll('.hero-card__quick-tag');
-    expect(tags.length).toBe(3);
+    // Plan essentials are visible WITHOUT expanding (decision-card design).
+    expect(screen.getByText('Teamfight odaklı')).toBeInTheDocument();
+    expect(screen.getByText(/Orianna: Strong wombo/)).toBeInTheDocument();
     expect(screen.getByText('Stretch pick — sınırlı mastery')).toBeInTheDocument();
-    expect(screen.getByText('Orianna ile güçlü combo')).toBeInTheDocument();
-    expect(screen.getByText('Engage eksikliği')).toBeInTheDocument();
   });
+
+  it('shows score breakdown inline without expanding', () => {
+    render(<HeroCard rec={mockRec} />);
+    // Scores are part of the card face now, not hidden behind "Detay".
+    expect(screen.getByText('Lane Matchup')).toBeInTheDocument();
+    expect(screen.getByText('Sinerji')).toBeInTheDocument();
+    expect(screen.getByText('Meta')).toBeInTheDocument();
+  });
+
+  it('labels inline plan pillars and surfaces the lose condition', () => {
+    render(
+      <HeroCard
+        rec={{
+          ...mockRec,
+          lane_plan: 'İlk üç wave güvenli oyna.',
+          mid_game_plan: 'Yan koridor baskısı kur.',
+          teamfight_job: 'Backline erişimini bekle.',
+          fallback_plan: 'Gerideysen pick arama.',
+          risk_summary: 'Erken ölürsen tempo kaybolur.',
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Lane')).toBeInTheDocument();
+    expect(screen.getByText('Mid game')).toBeInTheDocument();
+    expect(screen.getByText('Teamfight')).toBeInTheDocument();
+    expect(screen.getByText('Kaybetme riski')).toBeInTheDocument();
+    expect(screen.getByText('Erken ölürsen tempo kaybolur.')).toBeInTheDocument();
+  });
+
 });

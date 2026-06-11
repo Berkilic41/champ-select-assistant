@@ -1,0 +1,34 @@
+{
+  "name": "csa-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Electron host for champ-select-assistant — Node I/O layer around the csa-core WASM engine (P1 migration).",
+  "type": "commonjs",
+  "main": "out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "start": "electron-vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "dist:dir": "electron-vite build && electron-builder --dir",
+    "dist": "electron-vite build && electron-builder"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/ws": "^8.18.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "electron": "^38.2.0",
+    "electron-builder": "^26.15.2",
+    "electron-vite": "^4.0.0",
+    "typescript": "^5.8.0",
+    "vite": "^7.1.0",
+    "vitest": "^3.2.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": []
+  }
+}

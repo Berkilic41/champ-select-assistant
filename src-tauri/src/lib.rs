@@ -2,6 +2,8 @@ mod commands;
 mod db;
 mod ddragon;
 mod errors;
+#[cfg(test)]
+mod integration_tests;
 mod lcu;
 mod meta;
 mod recommendation;
@@ -22,6 +24,17 @@ pub struct AppState {
     pub lcu_ws_handle: Mutex<Option<tokio::task::JoinHandle<()>>>,
     /// Cancellation token for the active WebSocket champ-select watcher.
     pub lcu_ws_cancel: Mutex<Option<tokio_util::sync::CancellationToken>>,
+    /// Cancellation token for the gameflow-phase watcher (stops the old one on
+    /// reconnect so watchers don't accumulate).
+    pub gameflow_watcher_cancel: Mutex<Option<tokio_util::sync::CancellationToken>>,
+    /// Background data-pipeline scheduler handle.
+    pub data_pipeline_scheduler_handle: Mutex<Option<tokio::task::JoinHandle<()>>>,
+    /// Cancellation token for the background data-pipeline scheduler.
+    pub data_pipeline_scheduler_cancel: Mutex<Option<tokio_util::sync::CancellationToken>>,
+    /// Ensures manual and scheduled data refreshes do not run concurrently.
+    pub data_pipeline_refresh_lock: Mutex<()>,
+    /// Most recent background-scheduler ramp verdict (for the data-trajectory surface).
+    pub last_coverage_ramp: Mutex<Option<commands::data_quality::LastCoverageRamp>>,
     pub db: Arc<Mutex<rusqlite::Connection>>,
     pub ddragon: Mutex<ddragon::DdragonCache>,
     pub riot: Option<Arc<riot::RiotClient>>,
@@ -80,16 +93,12 @@ pub fn run() {
                 draft_iq.combos.len()
             );
 
-            let riot = if let Ok(proxy_url) = std::env::var("PROXY_URL") {
-                tracing::info!("Proxy modu aktif: {proxy_url}");
-                Some(Arc::new(riot::RiotClient::new_with_proxy(proxy_url)))
-            } else if let Ok(key) = std::env::var("RIOT_API_KEY") {
-                tracing::info!("Riot API key yüklendi (doğrudan mod)");
-                Some(Arc::new(riot::RiotClient::new(key)))
+            let riot = riot::client::runtime_client_from_env();
+            if riot.is_some() {
+                tracing::info!("Riot client runtime env ile hazır");
             } else {
                 tracing::warn!("RIOT_API_KEY ve PROXY_URL bulunamadı — Riot komutları devre dışı");
-                None
-            };
+            }
 
             let state = AppState {
                 lcu_client: Mutex::new(None),
@@ -97,6 +106,11 @@ pub fn run() {
                 session_poller_cancel: Mutex::new(None),
                 lcu_ws_handle: Mutex::new(None),
                 lcu_ws_cancel: Mutex::new(None),
+                gameflow_watcher_cancel: Mutex::new(None),
+                data_pipeline_scheduler_handle: Mutex::new(None),
+                data_pipeline_scheduler_cancel: Mutex::new(None),
+                data_pipeline_refresh_lock: Mutex::new(()),
+                last_coverage_ramp: Mutex::new(None),
                 db: Arc::new(Mutex::new(conn)),
                 ddragon: Mutex::new(ddragon::DdragonCache::new()),
                 riot,
@@ -106,6 +120,10 @@ pub fn run() {
             };
 
             app.manage(state);
+            let app_handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                commands::start_data_pipeline_scheduler(app_handle).await;
+            });
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -123,15 +141,51 @@ pub fn run() {
             commands::get_active_summoner_puuid,
             commands::start_ws_listener,
             commands::get_recommendations,
+            commands::get_draft_brain_recommendations,
+            commands::get_draft_simulation,
+            commands::get_draft_fork,
+            commands::get_champion_analysis,
+            commands::get_game_plan,
+            commands::get_counter_picks,
+            commands::get_team_comp,
+            commands::get_champion_archetypes,
+            commands::get_combo_board,
+            commands::get_champion_detail,
+            commands::get_draft_verdict,
+            commands::get_counter_items,
+            commands::get_lane_matchup,
+            commands::get_pool_suggestions,
+            commands::get_champion_pool_plan,
             commands::get_ban_suggestions,
             commands::sync_cdragon_meta,
             commands::sync_meraki_rates,
+            commands::get_data_quality_report,
+            commands::get_data_source_registry,
+            commands::get_pipeline_quality_report,
+            commands::get_pipeline_scheduler_status,
+            commands::get_data_trajectory,
+            commands::get_macro_state,
+            commands::get_ingame_plan,
+            commands::sync_data_pipeline,
+            commands::measure_live_coverage_ramp,
+            commands::rebuild_local_data_pack,
+            commands::get_feedback_observability,
+            commands::get_feedback_analytics,
+            commands::sync_recommendation_feedback,
+            commands::get_lobby_scouting,
+            commands::get_performance_report,
+            commands::get_mastery_progress,
+            commands::submit_recommendation_feedback,
+            commands::sync_model_pack,
+            commands::sync_data_pack,
+            commands::get_draft_brain_quality_report,
             commands::import_builds,
             commands::import_matchups,
             commands::set_always_on_top,
             commands::set_window_size,
             commands::hide_window,
             commands::show_window,
+            commands::set_overlay_mode,
             commands::get_champion_personal_stats,
             commands::hover_champion,
             commands::get_settings,

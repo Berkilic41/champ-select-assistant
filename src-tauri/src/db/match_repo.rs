@@ -16,12 +16,14 @@ pub fn insert_match(
     duration_secs: i64,
     queue_id: i64,
     played_at: i64,
+    // Total creep score (minions + neutral monsters); `None` when unavailable.
+    cs: Option<i64>,
 ) -> Result<bool> {
     let rows = conn.execute(
         "INSERT OR IGNORE INTO matches
          (match_id, puuid, champion_id, position, win, kills, deaths, assists,
-          duration_secs, queue_id, played_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+          duration_secs, queue_id, played_at, cs)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
         params![
             match_id,
             puuid,
@@ -33,7 +35,8 @@ pub fn insert_match(
             assists,
             duration_secs,
             queue_id,
-            played_at
+            played_at,
+            cs
         ],
     )?;
     Ok(rows > 0)

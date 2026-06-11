@@ -1,0 +1,70 @@
+.alt-rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.alt-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 16px auto 1fr auto;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--motion-fast), background var(--motion-fast);
+}
+.alt-row:hover { background: var(--surface-2); border-color: var(--border-strong); }
+.alt-row:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* #1 — the dominant "pick" */
+.alt-row--lead {
+  background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+  border-color: var(--border-strong);
+  padding: var(--space-3);
+}
+
+.alt-row--active { border-color: transparent; }
+.alt-row__bg {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--teal) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--teal) 55%, transparent);
+  pointer-events: none;
+}
+
+.alt-row > :not(.alt-row__bg) { position: relative; z-index: 1; }
+
+.alt-row__num {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--weight-bold);
+  color: var(--text-muted);
+  text-align: center;
+}
+.alt-row--active .alt-row__num { color: var(--teal-bright); }
+
+.alt-row__body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.alt-row__name {
+  font-family: var(--font-display);
+  font-size: var(--font-size-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.alt-row--lead .alt-row__name { font-size: var(--font-size-base); }
+.alt-row__meta { display: flex; align-items: center; gap: var(--space-2); }
+.alt-row__score {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}

@@ -1,8 +1,10 @@
 import React from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from '../../lib/host';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
-import { AppSettings } from '../../hooks/useSettings';
+import { AppSettings, WEIGHT_PRESETS, WeightPresetName, matchesPreset } from '../../hooks/useSettings';
+import type { DataPipelineRefreshSummary } from '../../types/generated/DataPipelineRefreshSummary';
+import type { FeedbackFlushSummary } from '../../types/generated/FeedbackFlushSummary';
 import './SettingsPanel.css';
 
 interface Props {
@@ -41,6 +43,16 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
   const [draft, setDraft] = React.useState<AppSettings>(settings);
   const update = (patch: Partial<AppSettings>) => setDraft(d => ({ ...d, ...patch }));
 
+  // Warn before discarding unsaved edits (the draft only persists on Save).
+  const dirty = React.useMemo(
+    () => JSON.stringify(draft) !== JSON.stringify(settings),
+    [draft, settings],
+  );
+  const handleClose = () => {
+    if (dirty && !window.confirm(t('app.unsavedConfirm'))) return;
+    onClose();
+  };
+
   // Weights are RELATIVE — the engine normalizes by their sum, so they never
   // need to add up to 100%. Show each factor's live effective share instead.
   const weightSum =
@@ -50,22 +62,70 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
 
   type SyncState = 'idle' | 'syncing' | 'done' | 'error';
   const [metaSync, setMetaSync] = React.useState<SyncState>('idle');
+  const [feedbackSync, setFeedbackSync] = React.useState<SyncState>('idle');
+  const [pipelineRefresh, setPipelineRefresh] =
+    React.useState<DataPipelineRefreshSummary | null>(null);
+  const [feedbackFlush, setFeedbackFlush] = React.useState<FeedbackFlushSummary | null>(null);
   const handleSyncMeta = async () => {
     setMetaSync('syncing');
+    setPipelineRefresh(null);
     try {
-      await invoke('sync_meraki_rates');
-      setMetaSync('done');
+      const summary = await invoke<DataPipelineRefreshSummary>('sync_data_pipeline');
+      setPipelineRefresh(summary);
+      setMetaSync(summary.errors.length > 0 ? 'error' : 'done');
     } catch {
       setMetaSync('error');
     }
   };
 
+  const handleSyncFeedback = async () => {
+    setFeedbackSync('syncing');
+    setFeedbackFlush(null);
+    try {
+      const summary = await invoke<FeedbackFlushSummary>('sync_recommendation_feedback');
+      setFeedbackFlush(summary);
+      setFeedbackSync(summary.failed > 0 ? 'error' : 'done');
+    } catch {
+      setFeedbackSync('error');
+    }
+  };
+
+  const feedbackSyncMessage =
+    feedbackFlush == null
+      ? null
+      : feedbackFlush.offline
+        ? t('settings.syncFeedbackOffline')
+        : feedbackFlush.attempted === 0 && feedbackFlush.skipped_no_hash === 0
+          ? t('settings.syncFeedbackNothing')
+          : t('settings.syncFeedbackSummary', {
+              synced: feedbackFlush.synced,
+              failed: feedbackFlush.failed,
+              skipped: feedbackFlush.skipped_no_hash,
+            });
+  const pipelineRefreshMessage =
+    pipelineRefresh == null
+      ? null
+      : t('settings.syncPipelineSummary', {
+          ddragon: pipelineRefresh.ddragon_champions,
+          rates: pipelineRefresh.meraki_rates,
+          builds: pipelineRefresh.builds_imported,
+          matchups: pipelineRefresh.matchups_imported,
+          riot: pipelineRefresh.match_v5_matches,
+          cache: t(`dataPipeline.cacheAction.${pipelineRefresh.cache_action}`),
+          status: t(`dataPipeline.status.${pipelineRefresh.after_status}`),
+        });
+
   return (
-    <div className="settings-overlay" onClick={onClose}>
-      <div className="settings-panel" onClick={e => e.stopPropagation()}>
+    <div className="settings-overlay" onClick={handleClose}>
+      <div
+        className="settings-panel"
+        onClick={e => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+      >
         <div className="settings-panel__header">
           <h2>{t('settings.title')}</h2>
-          <button className="settings-panel__close" onClick={onClose} aria-label="Kapat">
+          <button className="settings-panel__close" onClick={handleClose} aria-label={t('app.close')}>
             <X size={18} />
           </button>
         </div>
@@ -148,6 +208,21 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
         <section className="sp-section">
           <h3 className="sp-section-title">{t('settings.weightsSection')}</h3>
           <p className="sp-hint">{t('settings.weightsHint')}</p>
+          <div className="sp-presets">
+            <span className="sp-presets-label">{t('settings.presetsLabel')}</span>
+            <div className="sp-presets-row">
+              {(['balanced', 'soloq', 'flex', 'otp'] as WeightPresetName[]).map(name => (
+                <button
+                  key={name}
+                  type="button"
+                  className={`sp-preset-btn${matchesPreset(draft, WEIGHT_PRESETS[name]) ? ' sp-preset-btn--active' : ''}`}
+                  onClick={() => update(WEIGHT_PRESETS[name])}
+                >
+                  {t(`settings.preset_${name}`)}
+                </button>
+              ))}
+            </div>
+          </div>
           <WeightSlider
             label={t('settings.weightComfort')}
             value={draft.weight_comfort}
@@ -198,25 +273,39 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
               {metaSync === 'syncing' ? t('settings.syncMetaSyncing') : t('settings.syncMetaBtn')}
             </button>
             {metaSync === 'done' && (
-              <span className="sp-meta-ok">{t('settings.syncMetaDone')}</span>
+              <span className="sp-meta-ok">
+                {pipelineRefreshMessage ?? t('settings.syncMetaDone')}
+              </span>
             )}
             {metaSync === 'error' && (
-              <span className="sp-meta-err">{t('settings.syncMetaFail')}</span>
+              <span className="sp-meta-err">
+                {pipelineRefreshMessage ??
+                  t('settings.syncPipelineFail', { errors: pipelineRefresh?.errors.length ?? 1 })}
+              </span>
+            )}
+          </div>
+          <div className="sp-row sp-row--stack">
+            <button
+              className="sp-btn sp-btn--meta"
+              onClick={handleSyncFeedback}
+              disabled={feedbackSync === 'syncing'}
+              type="button"
+            >
+              {feedbackSync === 'syncing'
+                ? t('settings.syncFeedbackSyncing')
+                : t('settings.syncFeedbackBtn')}
+            </button>
+            {feedbackSync === 'done' && feedbackSyncMessage && (
+              <span className="sp-meta-ok">{feedbackSyncMessage}</span>
+            )}
+            {feedbackSync === 'error' && (
+              <span className="sp-meta-err">
+                {feedbackSyncMessage ?? t('settings.syncFeedbackFail')}
+              </span>
             )}
           </div>
         </section>
 
-        <section className="sp-section">
-          <h3 className="sp-section-title">{t('settings.soundSection')}</h3>
-          <label className="sp-toggle">
-            <input
-              type="checkbox"
-              checked={draft.sounds_enabled}
-              onChange={e => update({ sounds_enabled: e.target.checked })}
-            />
-            {t('settings.soundsEnabled')}
-          </label>
-        </section>
 
         <div className="sp-footer">
           <span className="sp-weight-total">{t('settings.weightsRelativeNote')}</span>

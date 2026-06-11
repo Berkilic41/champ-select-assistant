@@ -13,10 +13,11 @@ describe('tierFromScore', () => {
     expect(tierFromScore(0)).toBe('c');
   });
 
-  it('every tier has a label and a color', () => {
+  it('every tier has a label and a token-based color', () => {
     for (const t of ['s', 'a', 'b', 'c'] as const) {
       expect(TIER_LABELS[t]).toBeTruthy();
-      expect(TIER_COLORS[t]).toMatch(/^#[0-9A-Fa-f]{6}$/);
+      // Colors are now design tokens (cohesive with --tier-*), not raw hex.
+      expect(TIER_COLORS[t]).toMatch(/^var\(--tier-[sabc]\)$/);
     }
   });
 });

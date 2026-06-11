@@ -101,22 +101,45 @@ pub fn get_build_for_matchup(
 }
 
 pub fn upsert_build(conn: &Connection, row: &BuildRow) -> Result<()> {
+    upsert_build_with_pick_rate(conn, row, 0.0)
+}
+
+pub fn upsert_build_with_pick_rate(
+    conn: &Connection,
+    row: &BuildRow,
+    pick_rate: f64,
+) -> Result<()> {
+    upsert_build_with_metadata(conn, row, pick_rate, "global", 0, "low")
+}
+
+pub fn upsert_build_with_metadata(
+    conn: &Connection,
+    row: &BuildRow,
+    pick_rate: f64,
+    region: &str,
+    games: i64,
+    confidence: &str,
+) -> Result<()> {
     conn.execute(
         "INSERT INTO builds
              (champion_id, position, patch_version, item_ids, rune_ids, win_rate,
               pick_rate, source, opponent_archetype, skill_order, summoner_spells,
-              secondary_runes, stat_shards, cached_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, 0.0, ?7, ?8, ?9, ?10, ?11, ?12, ?13)
+              secondary_runes, stat_shards, region, games, confidence, cached_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17)
          ON CONFLICT(champion_id, position, patch_version, source,
                      COALESCE(opponent_archetype, '')) DO UPDATE SET
              item_ids           = excluded.item_ids,
              rune_ids           = excluded.rune_ids,
              win_rate           = excluded.win_rate,
+             pick_rate          = excluded.pick_rate,
              opponent_archetype = excluded.opponent_archetype,
              skill_order        = excluded.skill_order,
              summoner_spells    = excluded.summoner_spells,
              secondary_runes    = excluded.secondary_runes,
              stat_shards        = excluded.stat_shards,
+             region             = excluded.region,
+             games              = excluded.games,
+             confidence         = excluded.confidence,
              cached_at          = excluded.cached_at",
         params![
             row.champion_id,
@@ -125,12 +148,16 @@ pub fn upsert_build(conn: &Connection, row: &BuildRow) -> Result<()> {
             row.item_ids,
             row.rune_ids,
             row.win_rate,
+            pick_rate,
             row.source,
             row.opponent_archetype,
             row.skill_order,
             row.summoner_spells,
             row.secondary_runes,
             row.stat_shards,
+            region,
+            games,
+            confidence,
             now_secs(),
         ],
     )?;

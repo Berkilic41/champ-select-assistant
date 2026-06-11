@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from '../lib/host';
 
 export interface AppSettings {
   weight_comfort: number;
@@ -56,6 +56,72 @@ const DEFAULT_SETTINGS: AppSettings = {
 };
 
 export { DEFAULT_SETTINGS };
+
+/** Recommendation weight fields (the 6 sliders). */
+export type WeightFields = Pick<
+  AppSettings,
+  | 'weight_comfort'
+  | 'weight_matchup'
+  | 'weight_team_counter'
+  | 'weight_synergy'
+  | 'weight_meta'
+  | 'weight_role_fit'
+>;
+
+export type WeightPresetName = 'balanced' | 'soloq' | 'flex' | 'otp';
+
+/**
+ * Quick weight profiles. Each sums to 1.0. `balanced` matches the backend
+ * default (also the "reset"); `soloq` leans on lane matchup + role fit; `flex`
+ * on team synergy + counter; `otp` on personal comfort.
+ */
+export const WEIGHT_PRESETS: Record<WeightPresetName, WeightFields> = {
+  balanced: {
+    weight_comfort: 0.2,
+    weight_matchup: 0.25,
+    weight_team_counter: 0.15,
+    weight_synergy: 0.1,
+    weight_meta: 0.15,
+    weight_role_fit: 0.15,
+  },
+  soloq: {
+    weight_comfort: 0.15,
+    weight_matchup: 0.28,
+    weight_team_counter: 0.12,
+    weight_synergy: 0.08,
+    weight_meta: 0.15,
+    weight_role_fit: 0.22,
+  },
+  flex: {
+    weight_comfort: 0.15,
+    weight_matchup: 0.18,
+    weight_team_counter: 0.22,
+    weight_synergy: 0.2,
+    weight_meta: 0.12,
+    weight_role_fit: 0.13,
+  },
+  otp: {
+    weight_comfort: 0.4,
+    weight_matchup: 0.18,
+    weight_team_counter: 0.1,
+    weight_synergy: 0.07,
+    weight_meta: 0.12,
+    weight_role_fit: 0.13,
+  },
+};
+
+/** True when `s`'s weights match `preset` within a small tolerance. */
+export function matchesPreset(s: WeightFields, preset: WeightFields): boolean {
+  const keys: (keyof WeightFields)[] = [
+    'weight_comfort',
+    'weight_matchup',
+    'weight_team_counter',
+    'weight_synergy',
+    'weight_meta',
+    'weight_role_fit',
+  ];
+  return keys.every((k) => Math.abs(s[k] - preset[k]) < 0.005);
+}
 
 export function useSettings() {
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);

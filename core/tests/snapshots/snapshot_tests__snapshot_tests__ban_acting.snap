@@ -1,0 +1,37 @@
+---
+source: tests/snapshot_tests.rs
+assertion_line: 150
+expression: snap
+---
+[
+  {
+    "rank": 1,
+    "champion_key": "LeeSin",
+    "tier": "C",
+    "confidence": "low"
+  },
+  {
+    "rank": 2,
+    "champion_key": "Vi",
+    "tier": "C",
+    "confidence": "low"
+  },
+  {
+    "rank": 3,
+    "champion_key": "Irelia",
+    "tier": "C",
+    "confidence": "low"
+  },
+  {
+    "rank": 4,
+    "champion_key": "Yasuo",
+    "tier": "C",
+    "confidence": "low"
+  },
+  {
+    "rank": 5,
+    "champion_key": "Lux",
+    "tier": "C",
+    "confidence": "low"
+  }
+]

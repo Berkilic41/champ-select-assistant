@@ -86,6 +86,11 @@
 
 .sp-row { display: flex; align-items: center; justify-content: space-between; }
 .sp-row span { font-size: var(--font-size-sm); color: var(--text-primary); }
+.sp-row--stack {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: var(--space-1);
+}
 
 .sp-select {
   background: var(--surface-3);
@@ -163,6 +168,24 @@
   color: var(--teal-bright);
   background: rgba(45, 212, 191, 0.08);
 }
+
+/* Weight presets */
+.sp-presets { display: flex; flex-direction: column; gap: var(--space-2); margin-bottom: var(--space-3); }
+.sp-presets-label { font-size: var(--font-size-xs); color: var(--text-muted); }
+.sp-presets-row { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.sp-preset-btn {
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+  border-radius: var(--radius-pill);
+  padding: 4px var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--font-size-xs);
+  font-weight: var(--weight-medium);
+  transition: all var(--motion-normal);
+}
+.sp-preset-btn:hover { border-color: var(--teal-dim); color: var(--text-primary); }
+.sp-preset-btn--active { border-color: var(--teal); color: var(--teal-bright); background: rgba(45, 212, 191, 0.08); }
 
 /* Meta sync button */
 .sp-btn--meta { background: var(--surface-3); color: var(--text-primary); }

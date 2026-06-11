@@ -164,6 +164,40 @@ pub fn build_rate_rows(
     out
 }
 
+/// `AggregateSource` framework entry: fetch the Meraki rates table and map it to
+/// canonical rate rows (Meraki publishes no matchups/builds, so those stay empty).
+/// Reuses the existing [`fetch_meraki_rates`] + [`build_rate_rows`] pipeline.
+#[allow(dead_code)] // driven through the registry in Faz B2
+pub async fn fetch(
+    ctx: &crate::meta::source::FetchCtx,
+) -> Result<crate::recommendation::ingestion_contract::CanonicalRowSet> {
+    use crate::recommendation::ingestion_contract::{CanonicalRateRow, CanonicalRowSet};
+
+    let meraki = fetch_meraki_rates().await?;
+    let rates = build_rate_rows(&meraki, &ctx.champions)
+        .into_iter()
+        .map(|r| CanonicalRateRow {
+            region: ctx.region.clone(),
+            patch: r.patch,
+            champion_id: r.champion_id,
+            position: r.position,
+            win_rate: r.win_rate,
+            pick_rate: r.pick_rate,
+            ban_rate: r.ban_rate,
+            sample_size: r.sample_size,
+            source: r.source,
+            confidence: r.confidence,
+        })
+        .collect();
+
+    Ok(CanonicalRowSet {
+        region: ctx.region.clone(),
+        rates,
+        matchups: Vec::new(),
+        builds: Vec::new(),
+    })
+}
+
 // ---------------------------------------------------------------------------
 // Tests — pure-function only (no live HTTP).
 // ---------------------------------------------------------------------------

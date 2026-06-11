@@ -43,6 +43,11 @@
   word-break: break-word;
 }
 
+.disconnected__hint {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
 .disconnected__retry {
   display: inline-flex;
   align-items: center;

@@ -44,6 +44,8 @@ tokio-tungstenite = { version = "0.23", features = ["rustls-tls-native-roots"] }
 tokio-util = "0.7"
 rustls = "0.23"
 ts-rs = "10"
+# Shared pure engine core (also compiles to WASM for the Electron/edge migration).
+csa-core = { path = "../core" }
 
 [dev-dependencies]
 tempfile = "3"

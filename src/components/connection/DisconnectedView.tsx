@@ -16,6 +16,7 @@ export const DisconnectedView: React.FC<Props> = ({ error, onRetry, isRetrying }
       <div className="disconnected__icon"><Unplug size={32} /></div>
       <p className="disconnected__msg">{t('connection.disconnected')}</p>
       {error && <p className="disconnected__error">{error}</p>}
+      <p className="disconnected__hint">{t('connection.autoSearching')}</p>
       <button
         className="disconnected__retry"
         onClick={onRetry}

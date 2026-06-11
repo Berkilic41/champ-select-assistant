@@ -55,3 +55,13 @@ graphify-out/
 cloudflare-worker/.dev.vars
 .wrangler/
 cloudflare-worker/node_modules/
+
+# Electron host build output
+desktop/out/
+desktop/dist/
+
+# Backend (axum) build
+backend/target/
+
+# Pinned Riot root CA is PUBLIC and required at runtime (CA pinning) — un-ignore.
+!desktop/resources/riotgames.pem

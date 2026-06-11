@@ -5,4 +5,11 @@ export type ComboHint = { ally_champion_id: number, ally_champion_key: string,
 /**
  * Turkish display text shown in the Draft Plan panel.
  */
-combo_text: string, combo_type: ComboType, };
+combo_text: string, 
+/**
+ * Ability-by-ability mechanical breakdown (e.g. "Malphite R (Unstoppable
+ * Force) AOE knockup → Miss Fortune R (Bullet Time) full channel"). Ability
+ * names stay English per the project language convention (technical terms).
+ * Surfaced as the deep-dive "how to execute" detail under `combo_text`.
+ */
+ability_ref: string, combo_type: ComboType, };

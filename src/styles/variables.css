@@ -12,10 +12,12 @@
   --font-size-xs:   11px;
   --font-size-sm:   12px;
   --font-size-base: 14px;
+  --font-size-md:   16px;   /* intermediate step — softens the base→lg jump */
   --font-size-lg:   18px;
   --font-size-xl:   24px;
   --font-size-2xl:  32px;
 
+  --weight-light:   300;    /* lighter secondary / hint text */
   --weight-regular: 400;
   --weight-medium:  500;
   --weight-semibold:600;
@@ -93,7 +95,7 @@
   --transition-fast: var(--motion-fast);
 
   /* ── Focus ─────────────────────────────────────────────────────────────── */
-  --focus-ring: 0 0 0 2px var(--bg-deep), 0 0 0 4px rgba(45, 212, 191, 0.7);
+  --focus-ring: 0 0 0 2px var(--bg-deep), 0 0 0 4px rgba(45, 212, 191, 0.9);
 
   /* ── Z-index ───────────────────────────────────────────────────────────── */
   --z-overlay: 100; --z-modal: 200; --z-toast: 300;

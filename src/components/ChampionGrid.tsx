@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { invoke } from '../lib/host';
 import { useTranslation } from 'react-i18next';
 import { ChampionStats, MasteryEntry } from '../types/riot';
 import { ChampionIcon } from './shared/ChampionIcon';
+import { archetypeLabel } from '../lib/archetype';
+import { ChampionDetailCard } from './champ-select/ChampionDetailCard';
 import './ChampionGrid.css';
 
 interface ChampionGridProps {
@@ -31,12 +34,14 @@ interface CardProps {
   stat: ChampionStats;
   mastery?: MasteryEntry;
   champKey?: string;
+  archetype?: string;
+  onClick?: () => void;
 }
 
-const ChampionCard: React.FC<CardProps> = ({ stat, mastery, champKey }) => {
+const ChampionCard: React.FC<CardProps> = ({ stat, mastery, champKey, archetype, onClick }) => {
   const { t } = useTranslation();
   return (
-  <div className="champ-card">
+  <div className="champ-card champ-card--clickable" onClick={onClick}>
     <div className="champ-card__icon-wrap">
       <ChampionIcon size="md" championKey={champKey} />
       {mastery && mastery.mastery_level >= 5 && (
@@ -49,7 +54,11 @@ const ChampionCard: React.FC<CardProps> = ({ stat, mastery, champKey }) => {
         </span>
       )}
     </div>
-    <span className="champ-card__id">#{stat.champion_id}</span>
+    {archetype ? (
+      <span className="champ-card__archetype">{archetypeLabel(archetype)}</span>
+    ) : (
+      <span className="champ-card__id">{champKey ?? `#${stat.champion_id}`}</span>
+    )}
     <div className="champ-card__footer">
       <span className="champ-card__games">{stat.games}G</span>
       <span
@@ -75,6 +84,13 @@ const SKELETON_COUNT = 10;
 
 export const ChampionGrid: React.FC<ChampionGridProps> = ({ stats, masteries, champMap, isLoading }) => {
   const { t } = useTranslation();
+  const [archetypeMap, setArchetypeMap] = useState<Map<number, string>>(new Map());
+  useEffect(() => {
+    invoke<Array<{ champion_id: number; archetype: string }>>('get_champion_archetypes')
+      .then((rows) => setArchetypeMap(new Map(rows.map((r) => [r.champion_id, r.archetype]))))
+      .catch(() => {});
+  }, []);
+  const [detailId, setDetailId] = useState<number | null>(null);
   const masteryMap = new Map<number, MasteryEntry>(
     masteries.map(m => [m.champion_id, m])
   );
@@ -106,15 +122,24 @@ export const ChampionGrid: React.FC<ChampionGridProps> = ({ stats, masteries, ch
       }));
 
   return (
-    <div className="champ-grid">
-      {displayStats.map(stat => (
-        <ChampionCard
-          key={stat.champion_id}
-          stat={stat}
-          mastery={masteryMap.get(stat.champion_id)}
-          champKey={champMap.get(stat.champion_id)}
-        />
-      ))}
-    </div>
+    <>
+      <div className="champ-grid">
+        {displayStats.map(stat => (
+          <ChampionCard
+            key={stat.champion_id}
+            stat={stat}
+            mastery={masteryMap.get(stat.champion_id)}
+            champKey={champMap.get(stat.champion_id)}
+            archetype={archetypeMap.get(stat.champion_id)}
+            onClick={() => setDetailId(stat.champion_id)}
+          />
+        ))}
+      </div>
+      <ChampionDetailCard
+        championId={detailId}
+        championKey={detailId !== null ? champMap.get(detailId) : undefined}
+        onClose={() => setDetailId(null)}
+      />
+    </>
   );
 };

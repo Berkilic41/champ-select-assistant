@@ -128,6 +128,7 @@ mod snapshot_tests {
             meta_rates: &meta_rates,
             matchups: None,
             power_curves: None,
+            feedback_signals: None,
         };
 
         let champions = champion_pool();
@@ -173,5 +174,86 @@ mod snapshot_tests {
         let recs = run_engine(include_str!("../../tests/fixtures/aram_pick.json"));
         let snap = to_snapshot(&recs);
         insta::assert_json_snapshot!("aram_pick", snap);
+    }
+
+    // ─── Role-aware relevance (regression lock for the Faz 8 role behavior) ────
+    // Unlike the snapshot tests above (empty role_map), this populates CDragon
+    // roles + an assigned lane and asserts that an on-role pick outranks a hard
+    // off-role pick — the exact "alakasız pick" symptom the role fix targets.
+
+    #[test]
+    fn role_aware_demotes_off_role_pick() {
+        use crate::recommendation::scoring::{MetaRate, ScoringContext, ScoringWeights};
+
+        let session = parse_session(&serde_json::json!({
+            "localPlayerCellId": 0,
+            "myTeam": [
+                {"cellId": 0, "championId": 0, "championPickIntent": 0, "assignedPosition": "middle"}
+            ],
+            "theirTeam": [],
+            "bans": {"myTeamBans": [], "theirTeamBans": []},
+            "actions": [],
+            "timer": {"phase": "BAN_PICK", "adjustedTimeLeftInPhase": 27000},
+            "gameConfig": {"queueId": 420}
+        }))
+        .expect("session parse");
+
+        // Both fully mastered so comfort is equal — only role fit separates them.
+        let champions = vec![
+            ChampionRecord {
+                champion_id: 99,
+                key: "Lux".into(),
+                name: "Lux".into(),
+                title: String::new(),
+            },
+            ChampionRecord {
+                champion_id: 111,
+                key: "Nautilus".into(),
+                name: "Nautilus".into(),
+                title: String::new(),
+            },
+        ];
+        let mastery = vec![
+            MasteryRow {
+                champion_id: 99,
+                level: 7,
+                points: 100_000,
+                last_play_time: None,
+            },
+            MasteryRow {
+                champion_id: 111,
+                level: 7,
+                points: 100_000,
+                last_play_time: None,
+            },
+        ];
+        let mut role_map: HashMap<u32, Vec<String>> = HashMap::new();
+        role_map.insert(99, vec!["mage".into()]); // fits middle
+        role_map.insert(111, vec!["tank".into(), "support".into()]); // off-role at middle
+
+        let meta_rates: HashMap<(u32, String), MetaRate> = HashMap::new();
+        let ctx = ScoringContext {
+            session: &session,
+            mastery: &mastery,
+            stats: &[],
+            role_map: &role_map,
+            weights: ScoringWeights::default(),
+            meta_rates: &meta_rates,
+            matchups: None,
+            power_curves: None,
+            feedback_signals: None,
+        };
+        let kb = DraftKnowledgeBase::load().expect("Draft IQ KB yüklenemedi");
+        let recs = compute_recommendations(&ctx, &champions, &[], &[], &kb);
+
+        let lux = recs.iter().position(|r| r.champion_id == 99);
+        let naut = recs.iter().position(|r| r.champion_id == 111);
+        assert!(lux.is_some(), "on-role mage (Lux) önerilmeli");
+        if let (Some(l), Some(n)) = (lux, naut) {
+            assert!(
+                l < n,
+                "mid lane'de on-role mage, off-role tank'tan üstte sıralanmalı (lux={l}, naut={n})"
+            );
+        }
     }
 }

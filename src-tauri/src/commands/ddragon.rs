@@ -12,6 +12,10 @@ pub async fn get_ddragon_version(state: State<'_, AppState>) -> Result<String, A
 
 #[tauri::command]
 pub async fn sync_ddragon_champions(state: State<'_, AppState>) -> Result<usize, AppError> {
+    sync_ddragon_champions_inner(&state).await
+}
+
+pub(crate) async fn sync_ddragon_champions_inner(state: &AppState) -> Result<usize, AppError> {
     // Fetch without holding DB lock
     let (version, champions) = crate::ddragon::fetch_champion_list().await?;
     let count = champions.len();

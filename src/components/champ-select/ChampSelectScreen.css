@@ -11,6 +11,19 @@
 .cs-ban-img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(50%); }
 .cs-ban-img--unknown { background: var(--color-border); width: 100%; height: 100%; }
 .cs-empty { font-size: var(--font-size-sm); color: var(--color-text-muted); text-align: center; padding: var(--space-6); }
+.cs-empty__icon { display: block; color: var(--text-muted); opacity: 0.55; margin: 0 auto var(--space-2); }
+.cs-loading { display: flex; flex-direction: column; gap: var(--space-2); }
+.cs-loading__hint {
+  font-size: var(--font-size-sm); color: var(--text-muted);
+  text-align: center; font-weight: var(--weight-light);
+}
+.cs-empty__hint {
+  max-width: 420px;
+  margin: var(--space-2) auto 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+}
 .cs-empty__error {
   display: inline-flex; align-items: center; gap: var(--space-2);
   color: var(--danger); font-size: var(--font-size-sm);
@@ -56,4 +69,73 @@
 
 .cs-col-label {
   font-family: var(--font-display); font-weight: var(--weight-semibold);
+}
+
+/* Locked-pick coaching (finalization + post-lock watching) — uses the shared
+   HeroCard (pinned) + BuildSummary for one consistent card language. */
+.cs-locked { display: flex; flex-direction: column; gap: var(--space-3); width: 100%; }
+
+/* ── "Glance & Decide" pick dashboard ──────────────────────────────────────
+   Core decision (verdict + pick + build) stays in view; only the secondary
+   depth region scrolls; alternatives are a persistent right rail; data chips
+   move to a subtle footer. Uses horizontal space instead of one tall column. */
+.cs-screen__center:has(.cs-dashboard) { overflow: hidden; }
+.cs-dashboard {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) 248px;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "verdict   rail"
+    "decision  rail"
+    "secondary rail"
+    "footer    footer";
+  gap: var(--space-3);
+}
+.cs-dash__verdict { grid-area: verdict; min-width: 0; }
+.cs-pick-clarity { display: flex; }
+.cs-dash__decision {
+  grid-area: decision;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.cs-dash__rail {
+  grid-area: rail;
+  min-height: 0;
+  overflow-y: auto;
+}
+.cs-dash__secondary {
+  grid-area: secondary;
+  min-height: 0;
+  overflow: hidden; /* the SecondaryTabs panel scrolls; the tab header stays put */
+}
+.cs-dash__footer {
+  grid-area: footer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* Standard / compact: rail narrows, then drops under the decision. */
+@media (max-width: 1280px) {
+  .cs-dashboard { grid-template-columns: minmax(0, 1fr) 220px; }
+}
+@media (max-width: 980px) {
+  .cs-dashboard {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "verdict"
+      "decision"
+      "rail"
+      "secondary"
+      "footer";
+  }
+  .cs-dash__rail { overflow-x: auto; overflow-y: hidden; }
 }

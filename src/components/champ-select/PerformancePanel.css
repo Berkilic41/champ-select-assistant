@@ -1,0 +1,105 @@
+.performance-panel {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  box-shadow: var(--shadow-sm);
+}
+
+.performance-panel__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.performance-panel__eyebrow {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--teal-bright);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.performance-panel__title {
+  margin: 2px 0 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
+  font-weight: var(--weight-bold);
+}
+
+.performance-panel__badge {
+  flex-shrink: 0;
+  color: var(--warning);
+  background: rgba(227, 179, 65, 0.1);
+  border: 1px solid rgba(227, 179, 65, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 2px var(--space-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--weight-semibold);
+}
+
+.performance-panel__badge--risk {
+  color: var(--danger);
+  border-color: rgba(240, 80, 110, 0.4);
+  background: rgba(240, 80, 110, 0.1);
+}
+
+.performance-panel__lesson {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+}
+
+.performance-panel__metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.performance-panel__metrics span {
+  color: var(--text-secondary);
+  background: var(--surface-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 2px var(--space-2);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.performance-panel__champions {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.performance-panel__champion {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.performance-panel__champion-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.performance-panel__champion-copy strong {
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  line-height: 1.2;
+}
+
+.performance-panel__champion-copy span {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  line-height: 1.3;
+}

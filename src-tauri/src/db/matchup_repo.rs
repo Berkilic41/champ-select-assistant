@@ -22,16 +22,29 @@ fn now_secs() -> i64 {
 }
 
 pub fn upsert_matchup(conn: &Connection, row: &MatchupRow) -> Result<()> {
+    upsert_matchup_with_metadata(conn, row, "global", "low", row.games)
+}
+
+pub fn upsert_matchup_with_metadata(
+    conn: &Connection,
+    row: &MatchupRow,
+    region: &str,
+    confidence: &str,
+    sample_size: i64,
+) -> Result<()> {
     conn.execute(
         "INSERT INTO champion_matchups
              (champion_id, opponent_id, position, games, wins, win_rate,
-              source, patch_version, cached_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
+              source, patch_version, region, confidence, sample_size, cached_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)
          ON CONFLICT(champion_id, opponent_id, position, source) DO UPDATE SET
              games         = excluded.games,
              wins          = excluded.wins,
              win_rate      = excluded.win_rate,
              patch_version = excluded.patch_version,
+             region        = excluded.region,
+             confidence    = excluded.confidence,
+             sample_size   = excluded.sample_size,
              cached_at     = excluded.cached_at",
         params![
             row.champion_id,
@@ -42,6 +55,9 @@ pub fn upsert_matchup(conn: &Connection, row: &MatchupRow) -> Result<()> {
             row.win_rate,
             row.source,
             row.patch_version,
+            region,
+            confidence,
+            sample_size,
             now_secs(),
         ],
     )?;

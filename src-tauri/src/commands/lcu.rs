@@ -119,10 +119,20 @@ pub async fn connect_lcu(app: AppHandle, state: State<'_, AppState>) -> Result<L
     *state.session_poller_cancel.lock().await = Some(poller_cancel);
     *state.session_poller_handle.lock().await = Some(poller_handle);
 
+    // Replace any previous gameflow watcher so they don't accumulate on reconnect.
+    {
+        let mut cancel_guard = state.gameflow_watcher_cancel.lock().await;
+        if let Some(old) = cancel_guard.take() {
+            old.cancel();
+        }
+    }
+    let gameflow_cancel = CancellationToken::new();
     tokio::spawn(crate::lcu::poller::start_gameflow_watcher(
         app.clone(),
         client_arc,
+        gameflow_cancel.clone(),
     ));
+    *state.gameflow_watcher_cancel.lock().await = Some(gameflow_cancel);
 
     tracing::info!(
         "LCU bağlantısı kuruldu ve poller başlatıldı: {:?}",
@@ -252,6 +262,7 @@ pub async fn sync_lcu_player_data(
                 m.duration_secs,
                 m.queue_id,
                 m.played_at,
+                Some(m.cs),
             ) {
                 Ok(true) => matches_synced += 1,
                 Ok(false) => matches_skipped += 1,
@@ -314,6 +325,19 @@ pub async fn sync_lcu_player_data(
                 Ok(()) => masteries_synced += 1,
                 Err(_) => errors += 1,
             }
+            // Progress tracking: snapshot when points changed (training mode).
+            let now = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_secs() as i64)
+                .unwrap_or(0);
+            let _ = mastery_repo::record_mastery_snapshot(
+                &db,
+                &puuid,
+                m.champion_id,
+                m.level,
+                m.points,
+                now,
+            );
         }
     }
 

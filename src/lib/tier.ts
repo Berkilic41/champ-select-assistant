@@ -2,11 +2,12 @@ import React from 'react';
 
 export type Tier = 's' | 'a' | 'b' | 'c';
 
+// Aligned to the design tokens (--tier-*) so tier color is cohesive everywhere.
 export const TIER_COLORS: Record<Tier, string> = {
-  s: '#FFD700',   // Altın
-  a: '#C89B3C',   // LoL gold
-  b: '#7A7060',   // Gri-bronz
-  c: '#4A4A4A',   // Soluk gri
+  s: 'var(--tier-s)', // gold-bright
+  a: 'var(--tier-a)', // teal
+  b: 'var(--tier-b)', // info blue
+  c: 'var(--tier-c)', // muted
 };
 
 export const TIER_LABELS: Record<Tier, string> = {

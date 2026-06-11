@@ -64,6 +64,8 @@ export const RecommendationCard: React.FC<Props> = ({ rec, rank, champMap }) => 
             summonerSpells={rec.summoner_spells}
             secondaryRunes={rec.secondary_runes}
             statShards={rec.stat_shards}
+            buildSource={rec.build_source}
+            buildNote={rec.build_note}
           />
         </div>
       )}

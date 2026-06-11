@@ -181,6 +181,7 @@ fn test_insert_match_and_stats() {
         1800,
         420,
         1700000000,
+        None,
     )
     .unwrap();
     assert!(inserted, "İlk insert true döndürmeli");
@@ -199,6 +200,7 @@ fn test_insert_match_and_stats() {
         1800,
         420,
         1700000000,
+        None,
     )
     .unwrap();
     assert!(!inserted2, "Duplicate insert false döndürmeli");
@@ -225,12 +227,18 @@ fn test_insert_match_win_loss_aggregation() {
     ).unwrap();
 
     // Üç maç: 2 galibiyet, 1 yenilgi
-    match_repo::insert_match(&conn, "M001", "p2", 1, None, true, 3, 1, 5, 1500, 420, 1000).unwrap();
     match_repo::insert_match(
-        &conn, "M002", "p2", 1, None, false, 1, 4, 2, 1600, 420, 1001,
+        &conn, "M001", "p2", 1, None, true, 3, 1, 5, 1500, 420, 1000, None,
     )
     .unwrap();
-    match_repo::insert_match(&conn, "M003", "p2", 1, None, true, 5, 0, 9, 1400, 420, 1002).unwrap();
+    match_repo::insert_match(
+        &conn, "M002", "p2", 1, None, false, 1, 4, 2, 1600, 420, 1001, None,
+    )
+    .unwrap();
+    match_repo::insert_match(
+        &conn, "M003", "p2", 1, None, true, 5, 0, 9, 1400, 420, 1002, None,
+    )
+    .unwrap();
 
     let stats = match_repo::player_stats(&conn, "p2").unwrap();
     assert_eq!(stats.len(), 1);
@@ -248,7 +256,10 @@ fn test_player_stats_empty() {
     run_migrations(&mut conn).unwrap();
 
     let stats = match_repo::player_stats(&conn, "nonexistent").unwrap();
-    assert!(stats.is_empty(), "Bilinmeyen puuid için boş liste dönmeli");
+    assert!(
+        stats.is_empty(),
+        "Bilinmeyen puuid için boş liste dönmeli"
+    );
 }
 
 // -------------------------------------------------------------------------
@@ -969,6 +980,7 @@ fn test_recommendation_snapshot_top5_order() {
         weights: ScoringWeights::default(),
         matchups: None,
         power_curves: None,
+        feedback_signals: None,
     };
 
     let kb = DraftKnowledgeBase::load().expect("KB load failed");
@@ -1082,6 +1094,7 @@ fn test_recommendation_snapshot_no_candidates() {
         weights: ScoringWeights::default(),
         matchups: None,
         power_curves: None,
+        feedback_signals: None,
     };
 
     let kb = DraftKnowledgeBase::load().expect("KB load failed");
@@ -1116,6 +1129,7 @@ fn test_recommendation_snapshot_weight_sensitivity() {
         weights: ScoringWeights::default(),
         matchups: None,
         power_curves: None,
+        feedback_signals: None,
     };
 
     use crate::recommendation::scoring::{
@@ -1227,7 +1241,7 @@ fn test_recommendation_snapshot_with_db_fixture() {
         ("M08", 99, false, 0, 3, 5),
     ] {
         match_repo::insert_match(
-            &conn, mid, puuid, champ, None, win, k, d, a, 1800, 420, 1_000_000,
+            &conn, mid, puuid, champ, None, win, k, d, a, 1800, 420, 1_000_000, None,
         )
         .unwrap();
     }
@@ -1250,6 +1264,7 @@ fn test_recommendation_snapshot_with_db_fixture() {
         weights: ScoringWeights::default(),
         matchups: None,
         power_curves: None,
+        feedback_signals: None,
     };
 
     let kb = DraftKnowledgeBase::load().expect("KB load failed");
