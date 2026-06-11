@@ -30,6 +30,16 @@ pub struct MatchRow {
     pub duration_secs: u32,
     /// Total creep score; `None` for matches synced before CS ingestion.
     pub cs: Option<u32>,
+    /// CS at 10:00 (timeline-derived); `None` without timeline data (LCU path,
+    /// pre-V020 matches, games shorter than 10 min).
+    #[serde(default)]
+    pub cs_at_10: Option<u32>,
+    /// Deaths before 14:00 (timeline-derived); `None` without timeline data.
+    #[serde(default)]
+    pub deaths_pre_14: Option<u32>,
+    /// Match-V5 / LCU vision score; `None` when the source didn't carry it.
+    #[serde(default)]
+    pub vision_score: Option<u32>,
 }
 
 /// Per-champion mini stats for the trends panel.
@@ -61,6 +71,18 @@ pub struct PerformanceReport {
     /// legitimately low, so a threshold would false-alarm).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub avg_cs_per_min: Option<f32>,
+    /// Average CS at 10:00 over timeline-bearing matches (`None` when none).
+    /// Honest stat — NOT a lesson (jungle/support farm@10 is legitimately low).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub avg_cs_at_10: Option<f32>,
+    /// Average deaths before 14:00 over timeline-bearing matches. Feeds the
+    /// early-death lesson when the sample is big enough (role-neutral signal).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub avg_deaths_pre_14: Option<f32>,
+    /// Average vision score over matches that carry it. Honest stat — NOT a
+    /// lesson (support vision is structurally higher; a threshold would lie).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub avg_vision_score: Option<f32>,
     /// Consecutive losses counting back from the most recent match.
     pub loss_streak: u32,
     /// last-5 win_rate − previous-5 win_rate, in `[-1, 1]`. 0 when < 10 games.
@@ -83,6 +105,10 @@ const WEAK_CHAMP_WR: f32 = 0.40;
 const OFF_ROLE_THRESHOLD: f32 = 0.40;
 const GOOD_FORM_DELTA: f32 = 0.20;
 const LOW_DATA_GAMES: u32 = 5;
+/// Erken-ölüm lesson'ı için eşikler: en az bu kadar timeline'lı maç VE laning
+/// fazında ortalama bu kadar ölüm. Küçük örneklemde lesson üretmeyiz (dürüstlük).
+const EARLY_DEATH_MIN_GAMES: usize = 5;
+const EARLY_DEATH_AVG: f32 = 2.0;
 
 fn kda(k: u32, a: u32, d: u32) -> f32 {
     (k + a) as f32 / d.max(1) as f32
@@ -99,6 +125,9 @@ pub fn build_performance_report(matches: &[MatchRow]) -> PerformanceReport {
             win_rate: 0.0,
             avg_kda: 0.0,
             avg_cs_per_min: None,
+            avg_cs_at_10: None,
+            avg_deaths_pre_14: None,
+            avg_vision_score: None,
             loss_streak: 0,
             form_delta: 0.0,
             main_role: String::new(),
@@ -139,6 +168,22 @@ pub fn build_performance_report(matches: &[MatchRow]) -> PerformanceReport {
         let avg = cs_paces.iter().sum::<f32>() / cs_paces.len() as f32;
         Some((avg * 10.0).round() / 10.0)
     };
+
+    // Timeline-türevi ortalamalar — yalnız veriyi taşıyan maçlar üzerinden
+    // (None'lar dürüstçe atlanır; hiç yoksa alanın kendisi None kalır).
+    let avg_of = |vals: Vec<u32>| -> Option<f32> {
+        if vals.is_empty() {
+            None
+        } else {
+            let avg = vals.iter().sum::<u32>() as f32 / vals.len() as f32;
+            Some((avg * 10.0).round() / 10.0)
+        }
+    };
+    let avg_cs_at_10 = avg_of(ord.iter().filter_map(|m| m.cs_at_10).collect());
+    let early_deaths: Vec<u32> = ord.iter().filter_map(|m| m.deaths_pre_14).collect();
+    let early_death_games = early_deaths.len();
+    let avg_deaths_pre_14 = avg_of(early_deaths);
+    let avg_vision_score = avg_of(ord.iter().filter_map(|m| m.vision_score).collect());
 
     // Loss streak from the most recent match.
     let loss_streak = ord.iter().take_while(|m| !m.win).count() as u32;
@@ -207,6 +252,8 @@ pub fn build_performance_report(matches: &[MatchRow]) -> PerformanceReport {
         off_role_rate,
         form_delta,
         win_rate,
+        avg_deaths_pre_14,
+        early_death_games,
     );
 
     PerformanceReport {
@@ -216,6 +263,9 @@ pub fn build_performance_report(matches: &[MatchRow]) -> PerformanceReport {
         win_rate,
         avg_kda,
         avg_cs_per_min,
+        avg_cs_at_10,
+        avg_deaths_pre_14,
+        avg_vision_score,
         loss_streak,
         form_delta,
         main_role,
@@ -234,6 +284,8 @@ fn main_lesson(
     off_role_rate: f32,
     form_delta: f32,
     win_rate: f32,
+    avg_deaths_pre_14: Option<f32>,
+    early_death_games: usize,
 ) -> String {
     if loss_streak >= TILT_STREAK {
         return format!(
@@ -249,6 +301,17 @@ fn main_lesson(
             "{}: son maçlarda %{wr} ({} maç) — şu an zorlanıyorsun; güvenli pick'e dön ya da bilinçli pratiğe al.",
             weak.champion_key, weak.games
         );
+    }
+    // Erken-ölüm deseni: rol-bağımsız sinyal (laning ölümü her rolde pahalı).
+    // Yalnız yeterli timeline örnekleminde — küçük örneklemden ders çıkarmayız.
+    if early_death_games >= EARLY_DEATH_MIN_GAMES {
+        if let Some(avg) = avg_deaths_pre_14 {
+            if avg >= EARLY_DEATH_AVG {
+                return format!(
+                    "İlk 14 dakikada ortalama {avg:.1} ölüm ({early_death_games} maç) — laning'de daha az risk al: dalga durumuna ve rakip jungler'a göre oyna."
+                );
+            }
+        }
     }
     if off_role_rate > OFF_ROLE_THRESHOLD {
         let pct = (off_role_rate * 100.0).round() as u32;
@@ -294,6 +357,19 @@ mod tests {
             played_at: played,
             duration_secs: 1800,
             cs: None,
+            cs_at_10: None,
+            deaths_pre_14: None,
+            vision_score: None,
+        }
+    }
+
+    /// Timeline alanlı varyant (WS4 testleri).
+    fn mt(base: MatchRow, cs10: u32, dpre14: u32, vision: u32) -> MatchRow {
+        MatchRow {
+            cs_at_10: Some(cs10),
+            deaths_pre_14: Some(dpre14),
+            vision_score: Some(vision),
+            ..base
         }
     }
 
@@ -378,6 +454,9 @@ mod tests {
             played_at: 100,
             duration_secs: 1200, // 20 min
             cs,
+            cs_at_10: None,
+            deaths_pre_14: None,
+            vision_score: None,
         };
         let ms = vec![with_cs(Some(200)), with_cs(Some(160)), with_cs(None)];
         let r = build_performance_report(&ms);
@@ -405,5 +484,57 @@ mod tests {
         // kda: (16/2 + 4/4) / 2 = (8 + 1)/2 = 4.5
         assert!((r.avg_kda - 4.5).abs() < 1e-5, "kda={}", r.avg_kda);
         assert!(r.partial, "2 games < 5 → partial");
+    }
+
+    #[test]
+    fn timeline_averages_skip_missing_honestly() {
+        // 2 timeline'lı + 1 timeline'sız maç: ortalamalar yalnız taşıyanlardan.
+        let ms = vec![
+            mt(m(1, "A", "middle", true, 5, 2, 5, 300), 80, 1, 20),
+            mt(m(1, "A", "middle", false, 3, 4, 2, 200), 60, 2, 14),
+            m(1, "A", "middle", true, 4, 3, 6, 100), // timeline yok
+        ];
+        let r = build_performance_report(&ms);
+        assert_eq!(r.avg_cs_at_10, Some(70.0));
+        assert_eq!(r.avg_deaths_pre_14, Some(1.5));
+        assert_eq!(r.avg_vision_score, Some(17.0));
+
+        // Hiç timeline verisi yoksa alanlar None (asla uydurma).
+        let none = build_performance_report(&[m(1, "A", "middle", true, 4, 3, 6, 100)]);
+        assert_eq!(none.avg_cs_at_10, None);
+        assert_eq!(none.avg_deaths_pre_14, None);
+        assert_eq!(none.avg_vision_score, None);
+    }
+
+    #[test]
+    fn early_death_lesson_needs_sample_and_threshold() {
+        // 5 timeline'lı maç, ort. 3 erken ölüm (win'lerle — tilt/weak tetiklenmesin).
+        let many: Vec<MatchRow> = (0..5)
+            .map(|i| mt(m(1, "A", "middle", true, 5, 3, 5, 500 - i), 70, 3, 18))
+            .collect();
+        let r = build_performance_report(&many);
+        assert!(
+            r.main_lesson.contains("İlk 14 dakikada"),
+            "lesson: {}",
+            r.main_lesson
+        );
+
+        // Aynı desen ama 4 maç (< EARLY_DEATH_MIN_GAMES) → lesson tetiklenmez.
+        let few: Vec<MatchRow> = (0..4)
+            .map(|i| mt(m(1, "A", "middle", true, 5, 3, 5, 500 - i), 70, 3, 18))
+            .collect();
+        let r2 = build_performance_report(&few);
+        assert!(
+            !r2.main_lesson.contains("İlk 14 dakikada"),
+            "küçük örneklemde erken-ölüm lesson'ı üretmeyiz: {}",
+            r2.main_lesson
+        );
+
+        // Eşik altı ortalama (1.0) → lesson tetiklenmez.
+        let calm: Vec<MatchRow> = (0..5)
+            .map(|i| mt(m(1, "A", "middle", true, 5, 3, 5, 500 - i), 70, 1, 18))
+            .collect();
+        let r3 = build_performance_report(&calm);
+        assert!(!r3.main_lesson.contains("İlk 14 dakikada"));
     }
 }

@@ -264,6 +264,9 @@
     "games": "{{n}} games",
     "form": "Form {{delta}}",
     "csPerMin": "{{cs}} CS/min",
+    "csAt10": "{{cs}} CS@10",
+    "earlyDeaths": "{{n}} early deaths/game",
+    "vision": "{{n}} vision",
     "champLine": "{{games}} games · {{wr}} WR · {{kda}} KDA",
     "unknownRole": "Unknown"
   },

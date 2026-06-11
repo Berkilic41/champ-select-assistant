@@ -58,6 +58,15 @@ export const PerformancePanel: React.FC<Props> = ({ report }) => {
         {report.avg_cs_per_min != null && (
           <span>{t('performance.csPerMin', { cs: report.avg_cs_per_min.toFixed(1) })}</span>
         )}
+        {report.avg_cs_at_10 != null && (
+          <span>{t('performance.csAt10', { cs: report.avg_cs_at_10.toFixed(0) })}</span>
+        )}
+        {report.avg_deaths_pre_14 != null && (
+          <span>{t('performance.earlyDeaths', { n: report.avg_deaths_pre_14.toFixed(1) })}</span>
+        )}
+        {report.avg_vision_score != null && (
+          <span>{t('performance.vision', { n: report.avg_vision_score.toFixed(0) })}</span>
+        )}
         <span>{mainRole}</span>
         {report.games >= 10 && (
           <span>{t('performance.form', { delta: signedPct(report.form_delta) })}</span>

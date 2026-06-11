@@ -13,6 +13,21 @@ export type PerformanceReport = { games: number, wins: number, losses: number, w
  */
 avg_cs_per_min: number | null, 
 /**
+ * Average CS at 10:00 over timeline-bearing matches (`None` when none).
+ * Honest stat — NOT a lesson (jungle/support farm@10 is legitimately low).
+ */
+avg_cs_at_10: number | null, 
+/**
+ * Average deaths before 14:00 over timeline-bearing matches. Feeds the
+ * early-death lesson when the sample is big enough (role-neutral signal).
+ */
+avg_deaths_pre_14: number | null, 
+/**
+ * Average vision score over matches that carry it. Honest stat — NOT a
+ * lesson (support vision is structurally higher; a threshold would lie).
+ */
+avg_vision_score: number | null, 
+/**
  * Consecutive losses counting back from the most recent match.
  */
 loss_streak: number, 

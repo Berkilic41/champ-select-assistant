@@ -19,6 +19,9 @@ export interface ParsedLcuMatch {
   queue_id: number;
   played_at: number; // unix saniye
   cs: number; // lane minions + neutral monsters
+  // LCU match history timeline taşımaz → cs_at_10/deaths_pre_14 yok; yalnız
+  // visionScore stats'ta mevcut (yoksa dürüst null).
+  vision_score: number | null;
 }
 
 export interface ParsedLcuMastery {
@@ -81,6 +84,7 @@ function parseSingleGame(gameRaw: unknown, puuid: string): ParsedLcuMatch | null
     queue_id: num(game.queueId),
     played_at: Math.floor(num(game.gameCreation) / 1000),
     cs: num(stats.totalMinionsKilled) + num(stats.neutralMinionsKilled),
+    vision_score: typeof stats.visionScore === "number" ? stats.visionScore : null,
   };
 }
 

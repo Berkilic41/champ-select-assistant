@@ -264,6 +264,9 @@
     "games": "{{n}} maç",
     "form": "Form {{delta}}",
     "csPerMin": "{{cs}} CS/dk",
+    "csAt10": "{{cs}} CS@10",
+    "earlyDeaths": "{{n}} erken ölüm/maç",
+    "vision": "{{n}} vizyon",
     "champLine": "{{games}} maç · {{wr}} WR · {{kda}} KDA",
     "unknownRole": "Bilinmiyor"
   },

@@ -10,6 +10,9 @@ const report: PerformanceReport = {
   win_rate: 7 / 12,
   avg_kda: 3.2,
   avg_cs_per_min: 7.5,
+  avg_cs_at_10: 68,
+  avg_deaths_pre_14: 1.5,
+  avg_vision_score: 21,
   loss_streak: 3,
   form_delta: 0.2,
   main_role: 'middle',
@@ -36,6 +39,10 @@ describe('PerformancePanel', () => {
     expect(screen.getByText('tilt riski')).toBeInTheDocument();
     expect(screen.getByText('Orta')).toBeInTheDocument();
     expect(screen.getByText('7.5 CS/dk')).toBeInTheDocument();
+    // Timeline-türevi metrikler (WS4) — alan doluysa görünür.
+    expect(screen.getByText('68 CS@10')).toBeInTheDocument();
+    expect(screen.getByText('1.5 erken ölüm/maç')).toBeInTheDocument();
+    expect(screen.getByText('21 vizyon')).toBeInTheDocument();
   });
 
   it('renders nothing without a report', () => {

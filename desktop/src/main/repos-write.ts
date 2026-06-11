@@ -54,6 +54,11 @@ export interface MatchInsert {
   queue_id: number;
   played_at: number;
   cs: number | null;
+  // Timeline-türevi alanlar (V020) — yalnız Riot sync doldurur; LCU path ve
+  // timeline'sız maçlar null bırakır (rapor null'u dürüstçe atlar).
+  cs_at_10?: number | null;
+  deaths_pre_14?: number | null;
+  vision_score?: number | null;
 }
 
 /** INSERT OR IGNORE; true = yeni satır (Rust insert_match bool paritesi). */
@@ -66,8 +71,8 @@ export function insertMatch(
     .prepare(
       `INSERT OR IGNORE INTO matches
          (match_id, puuid, champion_id, position, win, kills, deaths, assists,
-          duration_secs, queue_id, played_at, cs)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          duration_secs, queue_id, played_at, cs, cs_at_10, deaths_pre_14, vision_score)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .run(
       m.match_id,
@@ -82,6 +87,9 @@ export function insertMatch(
       m.queue_id,
       m.played_at,
       m.cs,
+      m.cs_at_10 ?? null,
+      m.deaths_pre_14 ?? null,
+      m.vision_score ?? null,
     );
   return Number(result.changes) > 0;
 }

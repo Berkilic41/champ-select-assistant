@@ -214,12 +214,34 @@ describe("riot sync commands (riot.rs parity)", () => {
             assists: 3,
             totalMinionsKilled: 150,
             neutralMinionsKilled: 10,
+            visionScore: 23,
           },
         ],
       },
     });
+    // TR1_a timeline'ı: 10. dk frame'inde 71 CS, 14 dk öncesi 1 ölüm (victimId 1).
+    const timelineA = {
+      metadata: { participants: ["p-1"] },
+      info: {
+        frames: [
+          { timestamp: 0, participantFrames: { "1": { minionsKilled: 0, jungleMinionsKilled: 0 } }, events: [] },
+          {
+            timestamp: 660_000,
+            participantFrames: { "1": { minionsKilled: 65, jungleMinionsKilled: 6 } },
+            events: [
+              { type: "CHAMPION_KILL", timestamp: 620_000, victimId: 1 },
+              { type: "CHAMPION_KILL", timestamp: 900_000, victimId: 1 }, // 15. dk → sayılmaz
+              { type: "CHAMPION_KILL", timestamp: 700_000, victimId: 2 }, // başkası → sayılmaz
+            ],
+          },
+        ],
+      },
+    };
     const { fetch } = stubFetch([
       [/\/ids\?/, () => ({ status: 200, body: ["TR1_a", "TR1_b", "TR1_err"] })],
+      // timeline desenleri ÖNCE: /matches\/TR1_a/ timeline URL'sini de yakalar.
+      [/TR1_a\/timeline/, () => ({ status: 200, body: timelineA })],
+      [/TR1_b\/timeline/, () => ({ status: 500 })], // timeline hatası → alanlar null
       [/matches\/TR1_a/, () => ({ status: 200, body: detail("TR1_a", 86) })],
       [/matches\/TR1_b/, () => ({ status: 200, body: detail("TR1_b", 122) })],
       [/matches\/TR1_err/, () => ({ status: 403 })],
@@ -229,9 +251,24 @@ describe("riot sync commands (riot.rs parity)", () => {
     const result = await syncMatchHistory(db, "p-1", 20, client);
     expect(result).toEqual({ synced: 2, skipped: 0, errors: 1 });
     const row = db
-      .prepare("SELECT champion_id, cs FROM matches WHERE match_id = 'TR1_a'")
-      .get() as unknown as { champion_id: number; cs: number };
-    expect(row).toMatchObject({ champion_id: 86, cs: 160 });
+      .prepare(
+        "SELECT champion_id, cs, cs_at_10, deaths_pre_14, vision_score FROM matches WHERE match_id = 'TR1_a'",
+      )
+      .get() as unknown as Record<string, unknown>;
+    expect(row).toMatchObject({
+      champion_id: 86,
+      cs: 160,
+      cs_at_10: 71,
+      deaths_pre_14: 1,
+      vision_score: 23,
+    });
+    // Timeline'ı başarısız maç: vision detail'den gelir, timeline alanları dürüst null.
+    const rowB = db
+      .prepare(
+        "SELECT cs_at_10, deaths_pre_14, vision_score FROM matches WHERE match_id = 'TR1_b'",
+      )
+      .get() as unknown as Record<string, unknown>;
+    expect(rowB).toMatchObject({ cs_at_10: null, deaths_pre_14: null, vision_score: 23 });
 
     // İkinci koşu: INSERT OR IGNORE → hepsi skipped.
     const again = await syncMatchHistory(db, "p-1", 20, client);

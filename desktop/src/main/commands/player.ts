@@ -93,7 +93,8 @@ export function getPerformanceReport(
   // Most-recent-first so streak/form are correct in the pure builder.
   const rows = db
     .prepare(
-      `SELECT champion_id, position, win, kills, deaths, assists, played_at, duration_secs, cs
+      `SELECT champion_id, position, win, kills, deaths, assists, played_at, duration_secs,
+              cs, cs_at_10, deaths_pre_14, vision_score
        FROM matches
        WHERE puuid = ?
        ORDER BY played_at DESC
@@ -109,7 +110,12 @@ export function getPerformanceReport(
     played_at: number;
     duration_secs: number;
     cs: number | null;
+    cs_at_10: number | null;
+    deaths_pre_14: number | null;
+    vision_score: number | null;
   }[];
+  const optU32 = (v: number | null): number | null =>
+    v === null ? null : Math.max(Number(v), 0);
   const matches = rows.map((r) => ({
     champion_id: Number(r.champion_id),
     champion_key: keys.get(Number(r.champion_id)) ?? "",
@@ -120,7 +126,10 @@ export function getPerformanceReport(
     assists: Math.max(Number(r.assists), 0),
     played_at: Number(r.played_at),
     duration_secs: Math.max(Number(r.duration_secs), 0),
-    cs: r.cs === null ? null : Math.max(Number(r.cs), 0),
+    cs: optU32(r.cs),
+    cs_at_10: optU32(r.cs_at_10),
+    deaths_pre_14: optU32(r.deaths_pre_14),
+    vision_score: optU32(r.vision_score),
   }));
   return engine.performanceReport(matches);
 }

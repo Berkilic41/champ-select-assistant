@@ -268,6 +268,18 @@ export function getMatchDetail(
   );
 }
 
+/** Match-V5 timeline (dakikalık frame'ler + event'ler) — WS4 farm@10 /
+ *  erken-ölüm türevleri için. Detail ile aynı rate-limit havuzundan geçer. */
+export function getMatchTimeline(
+  client: RiotClient,
+  matchId: string,
+  routing: string,
+): Promise<Record<string, unknown>> {
+  return client.get(
+    `https://${routing}.api.riotgames.com/lol/match/v5/matches/${matchId}/timeline`,
+  );
+}
+
 export function masteryTopByPuuid(
   client: RiotClient,
   puuid: string,
