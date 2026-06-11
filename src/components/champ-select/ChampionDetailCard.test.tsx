@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from '../../lib/host';
 import { ChampionDetailCard } from './ChampionDetailCard';
 
 const mockInvoke = invoke as ReturnType<typeof vi.fn>;

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from '../lib/host';
 import { useSummonerData } from './useSummonerData';
 
 const mockInvoke = invoke as ReturnType<typeof import('vitest').vi.fn>;

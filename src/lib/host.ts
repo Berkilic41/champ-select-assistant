@@ -1,14 +1,9 @@
-// Host-agnostic IPC adapter — the ONLY place the renderer touches the shell.
-//
-// Tauri (bugün): @tauri-apps/api invoke/listen'a delege eder.
-// Electron (P1 göçü): preload'un contextBridge ile açtığı `window.api`'ye
-// delege eder. Tetkik: `window.api` varlığı. İki host da aynı komut adlarını ve
-// Tauri'nin `{ payload }` event zarfını kullanır — bileşenler host'u bilmez.
+// Electron IPC adapter — the ONLY place the renderer touches the shell.
+// Tauri host emekli edildi (commit 26d1471): tek host Electron; preload'un
+// contextBridge ile açtığı `window.api` zorunlu. Yokluğu sessiz boş veri DEĞİL
+// dürüst hatadır (preload yüklenmemiş demektir).
 
-import { invoke as tauriInvoke } from '@tauri-apps/api/core';
-import { listen as tauriListen } from '@tauri-apps/api/event';
-
-/** Tauri Event<T> zarfının bileşenlerce kullanılan kısmı. */
+/** Eski Tauri Event<T> zarfının bileşenlerce kullanılan kısmı (şekil korundu). */
 export interface HostEvent<T> {
   payload: T;
 }
@@ -26,30 +21,28 @@ declare global {
   }
 }
 
-function electronApi(): ElectronApi | undefined {
-  return typeof window !== 'undefined' ? window.api : undefined;
+function requireApi(): ElectronApi {
+  const api = typeof window !== 'undefined' ? window.api : undefined;
+  if (!api) {
+    throw new Error(
+      'Electron host bulunamadı: window.api tanımsız (preload yüklenmedi mi?)',
+    );
+  }
+  return api;
 }
 
-/** Tauri `invoke` paritesi: komut adı + named-args objesi. */
+/** Komut adı + named-args objesi (eski Tauri invoke imzasıyla birebir). */
 export async function invoke<T>(
   cmd: string,
   args?: Record<string, unknown>,
 ): Promise<T> {
-  const api = electronApi();
-  if (api) return api.invoke<T>(cmd, args);
-  // args verilmediğinde Tauri'ye HİÇ geçirme — mevcut çağrı imzaları (ve testlerin
-  // birebir arg assertion'ları) değişmesin.
-  return args === undefined ? tauriInvoke<T>(cmd) : tauriInvoke<T>(cmd, args);
+  return requireApi().invoke<T>(cmd, args);
 }
 
-/** Tauri `listen` paritesi: `{ payload }` zarfı ve Promise<UnlistenFn> dönüşü. */
+/** `{ payload }` zarfı ve Promise<UnlistenFn> dönüşü (eski imza korundu). */
 export async function listen<T>(
   event: string,
   handler: (event: HostEvent<T>) => void,
 ): Promise<UnlistenFn> {
-  const api = electronApi();
-  if (api) {
-    return api.on(event, (payload) => handler({ payload: payload as T }));
-  }
-  return tauriListen<T>(event, (e) => handler({ payload: e.payload }));
+  return requireApi().on(event, (payload) => handler({ payload: payload as T }));
 }

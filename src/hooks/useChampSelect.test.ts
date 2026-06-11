@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { invoke } from '@tauri-apps/api/core';
-import { listen } from '@tauri-apps/api/event';
+import { invoke } from '../lib/host';
+import { listen } from '../lib/host';
 import { useChampSelect } from './useChampSelect';
 
 const mockInvoke = invoke as ReturnType<typeof vi.fn>;

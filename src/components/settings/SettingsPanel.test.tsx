@@ -1,6 +1,6 @@
 import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from '../../lib/host';
 import { SettingsPanel } from './SettingsPanel';
 import { DEFAULT_SETTINGS } from '../../hooks/useSettings';
 

@@ -16,7 +16,6 @@
     "@fontsource/inter": "^5.2.8",
     "@fontsource/jetbrains-mono": "^5.2.8",
     "@fontsource/sora": "^5.2.8",
-    "@tauri-apps/api": "^2",
     "clsx": "^2.1.1",
     "framer-motion": "^12.40.0",
     "i18next": "^23.15.0",

@@ -8,11 +8,9 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-vi.mock('@tauri-apps/api/core', () => ({
+// Host adaptörü (Electron window.api sarmalayıcısı) global mock — testler
+// invoke/listen handle'larını `import { invoke } from '<...>/lib/host'` ile alır.
+vi.mock('../lib/host', () => ({
   invoke: vi.fn(),
-}));
-
-vi.mock('@tauri-apps/api/event', () => ({
   listen: vi.fn(() => Promise.resolve(() => {})),
-  emit: vi.fn(),
 }));
