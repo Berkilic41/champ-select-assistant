@@ -62,6 +62,7 @@
       "win": "Kazanma koşulu",
       "role": "Takım rolü",
       "spike": "Güç tepesi",
+      "spikeWindow": "Güç penceresi",
       "lane": "Erken (lane)",
       "matchup": "Matchup",
       "mid": "Orta oyun",

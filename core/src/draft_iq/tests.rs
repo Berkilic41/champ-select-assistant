@@ -609,6 +609,60 @@ fn spike_note_late_scaler_returns_some() {
 }
 
 #[test]
+fn matchup_spike_window_reads_curve_difference() {
+    use crate::draft_iq::archetype::{
+        CcProfile, ChampionArchetype, DamageProfile, PowerCurve,
+    };
+    use crate::draft_iq::narrative::build_matchup_spike_window;
+
+    let with_curve = |early: f32, mid: f32, late: f32| ChampionArchetype {
+        champion_id: 9,
+        archetype: "skirmisher".to_string(),
+        damage_profile: DamageProfile {
+            ad: 0.7,
+            ap: 0.1,
+            true_damage: 0.1,
+        },
+        cc: CcProfile {
+            has_hard_cc: false,
+            hard_cc_count: 0,
+            primary_cc: vec![],
+        },
+        mobility: "high".to_string(),
+        engage_role: "none".to_string(),
+        peel_capability: "low".to_string(),
+        blind_safety: 0.5,
+        execution_difficulty: 3,
+        win_condition: "teamfight".to_string(),
+        ult_type: "single".to_string(),
+        confidence: "high".to_string(),
+        power_curve: PowerCurve { early, mid, late },
+        counters_archetypes: vec![],
+        utility_tags: vec![],
+    };
+
+    // Çapraz pencere: ben erken, rakip geç → "penceren erken" okuması.
+    let mine = with_curve(0.80, 0.65, 0.50);
+    let opp = with_curve(0.40, 0.65, 0.90);
+    let w = build_matchup_spike_window(&mine, &opp).expect("belirgin fark → Some");
+    assert!(w.contains("penceren erken"), "window: {w}");
+
+    // Tersi: rakip erken, ben geç → sabırlı okuma.
+    let w2 = build_matchup_spike_window(&opp, &mine).expect("ters yönde de Some");
+    assert!(w2.contains("Rakibin penceresi erken"), "window: {w2}");
+
+    // Yalnız geç fark: erken eşit, geç bende → "Geç oyun senin lehine".
+    let late_me = with_curve(0.55, 0.65, 0.90);
+    let late_eq = with_curve(0.55, 0.65, 0.60);
+    let w3 = build_matchup_spike_window(&late_me, &late_eq).expect("geç fark → Some");
+    assert!(w3.contains("Geç oyun senin lehine"), "window: {w3}");
+
+    // Eş eğriler → None (gürültüden okuma üretmeyiz).
+    let flat = with_curve(0.60, 0.60, 0.60);
+    assert!(build_matchup_spike_window(&flat, &flat.clone()).is_none());
+}
+
+#[test]
 fn spike_note_early_dominant_returns_some() {
     use crate::draft_iq::archetype::{
         CcProfile, ChampionArchetype, DamageProfile, PowerCurve,

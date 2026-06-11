@@ -14,7 +14,12 @@ champion_key: string,
 /**
  * Normalized lane ("top"/"jungle"/"middle"/"bottom"/"utility" or "").
  */
-position: string, win_condition: string, team_role: string, damage_profile: string, spike_note: string | null, 
+position: string, win_condition: string, team_role: string, damage_profile: string, spike_note: string | null,
+/**
+ * Matchup'a özel güç penceresi (iki power_curve karşılaştırması) — yalnız rakip
+ * laner biliniyorken ve belirgin faz farkı varken set edilir.
+ */
+spike_window: string | null,
 /**
  * Generic lane-phase micro — set only when the lane opponent is unknown (otherwise
  * the richer `matchup_tips` carry the lane advice, so we avoid duplicating it).

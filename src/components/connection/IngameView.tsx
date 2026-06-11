@@ -119,6 +119,9 @@ export const IngameView: React.FC<Props> = ({ summonerName }) => {
           <PlanRow label={t('overlay.plan.win')} text={plan.win_condition} />
           <PlanRow label={t('overlay.plan.role')} text={plan.team_role} />
           {plan.spike_note && <PlanRow label={t('overlay.plan.spike')} text={plan.spike_note} />}
+          {plan.spike_window && (
+            <PlanRow label={t('overlay.plan.spikeWindow')} text={plan.spike_window} />
+          )}
           {plan.lane_note && <PlanRow label={t('overlay.plan.lane')} text={plan.lane_note} />}
           {plan.matchup_tips.length > 0 && (
             <div className="overlay-plan-row">

@@ -238,6 +238,10 @@ pub struct IngamePlan {
     pub damage_profile: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub spike_note: Option<String>,
+    /// Matchup'a özel güç penceresi (iki power_curve karşılaştırması) — yalnız
+    /// rakip laner biliniyorken ve belirgin faz farkı varken set edilir.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub spike_window: Option<String>,
     /// Generic lane-phase micro — set only when the lane opponent is unknown
     /// (otherwise the richer `matchup_tips` carry the lane advice).
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -290,6 +294,9 @@ fn build_ingame_plan(
             Vec::new(),
         ),
     };
+    // Güç penceresi yalnız rakip arketipi elimizdeyken (blind/ARAM'da None).
+    let spike_window =
+        opponent.and_then(|(opp, _, _)| narrative::build_matchup_spike_window(arch, opp));
     IngamePlan {
         champion_name: info.champion_name.clone(),
         champion_key: champion_key.to_string(),
@@ -298,6 +305,7 @@ fn build_ingame_plan(
         team_role: narrative::build_team_role_text(arch),
         damage_profile: narrative::build_damage_profile_label(&arch.damage_profile),
         spike_note: narrative::build_spike_note(arch),
+        spike_window,
         lane_note,
         opponent_name: opponent.map(|(_, name, _)| name.to_string()),
         opponent_key: opponent.map(|(_, _, key)| key.to_string()),

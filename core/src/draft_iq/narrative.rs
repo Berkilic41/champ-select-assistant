@@ -323,6 +323,58 @@ pub fn build_spike_note(archetype: &ChampionArchetype) -> Option<String> {
     None
 }
 
+/// Minimum power-curve farkı: bunun altındaki farklardan pencere okuması üretmeyiz
+/// (gürültüden ders çıkarmak dürüst değil).
+const SPIKE_WINDOW_DIFF: f32 = 0.15;
+
+/// Matchup'a özel güç penceresi: iki şampiyonun `power_curve`'ü karşılaştırılır,
+/// belirgin (≥0.15) faz farkı varsa aksiyona dönük Türkçe okuma döner. Yalnız
+/// KB'deki sayısal eğriden türetilir (mekanik uydurma yok); fark yoksa `None`.
+pub fn build_matchup_spike_window(
+    mine: &ChampionArchetype,
+    opp: &ChampionArchetype,
+) -> Option<String> {
+    let m = &mine.power_curve;
+    let o = &opp.power_curve;
+    let early = m.early - o.early;
+    let late = m.late - o.late;
+
+    // Çapraz pencereler önce: en aksiyona dönük iki okuma.
+    if early >= SPIKE_WINDOW_DIFF && late <= -SPIKE_WINDOW_DIFF {
+        return Some(
+            "Güç penceren erken: laning'de baskıyı kur ve avantajı objeye çevir — oyun uzadıkça rakip öne geçer"
+                .to_string(),
+        );
+    }
+    if early <= -SPIKE_WINDOW_DIFF && late >= SPIKE_WINDOW_DIFF {
+        return Some(
+            "Rakibin penceresi erken: laning'i kayıpsız atlat — item'ler tamamlandıkça güç sana geçer"
+                .to_string(),
+        );
+    }
+    if early >= SPIKE_WINDOW_DIFF {
+        return Some(
+            "Erken oyun farkı sende — ilk dakikalardan tempo kur, kazandığın avantajı büyüt"
+                .to_string(),
+        );
+    }
+    if early <= -SPIKE_WINDOW_DIFF {
+        return Some(
+            "Erken oyun rakipte — ilk dakikalarda gereksiz takas alma, kayıpsız farm'a odaklan"
+                .to_string(),
+        );
+    }
+    if late >= SPIKE_WINDOW_DIFF {
+        return Some("Geç oyun senin lehine — eşit giden oyunu uzatmak kazandırır".to_string());
+    }
+    if late <= -SPIKE_WINDOW_DIFF {
+        return Some(
+            "Geç oyun rakipte — avantajı orta oyunda objeye çevir, oyunu uzatma".to_string(),
+        );
+    }
+    None // belirgin pencere farkı yok — uydurma okuma üretmeyiz
+}
+
 /// Opponent-archetype-specific lane caution. Uses only the KB archetype class we hold
 /// (no per-ability mechanics → honest, no fabrication). Lets two early bullies of
 /// different classes get distinct advice when combined with the power-curve tempo line.

@@ -62,6 +62,7 @@
       "win": "Win condition",
       "role": "Team role",
       "spike": "Power spike",
+      "spikeWindow": "Power window",
       "lane": "Early (lane)",
       "matchup": "Matchup",
       "mid": "Mid game",
