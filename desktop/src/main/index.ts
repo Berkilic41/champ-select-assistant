@@ -18,6 +18,7 @@ import { createLiveClientFetcher } from "./live-client";
 import { migrationsDir } from "./paths";
 import { PipelineScheduler } from "./scheduler";
 import { createTray } from "./tray";
+import { setupAutoUpdater } from "./updater";
 import { createMainWindow } from "./window";
 
 const gotLock = app.requestSingleInstanceLock();
@@ -107,6 +108,9 @@ if (!gotLock) {
     } catch (err) {
       console.warn("Tray kurulamadı:", (err as Error).message);
     }
+
+    // 6. Otomatik güncelleme (yalnız paketli build; hata best-effort loglanır).
+    setupAutoUpdater();
 
     // CSA_SMOKE=1: boot'u doğrula, durumu yaz, çık (CI / headless duman testi).
     if (process.env.CSA_SMOKE) {
