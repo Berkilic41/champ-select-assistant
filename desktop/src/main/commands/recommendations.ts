@@ -1,13 +1,11 @@
 // Port of get_recommendations (src-tauri/src/commands/champ_select.rs:506 +
 // load_scoring_inputs:247). The host ONLY does I/O + assembly: every computation
 // (session parsing, rate blending + role-share filter, feedback aggregation, ARAM
-// weight preset, scoring itself) runs in core via the WASM JSON API — copying any
-// of that into TS would violate the single-source rule.
-//
-// Not yet ported (honest gaps, same as the Rust command's post-processing):
-// build enrichment (builds_repo seed builds), missing_signals, pro_presence and
-// DraftBrain pack upgrade — they land with the builds/ddragon slices. The engine
-// itself labels builds "none"/"general" honestly in the meantime.
+// weight preset, scoring itself, build enrichment, missing_signals, pro_presence
+// and the DraftBrain pack upgrade) runs in core via the WASM JSON API — copying
+// any of that into TS would violate the single-source rule. The host feeds the
+// raw rows (builds, pro champion_rates, draft_brain_packs payloads) and core does
+// the Rust command layer's full post-processing.
 
 import type { DatabaseSync } from "node:sqlite";
 
@@ -15,13 +13,16 @@ import type { Engine } from "../engine";
 import { getChampions } from "./champions";
 import { getSettings } from "./settings";
 import {
+  buildsForPosition,
   championRatesForPosition,
   championRoleMap,
   feedbackRows,
   masteryTopForPuuid,
   matchPlayerStats,
   matchupsForPosition,
+  packPayload,
   positionSampleTotals,
+  proPresenceRows,
 } from "../repos";
 
 /** The slice of ChampSelectState the host itself needs (full type: ts-rs gen). */
@@ -137,6 +138,15 @@ export function buildRecommendationsInput(
     console.warn("Item cache boş — önce sync_ddragon_champions çağırın");
   }
 
+  // Post-processing rows (champ_select.rs parity): curated builds for the lane,
+  // pro-presence rates and the cached DraftBrain pack payloads. Core consumes
+  // these in recommendations/analysis enrichment; absent rows degrade honestly
+  // (general heuristic build, no pro badge, local rules/seed packs).
+  const builds = orWarnDefault(() => buildsForPosition(db, myPos), "builds", []);
+  const proRows = orWarnDefault(() => proPresenceRows(db), "pro_presence", []);
+  const modelPackPayload = orWarnDefault(() => packPayload(db, "model_pack"), "model_pack", null);
+  const dataPackPayload = orWarnDefault(() => packPayload(db, "data_pack"), "data_pack", null);
+
   return {
     session,
     weights,
@@ -150,6 +160,10 @@ export function buildRecommendationsInput(
     items,
     rune_trees: runeTrees,
     // power_curves: core derives them from its own KB archetypes when omitted.
+    builds,
+    pro_rows: proRows,
+    model_pack_payload: modelPackPayload,
+    data_pack_payload: dataPackPayload,
   };
 }
 

@@ -181,6 +181,77 @@ export function matchupsForPosition(db: DatabaseSync, position: string): Matchup
   return [...best.values()];
 }
 
+/** core json_api::BuildRowEntry — JSON-string columns stay raw, core parses them. */
+export interface BuildRowOut {
+  champion_id: number;
+  item_ids: string;
+  rune_ids: string;
+  opponent_archetype: string | null;
+  skill_order: string | null;
+  summoner_spells: string | null;
+  secondary_runes: string | null;
+  stat_shards: string | null;
+}
+
+/**
+ * builds_repo read for the enrichment path: ALL rows for one lane, sorted
+ * `cached_at DESC` so core's first-match == Rust's `ORDER BY … LIMIT 1`
+ * (matchup-specific and default rows alike).
+ */
+export function buildsForPosition(db: DatabaseSync, position: string): BuildRowOut[] {
+  const rows = db
+    .prepare(
+      `SELECT champion_id, item_ids, rune_ids, opponent_archetype, skill_order,
+              summoner_spells, secondary_runes, stat_shards
+       FROM builds
+       WHERE position = ?
+       ORDER BY cached_at DESC`,
+    )
+    .all(position) as unknown as BuildRowOut[];
+  return rows.map((r) => ({
+    champion_id: Number(r.champion_id),
+    item_ids: String(r.item_ids),
+    rune_ids: String(r.rune_ids),
+    opponent_archetype: r.opponent_archetype === null ? null : String(r.opponent_archetype),
+    skill_order: r.skill_order === null ? null : String(r.skill_order),
+    summoner_spells: r.summoner_spells === null ? null : String(r.summoner_spells),
+    secondary_runes: r.secondary_runes === null ? null : String(r.secondary_runes),
+    stat_shards: r.stat_shards === null ? null : String(r.stat_shards),
+  }));
+}
+
+/** core json_api::ProPresenceRow — champion_rates rows at the synthetic "pro" position. */
+export interface ProPresenceRowOut {
+  champion_id: number;
+  pick_rate: number;
+  ban_rate: number;
+  source: string;
+}
+
+export function proPresenceRows(db: DatabaseSync): ProPresenceRowOut[] {
+  const rows = db
+    .prepare(
+      `SELECT champion_id, pick_rate, ban_rate, source
+       FROM champion_rates
+       WHERE position = 'pro'`,
+    )
+    .all() as unknown as ProPresenceRowOut[];
+  return rows.map((r) => ({
+    champion_id: Number(r.champion_id),
+    pick_rate: Number(r.pick_rate),
+    ban_rate: Number(r.ban_rate),
+    source: String(r.source),
+  }));
+}
+
+/** draft_brain pack_payload parity — raw payload_json for one pack kind, or null. */
+export function packPayload(db: DatabaseSync, kind: string): string | null {
+  const row = db
+    .prepare("SELECT payload_json FROM draft_brain_packs WHERE kind = ?")
+    .get(kind) as { payload_json?: string } | undefined;
+  return row?.payload_json != null ? String(row.payload_json) : null;
+}
+
 /** read_feedback_rows — raw rows; negative ids skipped (u32 try_from parity). */
 export function feedbackRows(db: DatabaseSync): FeedbackRow[] {
   const rows = db

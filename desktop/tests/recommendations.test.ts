@@ -22,7 +22,6 @@ import { getIngamePlan, getMacroState } from "../src/main/commands/overlay";
 import {
   getChampionPoolPlan,
   getFeedbackObservability,
-  getLobbyScouting,
   getPoolSuggestions,
 } from "../src/main/commands/insights";
 import {
@@ -161,6 +160,62 @@ describe("get_recommendations (champ_select.rs parity)", () => {
     expect(recs.some((r) => r.champion_id === 122)).toBe(false);
   });
 
+  it("enriches recs with seed builds, pro presence and the DraftBrain upgrade", () => {
+    const db = seededDb();
+    // Position-default curated build for Garen (opponent_archetype NULL).
+    db.prepare(
+      `INSERT INTO builds
+         (champion_id, position, patch_version, item_ids, rune_ids, win_rate,
+          pick_rate, source, skill_order, cached_at)
+       VALUES (86, 'top', '14.1', '[3078,3742,3065,3026,6333]', '[8010,8000]',
+               0.53, 0.1, 'seed', 'Q→E→W', 0)`,
+    ).run();
+    // Leaguepedia pro-presence row (synthetic "pro" position — never blended).
+    db.prepare(
+      `INSERT INTO champion_rates
+         (champion_id, position, win_rate, pick_rate, ban_rate, sample_size,
+          patch, source, confidence, cached_at)
+       VALUES (86, 'pro', 0, 0.30, 0.25, 40, '14.1', 'leaguepedia', 'medium', 0)`,
+    ).run();
+
+    interface EnrichedRec extends RecLike {
+      build_source: string;
+      core_items: number[];
+      keystone: number;
+      skill_order?: string;
+      pro_presence?: number;
+      model_version: string;
+      missing_signals?: string[];
+      score_breakdown?: unknown[];
+    }
+    const recs = getRecommendations(
+      engine,
+      db,
+      parsedTopSession(),
+      PUUID,
+    ) as EnrichedRec[];
+
+    const garen = recs.find((r) => r.champion_id === 86);
+    expect(garen).toBeDefined();
+    expect(garen!.build_source).toBe("seed");
+    expect(garen!.core_items).toEqual([3078, 3742, 3065, 3026]); // 4'e kırpılır
+    expect(garen!.keystone).toBe(8010);
+    expect(garen!.skill_order).toBe("Q→E→W");
+    expect(garen!.pro_presence).toBeCloseTo(0.55, 5);
+    expect(garen!.missing_signals ?? []).not.toContain("build");
+    // DraftBrain upgrade her öneride çalışır (pack yok → local rules fallback).
+    for (const rec of recs) {
+      expect(rec.model_version).toBe("draft-brain-rules-v2");
+      expect(rec.score_breakdown?.length ?? 0).toBeGreaterThan(0);
+    }
+    // Builds satırı olmayan aday dürüstçe "general" heuristiğe düşer.
+    const other = recs.find((r) => r.champion_id !== 86);
+    if (other) {
+      expect(other.build_source).toBe("general");
+      expect(other.missing_signals ?? []).toContain("build");
+    }
+  });
+
   it("accepts a RAW LCU session via core parse_session (actions branch)", () => {
     const db = seededDb();
     const raw = {
@@ -267,7 +322,7 @@ describe("analysis cluster (champ_select.rs parity)", () => {
     expect(fb.model_version).toBe("draft-brain-rules-v2");
   });
 
-  it("pool / scouting / feedback insight commands run end-to-end", () => {
+  it("pool / feedback insight commands run end-to-end", () => {
     const db = seededDb();
 
     const plan = getChampionPoolPlan(engine, db, "top", PUUID) as Record<string, unknown>;
@@ -278,17 +333,6 @@ describe("analysis cluster (champ_select.rs parity)", () => {
     }[];
     expect(Array.isArray(suggestions)).toBe(true);
     expect(suggestions.every((s) => s.champion_id !== 86)).toBe(true);
-
-    const scouting = getLobbyScouting(engine, db, [
-      {
-        cell_id: 5,
-        top_champion_id: 122,
-        top_champion_key: "Darius",
-        play_rate: 0.7,
-        game_count: 12,
-      },
-    ]) as { enemies: { top_champion_id: number }[] };
-    expect(scouting.enemies[0]?.top_champion_id).toBe(122);
 
     // seededDb 2 helpful feedback satırı ekler (synced_at NULL).
     const obs = getFeedbackObservability(engine, db) as {

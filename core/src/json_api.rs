@@ -13,15 +13,20 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::build_advisor::counter_item_advice;
+use crate::build_advisor::{counter_item_advice, heuristic_build};
 use crate::champion_types::{archetype_position_fit, flex_positions};
+use crate::draft_brain::{
+    local_rules_model_pack, local_seed_data_pack, upgrade_recommendation_with_context,
+    upgrade_recommendations_with_context, DataPack, ModelPack,
+};
 use crate::draft_iq::archetype::{ChampionArchetype, DamageProfile, PowerCurve};
 use crate::draft_simulator::{
     DamageType, DraftSimInput, DraftSimMove, DraftSimState, SimChampion,
 };
 use crate::draft_iq::game_plan::{compute_game_plan, GamePlan};
-use crate::draft_iq::narrative::build_matchup_tips;
+use crate::draft_iq::narrative::{build_matchup_tips, build_rationale};
 use crate::draft_iq::DraftKnowledgeBase;
+use crate::models::Recommendation;
 use crate::feedback_analytics::{analyze_feedback, FeedbackEvent};
 use crate::feedback_observability::{
     personalization_status, summarize_observability, FeedbackObservability,
@@ -31,7 +36,6 @@ use crate::feedback_signal::{aggregate_feedback, FeedbackInput, FeedbackSignal};
 use crate::pool_builder::suggest_pool;
 use crate::pool_coach::{analyze_pool, PoolChampion, PoolCoachInput};
 use crate::rate_blend::{self, SourceRate};
-use crate::scouting::{build_scouting_report, ScoutPoolInput};
 use crate::scoring::{
     matchup_score, resolve_lane_opponent_raw, MatchupEntry, MetaRate, ScoringContext,
     ScoringWeights,
@@ -129,6 +133,59 @@ pub struct RecommendationsInput {
     pub items: Vec<ItemData>,
     #[serde(default)]
     pub rune_trees: Vec<RuneTree>,
+    /// `builds` table rows for the player's lane, host-sorted `cached_at DESC`
+    /// (so first-match == Rust's `ORDER BY cached_at DESC LIMIT 1`). Empty =
+    /// no curated builds → archetype heuristic fallback ("general").
+    #[serde(default)]
+    pub builds: Vec<BuildRowEntry>,
+    /// `champion_rates` rows for the synthetic "pro" position. Core filters
+    /// `source == "leaguepedia"` and attaches `pick_rate + ban_rate` per rec.
+    #[serde(default)]
+    pub pro_rows: Vec<ProPresenceRow>,
+    /// Raw `draft_brain_packs` payloads (kind = "model_pack" / "data_pack").
+    /// Unparseable/absent → local rules / local seed fallback (Rust
+    /// `active_model_pack`/`active_data_pack` parity).
+    #[serde(default)]
+    pub model_pack_payload: Option<String>,
+    #[serde(default)]
+    pub data_pack_payload: Option<String>,
+}
+
+/// One `builds` table row as the host reads it (JSON-string columns kept raw —
+/// core parses them exactly like the Rust command layer did).
+#[derive(Debug, Deserialize)]
+pub struct BuildRowEntry {
+    pub champion_id: i64,
+    /// JSON-serialised `Vec<u32>`.
+    pub item_ids: String,
+    /// JSON-serialised `Vec<u32>` — `[keystone_id, primary_tree_id]`.
+    pub rune_ids: String,
+    /// Archetype of the expected lane opponent; `None` = position default.
+    #[serde(default)]
+    pub opponent_archetype: Option<String>,
+    #[serde(default)]
+    pub skill_order: Option<String>,
+    /// JSON-serialised `Vec<u32>` — `[spell1_id, spell2_id]`.
+    #[serde(default)]
+    pub summoner_spells: Option<String>,
+    /// JSON-serialised `Vec<u32>` — `[secondary_tree_id, rune1_id, rune2_id]`.
+    #[serde(default)]
+    pub secondary_runes: Option<String>,
+    /// JSON-serialised `Vec<u32>` — `[offense, flex, defense]`.
+    #[serde(default)]
+    pub stat_shards: Option<String>,
+}
+
+/// One `champion_rates` row at position "pro" (Leaguepedia presence source).
+#[derive(Debug, Deserialize)]
+pub struct ProPresenceRow {
+    pub champion_id: u32,
+    #[serde(default)]
+    pub pick_rate: f32,
+    #[serde(default)]
+    pub ban_rate: f32,
+    #[serde(default)]
+    pub source: String,
 }
 
 /// Input for `ban_advisor::compute_ban_suggestions`.
@@ -270,21 +327,202 @@ impl EngineInputs {
     }
 }
 
+/// Post-processing inputs split off [`RecommendationsInput`] before the rest is
+/// consumed by [`EngineInputs::from_input`]. These back the Rust command layer's
+/// enrichment (champ_select.rs get_recommendations / get_champion_analysis).
+struct EnrichmentInputs {
+    builds: Vec<BuildRowEntry>,
+    pro_rows: Vec<ProPresenceRow>,
+    model_pack_payload: Option<String>,
+    data_pack_payload: Option<String>,
+}
+
+impl EnrichmentInputs {
+    fn take(input: &mut RecommendationsInput) -> Self {
+        Self {
+            builds: std::mem::take(&mut input.builds),
+            pro_rows: std::mem::take(&mut input.pro_rows),
+            model_pack_payload: input.model_pack_payload.take(),
+            data_pack_payload: input.data_pack_payload.take(),
+        }
+    }
+
+    /// `active_model_pack` parity: cached payload when parseable, else local rules.
+    fn model_pack(&self) -> ModelPack {
+        self.model_pack_payload
+            .as_deref()
+            .and_then(|p| ModelPack::from_json(p).ok())
+            .unwrap_or_else(local_rules_model_pack)
+    }
+
+    /// `active_data_pack` parity: cached payload when parseable, else the honest
+    /// local-seed fallback. (Rust additionally built a coverage-based local pack
+    /// from DB counts; in the Electron host the scheduler persists exactly that
+    /// pack into `draft_brain_packs`, so the cached-payload path covers it.)
+    fn data_pack(&self) -> DataPack {
+        self.data_pack_payload
+            .as_deref()
+            .and_then(|p| DataPack::from_json(p).ok())
+            .unwrap_or_else(local_seed_data_pack)
+    }
+}
+
+/// Archetype of the enemy laner at `my_pos`, when visible (champ_select.rs port).
+fn resolve_enemy_archetype(
+    session: &ChampSelectState,
+    all_champions: &[ChampionRecord],
+    kb: &DraftKnowledgeBase,
+    my_pos: &str,
+) -> Option<String> {
+    session
+        .their_team
+        .iter()
+        .find(|s| s.assigned_position.to_lowercase() == my_pos && s.champion_id != 0)
+        .and_then(|s| {
+            all_champions
+                .iter()
+                .find(|c| c.champion_id == s.champion_id as i64)
+                .map(|c| c.key.clone())
+        })
+        .and_then(|key| kb.get_archetype(&key).map(|a| a.archetype.clone()))
+}
+
+/// Attach build data (core items, runes, summoner spells, shards) to a single
+/// recommendation (`enrich_build_for_rec` port). Order of preference:
+///   1. Matchup-specific curated row (`build_source = "seed"`).
+///   2. Position-default curated row (`opponent_archetype` NULL, also "seed").
+///   3. General archetype heuristic (`build_source = "general"`).
+/// Leaves `build_source = "none"` only when the archetype is unknown.
+fn enrich_build(
+    rec: &mut Recommendation,
+    builds: &[BuildRowEntry],
+    enemy_archetype: Option<&str>,
+    kb: &DraftKnowledgeBase,
+) {
+    let cand_arch = kb.get_archetype(&rec.champion_key);
+    let row = enemy_archetype
+        .and_then(|arch| {
+            builds.iter().find(|b| {
+                b.champion_id == rec.champion_id as i64
+                    && b.opponent_archetype.as_deref() == Some(arch)
+            })
+        })
+        .or_else(|| {
+            builds
+                .iter()
+                .find(|b| b.champion_id == rec.champion_id as i64 && b.opponent_archetype.is_none())
+        });
+    if let Some(build) = row {
+        if let Ok(ids) = serde_json::from_str::<Vec<u32>>(&build.item_ids) {
+            rec.core_items = ids.into_iter().take(4).collect();
+        }
+        if let Ok(rids) = serde_json::from_str::<Vec<u32>>(&build.rune_ids) {
+            rec.keystone = rids.first().copied().unwrap_or(0);
+            rec.primary_rune_tree = rids.get(1).copied().unwrap_or(0);
+        }
+        rec.skill_order = build.skill_order.clone();
+        if let Some(s) = &build.summoner_spells {
+            rec.summoner_spells = serde_json::from_str(s).unwrap_or_default();
+        }
+        if let Some(s) = &build.secondary_runes {
+            rec.secondary_runes = serde_json::from_str(s).unwrap_or_default();
+        }
+        if let Some(s) = &build.stat_shards {
+            rec.stat_shards = serde_json::from_str(s).unwrap_or_default();
+        }
+        rec.build_source = "seed".to_string();
+        rec.build_confidence = "high".to_string();
+        rec.build_note = cand_arch.map(|a| build_rationale(a, enemy_archetype, "seed"));
+        return;
+    }
+
+    // No curated row for this champion → general archetype build.
+    if let Some(a) = cand_arch {
+        if let Some(b) = heuristic_build(&a.archetype) {
+            rec.core_items = b.core_items.into_iter().take(4).collect();
+            rec.keystone = b.keystone;
+            rec.primary_rune_tree = b.primary_tree;
+            rec.secondary_runes = b.secondary_runes;
+            rec.stat_shards = b.stat_shards;
+            rec.summoner_spells = b.summoner_spells;
+            // skill_order intentionally left None — we don't fabricate it.
+            rec.build_source = "general".to_string();
+            rec.build_confidence = "medium".to_string();
+            rec.build_note = Some(build_rationale(a, enemy_archetype, "general"));
+        }
+    }
+}
+
+/// Display name of the first core item, from the host's item cache.
+fn resolve_core_item_name(rec: &Recommendation, items: &[ItemData]) -> Option<String> {
+    let id = *rec.core_items.first()?;
+    items.iter().find(|i| i.id == id).map(|i| i.name.clone())
+}
+
+/// Honest "what data is this pick missing" flags (champ_select.rs port). Computed
+/// BEFORE `upgrade_*` overwrites the engine's per-champ matchup confidence.
+fn compute_missing_signals(
+    rec: &Recommendation,
+    meta_rates: &HashMap<(u32, String), MetaRate>,
+    role: &str,
+) -> Vec<String> {
+    let mut out = Vec::new();
+    if !meta_rates.contains_key(&(rec.champion_id, role.to_string())) {
+        out.push("meta".to_string());
+    }
+    if rec.matchup_confidence == "heuristic" {
+        out.push("matchup".to_string());
+    }
+    if matches!(rec.build_source.as_str(), "general" | "none" | "") {
+        out.push("build".to_string());
+    }
+    out
+}
+
 /// Compute champion recommendations. Input/output are JSON strings; see
 /// [`RecommendationsInput`] and `models::Recommendation`.
+///
+/// Includes the Rust command layer's full post-processing: matchup-aware build
+/// enrichment, `core_item_name`, `missing_signals`, `pro_presence` and the
+/// DraftBrain pack upgrade (model score, tier, score breakdown, plans, why-not).
 pub fn recommendations_from_json(input_json: &str) -> Result<String, String> {
-    let input: RecommendationsInput = serde_json::from_str(input_json)
+    let mut input: RecommendationsInput = serde_json::from_str(input_json)
         .map_err(|e| format!("invalid recommendations input: {e}"))?;
+    let enrich = EnrichmentInputs::take(&mut input);
     let kb = DraftKnowledgeBase::load().map_err(|e| format!("KB load failed: {e}"))?;
     let inputs = EngineInputs::from_input(input, &kb);
 
-    let recs = crate::engine::compute_recommendations(
+    let mut recs = crate::engine::compute_recommendations(
         &inputs.ctx(),
         &inputs.all_champions,
         &inputs.items,
         &inputs.rune_trees,
         &kb,
     );
+
+    let my_pos = inputs.my_pos();
+    let enemy_archetype =
+        resolve_enemy_archetype(&inputs.session, &inputs.all_champions, &kb, &my_pos);
+    // Pro-play presence (pick% + ban% from Leaguepedia), stored under the
+    // synthetic "pro" position so it never mixes into the ranked per-role blend.
+    let pro_presence: HashMap<u32, f32> = enrich
+        .pro_rows
+        .iter()
+        .filter(|r| r.source == "leaguepedia")
+        .map(|r| (r.champion_id, r.pick_rate + r.ban_rate))
+        .collect();
+    for rec in &mut recs {
+        enrich_build(rec, &enrich.builds, enemy_archetype.as_deref(), &kb);
+        rec.core_item_name = resolve_core_item_name(rec, &inputs.items);
+        rec.missing_signals = compute_missing_signals(rec, &inputs.meta_rates, &my_pos);
+        rec.pro_presence = pro_presence.get(&rec.champion_id).copied();
+    }
+    upgrade_recommendations_with_context(
+        &mut recs,
+        Some(&enrich.model_pack()),
+        Some(&enrich.data_pack()),
+    );
+
     serde_json::to_string(&recs).map_err(|e| format!("recommendations serialize failed: {e}"))
 }
 
@@ -484,12 +722,13 @@ pub fn champion_analysis_from_json(input_json: &str) -> Result<String, String> {
     if champion_id == 0 {
         return Ok("null".to_string());
     }
-    let base: RecommendationsInput = serde_json::from_str(input_json)
+    let mut base: RecommendationsInput = serde_json::from_str(input_json)
         .map_err(|e| format!("invalid champion analysis input: {e}"))?;
+    let enrich = EnrichmentInputs::take(&mut base);
     let kb = DraftKnowledgeBase::load().map_err(|e| format!("KB load failed: {e}"))?;
     let inputs = EngineInputs::from_input(base, &kb);
 
-    let rec = crate::engine::analyze_champion(
+    let mut rec = crate::engine::analyze_champion(
         champion_id,
         &inputs.ctx(),
         &inputs.all_champions,
@@ -497,6 +736,20 @@ pub fn champion_analysis_from_json(input_json: &str) -> Result<String, String> {
         &inputs.rune_trees,
         &kb,
     );
+    // get_champion_analysis parity: build enrichment + core_item_name + single-rec
+    // DraftBrain upgrade (no missing_signals/pro_presence on this path).
+    if let Some(rec) = rec.as_mut() {
+        let my_pos = inputs.my_pos();
+        let enemy_archetype =
+            resolve_enemy_archetype(&inputs.session, &inputs.all_champions, &kb, &my_pos);
+        enrich_build(rec, &enrich.builds, enemy_archetype.as_deref(), &kb);
+        rec.core_item_name = resolve_core_item_name(rec, &inputs.items);
+        upgrade_recommendation_with_context(
+            rec,
+            Some(&enrich.model_pack()),
+            Some(&enrich.data_pack()),
+        );
+    }
     serde_json::to_string(&rec).map_err(|e| format!("champion analysis serialize failed: {e}"))
 }
 
@@ -911,11 +1164,10 @@ pub fn counter_items_from_json(input_json: &str) -> Result<String, String> {
     serde_json::to_string(&hints).map_err(|e| format!("counter items serialize failed: {e}"))
 }
 
-// ── Pool / scouting / feedback insights (P1.3b-6) ─────────────────────────────
+// ── Pool / feedback insights (P1.3b-6) ────────────────────────────────────────
 // Ports of the remaining pure command-layer logic (champ_select.rs:1283
-// get_pool_suggestions, pool_coach.rs get_champion_pool_plan, scouting.rs
-// get_lobby_scouting, data_quality.rs feedback read commands). The host ships
-// DB rows; every decision runs here.
+// get_pool_suggestions, pool_coach.rs get_champion_pool_plan, data_quality.rs
+// feedback read commands). The host ships DB rows; every decision runs here.
 
 /// Input for `pool_suggestions_json` / `champion_pool_plan_json`. `meta_rates`
 /// must already be blended + role-share filtered (use `blended_meta_rates_json`).
@@ -979,7 +1231,10 @@ fn clamp01(value: f32) -> f32 {
 
 fn meta_strength_for(meta: &HashMap<(u32, String), MetaRate>, id: u32, role: &str) -> f32 {
     match meta.get(&(id, role.to_string())) {
-        Some(r) if r.sample_size >= MIN_META_SAMPLE => ((r.win_rate - 0.48) / 0.07).clamp(0.0, 1.0),
+        Some(r) if r.sample_size >= MIN_META_SAMPLE => {
+            let wr = crate::scoring::shrunk_meta_wr(r.win_rate, r.sample_size);
+            ((wr - 0.48) / 0.07).clamp(0.0, 1.0)
+        }
         _ => 0.5,
     }
 }
@@ -1148,56 +1403,6 @@ pub fn champion_pool_plan_from_json(input_json: &str) -> Result<String, String> 
         candidates,
     });
     serde_json::to_string(&plan).map_err(|e| format!("pool plan serialize failed: {e}"))
-}
-
-/// One enemy slot's pre-fetched champion-pool summary (`EnemyPoolSummary` twin).
-#[derive(Debug, Deserialize)]
-pub struct EnemyPoolEntry {
-    pub cell_id: i32,
-    pub top_champion_id: u32,
-    #[serde(default)]
-    pub top_champion_key: String,
-    #[serde(default)]
-    pub play_rate: f32,
-    #[serde(default)]
-    pub game_count: u32,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct LobbyScoutingInput {
-    pub pools: Vec<EnemyPoolEntry>,
-    pub all_champions: Vec<ChampionRecord>,
-}
-
-/// Lobby scouting read (`get_lobby_scouting` parity): pre-fetched enemy pools +
-/// KB archetypes → playstyle profiles + explained ban targets.
-pub fn lobby_scouting_from_json(input_json: &str) -> Result<String, String> {
-    let input: LobbyScoutingInput = serde_json::from_str(input_json)
-        .map_err(|e| format!("invalid lobby scouting input: {e}"))?;
-    let kb = DraftKnowledgeBase::load().map_err(|e| format!("KB load failed: {e}"))?;
-
-    let inputs: Vec<ScoutPoolInput> = input
-        .pools
-        .iter()
-        .map(|p| {
-            let archetype = input
-                .all_champions
-                .iter()
-                .find(|c| c.champion_id == p.top_champion_id as i64)
-                .and_then(|c| kb.get_archetype(&c.key))
-                .map(|a| a.archetype.clone());
-            ScoutPoolInput {
-                cell_id: p.cell_id,
-                champion_id: p.top_champion_id,
-                champion_key: p.top_champion_key.clone(),
-                play_rate: p.play_rate,
-                game_count: p.game_count,
-                archetype,
-            }
-        })
-        .collect();
-    let report = build_scouting_report(&inputs);
-    serde_json::to_string(&report).map_err(|e| format!("scouting serialize failed: {e}"))
 }
 
 /// One raw feedback row with its sync flag (observability input).
@@ -2796,10 +3001,6 @@ mod wasm {
         super::champion_pool_plan_from_json(input).map_err(|e| JsValue::from_str(&e))
     }
 
-    #[wasm_bindgen]
-    pub fn lobby_scouting_json(input: &str) -> Result<String, JsValue> {
-        super::lobby_scouting_from_json(input).map_err(|e| JsValue::from_str(&e))
-    }
 
     #[wasm_bindgen]
     pub fn feedback_observability_json(input: &str) -> Result<String, JsValue> {
@@ -2912,6 +3113,129 @@ mod tests {
     fn recommendations_rejects_malformed_input() {
         let err = recommendations_from_json("{not json").unwrap_err();
         assert!(err.contains("invalid recommendations input"));
+    }
+
+    /// Post-processing parity: with no curated builds the fixture recs fall back
+    /// to the archetype heuristic ("general"), flag the build gap honestly, and
+    /// the DraftBrain upgrade always runs (local rules pack when no payload).
+    #[test]
+    fn recommendations_apply_general_build_and_draft_brain_upgrade() {
+        let out = recommendations_from_json(RECOMMENDATIONS_FIXTURE).expect("engine should run");
+        let recs: serde_json::Value = serde_json::from_str(&out).unwrap();
+        let arr = recs.as_array().unwrap();
+        assert!(arr.len() >= 2, "fixture yields Garen + Malphite");
+
+        for rec in arr {
+            assert_eq!(rec["build_source"], "general", "no seed rows → heuristic build");
+            assert!(
+                !rec["core_items"].as_array().unwrap().is_empty(),
+                "general build still carries core items"
+            );
+            let missing: Vec<&str> = rec["missing_signals"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .filter_map(|v| v.as_str())
+                .collect();
+            assert!(missing.contains(&"build"), "general build is flagged as missing");
+            assert_eq!(rec["model_version"], "draft-brain-rules-v2");
+            assert!(
+                !rec["score_breakdown"].as_array().unwrap().is_empty(),
+                "upgrade builds the score breakdown"
+            );
+        }
+        // Comparative why_not lands on every non-best rec.
+        assert!(
+            !arr[1]["why_not"].as_array().unwrap().is_empty(),
+            "runner-up carries a comparative why-not note"
+        );
+    }
+
+    /// Curated seed rows win over the heuristic: matchup-specific row preferred,
+    /// pro presence attached only from leaguepedia rows.
+    #[test]
+    fn recommendations_prefer_matchup_seed_build_and_attach_pro_presence() {
+        let kb = DraftKnowledgeBase::load().unwrap();
+        let darius_arch = kb.get_archetype("Darius").expect("Darius in KB").archetype.clone();
+
+        let mut input: serde_json::Value =
+            serde_json::from_str(RECOMMENDATIONS_FIXTURE).unwrap();
+        input["builds"] = serde_json::json!([
+            {
+                "champion_id": 86,
+                "item_ids": "[3078, 3742, 3065, 3026, 6333]",
+                "rune_ids": "[8010, 8000]",
+                "opponent_archetype": darius_arch,
+                "skill_order": "Q→E→W",
+                "summoner_spells": "[4, 12]",
+                "secondary_runes": "[8400, 8444, 8453]",
+                "stat_shards": "[5008, 5008, 5002]"
+            },
+            {
+                "champion_id": 86,
+                "item_ids": "[9999]",
+                "rune_ids": "[1, 2]",
+                "opponent_archetype": null
+            }
+        ]);
+        input["pro_rows"] = serde_json::json!([
+            { "champion_id": 86, "pick_rate": 0.30, "ban_rate": 0.25, "source": "leaguepedia" },
+            { "champion_id": 54, "pick_rate": 0.50, "ban_rate": 0.10, "source": "u_gg" }
+        ]);
+
+        let out = recommendations_from_json(&input.to_string()).expect("engine should run");
+        let recs: serde_json::Value = serde_json::from_str(&out).unwrap();
+        let garen = recs
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|r| r["champion_id"] == 86)
+            .expect("Garen recommended");
+
+        assert_eq!(garen["build_source"], "seed");
+        // enrich sets "high", but the upgrade honestly re-derives it from the
+        // data pack quality — with the local-seed fallback pack that is "low".
+        assert_eq!(garen["build_confidence"], "low");
+        // Matchup-specific row (3078 first), NOT the default 9999 row.
+        assert_eq!(garen["core_items"][0], 3078);
+        assert_eq!(garen["core_items"].as_array().unwrap().len(), 4, "capped at 4");
+        assert_eq!(garen["keystone"], 8010);
+        assert_eq!(garen["primary_rune_tree"], 8000);
+        assert_eq!(garen["skill_order"], "Q→E→W");
+        assert_eq!(garen["summoner_spells"], serde_json::json!([4, 12]));
+        let missing: Vec<&str> = garen["missing_signals"]
+            .as_array()
+            .map(|a| a.iter().filter_map(|v| v.as_str()).collect())
+            .unwrap_or_default();
+        assert!(!missing.contains(&"build"), "seed build is not a missing signal");
+        assert!((garen["pro_presence"].as_f64().unwrap() - 0.55).abs() < 1e-5);
+
+        let malphite = recs
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|r| r["champion_id"] == 54)
+            .expect("Malphite recommended");
+        assert!(
+            malphite.get("pro_presence").is_none() || malphite["pro_presence"].is_null(),
+            "non-leaguepedia pro rows are ignored"
+        );
+    }
+
+    /// Analysis path parity: single rec is enriched + upgraded (no comparative
+    /// why_not — that note only exists relative to a ranked list).
+    #[test]
+    fn champion_analysis_is_enriched_and_upgraded() {
+        let mut input: serde_json::Value =
+            serde_json::from_str(RECOMMENDATIONS_FIXTURE).unwrap();
+        input["champion_id"] = serde_json::json!(86);
+
+        let out = champion_analysis_from_json(&input.to_string()).expect("analysis should run");
+        let rec: serde_json::Value = serde_json::from_str(&out).unwrap();
+        assert_eq!(rec["champion_id"], 86);
+        assert_eq!(rec["build_source"], "general", "heuristic build attached");
+        assert_eq!(rec["model_version"], "draft-brain-rules-v2");
+        assert!(!rec["score_breakdown"].as_array().unwrap().is_empty());
     }
 
     #[test]
@@ -3177,19 +3501,6 @@ mod tests {
             arr.iter().all(|s| s["champion_id"] != 86),
             "owned champion must not be a learn suggestion"
         );
-
-        // Scouting: Zed OTP → yüksek tehdit + ban hedefi (host testinin aynası).
-        let scout_input = serde_json::json!({
-            "pools": [{"cell_id": 5, "top_champion_id": 238, "top_champion_key": "Zed",
-                       "play_rate": 0.70, "game_count": 12}],
-            "all_champions": [
-                {"champion_id": 238, "key": "Zed", "name": "Zed", "title": "t"}
-            ]
-        });
-        let report: serde_json::Value =
-            serde_json::from_str(&lobby_scouting_from_json(&scout_input.to_string()).unwrap())
-                .unwrap();
-        assert_eq!(report["enemies"][0]["threat"], "yüksek");
 
         // Observability: 2 satır, 1'i sync bekliyor.
         let obs_input = serde_json::json!([
