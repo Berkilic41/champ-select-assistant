@@ -1,0 +1,12 @@
+{
+  "measured_at": "2026-06-12T10:36:38.689Z",
+  "cold_start_ms": 8421,
+  "cold_start_status": "ok",
+  "rec_latency": {
+    "n": 50,
+    "p50_ms": 2.03,
+    "p95_ms": 3.71,
+    "max_ms": 4.19,
+    "note": "motor-yalnız (WASM çağrısı); IPC + DB okuma payı dahil değil"
+  }
+}

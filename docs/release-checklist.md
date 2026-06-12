@@ -90,6 +90,15 @@ Korunan: `ruvector.db` (tracked), `.claude/` (Claude workspace)
 
 ---
 
+## Seed Tazeleme (her release öncesi — Faz A3)
+
+- [ ] `node scripts/refresh-seeds.mjs` koş (yerel DB'de taze u.gg sync'i olmalı)
+- [ ] Diff özetini incele (+yeni / -kalkan anahtar sayıları makul mü?)
+- [ ] Adayları gözden geçir; uygunsa `builds_seed.json` / `matchup_seed.json` yerine koy
+- [ ] `*.candidate.json` dosyaları commit'lenmez (.gitignore kuralı var)
+
+---
+
 ## Visual QA Akışları
 
 - [ ] Onboarding: 4 adım, doğru Türkçe, "otomatik kilitleme yok" mesajı net

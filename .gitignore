@@ -65,3 +65,7 @@ backend/target/
 
 # Pinned Riot root CA is PUBLIC and required at runtime (CA pinning) — un-ignore.
 !desktop/resources/riotgames.pem
+
+# Seed refresh candidates (scripts/refresh-seeds.mjs output — curator reviews,
+# then manually replaces the real seed; candidates are never committed)
+*.candidate.json

@@ -422,12 +422,15 @@ export function upsertCanonicalRows(db: DatabaseSync, rowSet: CanonicalRowSetOut
        (champion_id, position, patch_version, item_ids, rune_ids, win_rate,
         pick_rate, source, opponent_archetype, skill_order, summoner_spells,
         secondary_runes, stat_shards, region, games, confidence, cached_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, NULL, NULL, ?, ?, ?, ?)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(champion_id, position, patch_version, source,
                  COALESCE(opponent_archetype, '')) DO UPDATE SET
        item_ids = excluded.item_ids, rune_ids = excluded.rune_ids,
        win_rate = excluded.win_rate, pick_rate = excluded.pick_rate,
-       summoner_spells = excluded.summoner_spells, region = excluded.region,
+       skill_order = excluded.skill_order,
+       summoner_spells = excluded.summoner_spells,
+       secondary_runes = excluded.secondary_runes,
+       stat_shards = excluded.stat_shards, region = excluded.region,
        games = excluded.games, confidence = excluded.confidence,
        cached_at = excluded.cached_at`,
   );
@@ -435,6 +438,9 @@ export function upsertCanonicalRows(db: DatabaseSync, rowSet: CanonicalRowSetOut
     const itemIds = (b.item_ids ?? []) as number[];
     const runeIds = (b.rune_ids ?? []) as number[];
     if (itemIds.length === 0 && runeIds.length === 0) continue;
+    // Kaynak vermiyorsa NULL kalır (Match-V5/edge satırları) — uydurma yok.
+    const secondaryRunes = (b.secondary_runes ?? []) as number[];
+    const statShards = (b.stat_shards ?? []) as number[];
     buildStmt.run(
       Number(b.champion_id),
       String(b.position),
@@ -444,7 +450,10 @@ export function upsertCanonicalRows(db: DatabaseSync, rowSet: CanonicalRowSetOut
       Number(b.win_rate),
       Number(b.pick_rate),
       String(b.source),
+      typeof b.skill_order === "string" && b.skill_order ? b.skill_order : null,
       JSON.stringify((b.summoner_spells ?? []) as number[]),
+      secondaryRunes.length > 0 ? JSON.stringify(secondaryRunes) : null,
+      statShards.length > 0 ? JSON.stringify(statShards) : null,
       String(b.region),
       Number(b.games),
       String(b.confidence),

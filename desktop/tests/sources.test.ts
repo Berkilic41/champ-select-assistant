@@ -131,7 +131,11 @@ describe("u.gg parsers (ugg.rs parity)", () => {
     expect(builds).toHaveLength(1);
     const b = builds[0];
     expect(b.item_ids).toEqual([6692, 6610, 3047]);
-    expect(b.rune_ids).toEqual([8010, 8299, 8304, 8347, 9104, 9111]);
+    // Seed format paritesi: [keystone, primary_tree] (A1 spike — d[0][2] stil id'si).
+    expect(b.rune_ids).toEqual([8010, 8000]);
+    expect(b.secondary_runes).toEqual([8300, 9104, 9111]);
+    expect(b.stat_shards).toEqual([5005, 5008, 5011]);
+    expect(b.skill_order).toBe("Q→W→E");
     expect(b.summoner_spells).toEqual([4, 11]);
     expect(b.games).toBe(9803);
   });

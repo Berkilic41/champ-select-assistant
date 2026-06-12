@@ -21,6 +21,9 @@ import { normalizePatch, upsertCanonicalRows } from "./match-v5";
 const UGG_STATS_BASE = "https://stats2.u.gg/lol/1.5";
 /** u.gg path'ine gömülü iç veri-format sürümü (dönerse 404 → dürüst hata). */
 const UGG_DATA_VERSION = "1.5.0";
+/** A2 spike bulgusu (2026-06-12): stats2 CDN'i YALNIZ ranked_solo_5x5 sunuyor —
+ *  normal_aram / aram / ranked_flex_sr / normal_blind_5x5 / quickplay → 403.
+ *  ARAM canlı metası bu CDN'den alınamaz; ARAM koçluğu KB + Match-V5'e dayanır. */
 const UGG_QUEUE = "ranked_solo_5x5";
 /** Region 12 = world (tüm bölgelerin toplamı). */
 const UGG_REGION_WORLD = "12";
@@ -81,9 +84,19 @@ export interface UggParseResult {
   builds: Record<string, unknown>[];
 }
 
-/** Bir şampiyonun `overview` JSON'u → canonical rate + build satırları
- *  (ugg.rs parse_overview birebir; d[6]=[wins,matches], d[3][2]=items,
- *  d[0][4]=rune perks, d[1][2]=spells). */
+/** Bir şampiyonun `overview` JSON'u → canonical rate + build satırları.
+ *
+ *  Blok şeması (canlı payload'da doğrulandı, 2026-06-12 A1 spike'ı):
+ *    d[0] = [matches, wins, primary_style, sub_style, perks[6]]
+ *    d[1] = [matches, wins, [spell1, spell2]]
+ *    d[3] = [matches, wins, core_items[]]
+ *    d[4] = [matches, wins, seq[18], "QWE"]   ← skill max önceliği
+ *    d[6] = [wins, matches]                    ← rol toplamı
+ *    d[8] = [matches, wins, ["5008","5008","5001"]] ← stat shard'lar
+ *
+ *  rune_ids seed formatıyla AYNI kodlanır: [keystone, primary_tree_id]
+ *  (eski davranış 6 perk'i olduğu gibi yazıyordu — tüketici rune_ids[1]'i
+ *  ağaç id'si sandığından u_gg build'lerinde yanlış ağaç görünüyordu). */
 export function parseUggOverview(
   v: unknown,
   championId: number,
@@ -123,7 +136,34 @@ export function parseUggOverview(
     });
 
     const itemIds = idList(at(at(d, 3), 2));
-    const runeIds = idList(at(at(d, 0), 4));
+    const perks = idList(at(at(d, 0), 4));
+    const primaryStyle = asU64(at(at(d, 0), 2));
+    const subStyle = asU64(at(at(d, 0), 3));
+    // Seed format paritesi: [keystone, primary_tree]; stil çözülemezse perk
+    // listesi olduğu gibi kalır (eski davranış — veri uydurma yok).
+    const runeIds =
+      perks.length > 0 && primaryStyle !== undefined
+        ? [perks[0], primaryStyle]
+        : perks;
+    // [secondary_tree, rune1, rune2] — yalnız tam 6-perk sayfası varsa.
+    const secondaryRunes =
+      subStyle !== undefined && perks.length >= 6
+        ? [subStyle, perks[4], perks[5]]
+        : [];
+    const statShards = (() => {
+      const raw = at(at(d, 8), 2);
+      if (!Array.isArray(raw)) return [] as number[];
+      return raw
+        .map((x) => Number(x))
+        .filter((n) => Number.isFinite(n) && n > 0);
+    })();
+    // "QWE" max-öncelik dizgisi → seed formatı "Q→W→E"; beklenmedik şekil →
+    // null (uydurma yok).
+    const orderRaw = at(at(d, 4), 3);
+    const skillOrder =
+      typeof orderRaw === "string" && /^[QWER]{3}$/.test(orderRaw)
+        ? orderRaw.split("").join("→")
+        : null;
     const summonerSpells = idList(at(at(d, 1), 2));
     if (itemIds.length > 0 || runeIds.length > 0) {
       builds.push({
@@ -133,6 +173,9 @@ export function parseUggOverview(
         position,
         item_ids: itemIds,
         rune_ids: runeIds,
+        secondary_runes: secondaryRunes,
+        stat_shards: statShards,
+        skill_order: skillOrder,
         summoner_spells: summonerSpells,
         games: matches,
         win_rate: winRate,

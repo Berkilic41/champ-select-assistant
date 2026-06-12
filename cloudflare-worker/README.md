@@ -55,7 +55,12 @@ curl "http://localhost:8787/v1/rates?region=tr1"       # read back the rates
 - cron cadence: `[triggers] crons` (default every 2h)
 
 ## Next: wire the desktop app
-After deploy, point the app's meta sync at `https://<worker>.workers.dev/v1/rates`
-(replace the Meraki fetch in `src-tauri/src/commands/meta_sync.rs`) and add the
-worker host to the Tauri CSP `connect-src`. The app maps the response into its
-existing `champion_rates` table.
+After deploy, set `EDGE_BASE_URL=https://<worker>.workers.dev` in the app's
+`.env` — the Electron scheduler's `cloud_edge` source picks it up on the next
+tick (no code change; see `desktop/src/main/scheduler.ts` / `sources.ts
+syncEdgeRates`). Rates, matchups and builds land in the existing canonical
+tables.
+
+Rehearsal status (2026-06-12, Faz A4): `wrangler deploy --dry-run` bundles
+cleanly with the D1 binding; the 3 migrations' tables match the code's queries
+7/7. Key-day = the 4 commands above + the `.env` flip.

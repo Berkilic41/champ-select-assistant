@@ -44,8 +44,11 @@ const FETCH_LOG_WINDOW_SECS = 30 * 24 * 60 * 60;
 const RATE_WINDOW_SECS = 60 * 60;
 /** MATCH_DISCOVERY_CRAWL_BUDGET — match-v5.ts'teki sabitle aynı (Rust verbatim). */
 const MATCH_DISCOVERY_CRAWL_BUDGET = 15;
-/** Bu host'ta devre dışı kaynaklar (tümü taşındı → boş; yenisi gelirse buraya). */
-const DISABLED_SOURCES: string[] = [];
+/** Bu host'ta devre dışı kaynaklar.
+ *  meraki: A5 probe'u (2026-06-12) — HTTP 200 ama payload bozuk/bayat
+ *  (patch 16.3, satırlarda yalnız playRate; winRate/count yok → parser zaten
+ *  her şeyi atlıyor). Silinmedi; kaynak düzelirse buradan çıkarmak yeter. */
+const DISABLED_SOURCES: string[] = ["meraki"];
 
 const nowSecs = () => Math.floor(Date.now() / 1000);
 

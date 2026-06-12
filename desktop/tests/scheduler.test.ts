@@ -145,7 +145,11 @@ describe("PipelineScheduler.tick (run_scheduler_tick paritesi)", () => {
 
     const logs = fetchLogs(db);
     expect(logFor(logs, "ddragon")).toMatchObject({ status: "success", decision: "refresh" });
-    expect(logFor(logs, "meraki")).toMatchObject({ status: "success", decision: "refresh" });
+    // Meraki A5 kararı: kaynak bozuk/bayat → disabled-by-default, dürüst skip.
+    expect(logFor(logs, "meraki")).toMatchObject({
+      status: "skipped",
+      decision: "skip_disabled",
+    });
     // Aggregate kaynaklar da taşındı → gerçek refresh (stub fetch'lerle).
     expect(logFor(logs, "u_gg")).toMatchObject({ status: "success", decision: "refresh" });
     expect(logFor(logs, "leaguepedia")).toMatchObject({
@@ -176,7 +180,7 @@ describe("PipelineScheduler.tick (run_scheduler_tick paritesi)", () => {
     // Başarı vardı → promotion adımı koştu (karar core'da; sonuç success|skipped).
     expect(["success", "skipped"]).toContain(logFor(logs, "data_pack_cache").status);
 
-    // Meraki 1 rate satırı yazdı → coverage büyüdü → progressing.
+    // u.gg satırları yazıldı → coverage büyüdü → progressing.
     const ramp = scheduler.lastCoverageRamp();
     expect(ramp).not.toBeNull();
     expect(ramp!.ramp_state).toBe("progressing");
@@ -191,9 +195,10 @@ describe("PipelineScheduler.tick (run_scheduler_tick paritesi)", () => {
     expect(after.trajectory).toBe("warming_up");
 
     // İkinci tick: kaynaklar TTL içinde + healthy → skip_fresh, yeniden fetch YOK.
+    // (meraki disabled → skip_fresh değil skip_disabled üretir.)
     await scheduler.tick();
     const second = fetchLogs(db).filter((l) => l.decision === "skip_fresh");
-    for (const source of ["ddragon", "meraki", "u_gg", "leaguepedia"]) {
+    for (const source of ["ddragon", "u_gg", "leaguepedia"]) {
       expect(second.some((l) => l.source === source), `${source} skip_fresh`).toBe(true);
     }
   });
