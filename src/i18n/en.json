@@ -134,7 +134,8 @@
     "missingSignal": {
       "meta": "no meta data",
       "matchup": "no matchup data",
-      "build": "build: generic"
+      "build": "build: generic",
+      "lane_performance": "no form data in this role"
     },
     "analyzing": "Computing recommendation…",
     "personalization": {

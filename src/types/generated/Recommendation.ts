@@ -55,7 +55,14 @@ missing_signals: Array<string>,
  * Pro-play presence (pick% + ban%) from Leaguepedia, when available — drives
  * the "pro heat" badge alongside the ranked signal. Set by the command layer.
  */
-pro_presence: number | null, lane_plan: string | null, mid_game_plan: string | null, teamfight_plan: string | null, teamfight_job: string | null, fallback_plan: string | null, risk_summary: string | null, why_not: Array<string>, data_sources: Array<DataSourceBadge>, coach_depth: string, 
+pro_presence: number | null, 
+/**
+ * D1 kişisel form sinyali (0..1; 0.5 = rol baseline'ında): bu şampiyondaki
+ * CS/dk + ölüm-oranı deltalarının Bayesian-shrunk okuması. `None` = bu rolde
+ * bu şampiyonla maç yok (dürüst — missing_signals'a düşer). json_api katmanı
+ * kurar ve total_score'a SINIRLI (±0.05) nudge uygular.
+ */
+lane_form_score: number | null, lane_plan: string | null, mid_game_plan: string | null, teamfight_plan: string | null, teamfight_job: string | null, fallback_plan: string | null, risk_summary: string | null, why_not: Array<string>, data_sources: Array<DataSourceBadge>, coach_depth: string, 
 /**
  * Placeholder — will be populated in Sprint 3b from builds_repo
  */

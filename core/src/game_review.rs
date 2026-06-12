@@ -100,7 +100,7 @@ const METRICS: &[(&str, &str, &str)] = &[
     ("deaths_pre_14", "at_most", "14 dk öncesi ölüm"),
 ];
 
-fn metric_value(m: &MatchRow, key: &str) -> Option<f32> {
+pub(crate) fn metric_value(m: &MatchRow, key: &str) -> Option<f32> {
     let mins = m.duration_secs as f32 / 60.0;
     match key {
         "cs_per_min" => m.cs.filter(|_| m.duration_secs > 0).map(|c| c as f32 / mins),
@@ -286,6 +286,88 @@ pub fn build_game_review(
         next_focus,
         partial,
     }
+}
+
+// ── D1: Kişisel form sinyali ──────────────────────────────────────────────────
+
+/// Şampiyon-başına form girdisi: rol baseline'ına karşı deltalar.
+#[derive(Debug, Clone, PartialEq)]
+pub struct LaneFormEntry {
+    /// CS/dk: şampiyondaki ortalaman − rol baseline'ın (pozitif = iyi).
+    pub cs_delta: f32,
+    /// 10 dk başına ölüm: baseline − şampiyondaki ortalaman (pozitif = iyi).
+    pub deaths_delta: f32,
+    pub games: u32,
+}
+
+/// Form skoru için prior (comfort'un prior_n=5 deseniyle aynı).
+const FORM_PRIOR_N: f32 = 5.0;
+/// Delta'ların doyduğu bant: CS/dk için ±2.0, ölüm/10dk için ±2.0.
+const FORM_BAND: f32 = 2.0;
+
+/// `recent_matches`'ten (host AYNI queue-grubunu yollar) draft'ın rolündeki
+/// şampiyon-başına form haritası. Rol baseline'ı = o roldeki TÜM maçların
+/// medyanı; şampiyon değeri = o şampiyondaki ortalama. Rolde maç yoksa boş.
+pub fn build_lane_form(matches: &[MatchRow], my_pos: &str) -> std::collections::HashMap<u32, LaneFormEntry> {
+    use std::collections::HashMap;
+    let mut out = HashMap::new();
+    if my_pos.is_empty() || my_pos == "aram" {
+        return out; // form rol-bazlı; ARAM/bilinmeyen pozisyonda sinyal yok
+    }
+    let role_rows: Vec<&MatchRow> = matches
+        .iter()
+        .filter(|m| m.position.eq_ignore_ascii_case(my_pos))
+        .collect();
+    let mut cs_all: Vec<f32> = role_rows
+        .iter()
+        .filter_map(|m| metric_value(m, "cs_per_min"))
+        .collect();
+    let mut deaths_all: Vec<f32> = role_rows
+        .iter()
+        .filter_map(|m| metric_value(m, "deaths_per_10"))
+        .collect();
+    let (Some(cs_base), Some(deaths_base)) = (median(&mut cs_all), median(&mut deaths_all))
+    else {
+        return out;
+    };
+
+    let mut per_champ: std::collections::HashMap<u32, (f32, f32, u32)> = HashMap::new();
+    for m in &role_rows {
+        let (Some(cs), Some(d)) = (
+            metric_value(m, "cs_per_min"),
+            metric_value(m, "deaths_per_10"),
+        ) else {
+            continue;
+        };
+        let e = per_champ.entry(m.champion_id).or_insert((0.0, 0.0, 0));
+        e.0 += cs;
+        e.1 += d;
+        e.2 += 1;
+    }
+    for (id, (cs_sum, d_sum, n)) in per_champ {
+        if n == 0 {
+            continue;
+        }
+        out.insert(
+            id,
+            LaneFormEntry {
+                cs_delta: cs_sum / n as f32 - cs_base,
+                deaths_delta: deaths_base - d_sum / n as f32,
+                games: n,
+            },
+        );
+    }
+    out
+}
+
+/// 0..1 form skoru (0.5 = baseline'da). Delta'lar ±FORM_BAND'da doyar; az maç
+/// prior'la 0.5'e çekilir — 1 iyi maç "formda" demek için yetmez.
+pub fn lane_form_score(entry: &LaneFormEntry) -> f32 {
+    let cs = (entry.cs_delta / FORM_BAND).clamp(-1.0, 1.0);
+    let d = (entry.deaths_delta / FORM_BAND).clamp(-1.0, 1.0);
+    let raw = 0.5 + 0.25 * cs + 0.25 * d;
+    let n = entry.games as f32;
+    ((raw * n) + 0.5 * FORM_PRIOR_N) / (n + FORM_PRIOR_N)
 }
 
 // ── C4: Trend raporu ──────────────────────────────────────────────────────────
@@ -504,6 +586,36 @@ mod tests {
         };
         let nd = build_game_review(&row(180, 5, 21, true), &history(), Some(&tl_goal));
         assert_eq!(nd.focus_check.as_ref().unwrap().result, "no_data");
+    }
+
+    #[test]
+    fn lane_form_builds_role_deltas_and_shrinks_small_samples() {
+        // top rolünde 6 maç: Garen(86) 3 maç güçlü CS, sahte 99 3 maç zayıf.
+        let mut matches = history(); // 5 Garen maçı, cs 150..210 (6.0 medyan civarı)
+        let mut weak = row(105, 8, 10, false); // 3.5 cs/dk, çok ölüm
+        weak.champion_id = 99;
+        weak.champion_key = "Weak".into();
+        matches.push(weak.clone());
+        matches.push(weak.clone());
+
+        let form = build_lane_form(&matches, "top");
+        let garen = form.get(&86).expect("Garen formu var");
+        let weak_e = form.get(&99).expect("99 formu var");
+        assert!(garen.cs_delta > weak_e.cs_delta);
+        assert!(garen.deaths_delta > weak_e.deaths_delta);
+
+        // Skor: iyi form > 0.5 > kötü form; prior az maçı nötre çeker.
+        let g = lane_form_score(garen);
+        let w = lane_form_score(weak_e);
+        assert!(g > 0.5, "iyi form 0.5 üstü: {g}");
+        assert!(w < 0.5, "kötü form 0.5 altı: {w}");
+        let one_game = LaneFormEntry { cs_delta: 2.0, deaths_delta: 2.0, games: 1 };
+        let many = LaneFormEntry { cs_delta: 2.0, deaths_delta: 2.0, games: 20 };
+        assert!(lane_form_score(&one_game) < lane_form_score(&many));
+
+        // ARAM / boş pozisyon → sinyal yok (dürüst).
+        assert!(build_lane_form(&matches, "aram").is_empty());
+        assert!(build_lane_form(&matches, "").is_empty());
     }
 
     #[test]

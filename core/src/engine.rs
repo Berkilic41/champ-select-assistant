@@ -651,6 +651,7 @@ fn score_candidate(
         matchup_confidence,
         missing_signals: Vec::new(),
         pro_presence: None,
+        lane_form_score: None,
         lane_plan,
         mid_game_plan: None,
         teamfight_plan,

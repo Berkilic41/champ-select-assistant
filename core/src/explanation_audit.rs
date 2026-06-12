@@ -578,6 +578,7 @@ mod tests {
             matchup_confidence: String::new(),
             missing_signals: Vec::new(),
             pro_presence: None,
+            lane_form_score: None,
             lane_plan: Some("Engage".into()), // thin (1 word)
             mid_game_plan: None,
             teamfight_plan: None,
@@ -688,6 +689,7 @@ mod tests {
             matchup_confidence: "medium".into(),
             missing_signals: Vec::new(),
             pro_presence: None,
+            lane_form_score: None,
             lane_plan: Some("Erken wave kontrol, lvl 6 all-in ara".into()),
             mid_game_plan: Some("Orta oyunda obje etrafında oyna".into()),
             teamfight_plan: None,

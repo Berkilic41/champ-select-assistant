@@ -22,7 +22,7 @@ const MAX_NEW_REVIEWS_PER_RUN = 10;
 /** Baseline geçmişi penceresi (core medyanı bunun üzerinden alır). */
 const HISTORY_WINDOW = 20;
 
-interface DbMatchRow {
+export interface DbMatchRow {
   match_id: string;
   champion_id: number;
   champion_key: string;
@@ -49,7 +49,7 @@ interface FocusGoalRow {
 }
 
 /** core postgame::MatchRow şekline çevir (snake_case, Option=null). */
-function toCoreMatch(r: DbMatchRow): Record<string, unknown> {
+export function toCoreMatch(r: DbMatchRow): Record<string, unknown> {
   return {
     champion_id: Number(r.champion_id),
     champion_key: String(r.champion_key ?? ""),
@@ -67,7 +67,7 @@ function toCoreMatch(r: DbMatchRow): Record<string, unknown> {
   };
 }
 
-function recentMatches(db: DatabaseSync, puuid: string, limit: number): DbMatchRow[] {
+export function recentMatches(db: DatabaseSync, puuid: string, limit: number): DbMatchRow[] {
   return db
     .prepare(
       `SELECT m.match_id, m.champion_id, COALESCE(c.key, '') AS champion_key,

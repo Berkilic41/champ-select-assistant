@@ -149,6 +149,11 @@ pub struct RecommendationsInput {
     pub model_pack_payload: Option<String>,
     #[serde(default)]
     pub data_pack_payload: Option<String>,
+    /// D1: oyuncunun son maç satırları (host AYNI queue-grubunu yollar; SR
+    /// draft'ında SR, ARAM'da ARAM). Core, draft'ın rolündeki şampiyon-başına
+    /// form haritasını bundan kurar. Boş = form sinyali yok (dürüst).
+    #[serde(default)]
+    pub recent_matches: Vec<crate::postgame::MatchRow>,
 }
 
 /// One `builds` table row as the host reads it (JSON-string columns kept raw —
@@ -335,6 +340,7 @@ struct EnrichmentInputs {
     pro_rows: Vec<ProPresenceRow>,
     model_pack_payload: Option<String>,
     data_pack_payload: Option<String>,
+    recent_matches: Vec<crate::postgame::MatchRow>,
 }
 
 impl EnrichmentInputs {
@@ -344,6 +350,7 @@ impl EnrichmentInputs {
             pro_rows: std::mem::take(&mut input.pro_rows),
             model_pack_payload: input.model_pack_payload.take(),
             data_pack_payload: input.data_pack_payload.take(),
+            recent_matches: std::mem::take(&mut input.recent_matches),
         }
     }
 
@@ -476,7 +483,27 @@ fn compute_missing_signals(
     if matches!(rec.build_source.as_str(), "general" | "none" | "") {
         out.push("build".to_string());
     }
+    // D1: rol bilinen SR draft'ında bu şampiyonla bu rolde maç yok → form yok.
+    if !role.is_empty() && role != "aram" && rec.lane_form_score.is_none() {
+        out.push("lane_performance".to_string());
+    }
     out
+}
+
+/// D1: form nudge'ı — feedback ile aynı sınırlı kanal (±`LANE_FORM_NUDGE`).
+/// Skoru karta yazar; `upgrade_*` sonradan model skoru üzerinden yeniden sıralar.
+const LANE_FORM_NUDGE: f32 = 0.05;
+
+fn apply_lane_form(
+    rec: &mut Recommendation,
+    lane_form: &HashMap<u32, crate::game_review::LaneFormEntry>,
+) {
+    if let Some(entry) = lane_form.get(&rec.champion_id) {
+        let s = crate::game_review::lane_form_score(entry);
+        rec.lane_form_score = Some((s * 100.0).round() / 100.0);
+        rec.total_score =
+            (rec.total_score + LANE_FORM_NUDGE * (s - 0.5) * 2.0).clamp(0.0, 1.0);
+    }
 }
 
 /// Compute champion recommendations. Input/output are JSON strings; see
@@ -511,9 +538,11 @@ pub fn recommendations_from_json(input_json: &str) -> Result<String, String> {
         .filter(|r| r.source == "leaguepedia")
         .map(|r| (r.champion_id, r.pick_rate + r.ban_rate))
         .collect();
+    let lane_form = crate::game_review::build_lane_form(&enrich.recent_matches, &my_pos);
     for rec in &mut recs {
         enrich_build(rec, &enrich.builds, enemy_archetype.as_deref(), &kb);
         rec.core_item_name = resolve_core_item_name(rec, &inputs.items);
+        apply_lane_form(rec, &lane_form); // missing_signals'tan ÖNCE (alanı okur)
         rec.missing_signals = compute_missing_signals(rec, &inputs.meta_rates, &my_pos);
         rec.pro_presence = pro_presence.get(&rec.champion_id).copied();
     }
@@ -744,6 +773,8 @@ pub fn champion_analysis_from_json(input_json: &str) -> Result<String, String> {
             resolve_enemy_archetype(&inputs.session, &inputs.all_champions, &kb, &my_pos);
         enrich_build(rec, &enrich.builds, enemy_archetype.as_deref(), &kb);
         rec.core_item_name = resolve_core_item_name(rec, &inputs.items);
+        let lane_form = crate::game_review::build_lane_form(&enrich.recent_matches, &my_pos);
+        apply_lane_form(rec, &lane_form);
         upgrade_recommendation_with_context(
             rec,
             Some(&enrich.model_pack()),
@@ -3268,6 +3299,51 @@ mod tests {
             malphite.get("pro_presence").is_none() || malphite["pro_presence"].is_null(),
             "non-leaguepedia pro rows are ignored"
         );
+    }
+
+    /// D1: recent_matches verilince form skoru karta yazılır ve sınırlı nudge
+    /// uygulanır; verilmeyince rol-bilinen draft'ta missing_signals'a düşer.
+    #[test]
+    fn recommendations_apply_lane_form_signal_honestly() {
+        // Form YOK → lane_performance eksik sinyali (fixture top-lane).
+        let bare = recommendations_from_json(RECOMMENDATIONS_FIXTURE).unwrap();
+        let bare: serde_json::Value = serde_json::from_str(&bare).unwrap();
+        let garen_bare = bare
+            .as_array().unwrap().iter().find(|r| r["champion_id"] == 86).unwrap();
+        assert!(garen_bare.get("lane_form_score").is_none());
+        let missing: Vec<&str> = garen_bare["missing_signals"]
+            .as_array().unwrap().iter().filter_map(|v| v.as_str()).collect();
+        assert!(missing.contains(&"lane_performance"));
+
+        // Garen'de güçlü form (yüksek CS, az ölüm) + rol baseline'ı için zayıf
+        // bir 54 (Malphite) geçmişi → Garen 0.5 üstü skor alır, eksikten çıkar.
+        let mut input: serde_json::Value =
+            serde_json::from_str(RECOMMENDATIONS_FIXTURE).unwrap();
+        let mk = |champ: u32, cs: u32, deaths: u32| {
+            serde_json::json!({
+                "champion_id": champ, "champion_key": if champ == 86 {"Garen"} else {"Malphite"},
+                "position": "top", "win": true, "kills": 5, "deaths": deaths,
+                "assists": 5, "played_at": 0, "duration_secs": 1800, "cs": cs,
+                "vision_score": 18
+            })
+        };
+        input["recent_matches"] = serde_json::json!([
+            mk(86, 240, 2), mk(86, 230, 3), mk(86, 235, 2),
+            mk(54, 130, 7), mk(54, 140, 8), mk(54, 135, 7)
+        ]);
+        let out = recommendations_from_json(&input.to_string()).unwrap();
+        let recs: serde_json::Value = serde_json::from_str(&out).unwrap();
+        let garen = recs
+            .as_array().unwrap().iter().find(|r| r["champion_id"] == 86).unwrap();
+        let score = garen["lane_form_score"].as_f64().expect("form skoru yazıldı");
+        assert!(score > 0.5, "güçlü form 0.5 üstü: {score}");
+        let missing: Vec<&str> = garen["missing_signals"]
+            .as_array().map(|a| a.iter().filter_map(|v| v.as_str()).collect())
+            .unwrap_or_default();
+        assert!(!missing.contains(&"lane_performance"));
+        let malphite = recs
+            .as_array().unwrap().iter().find(|r| r["champion_id"] == 54).unwrap();
+        assert!(malphite["lane_form_score"].as_f64().unwrap() < 0.5);
     }
 
     /// Analysis path parity: single rec is enriched + upgraded (no comparative

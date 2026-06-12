@@ -182,6 +182,12 @@ pub struct Recommendation {
     /// the "pro heat" badge alongside the ranked signal. Set by the command layer.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pro_presence: Option<f32>,
+    /// D1 kişisel form sinyali (0..1; 0.5 = rol baseline'ında): bu şampiyondaki
+    /// CS/dk + ölüm-oranı deltalarının Bayesian-shrunk okuması. `None` = bu rolde
+    /// bu şampiyonla maç yok (dürüst — missing_signals'a düşer). json_api katmanı
+    /// kurar ve total_score'a SINIRLI (±0.05) nudge uygular.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lane_form_score: Option<f32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub lane_plan: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]

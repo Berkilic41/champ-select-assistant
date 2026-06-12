@@ -197,6 +197,8 @@ describe("get_recommendations (champ_select.rs parity)", () => {
 
     const garen = recs.find((r) => r.champion_id === 86);
     expect(garen).toBeDefined();
+    // D1: bu test DB'sinde maç satırı yok → form sinyali dürüstçe eksik.
+    expect(garen!.missing_signals ?? []).toContain("lane_performance");
     expect(garen!.build_source).toBe("seed");
     expect(garen!.core_items).toEqual([3078, 3742, 3065, 3026]); // 4'e kırpılır
     expect(garen!.keystone).toBe(8010);

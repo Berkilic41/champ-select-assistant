@@ -7,6 +7,10 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Kişisel form sinyali** — öneriler artık her şampiyonda NASIL oynadığını da
+  bilir: bu roldeki kendi CS/dk ve ölüm-oranı medyanına karşı şampiyon-başına
+  form okuması (az maçta nötre çekilir), skora sınırlı (±0.05) etki eder ve
+  kartta görünür; bu rolde o şampiyonla maçın yoksa dürüstçe "form verisi yok".
 - **Trend Panosu** — baskın rol+kuyruktaki son maçların CS/dk, ölüm-oranı ve
   vizyon sparkline'ları + "yükseliyor/sabit/geriliyor" hükümleri (ilk-yarı vs
   ikinci-yarı medyan; 8 maç altında dürüstçe yalnız eğri).

@@ -134,7 +134,8 @@
     "missingSignal": {
       "meta": "meta verisi yok",
       "matchup": "matchup verisi yok",
-      "build": "build: genel"
+      "build": "build: genel",
+      "lane_performance": "bu rolde form verisi yok"
     },
     "analyzing": "Öneri hesaplanıyor…",
     "personalization": {

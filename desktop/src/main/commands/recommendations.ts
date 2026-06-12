@@ -11,6 +11,7 @@ import type { DatabaseSync } from "node:sqlite";
 
 import type { Engine } from "../engine";
 import { getChampions } from "./champions";
+import { recentMatches, toCoreMatch } from "./game-review";
 import { getSettings } from "./settings";
 import {
   buildsForPosition,
@@ -144,6 +145,17 @@ export function buildRecommendationsInput(
   // pro-presence rates and the cached DraftBrain pack payloads. Core consumes
   // these in recommendations/analysis enrichment; absent rows degrade honestly
   // (general heuristic build, no pro badge, local rules/seed packs).
+  // D1: form sinyali için ham maç satırları — draft'ın queue-grubuyla aynı
+  // (C3 kuralı: ARAM↔SR çapraz kirlenme yok). Core rol filtresini kendi yapar.
+  const recentRows = orWarnDefault(
+    () =>
+      recentMatches(db, puuid, 60).filter(
+        (r) => (Number(r.queue_id) === 450) === (session.queue_id === 450),
+      ),
+    "recent_matches",
+    [],
+  );
+
   const builds = orWarnDefault(() => buildsForPosition(db, myPos), "builds", []);
   const proRows = orWarnDefault(() => proPresenceRows(db), "pro_presence", []);
   const modelPackPayload = orWarnDefault(() => packPayload(db, "model_pack"), "model_pack", null);
@@ -166,6 +178,7 @@ export function buildRecommendationsInput(
     pro_rows: proRows,
     model_pack_payload: modelPackPayload,
     data_pack_payload: dataPackPayload,
+    recent_matches: recentRows.map(toCoreMatch),
   };
 }
 

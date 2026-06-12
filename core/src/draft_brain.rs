@@ -900,6 +900,7 @@ mod tests {
             matchup_confidence: String::new(),
             missing_signals: Vec::new(),
             pro_presence: None,
+            lane_form_score: None,
             lane_plan: None,
             mid_game_plan: None,
             teamfight_plan: None,
