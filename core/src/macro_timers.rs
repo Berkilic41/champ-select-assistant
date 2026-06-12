@@ -189,12 +189,27 @@ pub fn compute_macro_state(input: &MacroTimerInput) -> MacroState {
             .then(a.objective.cmp(&b.objective))
     });
 
-    let reminders: Vec<String> = objectives
+    let mut reminders: Vec<String> = objectives
         .iter()
         .filter(|t| t.state == "up" || t.state == "soon")
         .filter_map(|t| reminder_for(&t.objective, &t.state))
         .map(String::from)
         .collect();
+
+    // E1: saat-bazlı güç penceresi hatırlatıcıları. Yalnız PUBLIC oyun saati
+    // kullanılır; rakip için "beklenen" dili (gözlenen seviye verisi YOK —
+    // uyum kuralı). Pencereler genel oyun bilgisi, şampiyona özgü iddia yok.
+    if (90..=210).contains(&now) {
+        reminders.push(
+            "Lvl 2-3 erken güç penceresi — minyon sayısını takip et, rakipten önce bas."
+                .to_string(),
+        );
+    } else if (480..=660).contains(&now) {
+        reminders.push(
+            "6 seviye penceresi: rakip laner genelde bu dakikalarda 6'ya basar — all-in/gank tehdidini hesaba kat."
+                .to_string(),
+        );
+    }
 
     let phase = phase_of(now);
     MacroState {

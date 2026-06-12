@@ -24,7 +24,9 @@ spike_window: string | null,
  * Generic lane-phase micro — set only when the lane opponent is unknown (otherwise
  * the richer `matchup_tips` carry the lane advice, so we avoid duplicating it).
  */
-lane_note: string | null, 
+lane_note: string | null,
+/** E2 dalga yönetimi dersi (arketip × erken baskı); ARAM'da yok. */
+wave_note?: string | null,
 /**
  * The enemy laner (opposite team, same role), when resolvable from the scoreboard.
  */

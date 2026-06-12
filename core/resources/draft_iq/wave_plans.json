@@ -1,0 +1,70 @@
+{
+  "_comment": "E2 dalga yönetimi dersleri: arketip × baskı durumu (pressing = erken avantaj sende, even = denk, weak = erken avantaj rakipte). Ölçülü dil — garanti yok; genel wave kuralları, şampiyona özgü iddia yok.",
+  "plans": {
+    "juggernaut": {
+      "pressing": "Dalga senin: yavaş it (slow-push), büyüyen dalgayla menzilsiz all-in fırsatı kolla; aşırı uzanıp gank yeme.",
+      "even": "Dalgayı kule önünde tutmaya çalış (freeze) — rakip sana gelmek zorunda kalsın; menzil dezavantajını sabırla kapat.",
+      "weak": "Kule altı CS'e odaklan, dalgayı erken itme; jungler gelmeden trade alma, kayıp CS telafi edilir, ölüm edilmez."
+    },
+    "vanguard": {
+      "pressing": "Dalgayı it ve roam/obje tehdidi yarat — tank olarak grubs/dragon başlatma gücün masada.",
+      "even": "Kısa trade'lerle dalga dengesini koru; engage'ini gank ve obje pencerelerine sakla.",
+      "weak": "Dalgayı kuleye bırak, sağlıklı kal — engage aracın sağlığınla birlikte değer kaybeder."
+    },
+    "skirmisher": {
+      "pressing": "Yavaş it ve seviye/item avantajıyla uzun dövüş ara — uzayan takaslar lehine.",
+      "even": "Dalga ortada kalsın; rakibin kritik yeteneği boştayken kısa trade pencereleri kolla.",
+      "weak": "Kule altında güvenli farm; güç eşiğine (item/seviye) ulaşmadan all-in'den kaçın."
+    },
+    "assassin": {
+      "pressing": "Dalgayı hızlı itip roam et — yan koridor baskısı senin kazanma yolun.",
+      "even": "Dalgayı itip vision'sız bölgelerden roam tehdidi yarat; geri dönüş zamanlamanı dalgaya göre kur.",
+      "weak": "Kayıp laneden kaçış roam'dur: dalgayı itebildiğinde it, yoksa kule altı CS + güvenli ölçekleme."
+    },
+    "diver": {
+      "pressing": "Yavaş it, dalga büyüyünce dal — minyon desteğiyle dive penceresi açılır.",
+      "even": "Dalga kontrolünü gank'lerle eşle; jungler yakınken it, değilken tut.",
+      "weak": "Erken dövüşten kaçın; dalgayı tutup gank bekle — dalış gücün ancak destekle döner."
+    },
+    "burst_mage": {
+      "pressing": "Dalgayı hızla temizleyip poke/roam'a dön — itme hızın tempo silahın.",
+      "even": "Dalgayı rakipten önce temizle, kalan süreyle poke veya vision al.",
+      "weak": "Güvenli mesafeden son vuruş; tek kombo menzilinde durma, jungler tehdidini haritada takip et."
+    },
+    "control_mage": {
+      "pressing": "Yavaş itip rakibi kulesine mıhla — alan kontrolün dalga kontrolüyle birleşince koridor kilitlenir.",
+      "even": "Dalga dengesini alan büyülerinle yönet; mana'nı boşa itmeye değil trade cezalandırmaya harca.",
+      "weak": "Kule önü freeze dene; menzil avantajın varsa rakibin her CS'ine poke vergisi kes."
+    },
+    "battle_mage": {
+      "pressing": "Dalgayla birlikte üstüne yürü — sürekli hasarın uzun takasları kazanır.",
+      "even": "Kısa değil uzun takas ara; dalgayı buna göre konumla (kendi tarafında dövüş).",
+      "weak": "Sustain'ine güvenip aşırı durma; kule altı + güvenli ölçekleme, dövüşü orta oyuna ertele."
+    },
+    "artillery": {
+      "pressing": "Rakip kule altındayken poke vergisi kes; dalgayı kuleye sokmadan menzil farkını işle.",
+      "even": "Dalgayı rakipten önce temizleyip serbest poke pencereleri yarat.",
+      "weak": "Maksimum menzilden son vuruş; flank vision'ı olmadan ileri durma."
+    },
+    "marksman": {
+      "pressing": "Dalga senin: kule hasarına çevir (plate altını) ama destek'siz aşırı uzanma.",
+      "even": "Dalga dengesini destek'inle birlikte yönet; trade'leri minyon avantajıyla al.",
+      "weak": "Kule altı CS sanatı: her minyonu alamazsın, sağlık ve XP'yi önceliklendir."
+    },
+    "enchanter": {
+      "pressing": "Carry'nin itişini koru — vision ileri taşı, ama dalga olmadan ileri durma.",
+      "even": "Dalga durumuna göre konum: itişte vision, çekilişte carry'nin yanında peel.",
+      "weak": "Carry'nin önünde değil yanında dur; harcanabilir kabiliyetlerini peel'e sakla."
+    },
+    "catcher": {
+      "pressing": "İtilen dalga arkasında pick ara — kanca/yakalama menzilin vision'sız rakibe işler.",
+      "even": "Dalga gölgesinde tehdit yarat; kaçırdığın her yakalama dalga kaybına dönüşmesin.",
+      "weak": "Yakalama aracını peel'e çevir; öne değil carry'ne oyna."
+    },
+    "specialist": {
+      "pressing": "Güçlü olduğun deseni dalga avantajıyla büyüt (poke/split/kontrol neyse o).",
+      "even": "Dalgayı kendine has güç pencerene göre yönet — kalıbın dışına çıkma.",
+      "weak": "Zayıf pencerede sade oyna: güvenli CS, vision, takım için ölçeklen."
+    }
+  }
+}

@@ -449,28 +449,27 @@ fn score_candidate(
         .filter_map(|(_, k)| kb.get_archetype(k))
         .collect();
 
-    // Draft IQ enrichment — skipped for ARAM (combo logic meaningless there)
-    let (combo_bonus, analysis_opt) = if !pre.is_aram {
-        if let Some(archetype) = kb.get_archetype(&record.key) {
-            let input = AnalyzerInput {
-                candidate_key: &record.key,
-                candidate: archetype,
-                ally_id_keys: ally_id_keys.clone(),
-                ally_archetypes: ally_archetypes.clone(),
-                enemy_archetypes: pre.enemy_archetypes_for_kb.clone(),
-                combo_dir: &kb.combos,
-                is_first_pick: pre.is_first_pick,
-                is_late_pick: pre.is_late_pick,
-                pick_order: ctx.session.pick_order,
-                position: pre.my_pos.as_str(),
-                lane_opponent: pre.lane_opponent_kb,
-            };
-            let result = analyze_pick(&input);
-            let cb = result.combo_bonus;
-            (cb, Some(result))
-        } else {
-            (0.0, None)
-        }
+    // Draft IQ enrichment — ARAM'da da çalışır (E4): combo + team-need + damage
+    // balance sabit 5v5 teamfight'ta tam anlamlı. Lane-merkezli draft_plan
+    // prose'u ile blind-safety risk eki ise ARAM'da uygulanmaz (aşağıda) —
+    // koridor tavsiyesi ARAM'da yanıltıcı olur.
+    let (combo_bonus, analysis_opt) = if let Some(archetype) = kb.get_archetype(&record.key) {
+        let input = AnalyzerInput {
+            candidate_key: &record.key,
+            candidate: archetype,
+            ally_id_keys: ally_id_keys.clone(),
+            ally_archetypes: ally_archetypes.clone(),
+            enemy_archetypes: pre.enemy_archetypes_for_kb.clone(),
+            combo_dir: &kb.combos,
+            is_first_pick: pre.is_first_pick,
+            is_late_pick: pre.is_late_pick,
+            pick_order: ctx.session.pick_order,
+            position: pre.my_pos.as_str(),
+            lane_opponent: pre.lane_opponent_kb,
+        };
+        let result = analyze_pick(&input);
+        let cb = result.combo_bonus;
+        (cb, Some(result))
     } else {
         (0.0, None)
     };
@@ -490,10 +489,15 @@ fn score_candidate(
         .as_ref()
         .map(|r| ((tc_base + r.damage_balance) / 2.0).min(1.0))
         .unwrap_or(tc_base);
-    let rk = analysis_opt
-        .as_ref()
-        .map(|r| (rk_base + r.blind_unsafety).min(0.10))
-        .unwrap_or(rk_base);
+    // Blind-safety risk eki ARAM'da anlamsız (herkes rastgele) → yalnız SR'da.
+    let rk = if pre.is_aram {
+        rk_base
+    } else {
+        analysis_opt
+            .as_ref()
+            .map(|r| (rk_base + r.blind_unsafety).min(0.10))
+            .unwrap_or(rk_base)
+    };
 
     let pos_sum = w.comfort + w.matchup + w.team_counter + w.synergy + w.meta + w.role_fit;
     let base_total = if pos_sum > 0.0 {
@@ -562,7 +566,12 @@ fn score_candidate(
     let stat_row = ctx.stats.iter().find(|s| s.champion_id as u32 == id);
     let games = stat_row.map(|s| s.games).unwrap_or(0);
     let wins = stat_row.map(|s| s.wins).unwrap_or(0);
-    let draft_plan = analysis_opt.map(|r| r.plan);
+    // ARAM'da lane-merkezli plan prose'u atlanır (combo/team-need SKORU kaldı).
+    let draft_plan = if pre.is_aram {
+        None
+    } else {
+        analysis_opt.map(|r| r.plan)
+    };
     let lane_plan = draft_plan
         .as_ref()
         .and_then(|p| p.lane_phase_advice.clone());

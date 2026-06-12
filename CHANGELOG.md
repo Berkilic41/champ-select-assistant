@@ -7,6 +7,19 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **ARAM koçluğu derinleşti** — combo ve takım-ihtiyacı analizi artık ARAM'da
+  da skora işliyor (sabit 5v5'te tam anlamlı); koridor-merkezli plan metni ve
+  blind-pick risk eki ARAM'da bilinçli olarak kapalı.
+- **Dalga yönetimi dersleri** — oyun içi plan kartında arketipine ve erken
+  baskı durumuna göre wave tavsiyesi (slow-push/freeze/kule altı; 13 arketip ×
+  3 durum, ölçülü dil).
+- **Güç penceresi hatırlatıcıları** — overlay, 1:30-3:30 arasında Lvl 2-3
+  penceresini, 8:00-11:00 arasında "rakip genelde 6'ya basar" uyarısını
+  hatırlatır (yalnız public oyun saati; "beklenen" dili).
+- **+14 yeni combo** (109→123) — Alistar/Gragas/Nautilus/Zac+Yasuo,
+  Jarvan+MF, Amumu+Karthus, Rell+MF, Camille+Orianna, Braum/Nami+Lucian,
+  Lulu+KogMaw, Zilean+Yi, Shen+Twitch, Tahm+Senna; tümü mekanik-doğrulanmış
+  ability referanslarıyla.
 - **Veto & tercihler** — şampiyon detay kartından "Asla önerme" (öneri
   listesinden tamamen çıkar) ve "Öğreniyorum" (sınırlı pozitif boost)
   işaretlenebilir; tamamen yerel.

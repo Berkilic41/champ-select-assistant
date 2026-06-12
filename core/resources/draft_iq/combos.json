@@ -1088,5 +1088,145 @@
     "tr": "Gnar R AOE knockup → Yasuo R havadakilere",
     "strength": 0.85,
     "confidence": "high"
+  },
+  {
+    "a": "Alistar",
+    "b": "Yasuo",
+    "name": "Pulverize Tempest",
+    "type": "engage_followup",
+    "ability_ref": "Alistar Q (Pulverize) AOE knockup → Yasuo R (Last Breath) on airborne enemies",
+    "tr": "Alistar Q AOE knockup → Yasuo R havadakilere",
+    "strength": 0.85,
+    "confidence": "high"
+  },
+  {
+    "a": "Gragas",
+    "b": "Yasuo",
+    "name": "Cask Tempest",
+    "type": "engage_followup",
+    "ability_ref": "Gragas R (Explosive Cask) AOE displacement (airborne) → Yasuo R (Last Breath) follow-up",
+    "tr": "Gragas R AOE savurma (airborne) → Yasuo R takibi",
+    "strength": 0.72,
+    "confidence": "medium"
+  },
+  {
+    "a": "Nautilus",
+    "b": "Yasuo",
+    "name": "Depth Charge Tempest",
+    "type": "engage_followup",
+    "ability_ref": "Nautilus R (Depth Charge) chasing knockup (hits everyone on its path) → Yasuo R (Last Breath)",
+    "tr": "Nautilus R zincir knockup → Yasuo R havadakilere",
+    "strength": 0.85,
+    "confidence": "high"
+  },
+  {
+    "a": "Zac",
+    "b": "Yasuo",
+    "name": "Slingshot Tempest",
+    "type": "engage_followup",
+    "ability_ref": "Zac E (Elastic Slingshot) long-range AOE knockup on landing → Yasuo R (Last Breath)",
+    "tr": "Zac E uzun menzil AOE knockup → Yasuo R takibi",
+    "strength": 0.85,
+    "confidence": "high"
+  },
+  {
+    "a": "JarvanIV",
+    "b": "MissFortune",
+    "name": "Cataclysm Bullet Time",
+    "type": "wombo",
+    "ability_ref": "Jarvan IV R (Cataclysm) arena traps enemies inside terrain → Miss Fortune R (Bullet Time) channels onto the trapped group",
+    "tr": "Jarvan R arenası rakipleri hapseder → MF R kanalı hapsedilen gruba işler",
+    "strength": 0.85,
+    "confidence": "high"
+  },
+  {
+    "a": "Amumu",
+    "b": "Karthus",
+    "name": "Sad Requiem",
+    "type": "wombo",
+    "ability_ref": "Amumu R (Curse of the Sad Mummy) AOE root/stun → Karthus R (Requiem) global damage lands while enemies are held",
+    "tr": "Amumu R AOE stun → stun süresinde Karthus R isabeti kolaylaşır",
+    "strength": 0.72,
+    "confidence": "medium"
+  },
+  {
+    "a": "Rell",
+    "b": "MissFortune",
+    "name": "Magnet Bullet Time",
+    "type": "wombo",
+    "ability_ref": "Rell W (Ferromancy: Crash Down) AOE knockup + R (Magnet Storm) pulls enemies together → Miss Fortune R (Bullet Time) on the grouped targets",
+    "tr": "Rell W knockup + R mıknatıs toplaması → MF R gruplanmış hedeflere",
+    "strength": 0.85,
+    "confidence": "high"
+  },
+  {
+    "a": "Camille",
+    "b": "Orianna",
+    "name": "Ultimatum Shockwave",
+    "type": "pick_potential",
+    "ability_ref": "Camille R (The Hextech Ultimatum) locks a target in a zone; Orianna E (Command: Protect) attaches ball to Camille → R (Command: Shockwave) inside the lockdown",
+    "tr": "Camille R hedefi alana kilitler; Ori topu Camille'de → R kilitli hedefe",
+    "strength": 0.72,
+    "confidence": "medium"
+  },
+  {
+    "a": "Braum",
+    "b": "Lucian",
+    "name": "Concussive Barrage",
+    "type": "pick_potential",
+    "ability_ref": "Lucian's passive (Lightslinger) double-shots stack Braum's passive (Concussive Blows) marks rapidly → stun threshold reached in one trade",
+    "tr": "Lucian pasif çift atışları Braum pasif yükünü hızlı doldurur → tek trade'de stun",
+    "strength": 0.72,
+    "confidence": "medium"
+  },
+  {
+    "a": "Nami",
+    "b": "Lucian",
+    "name": "Tidecaller Lightslinger",
+    "type": "pick_potential",
+    "ability_ref": "Nami E (Tidecaller's Blessing) empowers Lucian's next attacks; his passive (Lightslinger) double-shots consume charges fast for slow + bonus damage trades",
+    "tr": "Nami E güçlendirmesini Lucian pasif çift atışlarıyla hızlı işler — yavaşlatmalı trade",
+    "strength": 0.72,
+    "confidence": "medium"
+  },
+  {
+    "a": "Lulu",
+    "b": "KogMaw",
+    "name": "Protect the Kog",
+    "type": "peel_chain",
+    "ability_ref": "Lulu W (Whimsy) polymorph peel + E (Help, Pix!) shield + R (Wild Growth) knockup/bonus HP keep Kog'Maw's W (Bio-Arcane Barrage) range online",
+    "tr": "Lulu W/E/R peel zinciri Kog'un menzilli DPS'ini ayakta tutar",
+    "strength": 0.85,
+    "confidence": "high"
+  },
+  {
+    "a": "Zilean",
+    "b": "MasterYi",
+    "name": "Chrono Highlander",
+    "type": "peel_chain",
+    "ability_ref": "Zilean E (Time Warp) haste on the diving carry + R (Chronoshift) revive removes the all-in's biggest cost",
+    "tr": "Zilean E hız + R revive — dalan carry'nin riskini azaltır",
+    "strength": 0.72,
+    "confidence": "medium"
+  },
+  {
+    "a": "Shen",
+    "b": "Twitch",
+    "name": "Stand United Ambush",
+    "type": "peel_chain",
+    "ability_ref": "Shen R (Stand United) global shield + teleport protects Twitch mid-ambush; Shen E (Shadow Dash) taunt peels divers off him",
+    "tr": "Shen R global kalkan+ışınlanma — pusudaki Twitch'e anında koruma",
+    "strength": 0.6,
+    "confidence": "low"
+  },
+  {
+    "a": "TahmKench",
+    "b": "Senna",
+    "name": "Devour Rescue",
+    "type": "peel_chain",
+    "ability_ref": "Tahm Kench W (Devour) swallows the endangered ally — covers Senna's lack of escapes while she scales souls",
+    "tr": "Tahm W tehlikedeki Senna'yı yutarak kurtarır — kaçışsızlığını kapatır",
+    "strength": 0.6,
+    "confidence": "low"
   }
 ]

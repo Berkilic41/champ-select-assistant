@@ -7,30 +7,30 @@ expression: snap
   {
     "rank": 1,
     "champion_key": "Lux",
-    "tier": "C",
+    "tier": "B",
     "confidence": "low"
   },
   {
     "rank": 2,
-    "champion_key": "Ashe",
+    "champion_key": "Blitzcrank",
     "tier": "C",
     "confidence": "low"
   },
   {
     "rank": 3,
-    "champion_key": "Vi",
+    "champion_key": "Ashe",
     "tier": "C",
     "confidence": "low"
   },
   {
     "rank": 4,
-    "champion_key": "Irelia",
+    "champion_key": "Ekko",
     "tier": "C",
     "confidence": "low"
   },
   {
     "rank": 5,
-    "champion_key": "Blitzcrank",
+    "champion_key": "Elise",
     "tier": "C",
     "confidence": "low"
   }

@@ -246,6 +246,10 @@ pub struct IngamePlan {
     /// (otherwise the richer `matchup_tips` carry the lane advice).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub lane_note: Option<String>,
+    /// E2 dalga yönetimi dersi: arketip × erken baskı durumu (rakip yoksa
+    /// "even" varsayımı). Lane'siz pozisyonlarda (ARAM) None.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub wave_note: Option<String>,
     /// The enemy laner (opposite team, same role), when resolvable.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub opponent_name: Option<String>,
@@ -297,6 +301,12 @@ fn build_ingame_plan(
     // Güç penceresi yalnız rakip arketipi elimizdeyken (blind/ARAM'da None).
     let spike_window =
         opponent.and_then(|(opp, _, _)| narrative::build_matchup_spike_window(arch, opp));
+    // E2: dalga dersi — pozisyon boşsa (ARAM/bilinmeyen) üretme.
+    let wave_note = if position.is_empty() {
+        None
+    } else {
+        narrative::wave_plan_line(arch, opponent.map(|(opp, _, _)| opp))
+    };
     IngamePlan {
         champion_name: info.champion_name.clone(),
         champion_key: champion_key.to_string(),
@@ -307,6 +317,7 @@ fn build_ingame_plan(
         spike_note: narrative::build_spike_note(arch),
         spike_window,
         lane_note,
+        wave_note,
         opponent_name: opponent.map(|(_, name, _)| name.to_string()),
         opponent_key: opponent.map(|(_, _, key)| key.to_string()),
         matchup_tips,

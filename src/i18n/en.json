@@ -64,6 +64,7 @@
       "spike": "Power spike",
       "spikeWindow": "Power window",
       "lane": "Early (lane)",
+      "wave": "Wave",
       "matchup": "Matchup",
       "mid": "Mid game",
       "late": "Late game",

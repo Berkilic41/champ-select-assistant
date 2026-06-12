@@ -625,6 +625,62 @@ pub fn build_matchup_tips(
     tips
 }
 
+// ── E2: dalga yönetimi dersleri ───────────────────────────────────────────────
+
+/// Arketip × baskı-durumu wave planları (derleme zamanında gömülü KB).
+const WAVE_PLANS_JSON: &str = include_str!("../../resources/draft_iq/wave_plans.json");
+
+#[derive(serde::Deserialize)]
+struct WavePlanTable {
+    plans: std::collections::HashMap<String, std::collections::HashMap<String, String>>,
+}
+
+fn wave_plans() -> &'static std::collections::HashMap<String, std::collections::HashMap<String, String>> {
+    use std::sync::OnceLock;
+    static TABLE: OnceLock<
+        std::collections::HashMap<String, std::collections::HashMap<String, String>>,
+    > = OnceLock::new();
+    TABLE.get_or_init(|| {
+        serde_json::from_str::<WavePlanTable>(WAVE_PLANS_JSON)
+            .map(|t| t.plans)
+            .unwrap_or_default()
+    })
+}
+
+/// Dalga yönetimi dersi: adayın arketipi × erken-oyun baskı durumu.
+/// Baskı = power_curve.early karşılaştırması (rakip yoksa "even"); arketip
+/// tabloda yoksa `None` (uydurma yok). Genel wave kuralları — şampiyona özgü
+/// mekanik iddiası içermez (coach_quality dili).
+pub fn wave_plan_line(
+    candidate: &ChampionArchetype,
+    lane_opponent: Option<&ChampionArchetype>,
+) -> Option<String> {
+    let state = match lane_opponent {
+        None => "even",
+        Some(opp) => {
+            let mine = candidate.power_curve.early;
+            let theirs = opp.power_curve.early;
+            let total = mine + theirs;
+            if total < 0.01 {
+                "even"
+            } else {
+                let share = mine / total;
+                if share > 0.55 {
+                    "pressing"
+                } else if share < 0.45 {
+                    "weak"
+                } else {
+                    "even"
+                }
+            }
+        }
+    };
+    wave_plans()
+        .get(candidate.archetype.as_str())
+        .and_then(|m| m.get(state))
+        .cloned()
+}
+
 #[cfg(test)]
 mod matchup_tips_tests {
     use super::*;
