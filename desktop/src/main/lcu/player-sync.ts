@@ -143,28 +143,3 @@ export function parseLcuSummonerName(summoner: unknown): {
   }
   return { gameName: display, tagLine: "" };
 }
-
-/**
- * LCU match-history → `(champion_id, count)` çiftleri, çok oynanandan aza
- * (champ_pool.rs `compute_champion_pool` paritesi). Eşleşmeyen puuid'li
- * oyunlar sessizce atlanır; championId 0 sayılmaz.
- */
-export function computeChampionPool(
-  historyJson: unknown,
-  puuid: string,
-): [number, number][] {
-  const counts = new Map<number, number>();
-  for (const gameRaw of asArr(asObj(asObj(historyJson).games).games)) {
-    const game = asObj(gameRaw);
-    const participantId = localParticipantId(game, puuid);
-    if (participantId === null) continue;
-    const participant = asArr(game.participants)
-      .map(asObj)
-      .find((p) => p.participantId === participantId);
-    const championId = participant?.championId;
-    if (typeof championId === "number" && championId !== 0) {
-      counts.set(championId, (counts.get(championId) ?? 0) + 1);
-    }
-  }
-  return [...counts.entries()].sort((a, b) => b[1] - a[1]);
-}

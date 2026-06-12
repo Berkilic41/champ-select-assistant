@@ -114,21 +114,6 @@
     "hoverFailed": "Hover başarısız: {{err}}",
     "banComputing": "Ban önerisi hesaplanıyor…",
     "banSuggestions": "Ban önerileri:",
-    "banOtp": "rakip OTP (%{{pct}})",
-    "scoutingTitle": "Lobby scouting",
-    "scoutingPartial": "ince veri",
-    "scoutingBanTargets": "Scouting ban hedefleri",
-    "scoutingProfiles": "Rakip profilleri",
-    "scoutGameplan": "Düşman planı",
-    "scoutPrimaryThreat": "Ana tehdit: {{champ}}",
-    "scoutWinCondition": {
-      "pick": "Pick komp",
-      "teamfight": "Teamfight komp",
-      "protect": "Protect komp",
-      "poke": "Poke komp",
-      "split": "Split push komp",
-      "mixed": "Karma komp"
-    },
     "dataNoMeta": "Canlı meta yok · genel sıralama",
     "dataNoMetaHint": "Şampiyon win/pick/ban oranları henüz bağlı değil — sıralama konfor + eşleşme + sinerjiye dayanıyor",
     "dataNoMastery": "Maç geçmişi yüklenmedi",
@@ -168,11 +153,6 @@
       "medium": "orta",
       "low": "düşük",
       "unknown": "bilinmiyor"
-    },
-    "threat": {
-      "high": "yüksek",
-      "medium": "orta",
-      "low": "düşük"
     },
     "rolePrompt": "Rolünü seç — öneriler ve ban'lar buna göre düzenlenir",
     "roleAutoHint": "Rol otomatik algılandı",

@@ -6,6 +6,27 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 
 ## [Unreleased]
 
+### Kaldırıldı
+- **Rakip havuzu + lobi scouting** — champ select'te LCU rakip `summonerId`
+  vermediği için rakip/takım arkadaşı şampiyon havuzları hiçbir zaman
+  dolmuyordu; ölü özellik tüm katmanlardan söküldü (UI kartı, IPC komutları
+  `get_enemy_champion_pools`/`get_lobby_scouting`, core `scouting` modülü).
+  Ban önerileri aynen çalışmaya devam ediyor.
+
+### Düzeltildi
+- **Öneri zenginleştirme Electron'da tamamlandı** — Tauri'den kalan açık
+  kapandı: küratörlü seed build'ler (matchup-özel + pozisyon varsayılanı),
+  `missing_signals` dürüstlük bayrakları, Leaguepedia pro-presence rozeti ve
+  DraftBrain pack yükseltmesi (model skoru, tier, skor dökümü, lane/orta-oyun
+  planları, karşılaştırmalı "neden o değil" notları) artık core'da çalışıyor
+  ve hem öneri listesinde hem tek-şampiyon analizinde uygulanıyor.
+
+### Değişti
+- **Bayesian meta yumuşatması** — düşük örneklemli win-rate'ler 0.50 önseline
+  çekilir (prior_n=200); 60 maçlık bir "yükseliş", 10k maçlık kanıtlanmış bir
+  seçimi öneri/ban/havuz sıralamasında artık geçemez. Gösterilen win-rate ham
+  kalır; yalnız skor kararları yumuşatılır.
+
 ## [0.10.0-beta.1] — 2026-06-12
 
 Electron çağı: masaüstü host tamamen değişti, veri tabanı bulut destekli derinleşti.

@@ -4,8 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useChampSelect } from '../../hooks/useChampSelect';
 import { detectPhaseView } from '../../hooks/useChampSelectPhase';
 import { ChampSelectScreen } from './ChampSelectScreen';
-import { BanSuggestion, EnemyPoolSummary } from '../../types/recommendation';
-import type { ScoutingReport } from '../../types/generated/ScoutingReport';
+import { BanSuggestion } from '../../types/recommendation';
 import type { DataSourceRegistryReport } from '../../types/generated/DataSourceRegistryReport';
 import type { DraftBrainQualityReport } from '../../types/generated/DraftBrainQualityReport';
 import type { FeedbackAnalytics } from '../../types/generated/FeedbackAnalytics';
@@ -33,8 +32,6 @@ export const ChampSelectWrapper: React.FC<Props> = ({ addToast }) => {
   const { session, recommendations, lockedAnalysis, gamePlan, counterPicks, teamComp, comboBoard, draftVerdict, counterItems, laneMatchup, role, roleSource, setRole, loading, error } = useChampSelect(puuid);
   const [champMap, setChampMap] = useState<Map<number, string>>(new Map());
   const [banSuggestions, setBanSuggestions] = useState<BanSuggestion[]>([]);
-  const [enemyPools, setEnemyPools] = useState<EnemyPoolSummary[]>([]);
-  const [scoutingReport, setScoutingReport] = useState<ScoutingReport | null>(null);
   const [dataRegistryReport, setDataRegistryReport] = useState<DataSourceRegistryReport | null>(null);
   const [pipelineQualityReport, setPipelineQualityReport] = useState<PipelineQualityReport | null>(null);
   const [dataTrajectory, setDataTrajectory] = useState<DataTrajectoryView | null>(null);
@@ -107,38 +104,16 @@ export const ChampSelectWrapper: React.FC<Props> = ({ addToast }) => {
       .catch(() => setDraftSimulation(null));
   }, [session, recommendations]);
 
-  // Fetch ban suggestions and enemy pools when it is the local player's ban turn.
+  // Fetch ban suggestions when it is the local player's ban turn.
   useEffect(() => {
     if (!session || session.action_type !== 'ban') {
       setBanSuggestions([]);
-      setEnemyPools([]);
-      setScoutingReport(null);
       return;
     }
-    setScoutingReport(null);
     invoke<BanSuggestion[]>('get_ban_suggestions', {
       sessionJson: session,
       puuid,
     }).then(setBanSuggestions).catch(() => setBanSuggestions([]));
-
-    invoke<EnemyPoolSummary[]>('get_enemy_champion_pools', {
-      sessionJson: session,
-    }).then(async (pools) => {
-      setEnemyPools(pools);
-      if (!pools.length) {
-        setScoutingReport(null);
-        return;
-      }
-      try {
-        const report = await invoke<ScoutingReport>('get_lobby_scouting', { pools });
-        setScoutingReport(report);
-      } catch {
-        setScoutingReport(null);
-      }
-    }).catch(() => {
-      setEnemyPools([]);
-      setScoutingReport(null);
-    });
     // Re-fetch on role change too — bans key off the lane meta + pool counters.
   }, [session?.action_type, session?.my_bans.length, session?.their_bans.length, session?.local_player.assigned_position, puuid]);
 
@@ -195,8 +170,6 @@ export const ChampSelectWrapper: React.FC<Props> = ({ addToast }) => {
         phaseView={phaseView}
         recError={error}
         banSuggestions={banSuggestions}
-        enemyPools={enemyPools}
-        scoutingReport={scoutingReport}
         onFeedbackSubmitted={refreshQualityReports}
         onHoverChampion={handleHoverChampion}
       />

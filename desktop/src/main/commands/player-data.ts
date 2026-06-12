@@ -1,14 +1,11 @@
-// LCU-based player data sync + enemy champion pools — ports of
-// src-tauri/src/commands/lcu.rs `sync_lcu_player_data` and
-// src-tauri/src/commands/champ_select.rs `get_enemy_champion_pools`.
-// No Riot developer key needed: everything reads the local League Client.
-// Partial failures degrade quietly (counters / skipped slots), never throw the
-// whole command away — Rust parity.
+// LCU-based player data sync — port of src-tauri/src/commands/lcu.rs
+// `sync_lcu_player_data`. No Riot developer key needed: everything reads the
+// local League Client. Partial failures degrade quietly (counters / skipped
+// steps), never throw the whole command away — Rust parity.
 
 import type { DatabaseSync } from "node:sqlite";
 
 import {
-  computeChampionPool,
   parseLcuMastery,
   parseLcuMatchHistory,
   parseLcuSummonerName,
@@ -136,76 +133,3 @@ export async function syncLcuPlayerData(
   };
 }
 
-/** EnemyPoolSummary (champ_select.rs:1487 ts-rs tipiyle aynı şekil). */
-export interface EnemyPoolSummary {
-  cell_id: number;
-  top_champion_id: number;
-  top_champion_key: string;
-  play_rate: number;
-  game_count: number;
-}
-
-/**
- * Her düşman slotunun son-20-maç şampiyon havuzu. LCU bağlı değilse `[]`;
- * tek tek slot hataları sessizce atlanır — komut her zaman başarılı döner.
- */
-export async function getEnemyChampionPools(
-  db: DatabaseSync,
-  lcu: LcuService,
-  sessionJson: unknown,
-): Promise<EnemyPoolSummary[]> {
-  const client = lcu.currentClient();
-  if (!client) return [];
-
-  const champKeyById = new Map<number, string>(
-    (
-      db
-        .prepare("SELECT champion_id, key FROM champions")
-        .all() as unknown as { champion_id: number; key: string }[]
-    ).map((r) => [Number(r.champion_id), r.key]),
-  );
-
-  // summoner_id ChampSelectState'te YOK → ham session JSON'dan okunur.
-  const session = (sessionJson ?? {}) as Record<string, unknown>;
-  const enemySlots: { cellId: number; summonerId: number }[] = (
-    Array.isArray(session.theirTeam) ? session.theirTeam : []
-  )
-    .map((s) => s as Record<string, unknown>)
-    .flatMap((s) => {
-      const cellId = Number(s.cellId);
-      const summonerId = Number(s.summonerId ?? 0);
-      return Number.isFinite(cellId) && summonerId !== 0
-        ? [{ cellId, summonerId }]
-        : [];
-    });
-
-  const HISTORY_COUNT = 20;
-  const results = await Promise.all(
-    enemySlots.map(async ({ cellId, summonerId }) => {
-      try {
-        const summoner = await client.getJson<Record<string, unknown>>(
-          `/lol-summoner/v1/summoners/${summonerId}`,
-        );
-        const puuid = typeof summoner.puuid === "string" ? summoner.puuid : "";
-        if (!puuid) return null;
-        const history = await client.getJson(
-          `/lol-match-history/v1/products/lol/${puuid}/matches?begIndex=0&endIndex=${HISTORY_COUNT}`,
-        );
-        const pool = computeChampionPool(history, puuid);
-        const total = pool.reduce((sum, [, count]) => sum + count, 0);
-        if (total === 0) return null;
-        const [topId, topCount] = pool[0];
-        return {
-          cell_id: cellId,
-          top_champion_id: topId,
-          top_champion_key: champKeyById.get(topId) ?? "",
-          play_rate: topCount / total,
-          game_count: total,
-        } satisfies EnemyPoolSummary;
-      } catch {
-        return null; // kısmi hata sessiz (Rust paritesi)
-      }
-    }),
-  );
-  return results.filter((r): r is EnemyPoolSummary => r !== null);
-}

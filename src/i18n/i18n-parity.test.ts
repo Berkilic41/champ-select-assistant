@@ -119,14 +119,6 @@ const REQUIRED_KEYS = [
   'pickClarity.clear',
   'pickClarity.edge',
   'pickClarity.close',
-  'champSelect.scoutGameplan',
-  'champSelect.scoutPrimaryThreat',
-  'champSelect.scoutWinCondition.pick',
-  'champSelect.scoutWinCondition.teamfight',
-  'champSelect.scoutWinCondition.protect',
-  'champSelect.scoutWinCondition.poke',
-  'champSelect.scoutWinCondition.split',
-  'champSelect.scoutWinCondition.mixed',
   'dataPipeline.cacheAction.promote',
   'dataPipeline.cacheAction.keep_current',
   'dataPipeline.cacheAction.reject',
@@ -237,21 +229,13 @@ const REQUIRED_KEYS = [
   'champSelect.roles.middle',
   'champSelect.roles.bottom',
   'champSelect.roles.utility',
-  // Lobby Scouting / Ban Coach static labels (BanSuggestionList).
+  // Ban Coach static labels (BanSuggestionList) + pool confidence labels.
   'champSelect.banComputing',
   'champSelect.banSuggestions',
-  'champSelect.banOtp',
-  'champSelect.scoutingTitle',
-  'champSelect.scoutingPartial',
-  'champSelect.scoutingBanTargets',
-  'champSelect.scoutingProfiles',
   'champSelect.confidence.high',
   'champSelect.confidence.medium',
   'champSelect.confidence.low',
   'champSelect.confidence.unknown',
-  'champSelect.threat.high',
-  'champSelect.threat.medium',
-  'champSelect.threat.low',
 ];
 
 describe('i18n tr/en parity', () => {

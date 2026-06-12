@@ -32,7 +32,6 @@ export interface CoreModule {
   counter_items_json(input: string): string;
   pool_suggestions_json(input: string): string;
   champion_pool_plan_json(input: string): string;
-  lobby_scouting_json(input: string): string;
   feedback_observability_json(input: string): string;
   feedback_analytics_json(input: string): string;
   draft_simulation_json(input: string): string;
@@ -179,11 +178,6 @@ export class Engine {
   /** {role, mastery, stats, all_champions, meta_rates} → ChampionPoolPlan. */
   championPoolPlan<TOut = unknown>(input: unknown): TOut {
     return this.call(this.core.champion_pool_plan_json, input);
-  }
-
-  /** {pools, all_champions} → ScoutingReport. */
-  lobbyScouting<TOut = unknown>(input: unknown): TOut {
-    return this.call(this.core.lobby_scouting_json, input);
   }
 
   /** [{champion_id, verdict, synced}] → {counters, status}. */

@@ -114,21 +114,6 @@
     "hoverFailed": "Hover failed: {{err}}",
     "banComputing": "Calculating ban suggestions…",
     "banSuggestions": "Ban suggestions:",
-    "banOtp": "enemy OTP ({{pct}}%)",
-    "scoutingTitle": "Lobby scouting",
-    "scoutingPartial": "thin data",
-    "scoutingBanTargets": "Scouting ban targets",
-    "scoutingProfiles": "Enemy profiles",
-    "scoutGameplan": "Enemy gameplan",
-    "scoutPrimaryThreat": "Primary threat: {{champ}}",
-    "scoutWinCondition": {
-      "pick": "Pick comp",
-      "teamfight": "Teamfight comp",
-      "protect": "Protect comp",
-      "poke": "Poke comp",
-      "split": "Split push comp",
-      "mixed": "Mixed comp"
-    },
     "dataNoMeta": "No live meta · general ranking",
     "dataNoMetaHint": "Champion win/pick/ban rates aren't connected yet — ranking uses comfort + matchup + synergy",
     "dataNoMastery": "Match history not loaded",
@@ -168,11 +153,6 @@
       "medium": "medium",
       "low": "low",
       "unknown": "unknown"
-    },
-    "threat": {
-      "high": "high",
-      "medium": "medium",
-      "low": "low"
     },
     "rolePrompt": "Pick your role — picks and bans adjust to it",
     "roleAutoHint": "Role auto-detected",

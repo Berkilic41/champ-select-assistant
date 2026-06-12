@@ -5,90 +5,6 @@
   margin-top: var(--space-3);
 }
 
-.ban-scouting-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-3);
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-}
-
-.ban-scouting-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
-.ban-scouting-title,
-.ban-scouting-label {
-  font-family: var(--font-display);
-  font-size: var(--font-size-xs);
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.10em;
-  font-weight: var(--weight-semibold);
-}
-
-.ban-scouting-partial,
-.ban-scouting-confidence,
-.ban-scouting-threat {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
-  color: var(--warning);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  padding: 1px 6px;
-  white-space: nowrap;
-}
-
-.ban-scouting-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.ban-scouting-target,
-.ban-scouting-profile {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-2);
-  min-width: 0;
-}
-
-.ban-scouting-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-  flex: 1;
-}
-
-.ban-scouting-name {
-  color: var(--text-primary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--weight-semibold);
-}
-
-.ban-scouting-reason,
-.ban-scouting-tags {
-  color: var(--text-secondary);
-  font-size: var(--font-size-xs);
-  line-height: var(--line-height-normal);
-}
-
-.ban-scouting-tags {
-  color: var(--text-muted);
-}
-
-.ban-scouting-profiles {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
 .ban-suggestion-title {
   font-family: var(--font-display);
   font-size: var(--font-size-xs);
@@ -159,10 +75,4 @@
   font-size: var(--font-size-xs);
   color: var(--text-secondary);
   line-height: var(--line-height-normal);
-}
-
-.ban-suggestion-otp {
-  color: var(--warning);
-  font-style: normal;
-  font-weight: var(--weight-medium);
 }

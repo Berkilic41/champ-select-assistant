@@ -1,8 +1,8 @@
-// Pool / scouting / feedback insight command ports: get_pool_suggestions
+// Pool / feedback insight command ports: get_pool_suggestions
 // (champ_select.rs:1283), get_champion_pool_plan (pool_coach.rs:109),
-// get_lobby_scouting (scouting.rs:47), get_feedback_observability +
-// get_feedback_analytics (data_quality.rs:2368/2410). Host = DB rows + blended
-// meta; every decision (pool filter, comfort, scouting, sentiment) runs in core.
+// get_feedback_observability + get_feedback_analytics (data_quality.rs:2368/2410).
+// Host = DB rows + blended meta; every decision (pool filter, comfort,
+// sentiment) runs in core.
 
 import type { DatabaseSync } from "node:sqlite";
 
@@ -60,18 +60,6 @@ export function getChampionPoolPlan(
     stats: matchPlayerStats(db, puuid),
     all_champions: getChampions(db),
     meta_rates: blendedMetaForRole(engine, db, role),
-  });
-}
-
-/** Lobi keşif raporu — pools renderer'dan gelir (get_enemy_champion_pools). */
-export function getLobbyScouting(
-  engine: Engine,
-  db: DatabaseSync,
-  pools: unknown[],
-): unknown {
-  return engine.lobbyScouting({
-    pools: Array.isArray(pools) ? pools : [],
-    all_champions: getChampions(db),
   });
 }
 

@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { invoke } from '../../lib/host';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Compass } from 'lucide-react';
-import { ChampSelectSession, Recommendation, BanSuggestion, EnemyPoolSummary, GamePlan, CounterPickHint, TeamCompBoard as TeamCompBoardData, ComboBoardEntry, DraftVerdict, CounterItemHint, LaneMatchup } from '../../types/recommendation';
-import type { ScoutingReport } from '../../types/generated/ScoutingReport';
+import { ChampSelectSession, Recommendation, BanSuggestion, GamePlan, CounterPickHint, TeamCompBoard as TeamCompBoardData, ComboBoardEntry, DraftVerdict, CounterItemHint, LaneMatchup } from '../../types/recommendation';
 import type { DataSourceRegistryReport } from '../../types/generated/DataSourceRegistryReport';
 import type { DraftBrainQualityReport } from '../../types/generated/DraftBrainQualityReport';
 import type { FeedbackAnalytics } from '../../types/generated/FeedbackAnalytics';
@@ -93,8 +92,6 @@ interface Props {
   phaseView: PhaseView;
   recError?: string | null;
   banSuggestions: BanSuggestion[];
-  enemyPools?: EnemyPoolSummary[];
-  scoutingReport?: ScoutingReport | null;
   onFeedbackSubmitted?: () => void;
   onHoverChampion?: (championId: number) => void;
 }
@@ -111,8 +108,6 @@ export function selectDraftForkIds(
 
 export const ChampSelectScreen: React.FC<Props> = ({
   session, role = '', roleSource = 'none', onRoleChange, recommendations, lockedRec, gamePlan, counterPicks = [], teamComp, comboBoard = [], draftVerdict, counterItems = [], laneMatchup, dataRegistryReport, pipelineQualityReport, dataTrajectory, draftBrainQualityReport, feedbackObservabilityReport, feedbackAnalytics, draftSimulation, performanceReport, champMap, loading, phaseView, recError, banSuggestions,
-  enemyPools = [],
-  scoutingReport,
   onFeedbackSubmitted,
   onHoverChampion,
 }) => {
@@ -409,11 +404,7 @@ export const ChampSelectScreen: React.FC<Props> = ({
               ) : (
                 <p className="cs-ban-hint">{t('champSelect.banHintNoHover')}</p>
               )}
-              <BanSuggestionList
-                suggestions={banSuggestions}
-                enemyPools={enemyPools}
-                scoutingReport={scoutingReport}
-              />
+              <BanSuggestionList suggestions={banSuggestions} />
               <CounterPickBoard picks={counterPicks} />
               <p className="cs-keyboard-hint">{t('champSelect.keyboardHintShort')}</p>
             </div>

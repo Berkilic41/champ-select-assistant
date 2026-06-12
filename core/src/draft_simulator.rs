@@ -4,7 +4,7 @@
 //! dimensions (damage balance, engage/disengage, frontline/peel, scaling, lane
 //! pressure, objective identity, execution risk, blind safety, synergy). Fully
 //! pure: no DB/network/engine-hot-file coupling. The trait values are derived from
-//! the SAME KB archetype taxonomy `champion_types` / `scouting` already use, so the
+//! the SAME KB archetype taxonomy `champion_types` already uses, so the
 //! reads are grounded heuristics, never fabricated stats — every coaching line is
 //! hedged (no guaranteed-outcome language, enforced by `coach_quality`).
 //!

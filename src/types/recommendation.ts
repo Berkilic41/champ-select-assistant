@@ -180,15 +180,6 @@ export type PhaseView =
   | 'pick_watching'
   | 'finalization';
 
-/** Champion pool summary for one enemy slot. play_rate is 0..1 fraction of recent games. */
-export interface EnemyPoolSummary {
-  cell_id: number;
-  top_champion_id: number;
-  top_champion_key: string;
-  play_rate: number;
-  game_count: number;
-}
-
 /** One phase band of the macro game-plan timeline. */
 export interface PhaseBand {
   label: string;

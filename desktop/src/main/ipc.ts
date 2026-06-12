@@ -37,10 +37,7 @@ import {
   getPipelineQualityReport,
 } from "./commands/data-quality";
 import { syncRecommendationFeedback } from "./commands/feedback-flush";
-import {
-  getEnemyChampionPools,
-  syncLcuPlayerData,
-} from "./commands/player-data";
+import { syncLcuPlayerData } from "./commands/player-data";
 import { getDraftBrainQualityReport } from "./commands/quality";
 import {
   syncMasteries,
@@ -52,7 +49,6 @@ import {
   getChampionPoolPlan,
   getFeedbackAnalytics,
   getFeedbackObservability,
-  getLobbyScouting,
   getPoolSuggestions,
 } from "./commands/insights";
 import type { LcuService } from "./commands/lcu";
@@ -306,16 +302,13 @@ export function buildCommandRegistry(
     syncMasteries(requireDb(ctx), String(args?.puuid ?? "")),
   );
 
-  // commands/lcu.rs sync_lcu_player_data + champ_select.rs get_enemy_champion_pools.
+  // commands/lcu.rs sync_lcu_player_data.
   commands.set("sync_lcu_player_data", (args) =>
     syncLcuPlayerData(
       requireDb(ctx),
       requireLcu(ctx),
       typeof args?.region === "string" ? args.region : undefined,
     ),
-  );
-  commands.set("get_enemy_champion_pools", (args) =>
-    getEnemyChampionPools(requireDb(ctx), requireLcu(ctx), args?.sessionJson),
   );
 
   // commands/feedback_flush.rs + draft_brain.rs quality raporu.
@@ -399,13 +392,6 @@ export function buildCommandRegistry(
       requireDb(ctx),
       String(args?.role ?? ""),
       String(args?.puuid ?? ""),
-    ),
-  );
-  commands.set("get_lobby_scouting", (args) =>
-    getLobbyScouting(
-      requireEngine(ctx),
-      requireDb(ctx),
-      (args?.pools as unknown[]) ?? [],
     ),
   );
   commands.set("get_feedback_observability", () =>

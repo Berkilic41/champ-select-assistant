@@ -1,16 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import type { DataSourceRegistryReport } from './generated/DataSourceRegistryReport';
 import type { DataSourceEntry } from './generated/DataSourceEntry';
-import type { ScoutingReport } from './generated/ScoutingReport';
-import type { EnemyProfile } from './generated/EnemyProfile';
-import type { ScoutBanTarget } from './generated/ScoutBanTarget';
 import type { DataPack } from './generated/DataPack';
 import type { DataPackQuality } from './generated/DataPackQuality';
 import type { DraftBrainQualityReport } from './generated/DraftBrainQualityReport';
 import type { PackSyncStatus } from './generated/PackSyncStatus';
 
-// Compile-time contract for the generated Data Supremacy, scouting, and
-// DraftBrain pack types. These typed literals must satisfy the generated shapes,
+// Compile-time contract for the generated Data Supremacy and DraftBrain pack
+// types. These typed literals must satisfy the generated shapes,
 // so if a Rust struct field is added/removed/renamed/retyped, `pnpm typecheck`
 // fails here and catches frontend/backend contract drift.
 //
@@ -43,39 +40,6 @@ const registry: DataSourceRegistryReport = {
   confidence: 'low',
   sources: [entry],
   generated_at: 0, // u32 → TS number (unified with the pack family; see audit doc)
-};
-
-const banTarget: ScoutBanTarget = {
-  champion_id: 238,
-  champion_key: 'Zed',
-  reason: 'Rakibin ana kozu',
-  confidence: 'high',
-};
-
-const profile: EnemyProfile = {
-  cell_id: 5,
-  top_champion_id: 238,
-  top_champion_key: 'Zed',
-  play_rate: 0.7,
-  game_count: 12,
-  pool_tendency: 'otp',
-  playstyle_tags: ['erken agresif'],
-  threat: 'yuksek',
-  threat_level: 'high',
-  note: 'Zed OTP',
-};
-
-const scouting: ScoutingReport = {
-  enemies: [profile],
-  ban_targets: [banTarget],
-  team_read: {
-    win_condition: 'pick',
-    high_threat_count: 1,
-    primary_threat_key: 'Zed',
-    primary_threat_cell_id: 5,
-    strategy_note: 'Pick komp: vision basın.',
-  },
-  partial: false,
 };
 
 const dataPackQuality: DataPackQuality = {
@@ -129,18 +93,6 @@ describe('data-supremacy generated TS contract', () => {
     expect(typeof registry.generated_at).toBe('number');
     // updated_at stays i64 → bigint (matches DataSourceBadge.updated_at).
     expect(typeof entry.updated_at).toBe('bigint');
-  });
-
-  it('ScoutingReport shape matches the Rust struct', () => {
-    expect(scouting.enemies[0].pool_tendency).toBe('otp');
-    // Locale-free threat token mirrors the TR `threat` field (3b bridge).
-    expect(scouting.enemies[0].threat_level).toBe('high');
-    expect(scouting.ban_targets[0].champion_id).toBe(238);
-    expect(scouting.partial).toBe(false);
-    // Team-level read (scouting depth v2).
-    expect(scouting.team_read.win_condition).toBe('pick');
-    expect(scouting.team_read.primary_threat_key).toBe('Zed');
-    expect(typeof scouting.team_read.high_threat_count).toBe('number');
   });
 
   it('DraftBrain pack and quality response shapes match the Rust structs', () => {

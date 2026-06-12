@@ -11,10 +11,7 @@ import { afterEach, beforeAll, describe, expect, it } from "vitest";
 
 import { LcuService } from "../src/main/commands/lcu";
 import { syncRecommendationFeedback } from "../src/main/commands/feedback-flush";
-import {
-  getEnemyChampionPools,
-  syncLcuPlayerData,
-} from "../src/main/commands/player-data";
+import { syncLcuPlayerData } from "../src/main/commands/player-data";
 import { syncDataPipeline } from "../src/main/commands/data-pipeline";
 import {
   hashPuuid,
@@ -35,7 +32,6 @@ import {
 import { openDatabase, runMigrations } from "../src/main/db";
 import { Engine } from "../src/main/engine";
 import {
-  computeChampionPool,
   parseLcuMastery,
   parseLcuMatchHistory,
   parseLcuSummonerName,
@@ -344,17 +340,9 @@ describe("LCU player-sync parsers (player_sync.rs/champ_pool.rs parity)", () => 
     expect(parseLcuSummonerName({})).toEqual({ gameName: "Summoner", tagLine: "" });
   });
 
-  it("counts the champion pool sorted by play count", () => {
-    const pool = computeChampionPool(matchHistoryFixture(), LOCAL_PUUID);
-    expect(pool).toEqual([
-      [238, 1],
-      [61, 1],
-    ]);
-    expect(computeChampionPool({}, LOCAL_PUUID)).toEqual([]);
-  });
 });
 
-describe("sync_lcu_player_data + get_enemy_champion_pools", () => {
+describe("sync_lcu_player_data", () => {
   const lockfile = {
     name: "LeagueClient",
     pid: 1,
@@ -397,52 +385,6 @@ describe("sync_lcu_player_data + get_enemy_champion_pools", () => {
     expect(Number(masteryCount.c)).toBe(3);
   });
 
-  it("enemy pools: empty without a connected client, computed from raw session", async () => {
-    const db = migratedDb();
-    db.prepare(
-      "INSERT INTO champions (champion_id, key, name, title, cached_at) VALUES (238, 'Zed', 'Zed', 't', 0)",
-    ).run();
-
-    const disconnected = new LcuService({ emit: () => {} });
-    expect(await getEnemyChampionPools(db, disconnected, {})).toEqual([]);
-
-    const service = new LcuService({
-      emit: () => {},
-      findLockfileFn: () => lockfile,
-      makeClient: () => ({
-        getJson: async <T>(path: string) => {
-          if (path.includes("current-summoner")) {
-            return { gameName: "Me", tagLine: "TR" } as T;
-          }
-          if (path === "/lol-summoner/v1/summoners/777") {
-            return { puuid: LOCAL_PUUID } as T;
-          }
-          if (path.includes("match-history")) return matchHistoryFixture() as T;
-          throw new Error(`beklenmedik yol: ${path}`);
-        },
-      }),
-    });
-    service.startWsListener = () => {};
-    await service.connect();
-
-    const pools = await getEnemyChampionPools(db, service, {
-      theirTeam: [
-        { cellId: 5, summonerId: 777 },
-        { cellId: 6, summonerId: 0 }, // bot/gizli — atlanır
-      ],
-    });
-    expect(pools).toHaveLength(1);
-    expect(pools[0]).toMatchObject({
-      cell_id: 5,
-      top_champion_id: 238,
-      top_champion_key: "Zed",
-      game_count: 2,
-    });
-    expect(pools[0].play_rate).toBeCloseTo(0.5);
-
-    // Parse edilmiş (snake_case) state'te theirTeam yok → dürüstçe boş.
-    expect(await getEnemyChampionPools(db, service, { their_team: [] })).toEqual([]);
-  });
 });
 
 describe("sync_recommendation_feedback (feedback_flush.rs parity)", () => {
