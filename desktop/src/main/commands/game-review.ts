@@ -137,6 +137,98 @@ export function getGameReviews(db: DatabaseSync, puuid: string, limit = 3): Stor
   }));
 }
 
+// ── C4: Trend raporu ─────────────────────────────────────────────────────────
+
+export interface TrendResult {
+  report: unknown;
+  role: string;
+  queue_group: string;
+  games: number;
+}
+
+/** Baskın queue-grubu + baskın roldeki son maçlardan trend raporu (core). */
+export function getTrendReport(
+  engine: Engine,
+  db: DatabaseSync,
+  puuid: string,
+): TrendResult | null {
+  const rows = recentMatches(db, puuid, 40);
+  if (rows.length === 0) return null;
+
+  // Baskın grup → grup içinde baskın rol (boş pozisyonlar rol seçiminde sayılmaz).
+  const counts = new Map<string, number>();
+  for (const r of rows) {
+    const g = queueGroup(Number(r.queue_id));
+    counts.set(g, (counts.get(g) ?? 0) + 1);
+  }
+  const group = [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+  const inGroup = rows.filter((r) => queueGroup(Number(r.queue_id)) === group);
+
+  const roleCounts = new Map<string, number>();
+  for (const r of inGroup) {
+    const role = String(r.position ?? "").toLowerCase();
+    if (role) roleCounts.set(role, (roleCounts.get(role) ?? 0) + 1);
+  }
+  const role =
+    [...roleCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
+  const filtered = role
+    ? inGroup.filter((r) => String(r.position ?? "").toLowerCase() === role)
+    : inGroup;
+  const window = filtered.slice(0, 20); // en yeni 20; core eski→yeni sıralar
+
+  const report = engine.trendReport({ matches: window.map(toCoreMatch) });
+  return { report, role, queue_group: group, games: window.length };
+}
+
+// ── C5: Maç notları ──────────────────────────────────────────────────────────
+
+export interface MatchNote {
+  match_id: string;
+  note: string;
+  tags: string[];
+  updated_at: number;
+}
+
+export function getMatchNote(db: DatabaseSync, matchId: string): MatchNote | null {
+  const row = db
+    .prepare("SELECT match_id, note, tags, updated_at FROM match_notes WHERE match_id = ?")
+    .get(matchId) as
+    | { match_id: string; note: string; tags: string; updated_at: number }
+    | undefined;
+  if (!row) return null;
+  let tags: string[] = [];
+  try {
+    const parsed: unknown = JSON.parse(String(row.tags));
+    if (Array.isArray(parsed)) tags = parsed.filter((t): t is string => typeof t === "string");
+  } catch {
+    /* bozuk tags → boş liste, not yine döner */
+  }
+  return {
+    match_id: String(row.match_id),
+    note: String(row.note),
+    tags,
+    updated_at: Number(row.updated_at),
+  };
+}
+
+export function setMatchNote(
+  db: DatabaseSync,
+  puuid: string,
+  matchId: string,
+  note: string,
+  tags: string[],
+): MatchNote {
+  const now = Math.floor(Date.now() / 1000);
+  const cleanTags = tags.filter((t) => typeof t === "string").slice(0, 6);
+  db.prepare(
+    `INSERT INTO match_notes (match_id, puuid, note, tags, updated_at)
+     VALUES (?, ?, ?, ?, ?)
+     ON CONFLICT(match_id) DO UPDATE SET
+       note = excluded.note, tags = excluded.tags, updated_at = excluded.updated_at`,
+  ).run(matchId, puuid, note, JSON.stringify(cleanTags), now);
+  return { match_id: matchId, note, tags: cleanTags, updated_at: now };
+}
+
 export interface GenerateResult {
   created: number;
   /** En son üretilen karne (varsa) + maç kimliği. */

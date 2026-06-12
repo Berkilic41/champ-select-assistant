@@ -25,25 +25,48 @@ interface GenerateResult {
  * önceki hedef kontrolü + sonraki maç hedefi. Kendi verisini çözer
  * (PoolBuilder deseni) — açılışta eksik karneleri üretir, en yenisini gösterir.
  */
+const NOTE_TAGS = ['tilt', 'wave', 'vision', 'macro'] as const;
+
+interface MatchNote {
+  match_id: string;
+  note: string;
+  tags: string[];
+  updated_at: number;
+}
+
 export const GameReviewCard: React.FC = () => {
   const { t } = useTranslation();
   const [latest, setLatest] = useState<StoredReview | null>(null);
   const [streak, setStreak] = useState(0);
+  const [puuid, setPuuid] = useState('');
+  const [note, setNote] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [noteSaved, setNoteSaved] = useState(false);
 
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
-        const puuid = await invoke<string | null>('get_active_summoner_puuid');
-        if (!puuid) return;
-        const gen = await invoke<GenerateResult>('generate_game_reviews', { puuid });
+        const p = await invoke<string | null>('get_active_summoner_puuid');
+        if (!p) return;
+        if (alive) setPuuid(p);
+        const gen = await invoke<GenerateResult>('generate_game_reviews', { puuid: p });
         if (!alive) return;
         setStreak(gen.streak);
-        if (gen.latest) {
-          setLatest(gen.latest);
-        } else {
-          const stored = await invoke<StoredReview[]>('get_game_reviews', { puuid, limit: 1 });
-          if (alive && stored.length > 0) setLatest(stored[0]);
+        let current = gen.latest;
+        if (!current) {
+          const stored = await invoke<StoredReview[]>('get_game_reviews', { puuid: p, limit: 1 });
+          current = stored[0] ?? null;
+        }
+        if (!alive || !current) return;
+        setLatest(current);
+        // C5: bu maçın mevcut notu (varsa) yüklenir.
+        const existing = await invoke<MatchNote | null>('get_match_note', {
+          matchId: current.match_id,
+        });
+        if (alive && existing) {
+          setNote(existing.note);
+          setTags(existing.tags);
         }
       } catch {
         /* karne üretilemedi (motor/DB yok) — kart sessizce gizli kalır */
@@ -53,6 +76,20 @@ export const GameReviewCard: React.FC = () => {
       alive = false;
     };
   }, []);
+
+  const toggleTag = (tag: string) =>
+    setTags((cur) => (cur.includes(tag) ? cur.filter((x) => x !== tag) : [...cur, tag]));
+
+  const saveNote = async () => {
+    if (!latest || !puuid) return;
+    try {
+      await invoke('set_match_note', { puuid, matchId: latest.match_id, note, tags });
+      setNoteSaved(true);
+      setTimeout(() => setNoteSaved(false), 1500);
+    } catch {
+      /* kaydedilemedi — buton durumu değişmez, not yerinde durur */
+    }
+  };
 
   if (!latest) return null;
   const review = latest.review;
@@ -135,6 +172,34 @@ export const GameReviewCard: React.FC = () => {
         </div>
       )}
       {review.partial && <p className="grc-partial">{t('review.partial')}</p>}
+
+      {/* C5: maç notu — yalnız yerel DB'ye yazılır. */}
+      <div className="grc-note-editor">
+        <div className="grc-note-tags">
+          {NOTE_TAGS.map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              className={`grc-tag ${tags.includes(tag) ? 'grc-tag--on' : ''}`}
+              onClick={() => toggleTag(tag)}
+            >
+              {t(`review.noteTag.${tag}`)}
+            </button>
+          ))}
+        </div>
+        <div className="grc-note-row">
+          <input
+            className="grc-note-input"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder={t('review.notePlaceholder')}
+            maxLength={200}
+          />
+          <button type="button" className="grc-note-save" onClick={saveNote}>
+            {noteSaved ? t('review.noteSaved') : t('review.noteSave')}
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

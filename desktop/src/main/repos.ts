@@ -72,8 +72,24 @@ export function masteryTopForPuuid(
   }));
 }
 
-/** match_repo::player_stats — per-champion aggregates, top-20 by games. */
-export function matchPlayerStats(db: DatabaseSync, puuid: string): ChampionStats[] {
+/** match_repo::player_stats — per-champion aggregates, top-20 by games.
+ *
+ *  `queueFilter` (C3, kuyruk ayrımı): 'aram' = yalnız ARAM (450), 'sr' = ARAM
+ *  HARİÇ tüm Sihirdar Vadisi kuyrukları. Verilmezse eski davranış (tümü) —
+ *  görüntüleme yolu (get_player_stats) değişmeden kalır; öneri motorunun
+ *  comfort winrate sinyali ise draft'ın kuyruğuna göre filtrelenir (ARAM
+ *  maçları SR konforunu, SR maçları ARAM konforunu kirletmez). */
+export function matchPlayerStats(
+  db: DatabaseSync,
+  puuid: string,
+  queueFilter?: "sr" | "aram",
+): ChampionStats[] {
+  const queueClause =
+    queueFilter === "aram"
+      ? "AND queue_id = 450"
+      : queueFilter === "sr"
+        ? "AND queue_id != 450"
+        : "";
   const rows = db
     .prepare(
       `SELECT champion_id,
@@ -81,7 +97,7 @@ export function matchPlayerStats(db: DatabaseSync, puuid: string): ChampionStats
               SUM(win) AS wins,
               AVG(CAST(kills + assists AS REAL) / MAX(deaths, 1)) AS kda_avg
        FROM matches
-       WHERE puuid = ?
+       WHERE puuid = ? ${queueClause}
        GROUP BY champion_id
        ORDER BY games DESC
        LIMIT 20`,

@@ -12,7 +12,10 @@ import {
   focusStreak,
   generateGameReviews,
   getGameReviews,
+  getMatchNote,
+  getTrendReport,
   queueGroup,
+  setMatchNote,
 } from "../src/main/commands/game-review";
 import { openDatabase, runMigrations } from "../src/main/db";
 import { Engine } from "../src/main/engine";
@@ -119,6 +122,46 @@ describe("koç döngüsü (game_review.rs + game-review.ts)", () => {
 
     // Streak dürüst: sonuç ne olursa olsun sayı negatif olamaz.
     expect(focusStreak(db, PUUID, "soloq")).toBeGreaterThanOrEqual(0);
+  });
+
+  it("trend report uses dominant role+queue and yields half-median verdicts (C4)", () => {
+    const db = seededDb();
+    // 7 maç < 8 → partial; yine de noktalar döner.
+    const thin = getTrendReport(engine, db, PUUID)!;
+    expect(thin.queue_group).toBe("soloq");
+    expect(thin.role).toBe("top");
+    const thinReport = thin.report as { partial: boolean; points: unknown[] };
+    expect(thinReport.partial).toBe(true);
+    expect(thinReport.points.length).toBe(7);
+
+    // 8. maç eklenince hükümler gelir.
+    db.prepare(
+      `INSERT INTO matches (match_id, puuid, champion_id, position, win, kills,
+         deaths, assists, duration_secs, queue_id, played_at, cs, vision_score)
+       VALUES ('TR1_r8', ?, 86, 'top', 1, 5, 3, 5, 1800, 420, 8000, 215, 24)`,
+    ).run(PUUID);
+    const full = getTrendReport(engine, db, PUUID)!;
+    const report = full.report as {
+      partial: boolean;
+      verdicts: { metric: string; direction: string }[];
+    };
+    expect(report.partial).toBe(false);
+    expect(report.verdicts.some((v) => v.metric === "win_rate")).toBe(true);
+    expect(report.verdicts.some((v) => v.metric === "cs_per_min")).toBe(true);
+  });
+
+  it("match notes roundtrip with tag list (C5)", () => {
+    const db = seededDb();
+    expect(getMatchNote(db, "TR1_r7")).toBeNull();
+    const saved = setMatchNote(db, PUUID, "TR1_r7", "wave kontrolü kaçtı", ["wave", "tilt"]);
+    expect(saved.tags).toEqual(["wave", "tilt"]);
+    const read = getMatchNote(db, "TR1_r7")!;
+    expect(read.note).toBe("wave kontrolü kaçtı");
+    expect(read.tags).toEqual(["wave", "tilt"]);
+    // Üzerine yazma.
+    setMatchNote(db, PUUID, "TR1_r7", "güncellendi", []);
+    expect(getMatchNote(db, "TR1_r7")!.note).toBe("güncellendi");
+    expect(getMatchNote(db, "TR1_r7")!.tags).toEqual([]);
   });
 
   it("thin history yields an honest partial review with no goal", () => {

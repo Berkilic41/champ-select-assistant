@@ -71,3 +71,42 @@
   padding-top: var(--space-1);
 }
 .grc-partial { font-size: var(--font-size-xs); color: var(--text-muted); font-style: italic; margin: 0; }
+
+/* C4: trend satırları */
+.grc-trend-row { display: flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-xs); }
+.grc-spark { flex: 1; min-width: 60px; }
+.grc-trend-verdict { display: inline-flex; align-items: center; gap: 4px; color: var(--text-secondary); white-space: nowrap; }
+
+/* C5: maç notu editörü */
+.grc-note-editor { display: flex; flex-direction: column; gap: var(--space-1); border-top: 1px dashed var(--border-subtle); padding-top: var(--space-2); }
+.grc-note-tags { display: flex; gap: var(--space-1); flex-wrap: wrap; }
+.grc-tag {
+  font-size: var(--font-size-xs);
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill, 999px);
+  padding: 1px 8px;
+  cursor: pointer;
+}
+.grc-tag--on { color: var(--gold, var(--color-gold)); border-color: var(--gold, var(--color-gold)); }
+.grc-note-row { display: flex; gap: var(--space-2); }
+.grc-note-input {
+  flex: 1;
+  font-size: var(--font-size-xs);
+  background: var(--surface-2);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 4px var(--space-2);
+}
+.grc-note-save {
+  font-size: var(--font-size-xs);
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.grc-note-save:hover { color: var(--text-primary); background: var(--surface-3); }

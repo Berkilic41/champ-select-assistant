@@ -404,7 +404,25 @@
       "vision_score": "Vision score",
       "cs_at_10": "CS@10",
       "deaths_pre_14": "Deaths before 14 min"
-    }
+    },
+    "noteTag": {
+      "tilt": "tilt",
+      "wave": "wave",
+      "vision": "vision",
+      "macro": "macro"
+    },
+    "notePlaceholder": "Note for this game… (stays local)",
+    "noteSave": "Save",
+    "noteSaved": "Saved ✓"
+  },
+  "trend": {
+    "title": "Trend Board",
+    "improving": "improving",
+    "flat": "flat",
+    "declining": "declining",
+    "winRate": "Win rate",
+    "games": "{{n}} games",
+    "partial": "Direction verdicts need at least 8 games — curve only for now."
   },
   "teamComp": {
     "title": "Team Composition",

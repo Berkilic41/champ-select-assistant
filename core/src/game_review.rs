@@ -288,6 +288,132 @@ pub fn build_game_review(
     }
 }
 
+// ── C4: Trend raporu ──────────────────────────────────────────────────────────
+
+/// Sparkline noktası (eski→yeni sırada).
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/generated/")]
+#[serde(rename_all = "snake_case")]
+pub struct TrendPoint {
+    pub played_at: i64,
+    pub win: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cs_per_min: Option<f32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub deaths_per_10: Option<f32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub vision_score: Option<f32>,
+    pub kda: f32,
+}
+
+/// Metrik başına yön hükmü: ilk yarı medyanı vs ikinci yarı medyanı.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/generated/")]
+#[serde(rename_all = "snake_case")]
+pub struct TrendVerdict {
+    pub metric: String,
+    /// "improving" | "flat" | "declining".
+    pub direction: String,
+    pub first_half: f32,
+    pub second_half: f32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/generated/")]
+#[serde(rename_all = "snake_case")]
+pub struct TrendReport {
+    pub points: Vec<TrendPoint>,
+    pub verdicts: Vec<TrendVerdict>,
+    /// < `TREND_MIN_GAMES` maçta hüküm üretilmez.
+    pub partial: bool,
+}
+
+/// Yön hükmü için gereken en az maç (iki yarıda da ≥4 değer).
+pub const TREND_MIN_GAMES: usize = 8;
+
+/// Trend hükmüne giren metrikler (win_rate ayrıca hesaplanır).
+const TREND_METRICS: &[(&str, &str)] = &[
+    ("cs_per_min", "at_least"),
+    ("deaths_per_10", "at_most"),
+    ("vision_score", "at_least"),
+    ("kda", "at_least"),
+];
+
+fn half_median(matches: &[MatchRow], key: &str) -> Option<f32> {
+    let mut vals: Vec<f32> = matches.iter().filter_map(|m| metric_value(m, key)).collect();
+    if vals.len() < 4 {
+        return None;
+    }
+    median(&mut vals)
+}
+
+/// Trend raporu. `matches` host tarafından AYNI rol + queue-grubuyla
+/// filtrelenmiş olmalı; sıra önemsiz (içeride eski→yeni sıralanır).
+pub fn build_trend_report(matches: &[MatchRow]) -> TrendReport {
+    let mut sorted: Vec<&MatchRow> = matches.iter().collect();
+    sorted.sort_by_key(|m| m.played_at);
+
+    let points: Vec<TrendPoint> = sorted
+        .iter()
+        .map(|m| TrendPoint {
+            played_at: m.played_at,
+            win: m.win,
+            cs_per_min: metric_value(m, "cs_per_min").map(round1),
+            deaths_per_10: metric_value(m, "deaths_per_10").map(round1),
+            vision_score: metric_value(m, "vision_score").map(round1),
+            kda: round1(metric_value(m, "kda").unwrap_or(0.0)),
+        })
+        .collect();
+
+    let partial = sorted.len() < TREND_MIN_GAMES;
+    let mut verdicts = Vec::new();
+    if !partial {
+        let mid = sorted.len() / 2;
+        let (first, second): (Vec<MatchRow>, Vec<MatchRow>) = (
+            sorted[..mid].iter().map(|m| (*m).clone()).collect(),
+            sorted[mid..].iter().map(|m| (*m).clone()).collect(),
+        );
+        for (key, direction) in TREND_METRICS {
+            if let (Some(a), Some(b)) = (half_median(&first, key), half_median(&second, key)) {
+                let m = signed_margin(b, a, direction);
+                let dir = if m > EVEN_BAND {
+                    "improving"
+                } else if m < -EVEN_BAND {
+                    "declining"
+                } else {
+                    "flat"
+                };
+                verdicts.push(TrendVerdict {
+                    metric: key.to_string(),
+                    direction: dir.to_string(),
+                    first_half: round1(a),
+                    second_half: round1(b),
+                });
+            }
+        }
+        // Win-rate hükmü (yarı başına kazanma oranı).
+        let wr = |half: &[MatchRow]| -> f32 {
+            half.iter().filter(|m| m.win).count() as f32 / half.len().max(1) as f32
+        };
+        let (a, b) = (wr(&first), wr(&second));
+        let m = signed_margin(b, a.max(0.05), "at_least");
+        verdicts.push(TrendVerdict {
+            metric: "win_rate".to_string(),
+            direction: if m > EVEN_BAND {
+                "improving".to_string()
+            } else if m < -EVEN_BAND {
+                "declining".to_string()
+            } else {
+                "flat".to_string()
+            },
+            first_half: round1(a * 100.0),
+            second_half: round1(b * 100.0),
+        });
+    }
+
+    TrendReport { points, verdicts, partial }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -378,6 +504,37 @@ mod tests {
         };
         let nd = build_game_review(&row(180, 5, 21, true), &history(), Some(&tl_goal));
         assert_eq!(nd.focus_check.as_ref().unwrap().result, "no_data");
+    }
+
+    #[test]
+    fn trend_report_compares_half_medians_and_is_honest_when_thin() {
+        // İlk 4 maç zayıf CS (4.0), son 4 maç güçlü CS (7.0) → improving.
+        let mut matches: Vec<MatchRow> = Vec::new();
+        for i in 0..4 {
+            let mut m = row(120, 6, 14, false); // 4.0 cs/dk
+            m.played_at = i;
+            matches.push(m);
+        }
+        for i in 4..8 {
+            let mut m = row(210, 3, 22, true); // 7.0 cs/dk
+            m.played_at = i;
+            matches.push(m);
+        }
+        let report = build_trend_report(&matches);
+        assert!(!report.partial);
+        assert_eq!(report.points.len(), 8);
+        let cs = report.verdicts.iter().find(|v| v.metric == "cs_per_min").unwrap();
+        assert_eq!(cs.direction, "improving");
+        let deaths = report.verdicts.iter().find(|v| v.metric == "deaths_per_10").unwrap();
+        assert_eq!(deaths.direction, "improving"); // 6→3 ölüm, at_most ekseni
+        let wr = report.verdicts.iter().find(|v| v.metric == "win_rate").unwrap();
+        assert_eq!(wr.direction, "improving");
+
+        // < 8 maç → hüküm yok, partial true (sparkline noktaları yine döner).
+        let thin = build_trend_report(&matches[..5]);
+        assert!(thin.partial);
+        assert!(thin.verdicts.is_empty());
+        assert_eq!(thin.points.len(), 5);
     }
 
     #[test]

@@ -404,7 +404,25 @@
       "vision_score": "Vizyon skoru",
       "cs_at_10": "CS@10",
       "deaths_pre_14": "14 dk öncesi ölüm"
-    }
+    },
+    "noteTag": {
+      "tilt": "tilt",
+      "wave": "wave",
+      "vision": "vizyon",
+      "macro": "makro"
+    },
+    "notePlaceholder": "Bu maç için not… (yalnız sende kalır)",
+    "noteSave": "Kaydet",
+    "noteSaved": "Kaydedildi ✓"
+  },
+  "trend": {
+    "title": "Trend Panosu",
+    "improving": "yükseliyor",
+    "flat": "sabit",
+    "declining": "geriliyor",
+    "winRate": "Kazanma oranı",
+    "games": "{{n}} maç",
+    "partial": "Yön hükmü için en az 8 maç gerekir — şimdilik yalnız eğri."
   },
   "teamComp": {
     "title": "Takım Kompozisyonu",

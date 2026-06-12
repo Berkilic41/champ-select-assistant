@@ -37,7 +37,13 @@ import {
   getPipelineQualityReport,
 } from "./commands/data-quality";
 import { syncRecommendationFeedback } from "./commands/feedback-flush";
-import { generateGameReviews, getGameReviews } from "./commands/game-review";
+import {
+  generateGameReviews,
+  getGameReviews,
+  getMatchNote,
+  getTrendReport,
+  setMatchNote,
+} from "./commands/game-review";
 import { syncLcuPlayerData } from "./commands/player-data";
 import { getDraftBrainQualityReport } from "./commands/quality";
 import {
@@ -404,6 +410,21 @@ export function buildCommandRegistry(
       requireDb(ctx),
       String(args?.puuid ?? ""),
       typeof args?.limit === "number" ? args.limit : 3,
+    ),
+  );
+  commands.set("get_trend_report", (args) =>
+    getTrendReport(requireEngine(ctx), requireDb(ctx), String(args?.puuid ?? "")),
+  );
+  commands.set("get_match_note", (args) =>
+    getMatchNote(requireDb(ctx), String(args?.matchId ?? "")),
+  );
+  commands.set("set_match_note", (args) =>
+    setMatchNote(
+      requireDb(ctx),
+      String(args?.puuid ?? ""),
+      String(args?.matchId ?? ""),
+      String(args?.note ?? ""),
+      Array.isArray(args?.tags) ? (args.tags as string[]) : [],
     ),
   );
   commands.set("get_feedback_observability", () =>

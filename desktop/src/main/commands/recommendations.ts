@@ -82,7 +82,9 @@ export function buildRecommendationsInput(
       : (session.local_player?.assigned_position ?? "").toLowerCase();
 
   const mastery = masteryTopForPuuid(db, puuid, 40);
-  const stats = matchPlayerStats(db, puuid);
+  // C3 kuyruk ayrımı: comfort winrate sinyali draft'ın kuyruğundan beslenir —
+  // ARAM draft'ı yalnız ARAM maçlarını, SR draft'ı yalnız SR maçlarını görür.
+  const stats = matchPlayerStats(db, puuid, session.queue_id === 450 ? "aram" : "sr");
   const allChampions = getChampions(db);
   const roleMap = championRoleMap(db);
 

@@ -33,6 +33,7 @@ export interface CoreModule {
   pool_suggestions_json(input: string): string;
   champion_pool_plan_json(input: string): string;
   game_review_json(input: string): string;
+  trend_report_json(input: string): string;
   feedback_observability_json(input: string): string;
   feedback_analytics_json(input: string): string;
   draft_simulation_json(input: string): string;
@@ -184,6 +185,11 @@ export class Engine {
   /** {match, history, prev_goal?} → GameReview (C1+C2 koç döngüsü). */
   gameReview<TOut = unknown>(input: unknown): TOut {
     return this.call(this.core.game_review_json, input);
+  }
+
+  /** {matches} → TrendReport (C4; host rol+queue-grubu filtreler). */
+  trendReport<TOut = unknown>(input: unknown): TOut {
+    return this.call(this.core.trend_report_json, input);
   }
 
   /** [{champion_id, verdict, synced}] → {counters, status}. */

@@ -7,6 +7,14 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Trend Panosu** — baskın rol+kuyruktaki son maçların CS/dk, ölüm-oranı ve
+  vizyon sparkline'ları + "yükseliyor/sabit/geriliyor" hükümleri (ilk-yarı vs
+  ikinci-yarı medyan; 8 maç altında dürüstçe yalnız eğri).
+- **Maç Notları** — karne kartında bu maç için serbest not + etiket çipleri
+  (tilt/wave/vizyon/makro); yalnız yerel veritabanında kalır.
+- **Kuyruk-ayrımlı konfor sinyali** — ARAM draft'ı yalnız ARAM maçlarından,
+  Sihirdar Vadisi draft'ı yalnız SR maçlarından kişisel win-rate okur; iki mod
+  birbirinin önerilerini artık kirletmez.
 - **Koç Döngüsü: Maç Sonu Karnesi + Sonraki Maç Hedefi** — her senkronlanan maç,
   SENİN aynı rol+kuyruk geçmişinin medyanına karşı notlanır (CS/dk, 10 dk başına
   ölüm, KDA, vizyon; timeline metrikleri key'siz dürüstçe "kilitli"); karne "iyi
