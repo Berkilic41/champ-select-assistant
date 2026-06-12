@@ -6,6 +6,17 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 
 ## [Unreleased]
 
+## [0.10.0-beta.2] — 2026-06-12
+
+İlk otomatik güncelleme turu: beta.1 kurulumları bu sürümü kendiliğinden çekmeli.
+
+### Eklendi
+- **u.gg'den tam rune sayfası** — ikincil ağaç + rune'lar, stat shard'ları ve
+  skill order (örn. "E→Q→W") artık 170+ şampiyonun tamamı için canlı veriden
+  gelir (eskiden yalnız ~40 seed şampiyonunda vardı).
+- Seed tazeleme aracı (`scripts/refresh-seeds.mjs`) ve performans baseline
+  ölçer (`scripts/benchmark/baseline.mjs`; motor gecikmesi p95 ≈ 4 ms).
+
 ### Kaldırıldı
 - **Rakip havuzu + lobi scouting** — champ select'te LCU rakip `summonerId`
   vermediği için rakip/takım arkadaşı şampiyon havuzları hiçbir zaman
