@@ -416,6 +416,15 @@
     "noteSave": "Save",
     "noteSaved": "Saved ✓"
   },
+  "prefs": {
+    "never": "Never suggest",
+    "learning": "Learning"
+  },
+  "metaTrend": {
+    "rising": "Meta ▲ +{{pct}}%",
+    "falling": "Meta ▼ −{{pct}}%",
+    "tooltip": "u.gg win-rate change over the last {{hours}}h — info only, no score impact"
+  },
   "trend": {
     "title": "Trend Board",
     "improving": "improving",

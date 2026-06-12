@@ -39,6 +39,67 @@ const PhaseBar: React.FC<{ label: string; value: number }> = ({ label, value }) 
   </div>
 );
 
+/** D3: "asla önerme" / "öğreniyorum" toggle'ları — yalnız yerel tercih. */
+const PreferenceToggles: React.FC<{ championId: number }> = ({ championId }) => {
+  const { t } = useTranslation();
+  const [puuid, setPuuid] = useState('');
+  const [pref, setPref] = useState<'never' | 'learning' | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const p = await invoke<string | null>('get_active_summoner_puuid');
+        if (!p || !alive) return;
+        setPuuid(p);
+        const prefs = await invoke<{ never: number[]; learning: number[] }>(
+          'get_champion_preferences',
+          { puuid: p },
+        );
+        if (!alive) return;
+        if (prefs.never.includes(championId)) setPref('never');
+        else if (prefs.learning.includes(championId)) setPref('learning');
+        else setPref(null);
+      } catch {
+        /* tercih okunamadı — toggle'lar nötr kalır */
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [championId]);
+
+  const toggle = async (next: 'never' | 'learning') => {
+    if (!puuid) return;
+    const value = pref === next ? null : next;
+    try {
+      await invoke('set_champion_preference', { puuid, championId, preference: value });
+      setPref(value);
+    } catch {
+      /* kaydedilemedi — durum değişmez */
+    }
+  };
+
+  return (
+    <div className="cdc-prefs">
+      <button
+        type="button"
+        className={`cdc-pref ${pref === 'never' ? 'cdc-pref--never' : ''}`}
+        onClick={() => toggle('never')}
+      >
+        {t('prefs.never')}
+      </button>
+      <button
+        type="button"
+        className={`cdc-pref ${pref === 'learning' ? 'cdc-pref--learning' : ''}`}
+        onClick={() => toggle('learning')}
+      >
+        {t('prefs.learning')}
+      </button>
+    </div>
+  );
+};
+
 /**
  * Lobby champion detail: full KB profile (archetype, power curve, win condition,
  * damage split, CC/mobility/difficulty, combos). Fetches on open; hidden when
@@ -103,6 +164,8 @@ export const ChampionDetailCard: React.FC<Props> = ({ championId, championKey, o
               <span className="cdc-badge">{t('champDetail.difficulty')}: {detail.execution_difficulty}/5</span>
               <span className="cdc-badge">{detail.has_hard_cc ? t('champDetail.hasCc') : t('champDetail.noCc')}</span>
             </div>
+
+            <PreferenceToggles championId={championId} />
 
             <div className="cdc-section">
               <span className="cdc-label">{t('champDetail.powerCurve')}</span>

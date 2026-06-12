@@ -44,6 +44,11 @@ import {
   getTrendReport,
   setMatchNote,
 } from "./commands/game-review";
+import {
+  getChampionPreferences,
+  getMetaTrend,
+  setChampionPreference,
+} from "./commands/preferences";
 import { syncLcuPlayerData } from "./commands/player-data";
 import { getDraftBrainQualityReport } from "./commands/quality";
 import {
@@ -414,6 +419,27 @@ export function buildCommandRegistry(
   );
   commands.set("get_trend_report", (args) =>
     getTrendReport(requireEngine(ctx), requireDb(ctx), String(args?.puuid ?? "")),
+  );
+  // D3 tercihler + D4 meta trend.
+  commands.set("get_champion_preferences", (args) =>
+    getChampionPreferences(requireDb(ctx), String(args?.puuid ?? "")),
+  );
+  commands.set("set_champion_preference", (args) =>
+    setChampionPreference(
+      requireDb(ctx),
+      String(args?.puuid ?? ""),
+      Number(args?.championId ?? 0),
+      args?.preference === "never" || args?.preference === "learning"
+        ? args.preference
+        : null,
+    ),
+  );
+  commands.set("get_meta_trend", (args) =>
+    getMetaTrend(
+      requireDb(ctx),
+      Number(args?.championId ?? 0),
+      String(args?.position ?? ""),
+    ),
   );
   commands.set("get_match_note", (args) =>
     getMatchNote(requireDb(ctx), String(args?.matchId ?? "")),

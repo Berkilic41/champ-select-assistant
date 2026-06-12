@@ -12,6 +12,7 @@ import type { DatabaseSync } from "node:sqlite";
 import type { Engine } from "../engine";
 import { getChampions } from "./champions";
 import { recentMatches, toCoreMatch } from "./game-review";
+import { getChampionPreferences } from "./preferences";
 import { getSettings } from "./settings";
 import {
   buildsForPosition,
@@ -160,6 +161,11 @@ export function buildRecommendationsInput(
   const proRows = orWarnDefault(() => proPresenceRows(db), "pro_presence", []);
   const modelPackPayload = orWarnDefault(() => packPayload(db, "model_pack"), "model_pack", null);
   const dataPackPayload = orWarnDefault(() => packPayload(db, "data_pack"), "data_pack", null);
+  const prefs = orWarnDefault(
+    () => getChampionPreferences(db, puuid),
+    "user_preferences",
+    { never: [], learning: [] },
+  );
 
   return {
     session,
@@ -179,6 +185,9 @@ export function buildRecommendationsInput(
     model_pack_payload: modelPackPayload,
     data_pack_payload: dataPackPayload,
     recent_matches: recentRows.map(toCoreMatch),
+    // D3: kullanıcı tercihleri — veto hard-filtre + learning boost core'da.
+    vetoed_champions: prefs.never,
+    learning_champions: prefs.learning,
   };
 }
 

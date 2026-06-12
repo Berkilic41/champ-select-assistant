@@ -23,6 +23,7 @@ import {
   withRefreshLock,
 } from "./commands/data-pipeline";
 import type { LcuService } from "./commands/lcu";
+import { recordRatesSnapshot } from "./commands/preferences";
 import { syncDdragonChampions, type DdragonCaches, type FetchJson } from "./ddragon";
 import type { Engine } from "./engine";
 import { syncMatchV5Ingestion } from "./match-v5";
@@ -329,6 +330,8 @@ export class PipelineScheduler {
       }
       case "u_gg": {
         const o = await syncUgg(db, caches, this.deps.uggFetch ?? defaultUggFetch);
+        // D4: başarılı sync sonrası trend snapshot'ı (≥6h aralık, içeride).
+        recordRatesSnapshot(db);
         return `${o.rates} rates, ${o.builds} builds, ${o.matchups} matchups`;
       }
       case "leaguepedia": {

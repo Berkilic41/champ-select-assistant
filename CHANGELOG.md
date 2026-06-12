@@ -7,6 +7,12 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Veto & tercihler** — şampiyon detay kartından "Asla önerme" (öneri
+  listesinden tamamen çıkar) ve "Öğreniyorum" (sınırlı pozitif boost)
+  işaretlenebilir; tamamen yerel.
+- **Meta trend çipi** — aktif önerinin u.gg win-rate'i son snapshot'tan beri
+  anlamlı oynadıysa pick ekranında ▲/▼ rozeti; yalnız bilgi amaçlı, skora
+  etkisi yok.
 - **Kişisel form sinyali** — öneriler artık her şampiyonda NASIL oynadığını da
   bilir: bu roldeki kendi CS/dk ve ölüm-oranı medyanına karşı şampiyon-başına
   form okuması (az maçta nötre çekilir), skora sınırlı (±0.05) etki eder ve

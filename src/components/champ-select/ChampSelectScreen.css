@@ -139,3 +139,18 @@
   }
   .cs-dash__rail { overflow-x: auto; overflow-y: hidden; }
 }
+
+/* D4: meta trend çipi (görsel-yalnız) */
+.meta-trend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill, 999px);
+  padding: 2px 8px;
+  margin-top: var(--space-2);
+  width: fit-content;
+}
+.meta-trend-chip--up { color: var(--success, #4caf50); }
+.meta-trend-chip--down { color: var(--danger, #f44336); }

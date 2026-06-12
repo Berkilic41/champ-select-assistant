@@ -17,6 +17,12 @@ import {
   queueGroup,
   setMatchNote,
 } from "../src/main/commands/game-review";
+import {
+  getChampionPreferences,
+  getMetaTrend,
+  recordRatesSnapshot,
+  setChampionPreference,
+} from "../src/main/commands/preferences";
 import { openDatabase, runMigrations } from "../src/main/db";
 import { Engine } from "../src/main/engine";
 
@@ -162,6 +168,39 @@ describe("koç döngüsü (game_review.rs + game-review.ts)", () => {
     setMatchNote(db, PUUID, "TR1_r7", "güncellendi", []);
     expect(getMatchNote(db, "TR1_r7")!.note).toBe("güncellendi");
     expect(getMatchNote(db, "TR1_r7")!.tags).toEqual([]);
+  });
+
+  it("champion preferences roundtrip (D3)", () => {
+    const db = seededDb();
+    expect(getChampionPreferences(db, PUUID)).toEqual({ never: [], learning: [] });
+    setChampionPreference(db, PUUID, 86, "never");
+    setChampionPreference(db, PUUID, 54, "learning");
+    expect(getChampionPreferences(db, PUUID)).toEqual({ never: [86], learning: [54] });
+    // null → tercih kaldırma.
+    setChampionPreference(db, PUUID, 86, null);
+    expect(getChampionPreferences(db, PUUID).never).toEqual([]);
+  });
+
+  it("meta trend snapshot honors the 6h gap and yields honest deltas (D4)", () => {
+    const db = seededDb();
+    db.prepare(
+      `INSERT INTO champion_rates (champion_id, position, win_rate, pick_rate,
+         ban_rate, sample_size, patch, source, confidence, cached_at)
+       VALUES (86, 'top', 0.50, 0, 0, 5000, '16.12', 'u_gg', 'high', 0)`,
+    ).run();
+    const t0 = 1_000_000;
+    expect(recordRatesSnapshot(db, t0)).toBe(1);
+    expect(recordRatesSnapshot(db, t0 + 60)).toBe(0); // 6 saat dolmadı
+
+    // WR 0.50 → 0.53; 7 saat sonra delta dürüstçe +0.03.
+    db.prepare(
+      "UPDATE champion_rates SET win_rate = 0.53 WHERE champion_id = 86 AND source = 'u_gg'",
+    ).run();
+    const trend = getMetaTrend(db, 86, "top", t0 + 7 * 3600)!;
+    expect(trend.delta_wr).toBeCloseTo(0.03, 5);
+    expect(trend.hours_apart).toBe(7);
+    // Snapshot'ı olmayan şampiyon → null (çip gizli kalır).
+    expect(getMetaTrend(db, 999, "top", t0 + 7 * 3600)).toBeNull();
   });
 
   it("thin history yields an honest partial review with no goal", () => {

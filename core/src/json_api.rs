@@ -154,6 +154,13 @@ pub struct RecommendationsInput {
     /// form haritasını bundan kurar. Boş = form sinyali yok (dürüst).
     #[serde(default)]
     pub recent_matches: Vec<crate::postgame::MatchRow>,
+    /// D3 "asla önerme": bu id'ler öneri listesinden çıkarılır (hard filtre;
+    /// kilitli kendi pick'inin analizi etkilenmez).
+    #[serde(default)]
+    pub vetoed_champions: Vec<u32>,
+    /// D3 "öğreniyorum": sınırlı pozitif boost (+`LEARNING_BOOST`).
+    #[serde(default)]
+    pub learning_champions: Vec<u32>,
 }
 
 /// One `builds` table row as the host reads it (JSON-string columns kept raw —
@@ -341,6 +348,8 @@ struct EnrichmentInputs {
     model_pack_payload: Option<String>,
     data_pack_payload: Option<String>,
     recent_matches: Vec<crate::postgame::MatchRow>,
+    vetoed_champions: Vec<u32>,
+    learning_champions: Vec<u32>,
 }
 
 impl EnrichmentInputs {
@@ -351,6 +360,8 @@ impl EnrichmentInputs {
             model_pack_payload: input.model_pack_payload.take(),
             data_pack_payload: input.data_pack_payload.take(),
             recent_matches: std::mem::take(&mut input.recent_matches),
+            vetoed_champions: std::mem::take(&mut input.vetoed_champions),
+            learning_champions: std::mem::take(&mut input.learning_champions),
         }
     }
 
@@ -493,6 +504,9 @@ fn compute_missing_signals(
 /// D1: form nudge'ı — feedback ile aynı sınırlı kanal (±`LANE_FORM_NUDGE`).
 /// Skoru karta yazar; `upgrade_*` sonradan model skoru üzerinden yeniden sıralar.
 const LANE_FORM_NUDGE: f32 = 0.05;
+/// D3 "öğreniyorum" boost'u — stretch tercihini görünür kılar ama ana
+/// sinyalleri ezemez.
+const LEARNING_BOOST: f32 = 0.03;
 
 fn apply_lane_form(
     rec: &mut Recommendation,
@@ -538,8 +552,16 @@ pub fn recommendations_from_json(input_json: &str) -> Result<String, String> {
         .filter(|r| r.source == "leaguepedia")
         .map(|r| (r.champion_id, r.pick_rate + r.ban_rate))
         .collect();
+    // D3 veto: kullanıcının "asla önerme" dediği şampiyonlar listeden çıkar.
+    if !enrich.vetoed_champions.is_empty() {
+        recs.retain(|r| !enrich.vetoed_champions.contains(&r.champion_id));
+    }
     let lane_form = crate::game_review::build_lane_form(&enrich.recent_matches, &my_pos);
     for rec in &mut recs {
+        // D3 "öğreniyorum" boost'u — form/feedback gibi sınırlı kanal.
+        if enrich.learning_champions.contains(&rec.champion_id) {
+            rec.total_score = (rec.total_score + LEARNING_BOOST).clamp(0.0, 1.0);
+        }
         enrich_build(rec, &enrich.builds, enemy_archetype.as_deref(), &kb);
         rec.core_item_name = resolve_core_item_name(rec, &inputs.items);
         apply_lane_form(rec, &lane_form); // missing_signals'tan ÖNCE (alanı okur)
@@ -3344,6 +3366,41 @@ mod tests {
         let malphite = recs
             .as_array().unwrap().iter().find(|r| r["champion_id"] == 54).unwrap();
         assert!(malphite["lane_form_score"].as_f64().unwrap() < 0.5);
+    }
+
+    /// D3: veto hard-filtre + learning sınırlı boost.
+    #[test]
+    fn recommendations_respect_veto_and_learning_preferences() {
+        // Veto: Garen listeden tamamen çıkar.
+        let mut input: serde_json::Value =
+            serde_json::from_str(RECOMMENDATIONS_FIXTURE).unwrap();
+        input["vetoed_champions"] = serde_json::json!([86]);
+        let out = recommendations_from_json(&input.to_string()).unwrap();
+        let recs: serde_json::Value = serde_json::from_str(&out).unwrap();
+        assert!(
+            recs.as_array().unwrap().iter().all(|r| r["champion_id"] != 86),
+            "vetolu şampiyon önerilemez"
+        );
+
+        // Learning: Malphite'ın skoru boost'suz koşuya göre artar (sınırlı).
+        let bare = recommendations_from_json(RECOMMENDATIONS_FIXTURE).unwrap();
+        let bare: serde_json::Value = serde_json::from_str(&bare).unwrap();
+        let base_score = bare
+            .as_array().unwrap().iter().find(|r| r["champion_id"] == 54).unwrap()
+            ["rules_score"].as_f64().unwrap();
+
+        let mut boosted: serde_json::Value =
+            serde_json::from_str(RECOMMENDATIONS_FIXTURE).unwrap();
+        boosted["learning_champions"] = serde_json::json!([54]);
+        let out2 = recommendations_from_json(&boosted.to_string()).unwrap();
+        let recs2: serde_json::Value = serde_json::from_str(&out2).unwrap();
+        let new_score = recs2
+            .as_array().unwrap().iter().find(|r| r["champion_id"] == 54).unwrap()
+            ["rules_score"].as_f64().unwrap();
+        assert!(
+            new_score > base_score && new_score - base_score < 0.05,
+            "learning boost sınırlı pozitif: {base_score} → {new_score}"
+        );
     }
 
     /// Analysis path parity: single rec is enriched + upgraded (no comparative

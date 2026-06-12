@@ -416,6 +416,15 @@
     "noteSave": "Kaydet",
     "noteSaved": "Kaydedildi ✓"
   },
+  "prefs": {
+    "never": "Asla önerme",
+    "learning": "Öğreniyorum"
+  },
+  "metaTrend": {
+    "rising": "Meta ▲ +{{pct}}%",
+    "falling": "Meta ▼ −{{pct}}%",
+    "tooltip": "Son {{hours}} saatteki u.gg win-rate değişimi — yalnız bilgi, skora etkisi yok"
+  },
   "trend": {
     "title": "Trend Panosu",
     "improving": "yükseliyor",

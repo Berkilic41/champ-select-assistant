@@ -32,6 +32,7 @@ import { ComboBoard } from './ComboBoard';
 import { CounterItemsPanel } from './CounterItemsPanel';
 import { LaneMatchupPanel } from './LaneMatchupPanel';
 import { DraftVerdictPanel } from './DraftVerdictPanel';
+import { MetaTrendChip } from './MetaTrendChip';
 import { PerformancePanel } from './PerformancePanel';
 import { FeedbackAnalyticsPanel } from './FeedbackAnalyticsPanel';
 import { DraftSimulatorPanel } from './DraftSimulatorPanel';
@@ -266,6 +267,9 @@ export const ChampSelectScreen: React.FC<Props> = ({
               {/* Verdict (sticky, never scrolls) */}
               <div className="cs-dash__verdict">
                 <DraftVerdictPanel verdict={draftVerdict} />
+                {activeRec && role && (
+                  <MetaTrendChip championId={activeRec.champion_id} position={role} />
+                )}
                 {enemyThreats.length > 0 && (
                   <div className="cs-hover-strip">
                     <span className="cs-ban-hint">{t('champSelect.enemyHovering')}</span>
