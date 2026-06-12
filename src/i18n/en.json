@@ -417,6 +417,23 @@
     "noteSave": "Save",
     "noteSaved": "Saved ✓"
   },
+  "session": {
+    "title": "Session Coach",
+    "record": "This session: {{w}}W {{l}}L",
+    "warmupTitle": "Warmup Checklist",
+    "warmupFocus": "Today's focus: {{label}}",
+    "warmupPlan": "Set ONE measurable goal today (CS/min, vision…)",
+    "warmupRole": "Role + a 3-champion plan ready?",
+    "warmupFirstGame": "First game is a warmup — keep mechanical expectations low"
+  },
+  "weekly": {
+    "title": "Weekly Summary",
+    "record": "{{w}}W {{l}}L",
+    "goals": "Goal hit rate",
+    "hitRate": "{{met}}/{{total}} ({{pct}}%)",
+    "noGoals": "No goals closed this week",
+    "reviews": "Report cards"
+  },
   "prefs": {
     "never": "Never suggest",
     "learning": "Learning"

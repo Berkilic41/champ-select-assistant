@@ -11,6 +11,7 @@ import {
 import { ChampionStats, MasteryEntry } from '../../types/riot';
 import { GameReviewCard } from './GameReviewCard';
 import { TrendPanel } from './TrendPanel';
+import { WeeklySummaryCard } from './WeeklySummaryCard';
 import './StatsView.css';
 
 interface Props {
@@ -60,6 +61,8 @@ export const StatsView: React.FC<Props> = ({ stats, masteries, champMap }) => {
       <GameReviewCard />
       {/* C4: baskın rol+queue trend okuması. */}
       <TrendPanel />
+      {/* F3: haftalık koç özeti. */}
+      <WeeklySummaryCard />
       {totalGames > 0 && (
         <p className="stats-summary">
           {t('stats.summary', { games: totalGames, wr: overallWinRate })}

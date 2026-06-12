@@ -370,6 +370,72 @@ pub fn lane_form_score(entry: &LaneFormEntry) -> f32 {
     ((raw * n) + 0.5 * FORM_PRIOR_N) / (n + FORM_PRIOR_N)
 }
 
+// ── F1: Seans okuması (tilt koruması) ─────────────────────────────────────────
+
+/// Bu oturumda (app açılışından beri) oynanan maçların seans-düzeyi okuması.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/generated/")]
+#[serde(rename_all = "snake_case")]
+pub struct SessionRead {
+    pub games: u32,
+    pub wins: u32,
+    pub losses: u32,
+    /// En son maçtan geriye ardışık kayıp.
+    pub loss_streak: u32,
+    /// "ok" | "caution" (2 ardışık kayıp) | "break" (3+ — ara öner).
+    pub verdict: String,
+    /// Ölçülü Türkçe seans notu (caution/break'te dolu).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub note: Option<String>,
+}
+
+/// Seans okuması. `session_matches` = bu oturumda oynanan maçlar (host
+/// `played_at >= boot` ile filtreler); sıra önemsiz, içeride yeniye göre
+/// sıralanır. Karar oyuncuya kalır — kart yalnız ÖNERİR (zorlamaz).
+pub fn build_session_read(session_matches: &[MatchRow]) -> SessionRead {
+    let mut sorted: Vec<&MatchRow> = session_matches.iter().collect();
+    sorted.sort_by_key(|m| std::cmp::Reverse(m.played_at));
+
+    let games = sorted.len() as u32;
+    let wins = sorted.iter().filter(|m| m.win).count() as u32;
+    let losses = games - wins;
+    let mut loss_streak = 0u32;
+    for m in &sorted {
+        if m.win {
+            break;
+        }
+        loss_streak += 1;
+    }
+
+    let (verdict, note) = if loss_streak >= 3 {
+        (
+            "break",
+            Some(format!(
+                "Bu oturumda üst üste {loss_streak} kayıp — 15 dakikalık bir ara çoğu oyuncuda seriyi keser. Karar senin."
+            )),
+        )
+    } else if loss_streak == 2 {
+        (
+            "caution",
+            Some(
+                "Üst üste 2 kayıp — bir sonraki maçtan önce kısa bir nefes ve net bir plan iyi gelir."
+                    .to_string(),
+            ),
+        )
+    } else {
+        ("ok", None)
+    };
+
+    SessionRead {
+        games,
+        wins,
+        losses,
+        loss_streak,
+        verdict: verdict.to_string(),
+        note,
+    }
+}
+
 // ── C4: Trend raporu ──────────────────────────────────────────────────────────
 
 /// Sparkline noktası (eski→yeni sırada).
@@ -586,6 +652,31 @@ mod tests {
         };
         let nd = build_game_review(&row(180, 5, 21, true), &history(), Some(&tl_goal));
         assert_eq!(nd.focus_check.as_ref().unwrap().result, "no_data");
+    }
+
+    #[test]
+    fn session_read_escalates_with_consecutive_losses() {
+        let m = |win: bool, at: i64| {
+            let mut r = row(180, 5, 18, win);
+            r.played_at = at;
+            r
+        };
+        // Boş oturum → ok.
+        assert_eq!(build_session_read(&[]).verdict, "ok");
+        // 1 kayıp → ok; 2 ardışık → caution; 3 ardışık → break (ara öner).
+        assert_eq!(build_session_read(&[m(false, 1)]).verdict, "ok");
+        let two = build_session_read(&[m(true, 1), m(false, 2), m(false, 3)]);
+        assert_eq!(two.verdict, "caution");
+        assert_eq!(two.loss_streak, 2);
+        let three = build_session_read(&[m(false, 1), m(false, 2), m(false, 3)]);
+        assert_eq!(three.verdict, "break");
+        assert!(three.note.as_deref().unwrap_or("").contains("ara"));
+        // Galibiyet seriyi keser (en yeni maç galibiyet → ok).
+        let reset = build_session_read(&[m(false, 1), m(false, 2), m(true, 3)]);
+        assert_eq!(reset.verdict, "ok");
+        assert_eq!(reset.loss_streak, 0);
+        assert_eq!(reset.wins, 1);
+        assert_eq!(reset.losses, 2);
     }
 
     #[test]

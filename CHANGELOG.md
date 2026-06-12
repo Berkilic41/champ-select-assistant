@@ -7,6 +7,11 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Seans Koçu** — oturum başında ısınma kontrol listesi (devreden maç hedefin
+  otomatik madde olur); üst üste 2 kayıpta nazik not, 3+ kayıpta "15 dk ara"
+  önerisi (seans W/L ile). Yalnız önerir, hiçbir şeyi engellemez; kapatılabilir.
+- **Haftalık Özet** — istatistik sekmesinde son 7 günün hedef isabet oranı,
+  W/L ve karne sayısı.
 - **ARAM koçluğu derinleşti** — combo ve takım-ihtiyacı analizi artık ARAM'da
   da skora işliyor (sabit 5v5'te tam anlamlı); koridor-merkezli plan metni ve
   blind-pick risk eki ARAM'da bilinçli olarak kapalı.

@@ -49,6 +49,7 @@ import {
   getMetaTrend,
   setChampionPreference,
 } from "./commands/preferences";
+import { getSessionCoach, getWeeklySummary } from "./commands/session-coach";
 import { syncLcuPlayerData } from "./commands/player-data";
 import { getDraftBrainQualityReport } from "./commands/quality";
 import {
@@ -440,6 +441,13 @@ export function buildCommandRegistry(
       Number(args?.championId ?? 0),
       String(args?.position ?? ""),
     ),
+  );
+  // Faz F: seans koçluğu + haftalık özet.
+  commands.set("get_session_coach", (args) =>
+    getSessionCoach(requireEngine(ctx), requireDb(ctx), String(args?.puuid ?? "")),
+  );
+  commands.set("get_weekly_summary", (args) =>
+    getWeeklySummary(requireDb(ctx), String(args?.puuid ?? "")),
   );
   commands.set("get_match_note", (args) =>
     getMatchNote(requireDb(ctx), String(args?.matchId ?? "")),

@@ -77,6 +77,13 @@
 .grc-spark { flex: 1; min-width: 60px; }
 .grc-trend-verdict { display: inline-flex; align-items: center; gap: 4px; color: var(--text-secondary); white-space: nowrap; }
 
+/* Faz F: seans koçu */
+.src-tilt--break { border-left-color: var(--danger, #f44336); }
+.src-tilt--caution { border-left-color: var(--warning, #ffb74d); }
+.src-check { display: flex; align-items: center; gap: var(--space-2); cursor: pointer; }
+.src-check input { accent-color: var(--gold, #c89b3c); }
+.src-check--done { text-decoration: line-through; color: var(--text-muted); }
+
 /* C5: maç notu editörü */
 .grc-note-editor { display: flex; flex-direction: column; gap: var(--space-1); border-top: 1px dashed var(--border-subtle); padding-top: var(--space-2); }
 .grc-note-tags { display: flex; gap: var(--space-1); flex-wrap: wrap; }

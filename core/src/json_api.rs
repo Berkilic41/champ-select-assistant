@@ -1484,6 +1484,20 @@ pub fn trend_report_from_json(input_json: &str) -> Result<String, String> {
     serde_json::to_string(&report).map_err(|e| format!("trend serialize failed: {e}"))
 }
 
+/// Seans okuması (F1 tilt koruması): bu oturumda oynanan maçlar → W/L,
+/// kayıp serisi ve ok/caution/break hükmü. Çıktı: `SessionRead`.
+pub fn session_read_from_json(input_json: &str) -> Result<String, String> {
+    #[derive(Deserialize)]
+    struct SessionInput {
+        #[serde(default)]
+        matches: Vec<crate::postgame::MatchRow>,
+    }
+    let input: SessionInput = serde_json::from_str(input_json)
+        .map_err(|e| format!("invalid session input: {e}"))?;
+    let read = crate::game_review::build_session_read(&input.matches);
+    serde_json::to_string(&read).map_err(|e| format!("session serialize failed: {e}"))
+}
+
 /// Maç sonu karnesi (`build_game_review` sarmalayıcısı). Çıktı: `GameReview`.
 pub fn game_review_from_json(input_json: &str) -> Result<String, String> {
     let input: GameReviewInput = serde_json::from_str(input_json)
@@ -3186,6 +3200,11 @@ mod wasm {
     #[wasm_bindgen]
     pub fn trend_report_json(input: &str) -> Result<String, JsValue> {
         super::trend_report_from_json(input).map_err(|e| JsValue::from_str(&e))
+    }
+
+    #[wasm_bindgen]
+    pub fn session_read_json(input: &str) -> Result<String, JsValue> {
+        super::session_read_from_json(input).map_err(|e| JsValue::from_str(&e))
     }
 }
 

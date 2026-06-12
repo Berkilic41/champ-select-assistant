@@ -23,6 +23,7 @@ import {
   recordRatesSnapshot,
   setChampionPreference,
 } from "../src/main/commands/preferences";
+import { getSessionCoach, getWeeklySummary } from "../src/main/commands/session-coach";
 import { openDatabase, runMigrations } from "../src/main/db";
 import { Engine } from "../src/main/engine";
 
@@ -168,6 +169,48 @@ describe("koç döngüsü (game_review.rs + game-review.ts)", () => {
     setMatchNote(db, PUUID, "TR1_r7", "güncellendi", []);
     expect(getMatchNote(db, "TR1_r7")!.note).toBe("güncellendi");
     expect(getMatchNote(db, "TR1_r7")!.tags).toEqual([]);
+  });
+
+  it("session coach reads only in-session matches and escalates honestly (F1)", () => {
+    const db = seededDb(); // 7 maç, played_at 1000..7000; son maç (r7) kayıp
+    // boot=8000 → seansta maç yok → fresh_session + ok.
+    const fresh = getSessionCoach(engine, db, PUUID, 8000);
+    expect(fresh.fresh_session).toBe(true);
+    expect((fresh.read as { verdict: string }).verdict).toBe("ok");
+    // boot=0 → 7 maç seansta; r7 kayıp ama r6/r5 galibiyet → streak 1 → ok.
+    const all = getSessionCoach(engine, db, PUUID, 0);
+    expect(all.fresh_session).toBe(false);
+    const read = all.read as { games: number; loss_streak: number; verdict: string };
+    expect(read.games).toBe(7);
+    expect(read.loss_streak).toBe(1);
+    expect(read.verdict).toBe("ok");
+    // 2 kayıp daha ekle → streak 3 → break (ara öner).
+    const ins = db.prepare(
+      `INSERT INTO matches (match_id, puuid, champion_id, position, win, kills,
+         deaths, assists, duration_secs, queue_id, played_at, cs, vision_score)
+       VALUES (?, ?, 86, 'top', 0, 2, 7, 2, 1500, 420, ?, 100, 10)`,
+    );
+    ins.run("TR1_r8", PUUID, 9000);
+    ins.run("TR1_r9", PUUID, 9100);
+    const tilted = getSessionCoach(engine, db, PUUID, 0)
+      .read as { loss_streak: number; verdict: string; note?: string };
+    expect(tilted.loss_streak).toBe(3);
+    expect(tilted.verdict).toBe("break");
+  });
+
+  it("weekly summary aggregates last-7-day goals and matches (F3)", () => {
+    const db = seededDb();
+    generateGameReviews(engine, db, PUUID); // hedef döngüsü kapanmış hedef üretir
+    const now = Math.floor(Date.now() / 1000);
+    // seededDb maçları played_at 1000..7000 (epoch başı) → haftalık pencere DIŞI.
+    const old = getWeeklySummary(db, PUUID, now);
+    expect(old.games).toBe(0);
+    // Pencere "şimdi"yse (epoch 8000) hepsi içeride + kapanmış hedef sayılır.
+    const inWindow = getWeeklySummary(db, PUUID, 8000);
+    expect(inWindow.games).toBe(7);
+    expect(inWindow.reviews).toBe(7);
+    expect(inWindow.goals_met + inWindow.goals_missed).toBeGreaterThan(0);
+    expect(inWindow.hit_rate).not.toBeNull();
   });
 
   it("champion preferences roundtrip (D3)", () => {

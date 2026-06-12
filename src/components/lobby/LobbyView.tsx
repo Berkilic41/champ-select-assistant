@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { useSummonerData } from '../../hooks/useSummonerData';
 import { ChampionGrid } from '../ChampionGrid';
+import { SessionCoachCard } from './SessionCoachCard';
 import { StatsView } from './StatsView';
 import { PoolBuilder } from './PoolBuilder';
 import './LobbyView.css';
@@ -101,6 +102,9 @@ export const LobbyView: React.FC<Props> = ({ summonerName, platformRegion }) => 
           )}
         </div>
       )}
+
+      {/* Faz F: seans koçu — ısınma checklist'i / tilt koruması. */}
+      <SessionCoachCard />
 
       <div className="lobby-tabs" role="tablist">
         <button

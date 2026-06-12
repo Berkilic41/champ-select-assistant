@@ -417,6 +417,23 @@
     "noteSave": "Kaydet",
     "noteSaved": "Kaydedildi ✓"
   },
+  "session": {
+    "title": "Seans Koçu",
+    "record": "Bu oturum: {{w}}G {{l}}M",
+    "warmupTitle": "Isınma Kontrol Listesi",
+    "warmupFocus": "Bugünkü odak: {{label}}",
+    "warmupPlan": "Bugün TEK ölçülebilir hedef belirle (CS/dk, vizyon…)",
+    "warmupRole": "Rol + 3 şampiyonluk plan hazır mı?",
+    "warmupFirstGame": "İlk maç ısınmadır — mekanik beklentini düşük tut"
+  },
+  "weekly": {
+    "title": "Haftalık Özet",
+    "record": "{{w}}G {{l}}M",
+    "goals": "Hedef isabeti",
+    "hitRate": "{{met}}/{{total}} (%{{pct}})",
+    "noGoals": "Bu hafta kapanan hedef yok",
+    "reviews": "Karne sayısı"
+  },
   "prefs": {
     "never": "Asla önerme",
     "learning": "Öğreniyorum"
