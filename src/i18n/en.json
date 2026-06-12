@@ -377,6 +377,35 @@
     "strongPhase": "strong: {{phase}}",
     "phase": { "early": "early", "mid": "mid", "late": "late" }
   },
+  "review": {
+    "title": "Post-Game Report Card",
+    "win": "Victory",
+    "loss": "Defeat",
+    "queue": {
+      "soloq": "SoloQ",
+      "flex": "Flex",
+      "aram": "ARAM",
+      "normal": "Normal"
+    },
+    "focusChecked": {
+      "met": "Goal: {{label}} → {{achieved}} ✓",
+      "missed": "Goal: {{label}} → {{achieved}} ✗",
+      "no_data": "Goal: {{label}} — not measurable this game"
+    },
+    "streak": "Streak: {{n}}",
+    "nextFocus": "Next game focus: {{label}}",
+    "baselineShort": "(avg {{v}})",
+    "locked": "Unlocks with a Riot key",
+    "partial": "History is still thin for comparison — it sharpens after a few games.",
+    "metric": {
+      "cs_per_min": "CS/min",
+      "deaths_per_10": "Deaths per 10 min",
+      "kda": "KDA",
+      "vision_score": "Vision score",
+      "cs_at_10": "CS@10",
+      "deaths_pre_14": "Deaths before 14 min"
+    }
+  },
   "teamComp": {
     "title": "Team Composition",
     "ally": "Your Team",

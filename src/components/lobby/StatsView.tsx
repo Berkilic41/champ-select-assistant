@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { ChampionStats, MasteryEntry } from '../../types/riot';
+import { GameReviewCard } from './GameReviewCard';
 import './StatsView.css';
 
 interface Props {
@@ -54,6 +55,8 @@ export const StatsView: React.FC<Props> = ({ stats, masteries, champMap }) => {
 
   return (
     <div className="stats-view">
+      {/* Koç döngüsü (C1+C2): en son maçın karnesi + sonraki maç hedefi. */}
+      <GameReviewCard />
       {totalGames > 0 && (
         <p className="stats-summary">
           {t('stats.summary', { games: totalGames, wr: overallWinRate })}

@@ -36,6 +36,7 @@ pub mod match_discovery_planner;
 pub mod match_fetch_planner;
 pub mod match_v5_aggregator;
 pub mod pipeline_scheduler_policy;
+pub mod game_review;
 pub mod coverage_ramp;
 pub mod draft_brain;
 pub mod draft_brain_data;

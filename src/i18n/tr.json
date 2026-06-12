@@ -377,6 +377,35 @@
     "strongPhase": "güçlü: {{phase}}",
     "phase": { "early": "erken", "mid": "orta", "late": "geç" }
   },
+  "review": {
+    "title": "Maç Sonu Karnesi",
+    "win": "Galibiyet",
+    "loss": "Mağlubiyet",
+    "queue": {
+      "soloq": "SoloQ",
+      "flex": "Flex",
+      "aram": "ARAM",
+      "normal": "Normal"
+    },
+    "focusChecked": {
+      "met": "Hedef: {{label}} → {{achieved}} ✓",
+      "missed": "Hedef: {{label}} → {{achieved}} ✗",
+      "no_data": "Hedef: {{label}} — bu maçta ölçülemedi"
+    },
+    "streak": "Seri: {{n}}",
+    "nextFocus": "Sonraki maç hedefi: {{label}}",
+    "baselineShort": "(ort. {{v}})",
+    "locked": "Riot anahtarıyla açılır",
+    "partial": "Karşılaştırma için geçmiş henüz ince — birkaç maç sonra netleşir.",
+    "metric": {
+      "cs_per_min": "CS/dk",
+      "deaths_per_10": "10 dk başına ölüm",
+      "kda": "KDA",
+      "vision_score": "Vizyon skoru",
+      "cs_at_10": "CS@10",
+      "deaths_pre_14": "14 dk öncesi ölüm"
+    }
+  },
   "teamComp": {
     "title": "Takım Kompozisyonu",
     "ally": "Bizim Takım",

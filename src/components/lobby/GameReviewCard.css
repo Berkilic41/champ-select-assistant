@@ -1,0 +1,73 @@
+/* Maç sonu karnesi (Faz C1+C2) */
+.grc-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--surface-1, var(--color-bg-panel));
+  border: 1px solid var(--border-subtle, var(--color-border));
+  border-left: 3px solid var(--gold, var(--color-gold));
+  border-radius: var(--radius-md, 8px);
+  margin-bottom: var(--space-3);
+}
+
+.grc-head { display: flex; align-items: center; gap: var(--space-2); }
+.grc-title {
+  font-family: var(--font-display);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  font-weight: var(--weight-semibold);
+  flex: 1;
+}
+.grc-result { font-size: var(--font-size-xs); font-weight: var(--weight-bold); }
+.grc-result--win { color: var(--success, #4caf50); }
+.grc-result--loss { color: var(--danger, #f44336); }
+.grc-chip {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill, 999px);
+  padding: 1px 8px;
+}
+
+.grc-focus-check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+.grc-focus-check--met { color: var(--success, #4caf50); }
+.grc-focus-check--missed { color: var(--warning, #ffb74d); }
+.grc-focus-check--no_data { color: var(--text-muted); }
+.grc-streak { margin-left: auto; font-weight: var(--weight-semibold); }
+
+.grc-lines { display: flex; flex-direction: column; gap: 3px; list-style: none; margin: 0; padding: 0; }
+.grc-line { display: flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-xs); }
+.grc-metric { color: var(--text-secondary); flex: 1; }
+.grc-value { color: var(--text-primary); font-variant-numeric: tabular-nums; font-weight: var(--weight-semibold); }
+.grc-baseline { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.grc-up { color: var(--success, #4caf50); }
+.grc-down { color: var(--danger, #f44336); }
+.grc-even, .grc-muted { color: var(--text-muted); }
+.grc-line--locked .grc-metric { color: var(--text-muted); }
+.grc-locked-note { color: var(--text-muted); font-style: italic; }
+
+.grc-note { font-size: var(--font-size-xs); margin: 0; line-height: var(--line-height-normal); }
+.grc-note--good { color: var(--text-secondary); }
+.grc-note--fix { color: var(--warning, #ffb74d); }
+
+.grc-next-focus {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--gold, var(--color-gold));
+  font-weight: var(--weight-semibold);
+  padding-top: var(--space-1);
+}
+.grc-partial { font-size: var(--font-size-xs); color: var(--text-muted); font-style: italic; margin: 0; }

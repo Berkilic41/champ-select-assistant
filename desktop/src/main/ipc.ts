@@ -37,6 +37,7 @@ import {
   getPipelineQualityReport,
 } from "./commands/data-quality";
 import { syncRecommendationFeedback } from "./commands/feedback-flush";
+import { generateGameReviews, getGameReviews } from "./commands/game-review";
 import { syncLcuPlayerData } from "./commands/player-data";
 import { getDraftBrainQualityReport } from "./commands/quality";
 import {
@@ -392,6 +393,17 @@ export function buildCommandRegistry(
       requireDb(ctx),
       String(args?.role ?? ""),
       String(args?.puuid ?? ""),
+    ),
+  );
+  // Koç döngüsü (C1+C2): karne üretimi + okuma.
+  commands.set("generate_game_reviews", (args) =>
+    generateGameReviews(requireEngine(ctx), requireDb(ctx), String(args?.puuid ?? "")),
+  );
+  commands.set("get_game_reviews", (args) =>
+    getGameReviews(
+      requireDb(ctx),
+      String(args?.puuid ?? ""),
+      typeof args?.limit === "number" ? args.limit : 3,
     ),
   );
   commands.set("get_feedback_observability", () =>

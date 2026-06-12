@@ -1,0 +1,391 @@
+//! Maç sonu karnesi + odak döngüsü (Faz C1+C2) — "koç döngüsünün" çekirdeği.
+//!
+//! Saf (I/O yok): incelenen maç + AYNI rol & queue-grubundaki geçmiş maçlar
+//! (host filtreler) + önceki açık hedef → notlu karne satırları, "iyi giden /
+//! düzeltilecek" okuması, önceki hedefin kontrolü ve SONRAKİ maç için TEK
+//! ölçülebilir hedef.
+//!
+//! Dürüstlük kuralları:
+//! - Baseline = oyuncunun KENDİ geçmişinin medyanı (rol+queue içi) — mutlak
+//!   eşik yok, rol önyargısı yok (jungle CS'i jungle medyanına kıyaslanır).
+//! - Geçmiş < `MIN_BASELINE_GAMES` → baseline yok, hedef yok, `partial: true`.
+//! - Timeline metrikleri (`cs_at_10`, `deaths_pre_14`) veri yoksa `locked`
+//!   işaretlenir — UI "Riot anahtarıyla açılır" der, sahte 0 üretilmez.
+//! - Hedef seçimi = baseline'a göre EN KÖTÜ sapan metrik; hedef değeri
+//!   medyanın kendisi (ulaşılabilir, abartısız).
+
+use serde::{Deserialize, Serialize};
+use ts_rs::TS;
+
+use crate::postgame::MatchRow;
+
+/// Baseline ve hedef üretimi için gereken en az geçmiş maç sayısı.
+pub const MIN_BASELINE_GAMES: usize = 5;
+/// "even" bandı: baseline'dan ±%8 sapma berabere sayılır.
+const EVEN_BAND: f32 = 0.08;
+
+/// Ölçülebilir tek maç hedefi ("sonraki maç odağı").
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, TS)]
+#[ts(export, export_to = "../../src/types/generated/")]
+#[serde(rename_all = "snake_case")]
+pub struct FocusGoal {
+    /// Makine anahtarı: "cs_per_min" | "deaths_per_10" | "kda" | "vision_score"
+    /// | "cs_at_10" | "deaths_pre_14".
+    pub metric: String,
+    pub target: f32,
+    /// "at_least" | "at_most".
+    pub direction: String,
+    /// Türkçe görünür etiket, örn. "CS/dk ≥ 6.1".
+    pub label: String,
+}
+
+/// Karnenin tek satırı: metrik değeri vs kişisel baseline.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/generated/")]
+#[serde(rename_all = "snake_case")]
+pub struct ReviewLine {
+    pub metric: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub value: Option<f32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub baseline: Option<f32>,
+    /// "better" | "even" | "worse" | "no_baseline" | "locked".
+    pub verdict: String,
+}
+
+/// Önceki açık hedefin bu maçtaki sonucu.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/generated/")]
+#[serde(rename_all = "snake_case")]
+pub struct FocusCheck {
+    pub metric: String,
+    pub target: f32,
+    pub direction: String,
+    pub label: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub achieved: Option<f32>,
+    /// "met" | "missed" | "no_data".
+    pub result: String,
+}
+
+/// Maç sonu karnesi.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/generated/")]
+#[serde(rename_all = "snake_case")]
+pub struct GameReview {
+    pub champion_id: u32,
+    pub champion_key: String,
+    pub position: String,
+    pub win: bool,
+    pub lines: Vec<ReviewLine>,
+    /// "İyi giden 1 şey" — Türkçe, ölçülü dil.
+    pub went_right: String,
+    /// "Düzeltilecek 1 şey" — Türkçe, ölçülü dil.
+    pub to_fix: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub focus_check: Option<FocusCheck>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub next_focus: Option<FocusGoal>,
+    /// Geçmiş < MIN_BASELINE_GAMES → baseline'sız, hedefsiz okuma.
+    pub partial: bool,
+}
+
+/// (anahtar, yön, Türkçe kısa ad) — karne satır sırası da bu.
+const METRICS: &[(&str, &str, &str)] = &[
+    ("cs_per_min", "at_least", "CS/dk"),
+    ("deaths_per_10", "at_most", "10 dk başına ölüm"),
+    ("kda", "at_least", "KDA"),
+    ("vision_score", "at_least", "Vizyon skoru"),
+    ("cs_at_10", "at_least", "CS@10"),
+    ("deaths_pre_14", "at_most", "14 dk öncesi ölüm"),
+];
+
+fn metric_value(m: &MatchRow, key: &str) -> Option<f32> {
+    let mins = m.duration_secs as f32 / 60.0;
+    match key {
+        "cs_per_min" => m.cs.filter(|_| m.duration_secs > 0).map(|c| c as f32 / mins),
+        "deaths_per_10" => (m.duration_secs > 0).then(|| m.deaths as f32 / mins * 10.0),
+        "kda" => Some((m.kills + m.assists) as f32 / m.deaths.max(1) as f32),
+        "vision_score" => m.vision_score.map(|v| v as f32),
+        "cs_at_10" => m.cs_at_10.map(|v| v as f32),
+        "deaths_pre_14" => m.deaths_pre_14.map(|v| v as f32),
+        _ => None,
+    }
+}
+
+/// Timeline metriği mi (key'siz kurulumlarda kilitli)?
+fn is_timeline_metric(key: &str) -> bool {
+    matches!(key, "cs_at_10" | "deaths_pre_14")
+}
+
+fn median(values: &mut Vec<f32>) -> Option<f32> {
+    if values.is_empty() {
+        return None;
+    }
+    values.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+    let mid = values.len() / 2;
+    Some(if values.len() % 2 == 0 {
+        (values[mid - 1] + values[mid]) / 2.0
+    } else {
+        values[mid]
+    })
+}
+
+/// `direction` yönünde değerin baseline'a göre işaretli iyilik payı.
+/// Pozitif = baseline'dan iyi. `at_most` metriklerinde eksen çevrilir.
+fn signed_margin(value: f32, baseline: f32, direction: &str) -> f32 {
+    let denom = baseline.abs().max(0.5); // sıfır baseline'da bölme patlamasın
+    let raw = (value - baseline) / denom;
+    if direction == "at_most" {
+        -raw
+    } else {
+        raw
+    }
+}
+
+fn verdict_for(margin: f32) -> &'static str {
+    if margin > EVEN_BAND {
+        "better"
+    } else if margin < -EVEN_BAND {
+        "worse"
+    } else {
+        "even"
+    }
+}
+
+fn round1(v: f32) -> f32 {
+    (v * 10.0).round() / 10.0
+}
+
+fn goal_label(short: &str, direction: &str, target: f32) -> String {
+    let sym = if direction == "at_most" { "≤" } else { "≥" };
+    format!("{short} {sym} {}", round1(target))
+}
+
+/// Karneyi üret. `history` = incelenen maçtan ÖNCEKİ, aynı rol + queue-grubu
+/// maçları (host filtreler; sıra önemsiz). `prev_goal` = bu queue-grubundaki
+/// açık hedef (varsa) — bu maçta kontrol edilir.
+pub fn build_game_review(
+    reviewed: &MatchRow,
+    history: &[MatchRow],
+    prev_goal: Option<&FocusGoal>,
+) -> GameReview {
+    let partial = history.len() < MIN_BASELINE_GAMES;
+
+    // Satırlar: değer + (yeterli geçmişte) medyan baseline + hüküm.
+    let mut lines = Vec::new();
+    let mut margins: Vec<(usize, f32)> = Vec::new(); // (METRICS idx, signed margin)
+    for (idx, (key, direction, _short)) in METRICS.iter().enumerate() {
+        let value = metric_value(reviewed, key);
+        let baseline = if partial {
+            None
+        } else {
+            let mut vals: Vec<f32> =
+                history.iter().filter_map(|m| metric_value(m, key)).collect();
+            // Baseline da en az MIN sayıda gerçek değer ister (örn. vision'sız
+            // eski satırlar medyanı çarpıtmasın).
+            if vals.len() >= MIN_BASELINE_GAMES {
+                median(&mut vals)
+            } else {
+                None
+            }
+        };
+        let verdict = match (value, baseline) {
+            (None, _) if is_timeline_metric(key) => "locked",
+            (None, _) => "no_baseline",
+            (Some(_), None) => "no_baseline",
+            (Some(v), Some(b)) => {
+                let m = signed_margin(v, b, direction);
+                margins.push((idx, m));
+                verdict_for(m)
+            }
+        };
+        lines.push(ReviewLine {
+            metric: key.to_string(),
+            value: value.map(round1),
+            baseline: baseline.map(round1),
+            verdict: verdict.to_string(),
+        });
+    }
+
+    // İyi giden / düzeltilecek: en iyi ve en kötü işaretli pay. Ölçülü dil,
+    // garanti dili yok (coach_quality kuralları).
+    let best = margins
+        .iter()
+        .max_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
+    let worst = margins
+        .iter()
+        .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
+
+    let went_right = match best {
+        Some(&(idx, m)) if m > EVEN_BAND => {
+            let (_, _, short) = METRICS[idx];
+            format!("{short} kendi ortalamanın üzerindeydi — bunu korumaya çalış.")
+        }
+        _ if reviewed.win => "Maç kazanıldı — net bir metrik sıçraması olmasa da sonuç lehine.".to_string(),
+        _ => "Bu maçta öne çıkan bir metrik yok; bir sonrakine temiz başla.".to_string(),
+    };
+    let to_fix = match worst {
+        Some(&(idx, m)) if m < -EVEN_BAND => {
+            let (_, _, short) = METRICS[idx];
+            format!("{short} kendi ortalamanın altında kaldı — bir sonraki maçın odağı bu olabilir.")
+        }
+        _ if partial => "Karşılaştırma için henüz yeterli geçmiş yok — birkaç maç sonra netleşir.".to_string(),
+        _ => "Belirgin bir zayıf metrik yok — istikrarı sürdür.".to_string(),
+    };
+
+    // Önceki hedef kontrolü.
+    let focus_check = prev_goal.map(|g| {
+        let achieved = metric_value(reviewed, &g.metric);
+        let result = match achieved {
+            None => "no_data",
+            Some(v) => {
+                let met = if g.direction == "at_most" { v <= g.target } else { v >= g.target };
+                if met {
+                    "met"
+                } else {
+                    "missed"
+                }
+            }
+        };
+        FocusCheck {
+            metric: g.metric.clone(),
+            target: g.target,
+            direction: g.direction.clone(),
+            label: g.label.clone(),
+            achieved: achieved.map(round1),
+            result: result.to_string(),
+        }
+    });
+
+    // Sonraki hedef: baseline'a göre en kötü sapan metrik; hedef = medyan.
+    let next_focus = if partial {
+        None
+    } else {
+        worst.map(|&(idx, _)| {
+            let (key, direction, short) = METRICS[idx];
+            let target = lines[idx].baseline.unwrap_or(0.0);
+            FocusGoal {
+                metric: key.to_string(),
+                target,
+                direction: direction.to_string(),
+                label: goal_label(short, direction, target),
+            }
+        })
+    };
+
+    GameReview {
+        champion_id: reviewed.champion_id,
+        champion_key: reviewed.champion_key.clone(),
+        position: reviewed.position.clone(),
+        win: reviewed.win,
+        lines,
+        went_right,
+        to_fix,
+        focus_check,
+        next_focus,
+        partial,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn row(cs: u32, deaths: u32, vision: u32, win: bool) -> MatchRow {
+        MatchRow {
+            champion_id: 86,
+            champion_key: "Garen".into(),
+            position: "top".into(),
+            win,
+            kills: 5,
+            deaths,
+            assists: 5,
+            played_at: 0,
+            duration_secs: 1800, // 30 dk
+            cs: Some(cs),
+            cs_at_10: None,
+            deaths_pre_14: None,
+            vision_score: Some(vision),
+        }
+    }
+
+    fn history() -> Vec<MatchRow> {
+        // CS/dk medyanı: [150,165,180,195,210]/30dk → 6.0; vision medyanı 18.
+        vec![
+            row(150, 4, 14, true),
+            row(165, 5, 16, false),
+            row(180, 4, 18, true),
+            row(195, 6, 20, false),
+            row(210, 5, 22, true),
+        ]
+    }
+
+    #[test]
+    fn baselines_are_personal_medians_and_verdicts_compare_against_them() {
+        let reviewed = row(240, 2, 25, true); // 8.0 CS/dk, az ölüm, yüksek vizyon
+        let review = build_game_review(&reviewed, &history(), None);
+        assert!(!review.partial);
+
+        let cs = review.lines.iter().find(|l| l.metric == "cs_per_min").unwrap();
+        assert_eq!(cs.baseline, Some(6.0));
+        assert_eq!(cs.value, Some(8.0));
+        assert_eq!(cs.verdict, "better");
+
+        let deaths = review.lines.iter().find(|l| l.metric == "deaths_per_10").unwrap();
+        assert_eq!(deaths.verdict, "better"); // at_most ekseni çevrilir
+
+        // Timeline metrikleri key'siz kurulumda dürüstçe kilitli.
+        let locked = review.lines.iter().find(|l| l.metric == "cs_at_10").unwrap();
+        assert_eq!(locked.verdict, "locked");
+        assert!(review.went_right.contains("ortalamanın üzerinde"));
+    }
+
+    #[test]
+    fn worst_metric_becomes_the_next_focus_with_median_target() {
+        let reviewed = row(120, 9, 19, false); // CS/dk 4.0 → en kötü sapma
+        let review = build_game_review(&reviewed, &history(), None);
+        let goal = review.next_focus.expect("yeterli geçmişte hedef üretilir");
+        // 4.0/6.0 CS sapması, 3.0/1.67 ölüm sapmasından daha mı kötü? Ölüm:
+        // (3.0-1.67)/1.67 ≈ -0.80; CS: (4.0-6.0)/6.0 ≈ -0.33 → ölüm daha kötü.
+        assert_eq!(goal.metric, "deaths_per_10");
+        assert_eq!(goal.direction, "at_most");
+        assert!(goal.label.contains("≤"));
+        assert!(review.to_fix.contains("ölüm"));
+    }
+
+    #[test]
+    fn focus_check_met_and_missed() {
+        let goal = FocusGoal {
+            metric: "vision_score".into(),
+            target: 18.0,
+            direction: "at_least".into(),
+            label: "Vizyon skoru ≥ 18".into(),
+        };
+        let good = build_game_review(&row(180, 5, 21, true), &history(), Some(&goal));
+        assert_eq!(good.focus_check.as_ref().unwrap().result, "met");
+        assert_eq!(good.focus_check.as_ref().unwrap().achieved, Some(21.0));
+
+        let bad = build_game_review(&row(180, 5, 12, false), &history(), Some(&goal));
+        assert_eq!(bad.focus_check.as_ref().unwrap().result, "missed");
+
+        // Hedef metriği bu maçta ölçülemiyorsa dürüst no_data.
+        let tl_goal = FocusGoal {
+            metric: "cs_at_10".into(),
+            target: 70.0,
+            direction: "at_least".into(),
+            label: "CS@10 ≥ 70".into(),
+        };
+        let nd = build_game_review(&row(180, 5, 21, true), &history(), Some(&tl_goal));
+        assert_eq!(nd.focus_check.as_ref().unwrap().result, "no_data");
+    }
+
+    #[test]
+    fn thin_history_is_partial_with_no_goal_and_no_baselines() {
+        let review = build_game_review(&row(200, 3, 20, true), &history()[..3].to_vec(), None);
+        assert!(review.partial);
+        assert!(review.next_focus.is_none());
+        assert!(review.lines.iter().all(|l| l.baseline.is_none()));
+        assert!(review.to_fix.contains("yeterli geçmiş yok"));
+    }
+}

@@ -7,6 +7,11 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Koç Döngüsü: Maç Sonu Karnesi + Sonraki Maç Hedefi** — her senkronlanan maç,
+  SENİN aynı rol+kuyruk geçmişinin medyanına karşı notlanır (CS/dk, 10 dk başına
+  ölüm, KDA, vizyon; timeline metrikleri key'siz dürüstçe "kilitli"); karne "iyi
+  giden 1 şey + düzeltilecek 1 şey" der, TEK ölçülebilir hedef bırakır ve SONRAKİ
+  maçta hedefi kontrol eder (✓/✗ + ardışık tutturma serisi). İstatistik sekmesinde.
 - **Rakip hover uyarısı pick fazında** — rakibin hover'ladığı şampiyonlar artık
   ban fazına ek olarak pick ekranında da görünür (client'ta zaten görünen bilgi).
 - **Takım sohbeti yardımcısı** — takım kompozisyonu eksiklerinden (engage/ön saf/

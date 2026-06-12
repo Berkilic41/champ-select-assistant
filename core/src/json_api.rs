@@ -1405,6 +1405,30 @@ pub fn champion_pool_plan_from_json(input_json: &str) -> Result<String, String> 
     serde_json::to_string(&plan).map_err(|e| format!("pool plan serialize failed: {e}"))
 }
 
+/// Input for `game_review_json` (C1+C2 koç döngüsü): incelenen maç + host'un
+/// AYNI rol & queue-grubuyla filtrelediği geçmiş + (varsa) açık hedef.
+#[derive(Debug, Deserialize)]
+pub struct GameReviewInput {
+    #[serde(rename = "match")]
+    pub reviewed: crate::postgame::MatchRow,
+    #[serde(default)]
+    pub history: Vec<crate::postgame::MatchRow>,
+    #[serde(default)]
+    pub prev_goal: Option<crate::game_review::FocusGoal>,
+}
+
+/// Maç sonu karnesi (`build_game_review` sarmalayıcısı). Çıktı: `GameReview`.
+pub fn game_review_from_json(input_json: &str) -> Result<String, String> {
+    let input: GameReviewInput = serde_json::from_str(input_json)
+        .map_err(|e| format!("invalid game review input: {e}"))?;
+    let review = crate::game_review::build_game_review(
+        &input.reviewed,
+        &input.history,
+        input.prev_goal.as_ref(),
+    );
+    serde_json::to_string(&review).map_err(|e| format!("game review serialize failed: {e}"))
+}
+
 /// One raw feedback row with its sync flag (observability input).
 #[derive(Debug, Deserialize)]
 pub struct FeedbackObservabilityRow {
@@ -3085,6 +3109,11 @@ mod wasm {
     #[wasm_bindgen]
     pub fn coverage_ramp_json(input: &str) -> Result<String, JsValue> {
         super::coverage_ramp_from_json(input).map_err(|e| JsValue::from_str(&e))
+    }
+
+    #[wasm_bindgen]
+    pub fn game_review_json(input: &str) -> Result<String, JsValue> {
+        super::game_review_from_json(input).map_err(|e| JsValue::from_str(&e))
     }
 }
 
