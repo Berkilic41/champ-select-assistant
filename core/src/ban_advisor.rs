@@ -39,7 +39,7 @@ use crate::types::MasteryRow;
 use crate::types::ChampSelectState;
 use crate::champion_types::{type_counter_score, ChampionType};
 use crate::draft_iq::DraftKnowledgeBase;
-use crate::scoring::MetaRate;
+use crate::scoring::{shrunk_meta_wr, MetaRate};
 
 /// A single ban recommendation surfaced to the UI during the ban phase.
 ///
@@ -193,13 +193,12 @@ pub fn compute_ban_suggestions(
             // ── Components ────────────────────────────────────────────────────
             // Meta (win_rate 0.48→0.55, weight 0.40) + ban_rate (30% → max, 0.30)
             // + an early-phase nudge toward meta tyrants. All zero without meta.
+            // Win-rate is Bayesian-shrunk so a low-sample spike can't claim a
+            // ban slot from a genuinely oppressive high-sample pick.
             let (meta_norm, win_rate, ban_rate) = rate
                 .map(|r| {
-                    (
-                        ((r.win_rate - 0.48) / 0.07).clamp(0.0, 1.0),
-                        r.win_rate,
-                        r.ban_rate,
-                    )
+                    let wr = shrunk_meta_wr(r.win_rate, r.sample_size);
+                    (((wr - 0.48) / 0.07).clamp(0.0, 1.0), wr, r.ban_rate)
                 })
                 .unwrap_or((0.0, 0.0, 0.0));
             let meta_component = meta_norm * 0.40;

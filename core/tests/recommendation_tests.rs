@@ -61,15 +61,15 @@ mod scoring_tests {
 
     #[test]
     fn test_meta_score_high_win_rate() {
-        // win_rate 0.55, large sample → maps to 1.0 (clamped)
-        // Formula: (0.55 - 0.48) / 0.07 = 1.0
+        // win_rate 0.56 @ 5000 games: Bayesian-shrunk wr ≈ 0.5577 still clears
+        // the 0.55 anchor → maps to 1.0 (clamped).
         let session = empty_session("top");
         let role_map = HashMap::new();
         let mut meta_rates = HashMap::new();
         meta_rates.insert(
             (157, "top".into()),
             MetaRate {
-                win_rate: 0.55,
+                win_rate: 0.56,
                 ban_rate: 0.05,
                 sample_size: 5000,
             },
@@ -78,7 +78,7 @@ mod scoring_tests {
         let score = meta_score(157, &ctx);
         assert!(
             (score - 1.0).abs() < 1e-5,
-            "win_rate=0.55 should map to 1.0, got {score}"
+            "shrunk win_rate 0.5577 should map to 1.0, got {score}"
         );
     }
 

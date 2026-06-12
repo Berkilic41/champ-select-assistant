@@ -59,7 +59,7 @@ impl ScoringWeights {
 }
 
 /// ARAM/Arena utility bonus from KB `utility_tags` + `archetype`.
-/// Returns a `Â±0.20` adjustment applied to the candidate's total score in brawl
+/// Returns a `±0.20` adjustment applied to the candidate's total score in brawl
 /// modes. Poke / waveclear / disengage / sustain are uplifted (no recall, single
 /// lane, constant trading); melee assassins and short-range divers are penalised.
 pub fn aram_utility_bonus(
@@ -113,6 +113,20 @@ pub struct MetaRate {
     pub win_rate: f32,
     pub ban_rate: f32,
     pub sample_size: u32,
+}
+
+/// Bayesian-shrunk meta win-rate: pulls low-sample rates toward the 0.50 prior.
+///
+/// `prior_n = 200` is aligned with the `risk_score` small-sample threshold:
+/// a 5000-game sample keeps ~96% of its distance from 0.50, a 200-game sample
+/// keeps half, and a 50-game 55% outlier lands near neutral (~0.51). Display
+/// values stay raw — only scoring decisions consume the shrunk rate, so the UI
+/// never shows a win-rate the data doesn't actually contain.
+pub fn shrunk_meta_wr(win_rate: f32, sample_size: u32) -> f32 {
+    const PRIOR_WR: f32 = 0.50;
+    const PRIOR_N: f32 = 200.0;
+    let n = sample_size as f32;
+    (win_rate * n + PRIOR_WR * PRIOR_N) / (n + PRIOR_N)
 }
 
 /// All inputs needed to score a champion candidate.
@@ -394,12 +408,14 @@ pub fn synergy_score(champion_id: u32, ctx: &ScoringContext) -> f32 {
 /// Patch-level meta strength based on aggregated win-rate from `champion_rates`.
 /// Returns 0.3 (neutral) when no data is present for (champion, position).
 ///
-/// Linear mapping: win_rate 0.48 → 0.0, 0.55 → 1.0 (clamped).
+/// Linear mapping: win_rate 0.48 → 0.0, 0.55 → 1.0 (clamped), applied to the
+/// Bayesian-shrunk rate (`shrunk_meta_wr`) so a hot streak on a 60-game sample
+/// can't outrank a consistently strong 10k-game pick.
 pub fn meta_score(champion_id: u32, ctx: &ScoringContext) -> f32 {
     let pos = ctx.session.local_player.assigned_position.to_lowercase();
     ctx.meta_rates
         .get(&(champion_id, pos))
-        .map(|r| ((r.win_rate - 0.48) / 0.07).clamp(0.0, 1.0))
+        .map(|r| ((shrunk_meta_wr(r.win_rate, r.sample_size) - 0.48) / 0.07).clamp(0.0, 1.0))
         .unwrap_or(0.3)
 }
 
@@ -693,6 +709,45 @@ mod tests {
     }
 
     #[test]
+    fn shrunk_meta_wr_pulls_small_samples_toward_neutral() {
+        // 50-game 55% spike → near neutral (~0.51).
+        let small = shrunk_meta_wr(0.55, 50);
+        assert!((small - 0.51).abs() < 0.001, "got {small}");
+        // 200 games (prior_n) → exactly halfway between 0.55 and 0.50.
+        let half = shrunk_meta_wr(0.55, 200);
+        assert!((half - 0.525).abs() < 0.001, "got {half}");
+        // 10k games → essentially unmoved.
+        let big = shrunk_meta_wr(0.55, 10_000);
+        assert!(big > 0.549, "got {big}");
+        // Symmetric: low win-rates are pulled UP toward 0.50.
+        let low = shrunk_meta_wr(0.45, 50);
+        assert!((low - 0.49).abs() < 0.001, "got {low}");
+    }
+
+    #[test]
+    fn meta_score_small_sample_cannot_outrank_large_sample() {
+        // Same raw 55% win-rate; only the sample differs.
+        let session = empty_session("top");
+        let role_map = HashMap::new();
+        let mut meta = HashMap::new();
+        meta.insert(
+            (1_u32, "top".to_string()),
+            MetaRate { win_rate: 0.55, ban_rate: 0.0, sample_size: 60 },
+        );
+        meta.insert(
+            (2_u32, "top".to_string()),
+            MetaRate { win_rate: 0.53, ban_rate: 0.0, sample_size: 20_000 },
+        );
+        let ctx = make_ctx(&session, &role_map, &meta);
+        let spike = meta_score(1, &ctx);
+        let proven = meta_score(2, &ctx);
+        assert!(
+            proven > spike,
+            "20k-game 53% ({proven}) must beat 60-game 55% ({spike})"
+        );
+    }
+
+    #[test]
     fn comfort_bayesian_wr_1_game_contributes() {
         use crate::types::ChampionStats;
         let session = empty_session("top");
@@ -752,10 +807,11 @@ mod tests {
         let session = empty_session("top");
         let role_map = HashMap::new();
         let mut meta = HashMap::new();
+        // 0.56 @ 5000 games: shrunk wr ≈ 0.5577 — still clears the 0.55 anchor.
         meta.insert(
             (157, "top".into()),
             MetaRate {
-                win_rate: 0.55,
+                win_rate: 0.56,
                 ban_rate: 0.05,
                 sample_size: 5000,
             },
@@ -765,14 +821,35 @@ mod tests {
     }
 
     #[test]
-    fn meta_score_low_winrate_maps_to_zero() {
+    fn meta_score_high_winrate_small_sample_stays_below_one() {
+        // The pre-shrinkage anchor case: 0.55 raw no longer saturates the score
+        // because the Bayesian prior pulls it toward 0.50 (0.55 @ 5000 ≈ 0.548).
         let session = empty_session("top");
         let role_map = HashMap::new();
         let mut meta = HashMap::new();
         meta.insert(
             (157, "top".into()),
             MetaRate {
-                win_rate: 0.48,
+                win_rate: 0.55,
+                ban_rate: 0.05,
+                sample_size: 5000,
+            },
+        );
+        let ctx = make_ctx(&session, &role_map, &meta);
+        let score = meta_score(157, &ctx);
+        assert!(score > 0.90 && score < 1.0, "got {score}");
+    }
+
+    #[test]
+    fn meta_score_low_winrate_maps_to_zero() {
+        let session = empty_session("top");
+        let role_map = HashMap::new();
+        let mut meta = HashMap::new();
+        // 0.47 @ 5000 games: shrunk wr ≈ 0.4712 — still below the 0.48 floor.
+        meta.insert(
+            (157, "top".into()),
+            MetaRate {
+                win_rate: 0.47,
                 ban_rate: 0.05,
                 sample_size: 5000,
             },

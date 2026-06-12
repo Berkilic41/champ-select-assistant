@@ -12,7 +12,7 @@
 use super::champion_types::{archetype_position_fit, flex_positions};
 use super::draft_iq::archetype::ChampionArchetype;
 use super::draft_iq::combos::ComboDirectory;
-use super::scoring::MetaRate;
+use super::scoring::{shrunk_meta_wr, MetaRate};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
@@ -33,27 +33,31 @@ pub struct PoolSuggestion {
     pub meta_tier: Option<String>,
 }
 
-/// Normalized meta fit in [0, 1] from win-rate (same shape as `scoring::meta_score`):
-/// 0.48 win-rate → 0.0, 0.55 → 1.0. `None` when missing or under-sampled.
+/// Normalized meta fit in [0, 1] from the Bayesian-shrunk win-rate (same shape
+/// as `scoring::meta_score`): 0.48 → 0.0, 0.55 → 1.0. `None` when missing or
+/// under-sampled.
 fn meta_fit(meta: &HashMap<(u32, String), MetaRate>, id: u32, role: &str) -> Option<f32> {
     let r = meta.get(&(id, role.to_string()))?;
     if r.sample_size < MIN_META_SAMPLE {
         return None;
     }
-    Some(((r.win_rate - 0.48) / 0.07).clamp(0.0, 1.0))
+    let wr = shrunk_meta_wr(r.win_rate, r.sample_size);
+    Some(((wr - 0.48) / 0.07).clamp(0.0, 1.0))
 }
 
-/// Coarse S/A/B/C tier from win-rate, only when the sample clears the floor.
+/// Coarse S/A/B/C tier from the Bayesian-shrunk win-rate, only when the sample
+/// clears the floor — a 60-game 55% spike tiers as A, not S.
 fn meta_tier(meta: &HashMap<(u32, String), MetaRate>, id: u32, role: &str) -> Option<String> {
     let r = meta.get(&(id, role.to_string()))?;
     if r.sample_size < MIN_META_SAMPLE {
         return None;
     }
-    let tier = if r.win_rate >= 0.53 {
+    let wr = shrunk_meta_wr(r.win_rate, r.sample_size);
+    let tier = if wr >= 0.53 {
         "S"
-    } else if r.win_rate >= 0.51 {
+    } else if wr >= 0.51 {
         "A"
-    } else if r.win_rate >= 0.49 {
+    } else if wr >= 0.49 {
         "B"
     } else {
         "C"
