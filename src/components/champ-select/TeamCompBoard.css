@@ -45,6 +45,30 @@
 
 .team-comp__summary { font-size: var(--font-size-xs); color: var(--text-secondary); line-height: var(--line-height-normal); }
 
+/* Takım sohbeti yardımcısı (B4) — kopyalanabilir öneri satırları */
+.team-comp__chat { display: flex; flex-direction: column; gap: var(--space-1); margin-top: var(--space-2); }
+.team-comp__chat-row { display: flex; align-items: center; gap: var(--space-2); }
+.team-comp__chat-line {
+  flex: 1;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 2px var(--space-2);
+}
+.team-comp__chat-copy {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  padding: 2px 6px;
+  cursor: pointer;
+}
+.team-comp__chat-copy:hover { color: var(--text-primary); background: var(--surface-3); }
+
 .team-comp__gaps { display: flex; flex-wrap: wrap; gap: var(--space-1); }
 .team-comp__gap {
   font-size: var(--font-size-xs);

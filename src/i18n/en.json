@@ -114,6 +114,7 @@
     "hoverFailed": "Hover failed: {{err}}",
     "banComputing": "Calculating ban suggestions…",
     "banSuggestions": "Ban suggestions:",
+    "enemyHovering": "Enemy hovering",
     "dataNoMeta": "No live meta · general ranking",
     "dataNoMetaHint": "Champion win/pick/ban rates aren't connected yet — ranking uses comfort + matchup + synergy",
     "dataNoMastery": "Match history not loaded",
@@ -211,6 +212,12 @@
     "pillarWhy": "Why",
     "pillarLane": "Lane plan",
     "pillarMidGame": "Mid game",
+    "missingSignals": "Missing signals: {{signals}}",
+    "confidenceBasis": {
+      "sample_depth": "Confidence basis: enough games on this champion",
+      "signal_convergence": "Confidence basis: signals disagreed — confidence was deliberately lowered",
+      "games_only": "Confidence basis: game count only (other signals are thin)"
+    },
     "pillarTeamfight": "Teamfight job",
     "pillarFallback": "Fallback plan",
     "pillarRisk": "How you lose",
@@ -379,7 +386,16 @@
     "mage": "Mage",
     "marksman": "Marksman",
     "assassin": "Assassin",
-    "support": "Support"
+    "support": "Support",
+    "chat": {
+      "title": "Team chat suggestion",
+      "copy": "Copy",
+      "needEngage": "We're missing engage — can anyone pick an engage champ?",
+      "needFrontline": "We have no frontline — could someone go tank/bruiser?",
+      "fullAd": "Team is full AD — can anyone pick AP?",
+      "fullAp": "Team is full AP — can anyone pick AD?",
+      "needPeel": "We lack peel for our carry — could we get a peel support?"
+    }
   },
   "comboBoard": {
     "title": "Combos",
@@ -601,7 +617,7 @@
       "ru":    "RU (Russia)"
     },
     "soundSection": "Sound",
-    "soundsEnabled": "Sound effects (hover/recommendation)",
+    "soundsEnabled": "Macro sound alerts (objective timers)",
     "metaSection": "Meta Data",
     "syncMetaBtn": "Refresh data pipeline",
     "syncMetaDone": "Pipeline refreshed ✓",

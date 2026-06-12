@@ -189,6 +189,14 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
             />
             {t('settings.autoHideInGame')}
           </label>
+          <label className="sp-toggle">
+            <input
+              type="checkbox"
+              checked={draft.sounds_enabled}
+              onChange={e => update({ sounds_enabled: e.target.checked })}
+            />
+            {t('settings.soundsEnabled')}
+          </label>
           <div className="sp-row">
             <span>{t('settings.size')}</span>
             <select

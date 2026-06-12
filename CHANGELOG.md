@@ -6,6 +6,17 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 
 ## [Unreleased]
 
+### Eklendi
+- **Rakip hover uyarısı pick fazında** — rakibin hover'ladığı şampiyonlar artık
+  ban fazına ek olarak pick ekranında da görünür (client'ta zaten görünen bilgi).
+- **Takım sohbeti yardımcısı** — takım kompozisyonu eksiklerinden (engage/ön saf/
+  full AD-AP/peel) kopyalanabilir 1-2 sohbet önerisi; yalnız panoya kopyalar,
+  LCU sohbetine asla yazmaz.
+- **Sesli makro uyarıları** (varsayılan KAPALI) — dragon/baron/herald penceresine
+  60 ve 30 sn kala kısa bip; ayarlardan açılır.
+- **Tam skor şeffaflığı** — skor kırılımında 6 sinyalin tamamı + güven temeli
+  ("yeterli örneklem" / "sinyaller çelişti") + eksik sinyal listesi.
+
 ## [0.10.0-beta.2] — 2026-06-12
 
 İlk otomatik güncelleme turu: beta.1 kurulumları bu sürümü kendiliğinden çekmeli.

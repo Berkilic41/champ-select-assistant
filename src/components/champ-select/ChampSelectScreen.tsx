@@ -159,7 +159,8 @@ export const ChampSelectScreen: React.FC<Props> = ({
     phaseView === 'pick_acting' ? setActiveIdx : undefined,
   );
 
-  // Enemy team's current hover targets — shown during ban phase
+  // Enemy team's current hover targets — shown during ban AND pick phases
+  // (hover intent is visible in the LoL client UI anyway; no hidden info).
   const enemyThreats = session.their_team
     .filter(s => s.intent_champion_id > 0)
     .map(s => ({
@@ -265,6 +266,21 @@ export const ChampSelectScreen: React.FC<Props> = ({
               {/* Verdict (sticky, never scrolls) */}
               <div className="cs-dash__verdict">
                 <DraftVerdictPanel verdict={draftVerdict} />
+                {enemyThreats.length > 0 && (
+                  <div className="cs-hover-strip">
+                    <span className="cs-ban-hint">{t('champSelect.enemyHovering')}</span>
+                    <div className="cs-ban-candidates">
+                      {enemyThreats.map(e => (
+                        <div key={e.champId} className="cs-ban-candidate">
+                          <ChampionIcon championKey={e.champKey ?? ''} size="sm" />
+                          <span className="cs-ban-candidate__name">
+                            {e.champKey ?? `#${e.champId}`}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Decision: THE pick + its build, always in view */}

@@ -114,6 +114,7 @@
     "hoverFailed": "Hover başarısız: {{err}}",
     "banComputing": "Ban önerisi hesaplanıyor…",
     "banSuggestions": "Ban önerileri:",
+    "enemyHovering": "Rakip hover'lıyor",
     "dataNoMeta": "Canlı meta yok · genel sıralama",
     "dataNoMetaHint": "Şampiyon win/pick/ban oranları henüz bağlı değil — sıralama konfor + eşleşme + sinerjiye dayanıyor",
     "dataNoMastery": "Maç geçmişi yüklenmedi",
@@ -211,6 +212,12 @@
     "pillarWhy": "Neden",
     "pillarLane": "Lane planı",
     "pillarMidGame": "Mid game",
+    "missingSignals": "Eksik sinyaller: {{signals}}",
+    "confidenceBasis": {
+      "sample_depth": "Güven temeli: bu şampiyonda yeterli maç örneklemi",
+      "signal_convergence": "Güven temeli: sinyaller çelişti — güven bilinçli düşürüldü",
+      "games_only": "Güven temeli: yalnız maç sayısı (diğer sinyaller ince)"
+    },
     "pillarTeamfight": "Teamfight işi",
     "pillarFallback": "Geriden plan",
     "pillarRisk": "Nasıl kaybedersin",
@@ -379,7 +386,16 @@
     "mage": "Büyücü",
     "marksman": "Nişancı",
     "assassin": "Suikastçı",
-    "support": "Destek"
+    "support": "Destek",
+    "chat": {
+      "title": "Takım sohbeti önerisi",
+      "copy": "Kopyala",
+      "needEngage": "Engage eksiğimiz var — engage atabilecek biri seçebilir mi?",
+      "needFrontline": "Ön safımız yok — tank/bruiser düşünebilir misiniz?",
+      "fullAd": "Takım full AD gidiyor — AP pick atabilecek var mı?",
+      "fullAp": "Takım full AP gidiyor — AD pick atabilecek var mı?",
+      "needPeel": "Carry'mizi koruyacak peel eksik — destek/peel seçilebilir mi?"
+    }
   },
   "comboBoard": {
     "title": "Kombolar",
@@ -601,7 +617,7 @@
       "ru":    "RU (Rusya)"
     },
     "soundSection": "Ses",
-    "soundsEnabled": "Ses efektleri (hover/öneri)",
+    "soundsEnabled": "Sesli makro uyarıları (objektif zamanlayıcıları)",
     "metaSection": "Meta Verisi",
     "syncMetaBtn": "Veri pipeline'ını yenile",
     "syncMetaDone": "Pipeline yenilendi ✓",

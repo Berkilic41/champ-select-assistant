@@ -97,7 +97,8 @@ export const DeepDiveTab = React.memo(function DeepDiveTab({ rec, draftSimulatio
         <div className="hero-detail-section">
           <span className="hero-card__plan-label">{t('heroCard.scoreBreakdown', { defaultValue: 'Skor kırılımı' })}</span>
           <ul className="hero-detail-threats">
-            {rec.score_breakdown.slice(0, 5).map((item) => (
+            {/* B3: TÜM sinyaller (kırpma yok) — şeffaflık tam olsun. */}
+            {rec.score_breakdown.map((item) => (
               <li key={item.key} className="hero-detail-threat">
                 <strong>{item.label}:</strong> {Math.round(item.value * 100)}%
                 {' · '}
@@ -105,6 +106,22 @@ export const DeepDiveTab = React.memo(function DeepDiveTab({ rec, draftSimulatio
               </li>
             ))}
           </ul>
+          {rec.confidence_basis && (
+            <p className="hero-detail-basis">
+              {t(`heroCard.confidenceBasis.${rec.confidence_basis}`, {
+                defaultValue: rec.confidence_basis,
+              })}
+            </p>
+          )}
+          {rec.missing_signals && rec.missing_signals.length > 0 && (
+            <p className="hero-detail-basis">
+              {t('heroCard.missingSignals', {
+                signals: rec.missing_signals
+                  .map((s) => t(`champSelect.missingSignal.${s}`, { defaultValue: s }))
+                  .join(' · '),
+              })}
+            </p>
+          )}
         </div>
       )}
 

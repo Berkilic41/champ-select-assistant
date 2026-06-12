@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { invoke } from '../../lib/host';
 import { useTranslation } from 'react-i18next';
 import { Minus } from 'lucide-react';
@@ -6,7 +6,28 @@ import type { OverlayMacroState } from '../../types/generated/OverlayMacroState'
 import type { ObjectiveTimer } from '../../types/generated/ObjectiveTimer';
 import type { IngamePlan } from '../../types/generated/IngamePlan';
 import { ChampionIcon } from '../shared/ChampionIcon';
+import { useSettings } from '../../hooks/useSettings';
 import './IngameView.css';
+
+// Sesli makro uyarısı (B5) — asset'siz WebAudio bip; yalnız ÇIKTI üretir
+// (oyuna/LCU'ya hiçbir şey yazmaz). sounds_enabled ayarı kapalıysa hiç çalmaz.
+let audioCtx: AudioContext | null = null;
+function beep(freq: number, ms = 180): void {
+  try {
+    audioCtx ??= new AudioContext();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    gain.gain.value = 0.08;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + ms / 1000);
+  } catch {
+    /* ses aygıtı yoksa sessiz devam */
+  }
+}
 
 interface Props {
   summonerName?: string;
@@ -26,6 +47,26 @@ export const IngameView: React.FC<Props> = ({ summonerName }) => {
   const { t } = useTranslation();
   const [data, setData] = useState<OverlayMacroState | null>(null);
   const [plan, setPlan] = useState<IngamePlan | null>(null);
+  const { settings } = useSettings();
+  const prevSecsRef = useRef<Record<string, number>>({});
+
+  // 60sn ve 30sn eşik GEÇİŞLERİNDE tek bip (60: alçak, 30: yüksek ton).
+  // Eşik geçişi = önceki poll > eşik && şimdiki ≤ eşik — spam yok.
+  useEffect(() => {
+    const macroState = data?.live ? data.state : null;
+    if (!macroState) {
+      prevSecsRef.current = {};
+      return;
+    }
+    for (const o of macroState.objectives) {
+      const prev = prevSecsRef.current[o.objective];
+      if (settings.sounds_enabled && prev !== undefined && o.seconds_until > 0) {
+        if (prev > 60 && o.seconds_until <= 60) beep(660);
+        else if (prev > 30 && o.seconds_until <= 30) beep(880);
+      }
+      prevSecsRef.current[o.objective] = o.seconds_until;
+    }
+  }, [data, settings.sounds_enabled]);
 
   useEffect(() => {
     let alive = true;
