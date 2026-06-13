@@ -417,6 +417,23 @@
     "noteSave": "Save",
     "noteSaved": "Saved ✓"
   },
+  "rank": {
+    "title": "Your Rank",
+    "record": "{{w}}W {{l}}L · {{wr}}%",
+    "provisional": "placements",
+    "tier": {
+      "IRON": "Iron",
+      "BRONZE": "Bronze",
+      "SILVER": "Silver",
+      "GOLD": "Gold",
+      "PLATINUM": "Platinum",
+      "EMERALD": "Emerald",
+      "DIAMOND": "Diamond",
+      "MASTER": "Master",
+      "GRANDMASTER": "Grandmaster",
+      "CHALLENGER": "Challenger"
+    }
+  },
   "session": {
     "title": "Session Coach",
     "record": "This session: {{w}}W {{l}}L",

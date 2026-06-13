@@ -268,6 +268,37 @@ export function packPayload(db: DatabaseSync, kind: string): string | null {
   return row?.payload_json != null ? String(row.payload_json) : null;
 }
 
+/** D2: ranked_stats okuma — oyuncunun soloQ/flex rank'i (görüntü bağlamı). */
+export interface RankedStatRow {
+  queue: string;
+  tier: string;
+  division: string;
+  league_points: number;
+  wins: number;
+  losses: number;
+  is_provisional: boolean;
+  updated_at: number;
+}
+
+export function rankedStats(db: DatabaseSync, puuid: string): RankedStatRow[] {
+  const rows = db
+    .prepare(
+      `SELECT queue, tier, division, league_points, wins, losses, is_provisional, updated_at
+       FROM ranked_stats WHERE puuid = ?`,
+    )
+    .all(puuid) as unknown as Record<string, unknown>[];
+  return rows.map((r) => ({
+    queue: String(r.queue),
+    tier: String(r.tier),
+    division: String(r.division ?? ""),
+    league_points: Number(r.league_points),
+    wins: Number(r.wins),
+    losses: Number(r.losses),
+    is_provisional: Number(r.is_provisional) === 1,
+    updated_at: Number(r.updated_at),
+  }));
+}
+
 /** read_feedback_rows — raw rows; negative ids skipped (u32 try_from parity). */
 export function feedbackRows(db: DatabaseSync): FeedbackRow[] {
   const rows = db

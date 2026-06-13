@@ -10,6 +10,7 @@ import {
 } from 'recharts';
 import { ChampionStats, MasteryEntry } from '../../types/riot';
 import { GameReviewCard } from './GameReviewCard';
+import { RankCard } from './RankCard';
 import { TrendPanel } from './TrendPanel';
 import { WeeklySummaryCard } from './WeeklySummaryCard';
 import './StatsView.css';
@@ -57,6 +58,8 @@ export const StatsView: React.FC<Props> = ({ stats, masteries, champMap }) => {
 
   return (
     <div className="stats-view">
+      {/* D2: rank bağlamı (soloQ/flex tier + LP + rekor). */}
+      <RankCard />
       {/* Koç döngüsü (C1+C2): en son maçın karnesi + sonraki maç hedefi. */}
       <GameReviewCard />
       {/* C4: baskın rol+queue trend okuması. */}

@@ -138,3 +138,40 @@ export function recordMasterySnapshot(
   ).run(puuid, championId, points, level, snapshotAt);
   return true;
 }
+
+/** D2: ranked_stats upsert (puuid+queue PK; LCU keyless çekiminden). */
+export function upsertRankedStats(
+  db: DatabaseSync,
+  puuid: string,
+  q: {
+    queue: string;
+    tier: string;
+    division: string;
+    league_points: number;
+    wins: number;
+    losses: number;
+    is_provisional: boolean;
+  },
+  updatedAt: number,
+): void {
+  db.prepare(
+    `INSERT INTO ranked_stats
+       (puuid, queue, tier, division, league_points, wins, losses, is_provisional, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(puuid, queue) DO UPDATE SET
+       tier = excluded.tier, division = excluded.division,
+       league_points = excluded.league_points, wins = excluded.wins,
+       losses = excluded.losses, is_provisional = excluded.is_provisional,
+       updated_at = excluded.updated_at`,
+  ).run(
+    puuid,
+    q.queue,
+    q.tier,
+    q.division,
+    q.league_points,
+    q.wins,
+    q.losses,
+    q.is_provisional ? 1 : 0,
+    updatedAt,
+  );
+}

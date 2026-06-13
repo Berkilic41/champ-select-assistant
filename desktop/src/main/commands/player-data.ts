@@ -8,6 +8,7 @@ import type { DatabaseSync } from "node:sqlite";
 import {
   parseLcuMastery,
   parseLcuMatchHistory,
+  parseLcuRankedStats,
   parseLcuSummonerName,
 } from "../lcu/player-sync";
 import {
@@ -15,6 +16,7 @@ import {
   insertMatch,
   recordMasterySnapshot,
   upsertMastery,
+  upsertRankedStats,
   upsertSummoner,
 } from "../repos-write";
 import type { SummonerInfo } from "../riot/client";
@@ -25,6 +27,7 @@ export interface LcuPlayerDataSyncResult {
   matches_synced: number;
   matches_skipped: number;
   masteries_synced: number;
+  ranked_synced: number;
   errors: number;
 }
 
@@ -124,11 +127,25 @@ export async function syncLcuPlayerData(
     }
   }
 
+  // D2: ranked stats (keyless, non-fatal). LCU bağlıyken her sync'te tazelenir;
+  // rank seans içinde nadiren değiştiğinden bu cadence yeterli.
+  const rankedJson = await getJsonOrNull(client, "/lol-ranked/v1/current-ranked-stats");
+  let rankedSynced = 0;
+  for (const q of parseLcuRankedStats(rankedJson)) {
+    try {
+      upsertRankedStats(db, puuid, q, now);
+      rankedSynced += 1;
+    } catch {
+      errors += 1;
+    }
+  }
+
   return {
     summoner,
     matches_synced: matchesSynced,
     matches_skipped: matchesSkipped,
     masteries_synced: masteriesSynced,
+    ranked_synced: rankedSynced,
     errors,
   };
 }

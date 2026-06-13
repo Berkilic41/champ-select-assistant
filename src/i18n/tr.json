@@ -417,6 +417,23 @@
     "noteSave": "Kaydet",
     "noteSaved": "Kaydedildi ✓"
   },
+  "rank": {
+    "title": "Rankın",
+    "record": "{{w}}G {{l}}M · %{{wr}}",
+    "provisional": "yerleştirme maçları",
+    "tier": {
+      "IRON": "Demir",
+      "BRONZE": "Bronz",
+      "SILVER": "Gümüş",
+      "GOLD": "Altın",
+      "PLATINUM": "Platin",
+      "EMERALD": "Zümrüt",
+      "DIAMOND": "Elmas",
+      "MASTER": "Usta",
+      "GRANDMASTER": "Büyük Usta",
+      "CHALLENGER": "Şampiyon"
+    }
+  },
   "session": {
     "title": "Seans Koçu",
     "record": "Bu oturum: {{w}}G {{l}}M",

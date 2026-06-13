@@ -120,6 +120,51 @@ export function parseLcuMastery(json: unknown): ParsedLcuMastery[] {
   return result;
 }
 
+export interface ParsedRankedQueue {
+  /** "soloq" | "flex". */
+  queue: string;
+  tier: string;
+  division: string;
+  league_points: number;
+  wins: number;
+  losses: number;
+  is_provisional: boolean;
+}
+
+/** LCU queueType → bizim queue anahtarımız (yalnız SR ranked kuyrukları). */
+const RANKED_QUEUE_MAP: Record<string, string> = {
+  RANKED_SOLO_5x5: "soloq",
+  RANKED_FLEX_SR: "flex",
+};
+
+/**
+ * D2: `/lol-ranked/v1/current-ranked-stats` yanıtından soloQ + flex rank'i.
+ * Ranklanmamış (tier yok / "NONE"/"UNRANKED") kuyruklar ATLANIR — uydurma yok.
+ * Şema canlı client'ta doğrulandı (2026-06-12): queueMap.<queueType> →
+ * { tier, division, leaguePoints, wins, losses, isProvisional }.
+ */
+export function parseLcuRankedStats(json: unknown): ParsedRankedQueue[] {
+  const queueMap = asObj(asObj(json).queueMap);
+  const out: ParsedRankedQueue[] = [];
+  for (const [queueType, key] of Object.entries(RANKED_QUEUE_MAP)) {
+    const q = asObj(queueMap[queueType]);
+    const tier = typeof q.tier === "string" ? q.tier.trim().toUpperCase() : "";
+    if (!tier || tier === "NONE" || tier === "UNRANKED") continue;
+    const division = typeof q.division === "string" ? q.division.trim().toUpperCase() : "";
+    out.push({
+      queue: key,
+      tier,
+      // Master+ kademelerinde division "NA" gelir → boş bırak (UI yalnız tier yazar).
+      division: division === "NA" ? "" : division,
+      league_points: num(q.leaguePoints),
+      wins: num(q.wins),
+      losses: num(q.losses),
+      is_provisional: q.isProvisional === true,
+    });
+  }
+  return out;
+}
+
 /**
  * current-summoner yanıtından (game_name, tag_line). Öncelik:
  * gameName+tagLine → displayName "Name#TAG" → displayName olduğu gibi.

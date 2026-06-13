@@ -50,6 +50,7 @@ import {
   setChampionPreference,
 } from "./commands/preferences";
 import { getSessionCoach, getWeeklySummary } from "./commands/session-coach";
+import { rankedStats } from "./repos";
 import { syncLcuPlayerData } from "./commands/player-data";
 import { getDraftBrainQualityReport } from "./commands/quality";
 import {
@@ -441,6 +442,10 @@ export function buildCommandRegistry(
       Number(args?.championId ?? 0),
       String(args?.position ?? ""),
     ),
+  );
+  // D2: rank bağlamı (LCU keyless çekildi, sync'te tazelenir).
+  commands.set("get_ranked_stats", (args) =>
+    rankedStats(requireDb(ctx), String(args?.puuid ?? "")),
   );
   // Faz F: seans koçluğu + haftalık özet.
   commands.set("get_session_coach", (args) =>

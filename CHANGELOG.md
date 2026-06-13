@@ -6,6 +6,11 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 
 ## [Unreleased]
 
+### Eklendi
+- **Rank bağlamı** — soloQ ve flex rank'in (tier/division/LP + split rekoru ve
+  win-rate) League Client'tan anahtar gerekmeden okunup istatistik sekmesinde
+  gösterilir. Yalnız görüntü; öneri/karne motorunu etkilemez.
+
 ## [0.10.0-beta.3] — 2026-06-12
 
 Koç sürümü: uygulama draft analistinden gerçek bir solo-q koçuna dönüştü —

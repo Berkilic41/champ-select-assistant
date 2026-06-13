@@ -34,6 +34,7 @@ import { Engine } from "../src/main/engine";
 import {
   parseLcuMastery,
   parseLcuMatchHistory,
+  parseLcuRankedStats,
   parseLcuSummonerName,
 } from "../src/main/lcu/player-sync";
 import {
@@ -338,6 +339,51 @@ describe("LCU player-sync parsers (player_sync.rs/champ_pool.rs parity)", () => 
       tagLine: "",
     });
     expect(parseLcuSummonerName({})).toEqual({ gameName: "Summoner", tagLine: "" });
+  });
+
+  // D2: şema canlı client'ta doğrulandı (2026-06-12, Platinum IV).
+  it("parses ranked stats and skips unranked queues", () => {
+    const fixture = {
+      queueMap: {
+        RANKED_SOLO_5x5: {
+          tier: "PLATINUM",
+          division: "IV",
+          leaguePoints: 26,
+          wins: 102,
+          losses: 108,
+          isProvisional: false,
+        },
+        RANKED_FLEX_SR: {
+          tier: "NONE",
+          division: "NA",
+          leaguePoints: 0,
+          wins: 0,
+          losses: 0,
+          isProvisional: false,
+        },
+        RANKED_TFT: { tier: "GOLD" }, // SR dışı kuyruk → atlanır
+      },
+    };
+    const parsed = parseLcuRankedStats(fixture);
+    expect(parsed).toHaveLength(1); // yalnız soloQ; flex NONE, TFT haritalanmaz
+    expect(parsed[0]).toMatchObject({
+      queue: "soloq",
+      tier: "PLATINUM",
+      division: "IV",
+      league_points: 26,
+      wins: 102,
+      losses: 108,
+      is_provisional: false,
+    });
+    // Master+ "NA" division → boş; provisional korunur.
+    const master = parseLcuRankedStats({
+      queueMap: {
+        RANKED_SOLO_5x5: { tier: "MASTER", division: "NA", leaguePoints: 340, isProvisional: true },
+      },
+    });
+    expect(master[0].division).toBe("");
+    expect(master[0].is_provisional).toBe(true);
+    expect(parseLcuRankedStats(null)).toEqual([]);
   });
 
 });
