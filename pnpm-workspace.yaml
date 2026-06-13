@@ -1,2 +1,10 @@
-allowBuilds:
-  esbuild: set this to true or false
+packages:
+  - "desktop"
+  - "cloudflare-worker"
+
+# pnpm 10+ gates dependency build/postinstall scripts. Electron must run its
+# postinstall (downloads the binary) and esbuild its install script, or a clean
+# CI install produces a broken desktop build.
+onlyBuiltDependencies:
+  - electron
+  - esbuild

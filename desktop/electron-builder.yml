@@ -55,3 +55,6 @@ publish:
   provider: github
   owner: Berkilic41
   repo: champ-select-assistant
+  # Beta tags publish as a prerelease. A stable (GA) release overrides this with
+  # `--config.publish.releaseType=release` in the public workflow.
+  releaseType: prerelease

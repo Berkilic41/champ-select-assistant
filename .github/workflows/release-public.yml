@@ -1,18 +1,14 @@
-name: Release (Public Signed)
+name: Release (Public)
 
 on:
   push:
     tags:
       - 'v*.*.*'
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Release version (e.g. 1.0.0)'
-        required: true
+  workflow_dispatch: {}
 
 jobs:
-  build-windows-signed:
-    name: Build signed Windows installer
+  build-windows:
+    name: Build Windows installer (public)
     runs-on: windows-latest
     permissions:
       contents: write
@@ -22,8 +18,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -33,6 +27,11 @@ jobs:
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
 
       - name: Cache Cargo
         uses: actions/cache@v4
@@ -40,50 +39,19 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            src-tauri/target
-          key: ${{ runner.os }}-cargo-pub-${{ hashFiles('src-tauri/Cargo.lock') }}
+            core/target
+          key: ${{ runner.os }}-cargo-pub-${{ hashFiles('core/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-pub-
 
-      - name: Install frontend dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # EV Code Signing: requires WINDOWS_CERTIFICATE and WINDOWS_CERTIFICATE_PASSWORD
-      # stored as GitHub repository secrets. The certificate is a base64-encoded .p12 file.
-      # Setup: openssl pkcs12 -export -out cert.p12 -inkey key.pem -in cert.pem
-      #        base64 -i cert.p12 > cert.b64  → paste into WINDOWS_CERTIFICATE secret
-      - name: Decode code signing certificate
-        if: ${{ secrets.WINDOWS_CERTIFICATE != '' }}
-        shell: pwsh
-        run: |
-          $bytes = [System.Convert]::FromBase64String("${{ secrets.WINDOWS_CERTIFICATE }}")
-          [System.IO.File]::WriteAllBytes("$env:RUNNER_TEMP\cert.p12", $bytes)
-
-      - name: Build and sign Tauri app
-        uses: tauri-apps/tauri-action@v0
+      # NOTE: Authenticode signing is not yet wired — no code-signing certificate.
+      # When a cert is available, add `win.certificateFile`/`cscLink` to
+      # electron-builder.yml and a decode step gated on an env-derived output
+      # (NOT `if: secrets.X != ''`, which GitHub does not evaluate for secrets).
+      - name: Build & publish Windows installer (GA release)
+        working-directory: desktop
+        run: pnpm build:wasm && pnpm exec electron-vite build && pnpm exec electron-builder --publish always --config.publish.releaseType=release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          # Code signing (optional — skip if no EV cert yet)
-          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
-          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
-          # Proxy URL replaces direct Riot API key in public builds
-          PROXY_URL: ${{ secrets.PROXY_URL }}
-        with:
-          tagName: ${{ github.ref_name }}
-          releaseName: 'Champ Select Assistant ${{ github.ref_name }}'
-          releaseBody: |
-            ## Champ Select Assistant ${{ github.ref_name }}
-
-            Windows installer — digitally signed.
-
-            ### Installation
-            1. Download the `.msi` installer
-            2. Run installer — Windows SmartScreen may appear for first run
-            3. Add your Riot ID in Settings after launch
-
-            ### Changelog
-            See [CHANGELOG.md](CHANGELOG.md) for full details.
-          releaseDraft: false
-          prerelease: false
-          includeDebug: false
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
