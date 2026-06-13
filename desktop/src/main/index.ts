@@ -7,7 +7,7 @@
 import { join } from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 
-import { app, BrowserWindow, type Tray } from "electron";
+import { app, BrowserWindow, session, type Tray } from "electron";
 
 import { LcuService } from "./commands/lcu";
 import { openDatabaseWithRecovery } from "./db";
@@ -61,6 +61,25 @@ if (!gotLock) {
   });
 
   void app.whenReady().then(() => {
+    // 0. Content-Security-Policy for the PACKAGED renderer (file://). Skipped in
+    //    dev so electron-vite's HMR (inline scripts + ws) keeps working. Champion
+    //    art loads from DDragon + CommunityDragon; everything else is same-origin.
+    if (!process.env.ELECTRON_RENDERER_URL) {
+      session.defaultSession.webRequest.onHeadersReceived((details, cb) => {
+        cb({
+          responseHeaders: {
+            ...details.responseHeaders,
+            "Content-Security-Policy": [
+              "default-src 'self'; " +
+                "img-src 'self' data: https://ddragon.leagueoflegends.com https://raw.communitydragon.org; " +
+                "script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; " +
+                "connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'",
+            ],
+          },
+        });
+      });
+    }
+
     // 1. DB + migrations (önce — Rust tarafındaki "migrations before any DB access"
     //    kuralı). G2: bozulmada dosya kenara alınır + taze şema kurulur.
     let db: DatabaseSync | undefined;

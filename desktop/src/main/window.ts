@@ -23,11 +23,23 @@ export function createMainWindow(): BrowserWindow {
       preload: join(__dirname, "..", "preload", "index.js"),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false,
+      // Safe: the preload imports only contextBridge/ipcRenderer (no Node APIs).
+      sandbox: true,
     },
   });
 
   win.once("ready-to-show", () => win.show());
+
+  // Hardening: this is a single-page app — it never opens child windows and never
+  // navigates the top frame to a remote origin. Deny both; allow only the dev
+  // server (HMR) and the packaged file:// renderer.
+  win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  win.webContents.on("will-navigate", (event, url) => {
+    const devUrl = process.env.ELECTRON_RENDERER_URL;
+    if (devUrl && url.startsWith(devUrl)) return;
+    if (url.startsWith("file://")) return;
+    event.preventDefault();
+  });
 
   const builtRenderer = join(__dirname, "..", "renderer", "index.html");
   if (process.env.ELECTRON_RENDERER_URL) {
