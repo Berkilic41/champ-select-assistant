@@ -11,7 +11,8 @@
     "welcomeNoLeague": "Hoş geldin! League açık değil — açıp Ayarlar'dan verilerini senkronize edebilirsin.",
     "errorTitle": "Bir şeyler ters gitti",
     "errorBody": "Uygulama beklenmedik bir hatayla karşılaştı. Yeniden denemeyi deneyebilirsin.",
-    "errorRetry": "Yeniden dene"
+    "errorRetry": "Yeniden dene",
+    "dataError": "Veri alınamadı"
   },
   "connection": {
     "connecting": "Bağlanıyor...",

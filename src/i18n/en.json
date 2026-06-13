@@ -11,7 +11,8 @@
     "welcomeNoLeague": "Welcome! League isn't running — open it and sync your data from Settings.",
     "errorTitle": "Something went wrong",
     "errorBody": "The app hit an unexpected error. You can try again.",
-    "errorRetry": "Try again"
+    "errorRetry": "Try again",
+    "dataError": "Couldn't load data"
   },
   "connection": {
     "connecting": "Connecting...",

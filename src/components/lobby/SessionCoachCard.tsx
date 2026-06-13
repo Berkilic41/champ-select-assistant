@@ -25,6 +25,7 @@ export const SessionCoachCard: React.FC = () => {
   const [focusLabel, setFocusLabel] = useState<string | null>(null);
   const [dismissed, setDismissed] = useState(false);
   const [checked, setChecked] = useState<boolean[]>([false, false, false]);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -46,7 +47,7 @@ export const SessionCoachCard: React.FC = () => {
           }
         }
       } catch {
-        /* seans okunamadı — kart gizli kalır */
+        if (alive) setError(true);
       }
     })();
     return () => {
@@ -54,6 +55,13 @@ export const SessionCoachCard: React.FC = () => {
     };
   }, []);
 
+  if (error && !dismissed) {
+    return (
+      <div className="grc-card">
+        <p className="grc-baseline">{t('app.dataError')}</p>
+      </div>
+    );
+  }
   if (!coach || dismissed) return null;
   const read = coach.read;
 

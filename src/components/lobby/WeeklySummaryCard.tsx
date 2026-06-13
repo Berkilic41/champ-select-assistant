@@ -17,6 +17,7 @@ interface WeeklySummary {
 export const WeeklySummaryCard: React.FC = () => {
   const { t } = useTranslation();
   const [summary, setSummary] = useState<WeeklySummary | null>(null);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -27,7 +28,7 @@ export const WeeklySummaryCard: React.FC = () => {
         const res = await invoke<WeeklySummary>('get_weekly_summary', { puuid });
         if (alive) setSummary(res);
       } catch {
-        /* özet okunamadı — kart gizli */
+        if (alive) setError(true);
       }
     })();
     return () => {
@@ -35,6 +36,17 @@ export const WeeklySummaryCard: React.FC = () => {
     };
   }, []);
 
+  if (error) {
+    return (
+      <div className="grc-card">
+        <div className="grc-head">
+          <CalendarCheck size={14} />
+          <span className="grc-title">{t('weekly.title')}</span>
+        </div>
+        <p className="grc-baseline">{t('app.dataError')}</p>
+      </div>
+    );
+  }
   if (!summary || summary.games === 0) return null;
 
   return (

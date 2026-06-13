@@ -22,6 +22,7 @@ const SPARK_METRICS = ['cs_per_min', 'deaths_per_10', 'vision_score'] as const;
 export const TrendPanel: React.FC = () => {
   const { t } = useTranslation();
   const [data, setData] = useState<TrendResult | null>(null);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -32,7 +33,7 @@ export const TrendPanel: React.FC = () => {
         const res = await invoke<TrendResult | null>('get_trend_report', { puuid });
         if (alive && res) setData(res);
       } catch {
-        /* trend üretilemedi — panel gizli kalır */
+        if (alive) setError(true);
       }
     })();
     return () => {
@@ -40,6 +41,16 @@ export const TrendPanel: React.FC = () => {
     };
   }, []);
 
+  if (error) {
+    return (
+      <div className="grc-card">
+        <div className="grc-head">
+          <span className="grc-title">{t('trend.title')}</span>
+        </div>
+        <p className="grc-baseline">{t('app.dataError')}</p>
+      </div>
+    );
+  }
   if (!data || data.report.points.length < 3) return null;
   const { report } = data;
 

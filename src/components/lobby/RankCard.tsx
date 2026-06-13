@@ -36,6 +36,7 @@ const TIER_COLOR: Record<string, string> = {
 export const RankCard: React.FC = () => {
   const { t } = useTranslation();
   const [ranks, setRanks] = useState<RankedStat[]>([]);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -46,7 +47,8 @@ export const RankCard: React.FC = () => {
         const res = await invoke<RankedStat[]>('get_ranked_stats', { puuid });
         if (alive) setRanks(res);
       } catch {
-        /* rank okunamadı — kart gizli */
+        // Honest error state (≠ "unranked"): a failed fetch shows a small badge.
+        if (alive) setError(true);
       }
     })();
     return () => {
@@ -54,6 +56,17 @@ export const RankCard: React.FC = () => {
     };
   }, []);
 
+  if (error) {
+    return (
+      <div className="grc-card">
+        <div className="grc-head">
+          <Trophy size={14} />
+          <span className="grc-title">{t('rank.title')}</span>
+        </div>
+        <p className="grc-baseline">{t('app.dataError')}</p>
+      </div>
+    );
+  }
   if (ranks.length === 0) return null;
   // soloQ önce.
   const ordered = [...ranks].sort((a) => (a.queue === 'soloq' ? -1 : 1));
