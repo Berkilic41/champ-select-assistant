@@ -1,6 +1,6 @@
 {
   "name": "csa-desktop",
-  "version": "0.10.0-beta.3",
+  "version": "0.10.0-beta.4",
   "private": true,
   "description": "Electron host for champ-select-assistant — Node I/O layer around the csa-core WASM engine (P1 migration).",
   "type": "commonjs",
