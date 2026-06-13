@@ -18,10 +18,13 @@ export const Timer: React.FC<Props> = ({ timeLeftMs, phase, isActing }) => {
 
   useEffect(() => { setTimeLeft(timeLeftMs); }, [timeLeftMs]);
 
+  // One ticking interval for the component's lifetime — the effect above re-syncs
+  // timeLeft whenever the backend pushes a new timeLeftMs. Keying this on
+  // timeLeftMs would tear down + recreate the interval on every session update.
   useEffect(() => {
     const id = setInterval(() => setTimeLeft(t => Math.max(0, t - 1000)), 1000);
     return () => clearInterval(id);
-  }, [timeLeftMs]);
+  }, []);
 
   const seconds = Math.ceil(timeLeft / 1000);
   const total = TOTAL_SECONDS[phase] ?? 30;

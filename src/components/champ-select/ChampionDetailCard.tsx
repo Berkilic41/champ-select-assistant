@@ -132,6 +132,15 @@ export const ChampionDetailCard: React.FC<Props> = ({ championId, championKey, o
     };
   }, [championId]);
 
+  // Close on Escape (dialog a11y).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
   if (championId === null) return null;
 
   const total = detail ? detail.damage_ad + detail.damage_ap : 0;

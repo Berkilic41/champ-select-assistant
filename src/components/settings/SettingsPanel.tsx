@@ -32,6 +32,7 @@ function WeightSlider({ label, value, effectivePct, onChange }: WeightSliderProp
         value={Math.round(value * 100)}
         onChange={e => onChange(parseInt(e.target.value) / 100)}
         className="sp-slider"
+        aria-label={label}
       />
       <span className="sp-weight-val">{effectivePct}%</span>
     </div>
@@ -52,6 +53,17 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
     if (dirty && !window.confirm(t('app.unsavedConfirm'))) return;
     onClose();
   };
+
+  // Close on Escape (respects the same unsaved-changes guard as the X button).
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      if (dirty && !window.confirm(t('app.unsavedConfirm'))) return;
+      onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [dirty, onClose, t]);
 
   // Weights are RELATIVE — the engine normalizes by their sum, so they never
   // need to add up to 100%. Show each factor's live effective share instead.
