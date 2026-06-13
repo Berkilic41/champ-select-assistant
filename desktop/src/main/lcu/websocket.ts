@@ -16,6 +16,9 @@ import { riotRootCa } from "./client";
 import type { Lockfile } from "./lockfile";
 
 export const CHAMP_SELECT_TOPIC = "OnJsonApiEvent_lol-champ-select_v1_session";
+/** Gameflow phase ("ChampSelect" / "InProgress" / "Lobby" / "None" …) — drives
+ *  the in-game overlay switch and the champ-select→lobby navigation fail-safe. */
+export const GAMEFLOW_PHASE_TOPIC = "OnJsonApiEvent_lol-gameflow_v1_gameflow-phase";
 
 /** Deterministic jitter (no rand dep): up to ~1s, same formula as Rust. */
 export function jitterMs(attempt: number): number {

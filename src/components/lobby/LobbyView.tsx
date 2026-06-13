@@ -48,7 +48,12 @@ export const LobbyView: React.FC<Props> = ({ summonerName, platformRegion }) => 
   const { t } = useTranslation();
   const { gameName, tagLine } = parseSummoner(summonerName);
   const { loading, error, stats, masteries, champMap, sync } = useSummonerData(gameName, tagLine, platformRegion);
-  const [activeTab, setActiveTab] = useState<Tab>('champions');
+  // Persist the selected tab so returning to the lobby (e.g. after a draft)
+  // restores it instead of snapping back to "champions" every time.
+  const [activeTab, setActiveTab] = useState<Tab>(() => {
+    const stored = localStorage.getItem('lobbyActiveTab');
+    return stored === 'stats' || stored === 'pool' ? stored : 'champions';
+  });
   const [patchVersion, setPatchVersion] = useState<string | null>(null);
   const [lastMetaSync, setLastMetaSync] = useState<number | null>(null);
 
@@ -62,6 +67,11 @@ export const LobbyView: React.FC<Props> = ({ summonerName, platformRegion }) => 
     if (stored) setLastMetaSync(parseInt(stored, 10));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Remember the active tab across lobby visits.
+  useEffect(() => {
+    localStorage.setItem('lobbyActiveTab', activeTab);
+  }, [activeTab]);
 
   const hasData = stats.length > 0 || masteries.length > 0;
 

@@ -88,14 +88,31 @@ function App(): React.ReactElement {
       return;
     }
 
-    // 2) Champ-select is active → live draft coaching.
-    if (isActive && lcuStatus.kind === 'lobby') {
+    // 2) Champ-select is active → live draft coaching. Gate on the gameflow phase
+    //    so a stuck `isActive` (a missed `champ-select-session: null`) can't pin
+    //    us to the draft after it ends. Empty phase = host hasn't reported one
+    //    yet → trust isActive (back-compat with the seed-on-connect timing).
+    const inChampSelectPhase = gamePhase === '' || gamePhase === 'ChampSelect';
+    if (isActive && lcuStatus.kind === 'lobby' && inChampSelectPhase) {
       setStatus({
         kind: 'champ-select',
         summonerName: lcuStatus.summonerName,
         port: lcuStatus.port,
       });
       setReconnecting(false);
+      return;
+    }
+
+    // 2b) Fail-safe for the "stuck on the draft screen" bug: we're still showing
+    //     champ-select but the gameflow phase has clearly left ChampSelect (dodge
+    //     or draft finished without a clean null event) → drop back to the lobby.
+    if (
+      status.kind === 'champ-select' &&
+      gamePhase !== '' &&
+      gamePhase !== 'ChampSelect'
+    ) {
+      setReconnecting(false);
+      setStatus(lcuStatus);
       return;
     }
 

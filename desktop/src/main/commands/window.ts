@@ -44,7 +44,9 @@ export function showWindow(win: BrowserWindow): void {
  * no injection). On disable, just re-centers (frontend restores preferred size).
  */
 export function setOverlayMode(win: BrowserWindow, enabled: boolean): void {
-  win.setAlwaysOnTop(true);
+  // Pin on enable, UNPIN on disable — otherwise the window stays always-on-top
+  // after the match ends (the renderer calls this with enabled=false on exit).
+  win.setAlwaysOnTop(enabled);
   if (enabled) {
     const w = 400;
     const h = 720;

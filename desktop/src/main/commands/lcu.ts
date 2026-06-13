@@ -44,6 +44,7 @@ export function findOwnPickActionId(
 }
 import {
   CHAMP_SELECT_TOPIC,
+  GAMEFLOW_PHASE_TOPIC,
   LcuEventWatcher,
   type WampEvent,
 } from "../lcu/websocket";
@@ -129,6 +130,12 @@ export class LcuService {
       error: null,
     };
     this.startWsListener();
+    // Seed the current gameflow phase — the WS only pushes future transitions, so
+    // without this the renderer wouldn't reflect an already-live match on connect.
+    void client
+      .getJson<unknown>("/lol-gameflow/v1/gameflow-phase")
+      .then((p) => this.opts.emit("gameflow-phase", typeof p === "string" ? p : ""))
+      .catch(() => undefined);
     return this.lastStatus;
   }
 
@@ -158,9 +165,20 @@ export class LcuService {
     if (!this.lockfile) return;
     this.watcher?.stop();
     this.watcher = new LcuEventWatcher(this.lockfile, {
-      topics: [CHAMP_SELECT_TOPIC],
+      topics: [CHAMP_SELECT_TOPIC, GAMEFLOW_PHASE_TOPIC],
       onStatus: (s) => this.opts.onStatus?.(s),
       onEvent: (event: WampEvent) => {
+        // Gameflow phase drives navigation: the renderer switches to the in-game
+        // overlay on a live match and uses the phase as a fail-safe to leave
+        // champ-select if the null event below never arrives (dodge / WS drop).
+        // data is the phase string ("ChampSelect" / "InProgress" / "Lobby" / "None").
+        if (event.topic === GAMEFLOW_PHASE_TOPIC) {
+          this.opts.emit(
+            "gameflow-phase",
+            typeof event.data === "string" ? event.data : "",
+          );
+          return;
+        }
         // Tauri websocket.rs paritesi (228-237): null → null yayınla (champ select
         // bitti sinyali); ham session → parse edip STATE yayınla; parse edilemeyen
         // payload → hiç yayınlama.
