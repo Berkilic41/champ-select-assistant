@@ -644,8 +644,8 @@
     },
     "step4": {
       "title": "Ready!",
-      "body": "Hit \"Start!\" — if League is running your match history loads automatically. Then enter champion select and recommendations appear on their own.",
-      "hint": "Tip: The app always stays on top so you won't miss champion select."
+      "body": "Hit \"Start!\" — if League is running your match history loads automatically. The first data sync may take a few minutes; meanwhile recommendations run on bundled data and enrich themselves as live data arrives.",
+      "hint": "Tip: During the pick phase, keys 1-5 cycle the suggested cards. Stats, report cards and pool screens keep working even when League is closed."
     },
     "back": "Back",
     "next": "Next",

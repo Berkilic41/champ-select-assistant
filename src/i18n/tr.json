@@ -644,8 +644,8 @@
     },
     "step4": {
       "title": "Hazır!",
-      "body": "\"Başla!\"a bas — League açıksa maç geçmişin otomatik yüklenir. Sonra champion select'e gir, öneriler kendiliğinden açılır.",
-      "hint": "İpucu: Uygulama her zaman üstte kalır, champion select'i kaçırmaz."
+      "body": "\"Başla!\"a bas — League açıksa maç geçmişin otomatik yüklenir. İlk veri senkronu birkaç dakika sürebilir; bu sırada öneriler paketle gelen verilerle çalışır ve canlı veri geldikçe kendiliğinden zenginleşir.",
+      "hint": "İpucu: Pick fazında 1-5 tuşları önerilen kartlar arasında gezer. League kapalıyken de istatistik, karne ve havuz ekranların çalışmaya devam eder."
     },
     "back": "Geri",
     "next": "İleri",

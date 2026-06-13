@@ -1,11 +1,16 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import { loadMigrations, openDatabase, runMigrations } from "../src/main/db";
+import {
+  loadMigrations,
+  openDatabase,
+  openDatabaseWithRecovery,
+  runMigrations,
+} from "../src/main/db";
 
 /** The real migration set — the .sql contract shared with the Tauri app. */
 const MIGRATIONS_DIR = join(__dirname, "..", "resources", "migrations");
@@ -22,6 +27,40 @@ describe("loadMigrations", () => {
     expect(migs[0].version).toBe(1);
     const versions = migs.map((m) => m.version);
     expect(versions).toEqual([...versions].sort((a, b) => a - b));
+  });
+});
+
+describe("openDatabaseWithRecovery (G2)", () => {
+  it("opens a healthy DB without recovery", () => {
+    dir = mkdtempSync(join(tmpdir(), "csa-rec-db-"));
+    const path = join(dir, "app.db");
+    const opened = openDatabaseWithRecovery(path, MIGRATIONS_DIR);
+    expect(opened.recovered).toBe(false);
+    expect(opened.migrations.applied.length).toBeGreaterThanOrEqual(19);
+    opened.db.close();
+    // İkinci açılış: idempotent, yine kurtarmasız.
+    const second = openDatabaseWithRecovery(path, MIGRATIONS_DIR);
+    expect(second.recovered).toBe(false);
+    expect(second.migrations.applied).toEqual([]);
+    second.db.close();
+  });
+
+  it("sets a corrupt file aside (never deletes) and rebuilds a fresh schema", () => {
+    dir = mkdtempSync(join(tmpdir(), "csa-rec-db-"));
+    const path = join(dir, "app.db");
+    // SQLite başlığı olmayan çöp dosya = bozuk DB.
+    writeFileSync(path, "bu bir sqlite dosyasi degil — bozuk veri");
+    const opened = openDatabaseWithRecovery(path, MIGRATIONS_DIR);
+    expect(opened.recovered).toBe(true);
+    expect(opened.migrations.applied.length).toBeGreaterThanOrEqual(19);
+    // Taze şema gerçekten çalışıyor + bozuk dosya .corrupt-* olarak duruyor.
+    const count = opened.db
+      .prepare("SELECT COUNT(*) AS c FROM champions")
+      .get() as { c: number };
+    expect(Number(count.c)).toBe(0);
+    opened.db.close();
+    expect(existsSync(path)).toBe(true);
+    expect(readdirSync(dir).some((f) => f.includes(".corrupt-"))).toBe(true);
   });
 });
 

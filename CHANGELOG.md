@@ -7,6 +7,16 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Veritabanı kurtarma** — açılışta bozuk veritabanı tespit edilirse dosya
+  SİLİNMEDEN `.corrupt-*` olarak kenara alınır, taze şema kurulur ve durum
+  dürüstçe bildirilir; maç/meta verileri sync'lerle yeniden dolar.
+- **İkon yedeği** — Data Dragon CDN'ine erişilemediğinde şampiyon ikonları boş
+  kutu yerine baş harflerle görünür.
+- **Onboarding netliği** — son adım artık ilk senkronun birkaç dakika
+  sürebileceğini, paket veriyle başlanacağını, 1-5 kısayollarını ve League
+  kapalıyken çalışmaya devam eden ekranları açıklıyor.
+- Canlı duman checklist'i (`docs/live-smoke-checklist.md`) — her release öncesi
+  koşulan elle doğrulama akışı (otomasyonun kapsamadığı canlı LCU/oyun yolları).
 - **Seans Koçu** — oturum başında ısınma kontrol listesi (devreden maç hedefin
   otomatik madde olur); üst üste 2 kayıpta nazik not, 3+ kayıpta "15 dk ara"
   önerisi (seans W/L ile). Yalnız önerir, hiçbir şeyi engellemez; kapatılabilir.

@@ -12,11 +12,15 @@ export const ChampionIcon: React.FC<Props> = ({ championKey, size = 'sm' }) => {
   const dim = size === 'sm' ? 'var(--champ-icon-sm)' : 'var(--champ-icon-md)';
 
   if (!championKey || error) {
+    // G3: CDN erişilemezse boş kutu yerine baş harfler — kart okunur kalır.
     return (
       <div
         className="champ-icon champ-icon--placeholder"
         style={{ width: dim, height: dim }}
-      />
+        title={championKey}
+      >
+        {championKey ? championKey.slice(0, 2) : ''}
+      </div>
     );
   }
 

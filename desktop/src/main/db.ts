@@ -14,7 +14,7 @@
 // replicated — the parallel-running Tauri app must keep its own DB file).
 
 import { createHash } from "node:crypto";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, renameSync } from "node:fs";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
@@ -110,4 +110,69 @@ export function openDatabase(dbPath: string): DatabaseSync {
   db.exec("PRAGMA journal_mode = WAL");
   db.exec("PRAGMA foreign_keys = ON");
   return db;
+}
+
+export interface RecoveredOpen {
+  db: DatabaseSync;
+  migrations: MigrationResult;
+  /** true = bozuk dosya kenara alınıp taze şema kuruldu. */
+  recovered: boolean;
+}
+
+/**
+ * G2 kurtarma yolu: aç + integrity check + migrate; herhangi biri patlarsa
+ * bozuk dosya SİLİNMEZ — `.corrupt-<ts>` olarak (WAL/SHM artıklarıyla) kenara
+ * alınır ve taze şema kurulur. Maç/meta verileri LCU + kaynak sync'leriyle
+ * yeniden dolar; feedback/not/hedef kaybı bozuk dosyadan elle kurtarılabilir.
+ */
+export function openDatabaseWithRecovery(
+  dbPath: string,
+  migrationsDir: string,
+): RecoveredOpen {
+  const tryOpen = (): RecoveredOpen => {
+    // openDatabase KULLANILMAZ: pragma aşamasında patlarsa tanıtıcı açık kalır
+    // ve Windows'ta bozuk dosya yeniden adlandırılamaz (EPERM). Burada her hata
+    // yolunda handle kapatılır.
+    const db = new DatabaseSync(dbPath);
+    try {
+      db.exec("PRAGMA journal_mode = WAL");
+      db.exec("PRAGMA foreign_keys = ON");
+      // integrity_check "ok" dönmezse bozulmuş kabul et (sessiz dejenerasyon yok).
+      const integrity = db
+        .prepare("PRAGMA integrity_check")
+        .get() as unknown as { integrity_check?: string };
+      if ((integrity?.integrity_check ?? "ok") !== "ok") {
+        throw new Error(`integrity_check: ${integrity.integrity_check}`);
+      }
+      return { db, migrations: runMigrations(db, migrationsDir), recovered: false };
+    } catch (err) {
+      try {
+        db.close();
+      } catch {
+        /* zaten kapalı */
+      }
+      throw err;
+    }
+  };
+
+  try {
+    return tryOpen();
+  } catch (firstErr) {
+    console.warn(
+      `DB açılamadı (${(firstErr as Error).message}) — bozuk dosya kenara alınıp taze şema kuruluyor`,
+    );
+    const stamp = Math.floor(Date.now() / 1000);
+    for (const suffix of ["", "-wal", "-shm"]) {
+      const p = `${dbPath}${suffix}`;
+      if (existsSync(p)) {
+        try {
+          renameSync(p, `${dbPath}.corrupt-${stamp}${suffix}`);
+        } catch {
+          /* kilitli artık dosya — taze açılış yine denenir */
+        }
+      }
+    }
+    const fresh = tryOpen();
+    return { ...fresh, recovered: true };
+  }
 }

@@ -10,7 +10,7 @@ import type { DatabaseSync } from "node:sqlite";
 import { app, BrowserWindow, type Tray } from "electron";
 
 import { LcuService } from "./commands/lcu";
-import { openDatabase, runMigrations } from "./db";
+import { openDatabaseWithRecovery } from "./db";
 import { emptyCaches } from "./ddragon";
 import { Engine } from "./engine";
 import { registerIpcHandlers, type AppStatus } from "./ipc";
@@ -61,12 +61,21 @@ if (!gotLock) {
   });
 
   void app.whenReady().then(() => {
-    // 1. DB + migrations (önce — Rust tarafındaki "migrations before any DB access" kuralı).
+    // 1. DB + migrations (önce — Rust tarafındaki "migrations before any DB access"
+    //    kuralı). G2: bozulmada dosya kenara alınır + taze şema kurulur.
     let db: DatabaseSync | undefined;
     try {
-      db = openDatabase(join(app.getPath("userData"), "csa-electron.db"));
-      const result = runMigrations(db, migrationsDir());
-      status.db.migrated = result.applied.length + result.skipped.length;
+      const opened = openDatabaseWithRecovery(
+        join(app.getPath("userData"), "csa-electron.db"),
+        migrationsDir(),
+      );
+      db = opened.db;
+      status.db.migrated =
+        opened.migrations.applied.length + opened.migrations.skipped.length;
+      if (opened.recovered) {
+        // Dürüst sinyal: veri sıfırdan dolacak; bozuk dosya .corrupt-* olarak duruyor.
+        status.db.error = "kurtarıldı: bozuk DB kenara alındı, taze şema kuruldu";
+      }
     } catch (err) {
       status.db.error = (err as Error).message;
     }
