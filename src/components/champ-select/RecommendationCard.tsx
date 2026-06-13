@@ -33,7 +33,19 @@ export const RecommendationCard: React.FC<Props> = ({ rec, rank, champMap }) => 
   const totalPct = Math.round(rec.total_score * 100);
 
   return (
-    <div className="rec-card" onClick={() => setExpanded((e) => !e)}>
+    <div
+      className="rec-card"
+      role="button"
+      tabIndex={0}
+      aria-expanded={expanded}
+      onClick={() => setExpanded((e) => !e)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          setExpanded((x) => !x);
+        }
+      }}
+    >
       <span className="rec-card__rank">{rank}</span>
       <ChampionIcon
         championKey={champMap.get(rec.champion_id) ?? rec.champion_key}

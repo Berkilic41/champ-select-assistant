@@ -47,6 +47,7 @@ export const OnboardingWizard: React.FC<Props> = ({ onComplete }) => {
             <span
               key={i}
               className={`onboarding-dot${i === step ? ' onboarding-dot--active' : ''}`}
+              aria-current={i === step ? 'step' : undefined}
             />
           ))}
         </div>

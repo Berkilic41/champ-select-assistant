@@ -16,10 +16,13 @@ export const QuickPickList: React.FC<Props> = ({ recommendations, activeIndex, o
   return (
   <div className="quick-pick-list">
     {recommendations.slice(0, 5).map((rec, i) => (
-      <div
+      <button
+        type="button"
         key={rec.champion_id}
         className={`quick-pick-row ${i === activeIndex ? 'quick-pick-row--active' : ''}`}
         onClick={() => onSelect(i)}
+        aria-label={rec.champion_name || rec.champion_key}
+        aria-current={i === activeIndex}
       >
         <span className="quick-pick-num">{i + 1}</span>
         <ChampionIcon championKey={rec.champion_key} size="sm" />
@@ -32,7 +35,7 @@ export const QuickPickList: React.FC<Props> = ({ recommendations, activeIndex, o
         >
           {rec.confidence === 'high' ? '●●●' : rec.confidence === 'medium' ? '●●○' : '●○○'}
         </span>
-      </div>
+      </button>
     ))}
   </div>
   );

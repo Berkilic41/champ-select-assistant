@@ -41,7 +41,18 @@ interface CardProps {
 const ChampionCard: React.FC<CardProps> = ({ stat, mastery, champKey, archetype, onClick }) => {
   const { t } = useTranslation();
   return (
-  <div className="champ-card champ-card--clickable" onClick={onClick}>
+  <div
+    className="champ-card champ-card--clickable"
+    role="button"
+    tabIndex={0}
+    onClick={onClick}
+    onKeyDown={(e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onClick?.();
+      }
+    }}
+  >
     <div className="champ-card__icon-wrap">
       <ChampionIcon size="md" championKey={champKey} />
       {mastery && mastery.mastery_level >= 5 && (
