@@ -6,20 +6,21 @@ League of Legends champ-select overlay. Kendi maç geçmişin, mastery verilerin
 
 - **Tüm roster — eksiksiz:** 172/172 şampiyon için draft analizi (arketip, hasar profili, CC, engage/peel). Kapsam, DDragon'a karşı bir testle zorunlu kılınır (`validate_ddragon_completeness`).
 - **Güncel patch:** Şampiyon/item/rune verisi Data Dragon / Community Dragon üzerinden güncel patch'ten (16.11) otomatik çekilir. Meta (win/pick/ban) oranları yakında kendi Riot API tabanlı veri servisinden gelecek (bkz. `docs/api-key-policy.md`); şu an comfort/matchup/sinerji/arketip sinyalleriyle öneri üretilir.
-- **Draft IQ:** 109 ability-referanslı combo + 80 lane matchup; kapsanmayan her eşleşme arketip-tabanlı counter ile yine de değerlendirilir (boş öneri yok).
+- **Draft IQ:** 123 ability-referanslı combo + lane matchup tablosu; kapsanmayan her eşleşme arketip-tabanlı counter ile yine de değerlendirilir (boş öneri yok).
 - **Dürüst güven:** Az veri / yeni patch / düşük örneklem durumları "güven" etiketiyle açıkça gösterilir — uydurma kesinlik yok.
 - **Güvenli:** Otomatik lock/ban/pick **yapmaz** (sadece öneri); LCU-first (developer API key gerekmez); telemetry yok.
 
 ## Stack
 
-- **Backend**: Rust 1.80+ · Tauri 2 · SQLite (rusqlite + refinery)
-- **Frontend**: React 19 · TypeScript 5 · Vite 7
-- **Package manager**: pnpm
+- **Core**: Rust 1.80+ → WebAssembly (`core/` — host-agnostik scoring & draft motoru)
+- **Host**: Electron (`desktop/` — Node I/O, LCU, `node:sqlite` ile DB)
+- **Frontend**: React 19 · TypeScript 5 · Vite 7 (`src/`, iki host'ta ortak)
+- **Package manager**: pnpm (workspace)
 
 ## Kurulum
 
 ```powershell
-# Gereksinimler: Rust 1.80+, Node 20+, pnpm, cargo-tauri
+# Gereksinimler: Rust 1.80+ (wasm32-unknown-unknown + wasm-pack), Node 22.5+, pnpm
 
 cp .env.example .env
 # .env içine Riot API anahtarını gir (RIOT_API_KEY=RGAPI-...)
@@ -30,23 +31,28 @@ pnpm install
 ## Geliştirme
 
 ```powershell
-pnpm tauri dev          # Tauri dev modu (hot reload)
-pnpm typecheck          # TypeScript tip kontrolü
+pnpm --filter csa-desktop dev   # Electron dev (hot reload)
+pnpm typecheck                  # TypeScript tip kontrolü
 ```
 
 ## Test
 
 ```powershell
-cd src-tauri
-cargo test              # Rust birim testleri (188 test)
-cargo clippy            # Rust lint
-cargo fmt               # Rust formatlama
+cd core
+cargo test                            # Rust/core birim testleri
+cargo clippy --all-features -- -D warnings
+cargo fmt --all -- --check
+
+# kökten (renderer) + desktop host:
+pnpm test:run                         # React/renderer testleri
+pnpm --filter csa-desktop test        # Electron host testleri (önce WASM build)
 ```
 
 ## Build
 
 ```powershell
-pnpm tauri build        # Üretim installer'ı oluşturur
+pnpm --filter csa-desktop build:wasm   # core → WASM (dist öncesi otomatik çalışır)
+pnpm --filter csa-desktop dist         # electron-builder ile Windows installer
 ```
 
 ## Ortam Değişkenleri
@@ -60,16 +66,16 @@ pnpm tauri build        # Üretim installer'ı oluşturur
 ## Mimari
 
 ```
-src-tauri/src/
-├── lcu/           # League Client Update lockfile + HTTP + WebSocket
-├── db/            # SQLite repo katmanı (rusqlite + refinery)
-├── ddragon/       # Data Dragon + CDragon cache
-├── riot/          # Riot API client + rate limiter
-├── recommendation/# Öneri motoru (scoring, team analysis)
-├── meta/          # Meta veri kaynakları (Sprint D)
-└── commands/      # Tauri command thin wrapper'ları
-src/
-└── components/    # React UI
+core/                    # Rust → WASM motoru (host-agnostik)
+├── src/recommendation/  # Öneri motoru (scoring, team analysis)
+├── resources/draft_iq/  # Draft IQ seed verisi (combos, arketipler, şampiyonlar)
+└── pkg/                 # wasm-pack çıktısı (build'de üretilir, gitignore)
+desktop/                 # Electron host (Node I/O)
+├── src/main/            # LCU (lockfile+HTTP+WS), node:sqlite DB, IPC, pencere
+└── src/preload/         # contextBridge köprüsü (window.api)
+src/                     # React/TS renderer (Tauri ve Electron'da ortak)
+└── components/
+cloudflare-worker/       # Match-V5 ingestion + anonim /v1/rates aggregate
 ```
 
 ## Roadmap
