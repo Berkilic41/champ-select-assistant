@@ -22,6 +22,7 @@
 
 .rec-card__info {
   flex: 1;
+  min-width: 0; /* let the text column shrink so long names truncate, not overflow */
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -84,6 +85,7 @@
 
 .score-row__label {
   width: 50px;
+  flex-shrink: 0; /* keep the label column from compressing on narrow cards */
   color: var(--color-text-muted);
 }
 
