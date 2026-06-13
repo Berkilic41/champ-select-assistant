@@ -639,9 +639,18 @@
     "locking": "LOCKING IN"
   },
   "quickPick": {
+    "title": "Alternatives",
     "confLow": "Low data",
     "confMedium": "Medium data",
     "confHigh": "High data"
+  },
+  "secondaryTabs": {
+    "matchup": "Matchup",
+    "teamPlan": "Team plan",
+    "counters": "Counter / Combo",
+    "deepDive": "Details",
+    "empty": "No data yet — fills in as the draft unfolds.",
+    "aria": "Detail tabs"
   },
   "onboarding": {
     "step1": {

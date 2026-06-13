@@ -589,12 +589,12 @@
   "build": {
     "loading": "Build verisi yükleniyor…",
     "title": "{{champ}} Build",
-    "core": "Core",
+    "core": "Temel",
     "situational": "Duruma Göre",
-    "skillOrder": "Skill Order",
-    "summoners": "Summoners",
-    "secondaryRunes": "Secondary Runes",
-    "statShards": "Stat Shards",
+    "skillOrder": "Beceri Sırası",
+    "summoners": "Sihirdar Büyüleri",
+    "secondaryRunes": "İkincil Rünler",
+    "statShards": "Stat Parçaları",
     "generalBadge": "Genel öneri",
     "generalHint": "Arketibe göre genel build — kanıtlanmış winrate değil"
   },
@@ -639,9 +639,18 @@
     "locking": "KİLİTLENİYOR"
   },
   "quickPick": {
+    "title": "Alternatifler",
     "confLow": "Az veri",
     "confMedium": "Orta veri",
     "confHigh": "Yüksek veri"
+  },
+  "secondaryTabs": {
+    "matchup": "Matchup",
+    "teamPlan": "Takım planı",
+    "counters": "Counter / Combo",
+    "deepDive": "Detay",
+    "empty": "Henüz veri yok — draft ilerledikçe dolacak.",
+    "aria": "Detay sekmeleri"
   },
   "onboarding": {
     "step1": {
@@ -687,9 +696,9 @@
     "preset_flex": "Flex",
     "preset_otp": "OTP",
     "weightsRelativeNote": "Ağırlıklar göreceli · otomatik dengelenir",
-    "weightComfort": "Mastery (Comfort)",
-    "weightLaneCounter": "Lane Counter",
-    "weightMatchup": "Lane Matchup",
+    "weightComfort": "Mastery (Konfor)",
+    "weightLaneCounter": "Koridor Counter'ı",
+    "weightMatchup": "Koridor Eşleşmesi",
     "weightTeamCounter": "Takım Karşılığı",
     "weightSynergy": "Sinerji",
     "weightMeta": "Meta",
@@ -723,7 +732,7 @@
     "syncFeedbackOffline": "Cloud endpoint yok; feedback yerelde bekliyor",
     "syncFeedbackNothing": "Gönderilecek feedback yok",
     "syncFeedbackFail": "Feedback sync hatası — tekrar denenebilir",
-    "languageSection": "Dil / Language",
+    "languageSection": "Dil",
     "language": "Dil",
     "languageTr": "Türkçe",
     "languageEn": "English",
