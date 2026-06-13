@@ -14,6 +14,8 @@ export interface Env {
   MAX_MATCHES_PER_RUN: string;
   SEED_PLAYERS_PER_REGION: string;
   MATCHES_PER_PLAYER: string;
+  /** Shared secret gating the manual /v1/ingest HTTP trigger (cron needs none). */
+  INGEST_SECRET?: string;
 }
 
 const num = (v: string | undefined, fallback: number): number => {
@@ -61,12 +63,6 @@ export async function runIngestion(
 
     for (const matchId of candidates) {
       if (remaining <= 0) break;
-      const seen = await env.DB.prepare(
-        "SELECT 1 FROM processed_matches WHERE match_id = ?",
-      )
-        .bind(matchId)
-        .first();
-      if (seen) continue;
 
       let match: MatchDto;
       try {
@@ -74,7 +70,29 @@ export async function runIngestion(
       } catch {
         continue;
       }
-      await aggregateMatch(env, region, matchId, match);
+
+      // Atomic claim: INSERT OR IGNORE is atomic, so exactly one concurrent run
+      // (cron + a manual trigger) gets changes===1 and aggregates; the loser
+      // gets changes===0 and skips — no double counting. The claim replaces the
+      // old non-atomic SELECT-then-skip + in-batch insert.
+      const claim = await env.DB.prepare(
+        "INSERT OR IGNORE INTO processed_matches (match_id, processed_at) VALUES (?, ?)",
+      )
+        .bind(matchId, Date.now())
+        .run();
+      if (!claim.success || (claim.meta?.changes ?? 0) === 0) continue;
+
+      try {
+        await aggregateMatch(env, region, match);
+      } catch {
+        // Aggregation failed after claiming — release the claim so a later run
+        // retries this match instead of silently dropping it.
+        await env.DB.prepare("DELETE FROM processed_matches WHERE match_id = ?")
+          .bind(matchId)
+          .run()
+          .catch(() => undefined);
+        continue;
+      }
       remaining--;
       perRegion[region]++;
     }
@@ -87,7 +105,6 @@ export async function runIngestion(
 async function aggregateMatch(
   env: Env,
   region: string,
-  matchId: string,
   match: MatchDto,
 ): Promise<void> {
   const patch = patchFromGameVersion(match.info.gameVersion);
@@ -176,11 +193,9 @@ async function aggregateMatch(
        DO UPDATE SET total_games = total_games + 1, updated_at = excluded.updated_at`,
     ).bind(patch, region, now),
   );
-  stmts.push(
-    env.DB.prepare(
-      "INSERT OR IGNORE INTO processed_matches (match_id, processed_at) VALUES (?, ?)",
-    ).bind(matchId, now),
-  );
+  // NOTE: processed_matches is claimed atomically in runIngestion BEFORE this
+  // call (INSERT OR IGNORE + changes check), so it is intentionally not inserted
+  // here — doing both would re-introduce the double-count race.
 
   await env.DB.batch(stmts);
 }

@@ -2,17 +2,6 @@ import { runIngestion, readRates, readMatchups, readBuilds, type Env } from "./i
 
 export type { Env };
 
-const ALLOWED_HOSTS = new Set([
-  "tr1.api.riotgames.com",
-  "euw1.api.riotgames.com",
-  "eune1.api.riotgames.com",
-  "na1.api.riotgames.com",
-  "kr.api.riotgames.com",
-  "europe.api.riotgames.com",
-  "americas.api.riotgames.com",
-  "asia.api.riotgames.com",
-]);
-
 const CORS = { "Access-Control-Allow-Origin": "*" };
 
 function json(body: unknown, status = 200): Response {
@@ -64,8 +53,14 @@ export default {
         return json({ error: String(e) }, 500);
       }
     }
-    // Manual ingestion trigger (handy for `wrangler dev`; cron does this on schedule).
+    // Manual ingestion trigger — secret-gated so an anonymous caller can't drive
+    // the personal Riot key or race the cron. Cron runs this on schedule without
+    // HTTP. Requires `Authorization: Bearer <INGEST_SECRET>` (set via wrangler secret).
     if (path === "/v1/ingest") {
+      const auth = request.headers.get("Authorization");
+      if (!env.INGEST_SECRET || auth !== `Bearer ${env.INGEST_SECRET}`) {
+        return json({ error: "unauthorized" }, 401);
+      }
       try {
         return json(await runIngestion(env));
       } catch (e) {
@@ -73,26 +68,9 @@ export default {
       }
     }
 
-    // ── Per-user Riot API passthrough proxy: /proxy/{riot-host}/{riot-path} ──
-    if (path.startsWith("/proxy/")) {
-      const parts = path.slice("/proxy/".length).split("/");
-      if (parts.length < 2) return new Response("Invalid path", { status: 400 });
-      const riotHost = parts[0];
-      if (!ALLOWED_HOSTS.has(riotHost)) {
-        return new Response("Host not allowed", { status: 403 });
-      }
-      const riotPath = "/" + parts.slice(1).join("/");
-      const riotResp = await fetch(`https://${riotHost}${riotPath}${url.search}`, {
-        headers: { "X-Riot-Token": env.RIOT_API_KEY, Accept: "application/json" },
-      });
-      const headers = new Headers({ "Content-Type": "application/json", ...CORS });
-      for (const h of ["X-App-Rate-Limit", "X-Method-Rate-Limit", "Retry-After"]) {
-        const v = riotResp.headers.get(h);
-        if (v) headers.set(h, v);
-      }
-      return new Response(riotResp.body, { status: riotResp.status, headers });
-    }
-
+    // NOTE: the per-user Riot API passthrough (/proxy/*) was removed — it exposed
+    // the personal/dev key to anonymous abuse. The app is LCU-first; a Riot proxy
+    // returns (auth-gated) only after a production key is approved.
     return new Response("Not found", { status: 404 });
   },
 
