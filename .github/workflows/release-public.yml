@@ -44,7 +44,7 @@ jobs:
           restore-keys: ${{ runner.os }}-cargo-pub-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true
 
       # NOTE: Authenticode signing is not yet wired — no code-signing certificate.
       # When a cert is available, add `win.certificateFile`/`cscLink` to

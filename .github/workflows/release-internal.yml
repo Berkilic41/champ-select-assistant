@@ -45,7 +45,7 @@ jobs:
           restore-keys: ${{ runner.os }}-cargo-release-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true
 
       # Builds the WASM core (predist hook), the Electron bundle, then the NSIS
       # installer, and publishes Setup.exe + blockmap + latest.yml to the tag's

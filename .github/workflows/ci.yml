@@ -59,7 +59,9 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        # pnpm 10+ gates dependency build scripts; allow them so electron/esbuild/
+        # workerd postinstalls run (a clean CI install otherwise errors ERR_PNPM_IGNORED_BUILDS).
+        run: pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true
 
       - name: TypeScript check
         run: pnpm typecheck
