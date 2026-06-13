@@ -6,6 +6,11 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 
 ## [Unreleased]
 
+## [0.10.0-beta.3] — 2026-06-12
+
+Koç sürümü: uygulama draft analistinden gerçek bir solo-q koçuna dönüştü —
+maç karnesi + hedef döngüsü, kişisel form sinyali, seans koçu ve daha fazlası.
+
 ### Eklendi
 - **Veritabanı kurtarma** — açılışta bozuk veritabanı tespit edilirse dosya
   SİLİNMEDEN `.corrupt-*` olarak kenara alınır, taze şema kurulur ve durum
