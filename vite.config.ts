@@ -35,5 +35,9 @@ export default defineConfig(async () => ({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    // Renderer tests only. Without this, vitest's default glob also picks up
+    // desktop/tests/** and core/** — which need a WASM build + Electron and so
+    // belong to the dedicated "Desktop checks" CI job, not the renderer run.
+    include: ['src/**/*.test.{ts,tsx}'],
   },
 }));

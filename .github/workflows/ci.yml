@@ -66,5 +66,55 @@ jobs:
       - name: TypeScript check
         run: pnpm typecheck
 
-      - name: Unit tests
+      - name: Unit tests (renderer)
+        # Root vitest is scoped to src/ (see vite.config.ts). Desktop tests run
+        # in the dedicated "desktop" job below — they need a WASM build + an
+        # Electron stub and would otherwise fail in this plain-Node job.
         run: pnpm test:run
+
+  desktop:
+    name: Desktop checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            core/target
+          key: ${{ runner.os }}-cargo-desktop-${{ hashFiles('core/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-desktop-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true
+
+      - name: Build WASM core
+        # engine.test.ts loads ../core/pkg directly; tests in node, electron stubbed.
+        run: pnpm --filter csa-desktop build:wasm
+
+      - name: TypeScript check (desktop)
+        run: pnpm --filter csa-desktop typecheck
+
+      - name: Unit tests (desktop)
+        run: pnpm --filter csa-desktop test

@@ -35,11 +35,6 @@
     "react-i18next": "^15.0.0",
     "recharts": "^2.15.0"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
-  },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
