@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — Champ Select Assistant</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #0a0e14; color: #e6edf3; line-height: 1.7; }
+    a { color: #c8aa6e; }
+    .wrap { max-width: 780px; margin: 0 auto; padding: 24px 20px 60px; }
+    .top { padding: 16px 0; border-bottom: 1px solid #243044; margin-bottom: 24px; }
+    .top a { color: #9fb0c3; text-decoration: none; font-size: 14px; }
+    h1 { color: #f0e6d2; font-size: 30px; margin: 0 0 6px; }
+    .eff { color: #9fb0c3; font-size: 14px; margin: 0 0 28px; }
+    h2 { color: #f0e6d2; font-size: 20px; margin: 30px 0 8px; }
+    p, li { color: #c7d3e0; }
+    table { width: 100%; border-collapse: collapse; margin: 14px 0; }
+    th, td { border: 1px solid #243044; padding: 8px 12px; text-align: left; font-size: 14px; }
+    th { background: #1a2230; color: #f0e6d2; }
+    .disclaimer { margin-top: 36px; padding-top: 18px; border-top: 1px solid #243044; font-size: 12px; color: #6b7a8d; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top"><a href="index.html">← Champ Select Assistant</a></div>
+
+    <h1>Privacy Policy</h1>
+    <p class="eff">Effective date: 2026-05-31 · Champ Select Assistant ("the App")</p>
+
+    <p>This document explains what data the App accesses, how it uses that data, and what it deliberately does <strong>not</strong> do.</p>
+
+    <h2>Summary</h2>
+    <ul>
+      <li><strong>No telemetry.</strong> The App sends no data to any analytics or tracking service.</li>
+      <li><strong>Data stays local.</strong> All data is stored only on your own computer.</li>
+      <li><strong>No accounts.</strong> There is no registration, login, or cloud sync.</li>
+    </ul>
+
+    <h2>Data we access</h2>
+    <p>The App only accesses the following data, belonging to the <strong>local player</strong> currently logged into League of Legends:</p>
+    <table>
+      <tr><th>Data</th><th>Source</th><th>Purpose</th></tr>
+      <tr><td>Recent match history</td><td>League Client (LCU)</td><td>Comfort / recommendation scoring</td></tr>
+      <tr><td>Champion mastery</td><td>League Client (LCU)</td><td>Recommendation ranking</td></tr>
+      <tr><td>Champion-select session state</td><td>League Client (LCU)</td><td>Live recommendations</td></tr>
+      <tr><td>Server/language preference, weight settings</td><td>Values you enter</td><td>App configuration</td></tr>
+    </table>
+    <p>This data is stored only in a <strong>local SQLite database</strong> and never leaves your device.</p>
+
+    <h2>How we use it</h2>
+    <ul>
+      <li>Data is processed on your device only, to produce champion-select recommendations.</li>
+      <li>No data is shared with third parties, sold, or uploaded to any server.</li>
+    </ul>
+
+    <h2>Aggregated meta data (server-side)</h2>
+    <p>To compute the meta (champion win/pick/ban rates, lane matchups, common builds), a scheduled server-side job samples high-elo public games. Only <strong>aggregated statistics</strong> are stored server-side — no individual user's personal data. The Riot API key used for this is stored only on the server-side proxy and is never embedded in the distributed App.</p>
+
+    <h2>External connections (public static content only)</h2>
+    <p>The App connects to the following services for public static content that contains <strong>no personal data</strong>:</p>
+    <ul>
+      <li><code>ddragon.leagueoflegends.com</code> and <code>cdn.communitydragon.org</code> — champion/item images and static game data (Data Dragon / Community Dragon).</li>
+      <li>Aggregated meta (win/pick/ban) statistics for the current patch.</li>
+    </ul>
+    <p>These requests carry no personal identifier (PUUID, name, or match ID).</p>
+
+    <h2>Riot Developer API key</h2>
+    <ul>
+      <li>The App does not require a Riot developer API key for normal use.</li>
+      <li>An optional key may be kept only in a local <code>.env</code> file; it is never embedded in the binary and never logged.</li>
+    </ul>
+
+    <h2>Retention and deletion</h2>
+    <ul>
+      <li>All data lives in a SQLite file in your local application-data folder.</li>
+      <li>Uninstalling the App or deleting that file permanently removes all of your data.</li>
+    </ul>
+
+    <h2>Children's privacy</h2>
+    <p>The App is subject to League of Legends' age requirements and does not intend to collect data specifically from children.</p>
+
+    <h2>Changes</h2>
+    <p>If this policy is updated, the effective date will change and it will be noted in the changelog.</p>
+
+    <h2>Contact</h2>
+    <p>Questions: <a href="https://github.com/Berkilic41/champ-select-assistant/issues">GitHub Issues</a>.</p>
+
+    <p class="disclaimer">
+      Champ Select Assistant isn't endorsed by Riot Games and doesn't reflect the
+      views or opinions of Riot Games or anyone officially involved in producing or
+      managing Riot Games properties. Riot Games and all associated properties are
+      trademarks or registered trademarks of Riot Games, Inc.
+    </p>
+  </div>
+</body>
+</html>
