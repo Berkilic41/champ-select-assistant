@@ -20,19 +20,17 @@ use crate::draft_brain::{
     upgrade_recommendations_with_context, DataPack, ModelPack,
 };
 use crate::draft_iq::archetype::{ChampionArchetype, DamageProfile, PowerCurve};
-use crate::draft_simulator::{
-    DamageType, DraftSimInput, DraftSimMove, DraftSimState, SimChampion,
-};
 use crate::draft_iq::game_plan::{compute_game_plan, GamePlan};
 use crate::draft_iq::narrative::{build_matchup_tips, build_rationale};
 use crate::draft_iq::DraftKnowledgeBase;
-use crate::models::Recommendation;
+use crate::draft_simulator::{DamageType, DraftSimInput, DraftSimMove, DraftSimState, SimChampion};
 use crate::feedback_analytics::{analyze_feedback, FeedbackEvent};
 use crate::feedback_observability::{
     personalization_status, summarize_observability, FeedbackObservability,
     FeedbackPersonalizationStatus,
 };
 use crate::feedback_signal::{aggregate_feedback, FeedbackInput, FeedbackSignal};
+use crate::models::Recommendation;
 use crate::pool_builder::suggest_pool;
 use crate::pool_coach::{analyze_pool, PoolChampion, PoolCoachInput};
 use crate::rate_blend::{self, SourceRate};
@@ -410,6 +408,7 @@ fn resolve_enemy_archetype(
 ///   1. Matchup-specific curated row (`build_source = "seed"`).
 ///   2. Position-default curated row (`opponent_archetype` NULL, also "seed").
 ///   3. General archetype heuristic (`build_source = "general"`).
+///
 /// Leaves `build_source = "none"` only when the archetype is unknown.
 fn enrich_build(
     rec: &mut Recommendation,
@@ -515,8 +514,7 @@ fn apply_lane_form(
     if let Some(entry) = lane_form.get(&rec.champion_id) {
         let s = crate::game_review::lane_form_score(entry);
         rec.lane_form_score = Some((s * 100.0).round() / 100.0);
-        rec.total_score =
-            (rec.total_score + LANE_FORM_NUDGE * (s - 0.5) * 2.0).clamp(0.0, 1.0);
+        rec.total_score = (rec.total_score + LANE_FORM_NUDGE * (s - 0.5) * 2.0).clamp(0.0, 1.0);
     }
 }
 
@@ -592,7 +590,8 @@ pub fn ban_suggestions_from_json(input_json: &str) -> Result<String, String> {
         &input.role_map,
         &kb,
     );
-    serde_json::to_string(&suggestions).map_err(|e| format!("ban suggestions serialize failed: {e}"))
+    serde_json::to_string(&suggestions)
+        .map_err(|e| format!("ban suggestions serialize failed: {e}"))
 }
 
 /// Compute the draft verdict. Output is one `draft_verdict::DraftVerdict` object.
@@ -611,8 +610,8 @@ pub fn draft_verdict_from_json(input_json: &str) -> Result<String, String> {
 /// Analyze the player's champion pool. Input is one `pool_coach::PoolCoachInput`;
 /// output is one `pool_coach::ChampionPoolPlan`.
 pub fn pool_coach_from_json(input_json: &str) -> Result<String, String> {
-    let input: crate::pool_coach::PoolCoachInput = serde_json::from_str(input_json)
-        .map_err(|e| format!("invalid pool coach input: {e}"))?;
+    let input: crate::pool_coach::PoolCoachInput =
+        serde_json::from_str(input_json).map_err(|e| format!("invalid pool coach input: {e}"))?;
     let plan = crate::pool_coach::analyze_pool(&input);
     serde_json::to_string(&plan).map_err(|e| format!("pool plan serialize failed: {e}"))
 }
@@ -629,8 +628,8 @@ pub fn performance_report_from_json(input_json: &str) -> Result<String, String> 
 /// Compute objective timers / macro state. Input is one
 /// `macro_timers::MacroTimerInput`; output is one `macro_timers::MacroState`.
 pub fn macro_state_from_json(input_json: &str) -> Result<String, String> {
-    let input: crate::macro_timers::MacroTimerInput = serde_json::from_str(input_json)
-        .map_err(|e| format!("invalid macro state input: {e}"))?;
+    let input: crate::macro_timers::MacroTimerInput =
+        serde_json::from_str(input_json).map_err(|e| format!("invalid macro state input: {e}"))?;
     let state = crate::macro_timers::compute_macro_state(&input);
     serde_json::to_string(&state).map_err(|e| format!("macro state serialize failed: {e}"))
 }
@@ -641,8 +640,8 @@ pub fn macro_state_from_json(input_json: &str) -> Result<String, String> {
 pub fn parse_session_from_json(input_json: &str) -> Result<String, String> {
     let value: serde_json::Value =
         serde_json::from_str(input_json).map_err(|_| "Geçersiz session JSON".to_string())?;
-    let state =
-        crate::session_parse::parse_session(&value).ok_or_else(|| "Geçersiz session JSON".to_string())?;
+    let state = crate::session_parse::parse_session(&value)
+        .ok_or_else(|| "Geçersiz session JSON".to_string())?;
     serde_json::to_string(&state).map_err(|e| format!("session serialize failed: {e}"))
 }
 
@@ -697,8 +696,7 @@ pub fn feedback_signals_from_json(input_json: &str) -> Result<String, String> {
 /// The brawl-mode (ARAM/Arena) scoring preset as JSON — single source of truth
 /// stays in core (`ScoringWeights::aram()`); the JS host must not copy the values.
 pub fn aram_weights_json_string() -> String {
-    serde_json::to_string(&ScoringWeights::aram())
-        .expect("ScoringWeights serializes infallibly")
+    serde_json::to_string(&ScoringWeights::aram()).expect("ScoringWeights serializes infallibly")
 }
 
 // ── Champ-select analysis cluster (P1.3b-3) ───────────────────────────────────
@@ -814,9 +812,17 @@ pub fn counter_picks_from_json(input_json: &str) -> Result<String, String> {
     let kb = DraftKnowledgeBase::load().map_err(|e| format!("KB load failed: {e}"))?;
     let inputs = EngineInputs::from_input(input, &kb);
 
-    let pool_ids: Vec<u32> = inputs.mastery.iter().map(|m| m.champion_id as u32).collect();
-    let hints =
-        crate::counter_pick::compute_counter_picks(&inputs.ctx(), &inputs.all_champions, &kb, &pool_ids);
+    let pool_ids: Vec<u32> = inputs
+        .mastery
+        .iter()
+        .map(|m| m.champion_id as u32)
+        .collect();
+    let hints = crate::counter_pick::compute_counter_picks(
+        &inputs.ctx(),
+        &inputs.all_champions,
+        &kb,
+        &pool_ids,
+    );
     serde_json::to_string(&hints).map_err(|e| format!("counter picks serialize failed: {e}"))
 }
 
@@ -861,8 +867,8 @@ pub fn draft_verdict_full_from_json(input_json: &str) -> Result<String, String> 
 
 /// Both teams' composition summaries (`get_team_comp` parity) → `TeamCompBoard`.
 pub fn team_comp_from_json(input_json: &str) -> Result<String, String> {
-    let input: TeamContextInput = serde_json::from_str(input_json)
-        .map_err(|e| format!("invalid team comp input: {e}"))?;
+    let input: TeamContextInput =
+        serde_json::from_str(input_json).map_err(|e| format!("invalid team comp input: {e}"))?;
     let kb = DraftKnowledgeBase::load().map_err(|e| format!("KB load failed: {e}"))?;
 
     let (ally_ids, enemy_ids) = ally_enemy_ids(&input.session);
@@ -877,8 +883,8 @@ pub fn team_comp_from_json(input_json: &str) -> Result<String, String> {
 
 /// Team-level macro game plan (`get_game_plan` parity) → `GamePlan`.
 pub fn game_plan_from_json(input_json: &str) -> Result<String, String> {
-    let input: TeamContextInput = serde_json::from_str(input_json)
-        .map_err(|e| format!("invalid game plan input: {e}"))?;
+    let input: TeamContextInput =
+        serde_json::from_str(input_json).map_err(|e| format!("invalid game plan input: {e}"))?;
     let kb = DraftKnowledgeBase::load().map_err(|e| format!("KB load failed: {e}"))?;
 
     let (ally_ids, enemy_ids) = ally_enemy_ids(&input.session);
@@ -904,8 +910,8 @@ pub struct ComboBoardEntry {
 /// Known combos between the local pick (locked or hovered) and the locked
 /// allies, strongest first. Empty when no pick or no ally combo exists.
 pub fn combo_board_from_json(input_json: &str) -> Result<String, String> {
-    let input: TeamContextInput = serde_json::from_str(input_json)
-        .map_err(|e| format!("invalid combo board input: {e}"))?;
+    let input: TeamContextInput =
+        serde_json::from_str(input_json).map_err(|e| format!("invalid combo board input: {e}"))?;
     let kb = DraftKnowledgeBase::load().map_err(|e| format!("KB load failed: {e}"))?;
     let session = &input.session;
 
@@ -1102,8 +1108,8 @@ pub struct LaneMatchup {
 /// Per-phase lane matchup vs the visible (or inferred) lane opponent. JSON
 /// `null` when there's no lane (ARAM), no pick, no opponent, or missing KB data.
 pub fn lane_matchup_from_json(input_json: &str) -> Result<String, String> {
-    let input: TeamContextInput = serde_json::from_str(input_json)
-        .map_err(|e| format!("invalid lane matchup input: {e}"))?;
+    let input: TeamContextInput =
+        serde_json::from_str(input_json).map_err(|e| format!("invalid lane matchup input: {e}"))?;
     let kb = DraftKnowledgeBase::load().map_err(|e| format!("KB load failed: {e}"))?;
     let session = &input.session;
     let null = || Ok("null".to_string());
@@ -1354,8 +1360,8 @@ fn to_pool_champion(
 /// ≥ 12k points or ≥ 15 games; role fit via meta share / curated flex / archetype;
 /// top-12 by comfort); learn candidates are role-fitting champions NOT owned.
 pub fn champion_pool_plan_from_json(input_json: &str) -> Result<String, String> {
-    let input: PoolInsightsInput = serde_json::from_str(input_json)
-        .map_err(|e| format!("invalid pool plan input: {e}"))?;
+    let input: PoolInsightsInput =
+        serde_json::from_str(input_json).map_err(|e| format!("invalid pool plan input: {e}"))?;
     let kb = DraftKnowledgeBase::load().map_err(|e| format!("KB load failed: {e}"))?;
     let role = input.role;
     let meta_rates = meta_rates_map(input.meta_rates);
@@ -1363,16 +1369,26 @@ pub fn champion_pool_plan_from_json(input_json: &str) -> Result<String, String> 
     let mut key_by_id: HashMap<u32, String> = input
         .all_champions
         .iter()
-        .filter_map(|c| u32::try_from(c.champion_id).ok().map(|id| (id, c.key.clone())))
+        .filter_map(|c| {
+            u32::try_from(c.champion_id)
+                .ok()
+                .map(|id| (id, c.key.clone()))
+        })
         .collect();
     for (key, arch) in &kb.archetypes {
-        key_by_id.entry(arch.champion_id).or_insert_with(|| key.clone());
+        key_by_id
+            .entry(arch.champion_id)
+            .or_insert_with(|| key.clone());
     }
 
     let mastery_by_id: HashMap<u32, (i64, i64)> = input
         .mastery
         .iter()
-        .filter_map(|m| u32::try_from(m.champion_id).ok().map(|id| (id, (m.level, m.points))))
+        .filter_map(|m| {
+            u32::try_from(m.champion_id)
+                .ok()
+                .map(|id| (id, (m.level, m.points)))
+        })
         .collect();
     let games_by_id: HashMap<u32, u32> = input
         .stats
@@ -1478,8 +1494,8 @@ pub fn trend_report_from_json(input_json: &str) -> Result<String, String> {
         #[serde(default)]
         matches: Vec<crate::postgame::MatchRow>,
     }
-    let input: TrendInput = serde_json::from_str(input_json)
-        .map_err(|e| format!("invalid trend input: {e}"))?;
+    let input: TrendInput =
+        serde_json::from_str(input_json).map_err(|e| format!("invalid trend input: {e}"))?;
     let report = crate::game_review::build_trend_report(&input.matches);
     serde_json::to_string(&report).map_err(|e| format!("trend serialize failed: {e}"))
 }
@@ -1492,16 +1508,16 @@ pub fn session_read_from_json(input_json: &str) -> Result<String, String> {
         #[serde(default)]
         matches: Vec<crate::postgame::MatchRow>,
     }
-    let input: SessionInput = serde_json::from_str(input_json)
-        .map_err(|e| format!("invalid session input: {e}"))?;
+    let input: SessionInput =
+        serde_json::from_str(input_json).map_err(|e| format!("invalid session input: {e}"))?;
     let read = crate::game_review::build_session_read(&input.matches);
     serde_json::to_string(&read).map_err(|e| format!("session serialize failed: {e}"))
 }
 
 /// Maç sonu karnesi (`build_game_review` sarmalayıcısı). Çıktı: `GameReview`.
 pub fn game_review_from_json(input_json: &str) -> Result<String, String> {
-    let input: GameReviewInput = serde_json::from_str(input_json)
-        .map_err(|e| format!("invalid game review input: {e}"))?;
+    let input: GameReviewInput =
+        serde_json::from_str(input_json).map_err(|e| format!("invalid game review input: {e}"))?;
     let review = crate::game_review::build_game_review(
         &input.reviewed,
         &input.history,
@@ -1542,8 +1558,7 @@ pub fn feedback_observability_from_json(input_json: &str) -> Result<String, Stri
     let counters = summarize_observability(&inputs, pending_sync);
     let status = personalization_status(&counters);
     let out = FeedbackObservabilityOut { counters, status };
-    serde_json::to_string(&out)
-        .map_err(|e| format!("feedback observability serialize failed: {e}"))
+    serde_json::to_string(&out).map_err(|e| format!("feedback observability serialize failed: {e}"))
 }
 
 #[derive(Debug, Deserialize)]
@@ -1794,8 +1809,8 @@ pub fn draft_simulation_from_json(input_json: &str) -> Result<String, String> {
 /// `get_draft_fork` parity: decisive A-vs-B comparison of two pickable options.
 /// JSON `null` when an option is 0 / duplicate / unavailable / not in the KB.
 pub fn draft_fork_from_json(input_json: &str) -> Result<String, String> {
-    let input: DraftForkInput = serde_json::from_str(input_json)
-        .map_err(|e| format!("invalid draft fork input: {e}"))?;
+    let input: DraftForkInput =
+        serde_json::from_str(input_json).map_err(|e| format!("invalid draft fork input: {e}"))?;
     if input.option_a_id == 0 || input.option_b_id == 0 || input.option_a_id == input.option_b_id {
         return Ok("null".to_string());
     }
@@ -1834,10 +1849,11 @@ pub struct IngamePlanInput {
 /// active player in the payload or the champion isn't in the KB (quiet, expected
 /// — the "no live game" case never reaches core, the host returns null itself).
 pub fn ingame_plan_from_json(input_json: &str) -> Result<String, String> {
-    let input: IngamePlanInput = serde_json::from_str(input_json)
-        .map_err(|e| format!("invalid ingame plan input: {e}"))?;
+    let input: IngamePlanInput =
+        serde_json::from_str(input_json).map_err(|e| format!("invalid ingame plan input: {e}"))?;
     let kb = DraftKnowledgeBase::load().map_err(|e| format!("KB load failed: {e}"))?;
-    let plan = crate::live_client::compute_ingame_plan(&input.allgamedata, &input.all_champions, &kb);
+    let plan =
+        crate::live_client::compute_ingame_plan(&input.allgamedata, &input.all_champions, &kb);
     serde_json::to_string(&plan).map_err(|e| format!("ingame plan serialize failed: {e}"))
 }
 
@@ -1845,8 +1861,8 @@ pub fn ingame_plan_from_json(input_json: &str) -> Result<String, String> {
 /// state. The host wraps it as `{live, state}` (`OverlayMacroState` parity) and
 /// handles the offline case without calling core.
 pub fn macro_state_from_allgamedata_json(input_json: &str) -> Result<String, String> {
-    let raw: serde_json::Value = serde_json::from_str(input_json)
-        .map_err(|e| format!("invalid allgamedata input: {e}"))?;
+    let raw: serde_json::Value =
+        serde_json::from_str(input_json).map_err(|e| format!("invalid allgamedata input: {e}"))?;
     let state =
         crate::macro_timers::compute_macro_state(&crate::live_client::parse_macro_input(&raw));
     serde_json::to_string(&state).map_err(|e| format!("macro state serialize failed: {e}"))
@@ -2034,11 +2050,7 @@ fn coverage_from_counts(
     counts: &CoverageCountsInput,
     data_pack: Option<&DataPackCacheInput>,
     now: i64,
-) -> (
-    crate::draft_brain_data::LocalCoverage,
-    bool,
-    Vec<String>,
-) {
+) -> (crate::draft_brain_data::LocalCoverage, bool, Vec<String>) {
     use crate::draft_brain_data::{DataSourceEntry, DataSourceKind};
 
     // Bundled seeds + DDragon are always present; rates imply an aggregator.
@@ -2049,7 +2061,11 @@ fn coverage_from_counts(
             Some(counts.build_count.max(counts.matchup_count)),
             no_local_data,
         ),
-        DataSourceEntry::from_kind(DataSourceKind::ManualSeed, Some(counts.matchup_count), false),
+        DataSourceEntry::from_kind(
+            DataSourceKind::ManualSeed,
+            Some(counts.matchup_count),
+            false,
+        ),
         DataSourceEntry::from_kind(DataSourceKind::Ddragon, None, false),
     ];
     if counts.champion_rates_count > 0 {
@@ -2281,8 +2297,10 @@ pub fn data_trajectory_from_json(input_json: &str) -> Result<String, String> {
 
     let (ramp_state, data_growing, measured_at, trajectory) = match input.ramp {
         Some(r) => {
-            let trajectory =
-                crate::coverage_ramp::classify_data_trajectory(&input.quality_status, &r.ramp_state);
+            let trajectory = crate::coverage_ramp::classify_data_trajectory(
+                &input.quality_status,
+                &r.ramp_state,
+            );
             (
                 r.ramp_state,
                 r.data_growing,
@@ -2420,8 +2438,8 @@ pub fn cache_promotion_from_json(input_json: &str) -> Result<String, String> {
         let mut pack =
             crate::draft_brain_data::build_local_data_pack(&coverage, input.patch, input.region);
         pack.generated_at = Some(input.now_secs.clamp(0, u32::MAX as i64) as u32);
-        let payload = serde_json::to_string(&pack)
-            .map_err(|e| format!("data pack serialize failed: {e}"))?;
+        let payload =
+            serde_json::to_string(&pack).map_err(|e| format!("data pack serialize failed: {e}"))?;
         (Some(pack.version), Some(payload))
     } else {
         (None, None)
@@ -2505,8 +2523,7 @@ pub fn match_fetch_plan_from_json(input_json: &str) -> Result<String, String> {
         plan_coverage_expansion, CoverageExpansionInput, FrontierSample,
     };
     use crate::match_fetch_planner::{
-        plan_match_fetch, CoverageGap, FetchedMatchRecord, MatchCandidate,
-        MatchFetchPlannerInput,
+        plan_match_fetch, CoverageGap, FetchedMatchRecord, MatchCandidate, MatchFetchPlannerInput,
     };
 
     let input: MatchFetchPlanInput = serde_json::from_str(input_json)
@@ -2688,8 +2705,7 @@ pub fn match_discovery_plan_from_json(input_json: &str) -> Result<String, String
             })
             .collect(),
     });
-    serde_json::to_string(&plan)
-        .map_err(|e| format!("match discovery plan serialize failed: {e}"))
+    serde_json::to_string(&plan).map_err(|e| format!("match discovery plan serialize failed: {e}"))
 }
 
 /// Raw Match-V5 detayları (id'leriyle hizalı) + bölge.
@@ -3106,7 +3122,6 @@ mod wasm {
         super::champion_pool_plan_from_json(input).map_err(|e| JsValue::from_str(&e))
     }
 
-
     #[wasm_bindgen]
     pub fn feedback_observability_json(input: &str) -> Result<String, JsValue> {
         super::feedback_observability_from_json(input).map_err(|e| JsValue::from_str(&e))
@@ -3222,10 +3237,19 @@ mod tests {
         let out = recommendations_from_json(RECOMMENDATIONS_FIXTURE).expect("engine should run");
         let recs: serde_json::Value = serde_json::from_str(&out).expect("output must be JSON");
         let arr = recs.as_array().expect("output must be an array");
-        assert!(!arr.is_empty(), "fixture should yield at least one recommendation");
+        assert!(
+            !arr.is_empty(),
+            "fixture should yield at least one recommendation"
+        );
         for rec in arr {
-            assert!(rec.get("champion_id").is_some(), "recommendation has champion_id");
-            assert!(rec.get("total_score").is_some(), "recommendation has total_score");
+            assert!(
+                rec.get("champion_id").is_some(),
+                "recommendation has champion_id"
+            );
+            assert!(
+                rec.get("total_score").is_some(),
+                "recommendation has total_score"
+            );
         }
     }
 
@@ -3246,7 +3270,10 @@ mod tests {
         assert!(arr.len() >= 2, "fixture yields Garen + Malphite");
 
         for rec in arr {
-            assert_eq!(rec["build_source"], "general", "no seed rows → heuristic build");
+            assert_eq!(
+                rec["build_source"], "general",
+                "no seed rows → heuristic build"
+            );
             assert!(
                 !rec["core_items"].as_array().unwrap().is_empty(),
                 "general build still carries core items"
@@ -3257,7 +3284,10 @@ mod tests {
                 .iter()
                 .filter_map(|v| v.as_str())
                 .collect();
-            assert!(missing.contains(&"build"), "general build is flagged as missing");
+            assert!(
+                missing.contains(&"build"),
+                "general build is flagged as missing"
+            );
             assert_eq!(rec["model_version"], "draft-brain-rules-v2");
             assert!(
                 !rec["score_breakdown"].as_array().unwrap().is_empty(),
@@ -3276,10 +3306,13 @@ mod tests {
     #[test]
     fn recommendations_prefer_matchup_seed_build_and_attach_pro_presence() {
         let kb = DraftKnowledgeBase::load().unwrap();
-        let darius_arch = kb.get_archetype("Darius").expect("Darius in KB").archetype.clone();
+        let darius_arch = kb
+            .get_archetype("Darius")
+            .expect("Darius in KB")
+            .archetype
+            .clone();
 
-        let mut input: serde_json::Value =
-            serde_json::from_str(RECOMMENDATIONS_FIXTURE).unwrap();
+        let mut input: serde_json::Value = serde_json::from_str(RECOMMENDATIONS_FIXTURE).unwrap();
         input["builds"] = serde_json::json!([
             {
                 "champion_id": 86,
@@ -3318,7 +3351,11 @@ mod tests {
         assert_eq!(garen["build_confidence"], "low");
         // Matchup-specific row (3078 first), NOT the default 9999 row.
         assert_eq!(garen["core_items"][0], 3078);
-        assert_eq!(garen["core_items"].as_array().unwrap().len(), 4, "capped at 4");
+        assert_eq!(
+            garen["core_items"].as_array().unwrap().len(),
+            4,
+            "capped at 4"
+        );
         assert_eq!(garen["keystone"], 8010);
         assert_eq!(garen["primary_rune_tree"], 8000);
         assert_eq!(garen["skill_order"], "Q→E→W");
@@ -3327,7 +3364,10 @@ mod tests {
             .as_array()
             .map(|a| a.iter().filter_map(|v| v.as_str()).collect())
             .unwrap_or_default();
-        assert!(!missing.contains(&"build"), "seed build is not a missing signal");
+        assert!(
+            !missing.contains(&"build"),
+            "seed build is not a missing signal"
+        );
         assert!((garen["pro_presence"].as_f64().unwrap() - 0.55).abs() < 1e-5);
 
         let malphite = recs
@@ -3350,16 +3390,23 @@ mod tests {
         let bare = recommendations_from_json(RECOMMENDATIONS_FIXTURE).unwrap();
         let bare: serde_json::Value = serde_json::from_str(&bare).unwrap();
         let garen_bare = bare
-            .as_array().unwrap().iter().find(|r| r["champion_id"] == 86).unwrap();
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|r| r["champion_id"] == 86)
+            .unwrap();
         assert!(garen_bare.get("lane_form_score").is_none());
         let missing: Vec<&str> = garen_bare["missing_signals"]
-            .as_array().unwrap().iter().filter_map(|v| v.as_str()).collect();
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter_map(|v| v.as_str())
+            .collect();
         assert!(missing.contains(&"lane_performance"));
 
         // Garen'de güçlü form (yüksek CS, az ölüm) + rol baseline'ı için zayıf
         // bir 54 (Malphite) geçmişi → Garen 0.5 üstü skor alır, eksikten çıkar.
-        let mut input: serde_json::Value =
-            serde_json::from_str(RECOMMENDATIONS_FIXTURE).unwrap();
+        let mut input: serde_json::Value = serde_json::from_str(RECOMMENDATIONS_FIXTURE).unwrap();
         let mk = |champ: u32, cs: u32, deaths: u32| {
             serde_json::json!({
                 "champion_id": champ, "champion_key": if champ == 86 {"Garen"} else {"Malphite"},
@@ -3369,21 +3416,36 @@ mod tests {
             })
         };
         input["recent_matches"] = serde_json::json!([
-            mk(86, 240, 2), mk(86, 230, 3), mk(86, 235, 2),
-            mk(54, 130, 7), mk(54, 140, 8), mk(54, 135, 7)
+            mk(86, 240, 2),
+            mk(86, 230, 3),
+            mk(86, 235, 2),
+            mk(54, 130, 7),
+            mk(54, 140, 8),
+            mk(54, 135, 7)
         ]);
         let out = recommendations_from_json(&input.to_string()).unwrap();
         let recs: serde_json::Value = serde_json::from_str(&out).unwrap();
         let garen = recs
-            .as_array().unwrap().iter().find(|r| r["champion_id"] == 86).unwrap();
-        let score = garen["lane_form_score"].as_f64().expect("form skoru yazıldı");
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|r| r["champion_id"] == 86)
+            .unwrap();
+        let score = garen["lane_form_score"]
+            .as_f64()
+            .expect("form skoru yazıldı");
         assert!(score > 0.5, "güçlü form 0.5 üstü: {score}");
         let missing: Vec<&str> = garen["missing_signals"]
-            .as_array().map(|a| a.iter().filter_map(|v| v.as_str()).collect())
+            .as_array()
+            .map(|a| a.iter().filter_map(|v| v.as_str()).collect())
             .unwrap_or_default();
         assert!(!missing.contains(&"lane_performance"));
         let malphite = recs
-            .as_array().unwrap().iter().find(|r| r["champion_id"] == 54).unwrap();
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|r| r["champion_id"] == 54)
+            .unwrap();
         assert!(malphite["lane_form_score"].as_f64().unwrap() < 0.5);
     }
 
@@ -3391,13 +3453,15 @@ mod tests {
     #[test]
     fn recommendations_respect_veto_and_learning_preferences() {
         // Veto: Garen listeden tamamen çıkar.
-        let mut input: serde_json::Value =
-            serde_json::from_str(RECOMMENDATIONS_FIXTURE).unwrap();
+        let mut input: serde_json::Value = serde_json::from_str(RECOMMENDATIONS_FIXTURE).unwrap();
         input["vetoed_champions"] = serde_json::json!([86]);
         let out = recommendations_from_json(&input.to_string()).unwrap();
         let recs: serde_json::Value = serde_json::from_str(&out).unwrap();
         assert!(
-            recs.as_array().unwrap().iter().all(|r| r["champion_id"] != 86),
+            recs.as_array()
+                .unwrap()
+                .iter()
+                .all(|r| r["champion_id"] != 86),
             "vetolu şampiyon önerilemez"
         );
 
@@ -3405,17 +3469,26 @@ mod tests {
         let bare = recommendations_from_json(RECOMMENDATIONS_FIXTURE).unwrap();
         let bare: serde_json::Value = serde_json::from_str(&bare).unwrap();
         let base_score = bare
-            .as_array().unwrap().iter().find(|r| r["champion_id"] == 54).unwrap()
-            ["rules_score"].as_f64().unwrap();
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|r| r["champion_id"] == 54)
+            .unwrap()["rules_score"]
+            .as_f64()
+            .unwrap();
 
-        let mut boosted: serde_json::Value =
-            serde_json::from_str(RECOMMENDATIONS_FIXTURE).unwrap();
+        let mut boosted: serde_json::Value = serde_json::from_str(RECOMMENDATIONS_FIXTURE).unwrap();
         boosted["learning_champions"] = serde_json::json!([54]);
         let out2 = recommendations_from_json(&boosted.to_string()).unwrap();
         let recs2: serde_json::Value = serde_json::from_str(&out2).unwrap();
         let new_score = recs2
-            .as_array().unwrap().iter().find(|r| r["champion_id"] == 54).unwrap()
-            ["rules_score"].as_f64().unwrap();
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|r| r["champion_id"] == 54)
+            .unwrap()["rules_score"]
+            .as_f64()
+            .unwrap();
         assert!(
             new_score > base_score && new_score - base_score < 0.05,
             "learning boost sınırlı pozitif: {base_score} → {new_score}"
@@ -3426,8 +3499,7 @@ mod tests {
     /// why_not — that note only exists relative to a ranked list).
     #[test]
     fn champion_analysis_is_enriched_and_upgraded() {
-        let mut input: serde_json::Value =
-            serde_json::from_str(RECOMMENDATIONS_FIXTURE).unwrap();
+        let mut input: serde_json::Value = serde_json::from_str(RECOMMENDATIONS_FIXTURE).unwrap();
         input["champion_id"] = serde_json::json!(86);
 
         let out = champion_analysis_from_json(&input.to_string()).expect("analysis should run");
@@ -3559,10 +3631,17 @@ mod tests {
         let out = blended_meta_rates_from_json(&input.to_string()).expect("blend should run");
         let entries: serde_json::Value = serde_json::from_str(&out).expect("output must be JSON");
         let arr = entries.as_array().expect("output must be an array");
-        assert_eq!(arr.len(), 1, "off-role Olaf bottom row must be filtered out");
+        assert_eq!(
+            arr.len(),
+            1,
+            "off-role Olaf bottom row must be filtered out"
+        );
         assert_eq!(arr[0]["champion_id"], 51);
         assert_eq!(arr[0]["position"], "bottom");
-        assert_eq!(arr[0]["sample_size"], 14000, "agreeing sources sum evidence");
+        assert_eq!(
+            arr[0]["sample_size"], 14000,
+            "agreeing sources sum evidence"
+        );
         assert!(
             (arr[0]["ban_rate"].as_f64().unwrap() - 0.08).abs() < 1e-5,
             "ban rate only from the source that reports one"
@@ -3594,16 +3673,16 @@ mod tests {
         let base: serde_json::Value = serde_json::from_str(RECOMMENDATIONS_FIXTURE).unwrap();
 
         // champion_analysis: analyze the first recommended champion.
-        let recs: serde_json::Value = serde_json::from_str(
-            &recommendations_from_json(RECOMMENDATIONS_FIXTURE).unwrap(),
-        )
-        .unwrap();
+        let recs: serde_json::Value =
+            serde_json::from_str(&recommendations_from_json(RECOMMENDATIONS_FIXTURE).unwrap())
+                .unwrap();
         let top_id = recs[0]["champion_id"].as_u64().expect("rec has id");
         let mut analysis_input = base.clone();
         analysis_input["champion_id"] = top_id.into();
-        let analysis: serde_json::Value =
-            serde_json::from_str(&champion_analysis_from_json(&analysis_input.to_string()).unwrap())
-                .unwrap();
+        let analysis: serde_json::Value = serde_json::from_str(
+            &champion_analysis_from_json(&analysis_input.to_string()).unwrap(),
+        )
+        .unwrap();
         assert_eq!(analysis["champion_id"].as_u64(), Some(top_id));
 
         // champion_id 0 → null (command parity).
@@ -3660,7 +3739,11 @@ mod tests {
         let archetypes: serde_json::Value =
             serde_json::from_str(&champion_archetypes_string().unwrap()).unwrap();
         let arr = archetypes.as_array().expect("array");
-        assert!(arr.len() > 100, "KB 172 şampiyon taşır, {} bulundu", arr.len());
+        assert!(
+            arr.len() > 100,
+            "KB 172 şampiyon taşır, {} bulundu",
+            arr.len()
+        );
         let first_id = arr[0]["champion_id"].as_u64().unwrap() as u32;
 
         let detail: serde_json::Value =
@@ -3707,9 +3790,10 @@ mod tests {
             {"champion_id": 86, "verdict": "helpful", "synced": true},
             {"champion_id": 86, "verdict": "not_helpful", "synced": false}
         ]);
-        let obs: serde_json::Value =
-            serde_json::from_str(&feedback_observability_from_json(&obs_input.to_string()).unwrap())
-                .unwrap();
+        let obs: serde_json::Value = serde_json::from_str(
+            &feedback_observability_from_json(&obs_input.to_string()).unwrap(),
+        )
+        .unwrap();
         assert_eq!(obs["counters"]["pending_sync"], 1);
         assert!(obs["status"].is_object() || obs["status"].is_string());
 
@@ -3778,7 +3862,10 @@ mod tests {
         let empty = serde_json::json!({
             "session": &session, "all_champions": &champions, "candidate_ids": []
         });
-        assert_eq!(draft_simulation_from_json(&empty.to_string()).unwrap(), "[]");
+        assert_eq!(
+            draft_simulation_from_json(&empty.to_string()).unwrap(),
+            "[]"
+        );
 
         // Fork: aynı id → null; banlı opsiyon → null; Garen vs Sett benzeri geçerli çift → obje.
         let same = serde_json::json!({
@@ -3842,7 +3929,10 @@ mod tests {
 
         // Şampiyon tablosu boş → KB çözülemez → null (sessiz, beklenen).
         let no_table = serde_json::json!({ "allgamedata": &allgamedata, "all_champions": [] });
-        assert_eq!(ingame_plan_from_json(&no_table.to_string()).unwrap(), "null");
+        assert_eq!(
+            ingame_plan_from_json(&no_table.to_string()).unwrap(),
+            "null"
+        );
 
         // Macro state doğrudan raw payload'dan: dragon 480'de → 780'de yeniden.
         let state: serde_json::Value = serde_json::from_str(
@@ -3911,7 +4001,10 @@ mod tests {
             .unwrap(),
         )
         .unwrap();
-        assert!(failed["synced_at"].is_null(), "hata satırı asla synced olmaz");
+        assert!(
+            failed["synced_at"].is_null(),
+            "hata satırı asla synced olmaz"
+        );
         assert_eq!(failed["retry_count"], 1);
         assert_eq!(failed["next_retry_at"], 5030);
     }
@@ -4099,7 +4192,10 @@ mod tests {
             .filter_map(|v| v.as_str())
             .collect();
         assert!(to_fetch.contains(&"EUW1_2"));
-        assert!(!to_fetch.contains(&"EUW1_1"), "processed maç yeniden çekilmez");
+        assert!(
+            !to_fetch.contains(&"EUW1_1"),
+            "processed maç yeniden çekilmez"
+        );
 
         // Ingest: 1 geçerli detay + 1 bozuk → canonical satırlar + failed id + hash.
         let detail = serde_json::json!({
@@ -4148,10 +4244,9 @@ mod tests {
             ],
             "crawled_players": [], "candidate_matches": [], "known_matches": []
         });
-        let disc: serde_json::Value = serde_json::from_str(
-            &match_discovery_plan_from_json(&disc_input.to_string()).unwrap(),
-        )
-        .unwrap();
+        let disc: serde_json::Value =
+            serde_json::from_str(&match_discovery_plan_from_json(&disc_input.to_string()).unwrap())
+                .unwrap();
         assert!(disc["to_crawl"]
             .as_array()
             .unwrap()
@@ -4274,8 +4369,7 @@ mod tests {
             "champ_select_active": true, "crawl_budget": 0
         });
         let out: serde_json::Value =
-            serde_json::from_str(&coverage_ramp_from_json(&deferred.to_string()).unwrap())
-                .unwrap();
+            serde_json::from_str(&coverage_ramp_from_json(&deferred.to_string()).unwrap()).unwrap();
         assert_eq!(out["ramp_state"], "no_budget");
         let trajectory = serde_json::json!({
             "quality_status": "degraded",

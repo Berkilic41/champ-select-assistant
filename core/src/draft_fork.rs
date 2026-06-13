@@ -6,9 +6,7 @@
 //! the public `draft_simulator` API only; no DB/network/hot-file coupling.
 #![allow(dead_code)] // public DTO + helper consumed by a command/UI in a later turn
 
-use crate::draft_simulator::{
-    compare_moves, DraftSimMove, DraftSimResult, DraftSimState,
-};
+use crate::draft_simulator::{compare_moves, DraftSimMove, DraftSimResult, DraftSimState};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use ts_rs::TS;

@@ -269,15 +269,15 @@ mod tests {
     }
 
     // ── Real-pipeline grounding MEASUREMENT (the audit number) ───────────────────
-    use crate::types::ChampionRecord;
-    use crate::types::MasteryRow;
-    use crate::types::{ChampSelectState, TeamSlot};
     use crate::draft_brain::{
         local_rules_model_pack, local_seed_data_pack, upgrade_recommendations_with_context,
     };
     use crate::draft_iq::DraftKnowledgeBase;
     use crate::engine::compute_recommendations;
     use crate::scoring::{MetaRate, ScoringContext, ScoringWeights};
+    use crate::types::ChampionRecord;
+    use crate::types::MasteryRow;
+    use crate::types::{ChampSelectState, TeamSlot};
     use std::collections::HashMap;
 
     const CATALOG: &[(i64, &str)] = &[

@@ -635,7 +635,8 @@ struct WavePlanTable {
     plans: std::collections::HashMap<String, std::collections::HashMap<String, String>>,
 }
 
-fn wave_plans() -> &'static std::collections::HashMap<String, std::collections::HashMap<String, String>> {
+fn wave_plans(
+) -> &'static std::collections::HashMap<String, std::collections::HashMap<String, String>> {
     use std::sync::OnceLock;
     static TABLE: OnceLock<
         std::collections::HashMap<String, std::collections::HashMap<String, String>>,

@@ -103,7 +103,10 @@ const METRICS: &[(&str, &str, &str)] = &[
 pub(crate) fn metric_value(m: &MatchRow, key: &str) -> Option<f32> {
     let mins = m.duration_secs as f32 / 60.0;
     match key {
-        "cs_per_min" => m.cs.filter(|_| m.duration_secs > 0).map(|c| c as f32 / mins),
+        "cs_per_min" => {
+            m.cs.filter(|_| m.duration_secs > 0)
+                .map(|c| c as f32 / mins)
+        }
         "deaths_per_10" => (m.duration_secs > 0).then(|| m.deaths as f32 / mins * 10.0),
         "kda" => Some((m.kills + m.assists) as f32 / m.deaths.max(1) as f32),
         "vision_score" => m.vision_score.map(|v| v as f32),
@@ -118,13 +121,13 @@ fn is_timeline_metric(key: &str) -> bool {
     matches!(key, "cs_at_10" | "deaths_pre_14")
 }
 
-fn median(values: &mut Vec<f32>) -> Option<f32> {
+fn median(values: &mut [f32]) -> Option<f32> {
     if values.is_empty() {
         return None;
     }
     values.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
     let mid = values.len() / 2;
-    Some(if values.len() % 2 == 0 {
+    Some(if values.len().is_multiple_of(2) {
         (values[mid - 1] + values[mid]) / 2.0
     } else {
         values[mid]
@@ -180,8 +183,10 @@ pub fn build_game_review(
         let baseline = if partial {
             None
         } else {
-            let mut vals: Vec<f32> =
-                history.iter().filter_map(|m| metric_value(m, key)).collect();
+            let mut vals: Vec<f32> = history
+                .iter()
+                .filter_map(|m| metric_value(m, key))
+                .collect();
             // Baseline da en az MIN sayıda gerçek değer ister (örn. vision'sız
             // eski satırlar medyanı çarpıtmasın).
             if vals.len() >= MIN_BASELINE_GAMES {
@@ -222,15 +227,21 @@ pub fn build_game_review(
             let (_, _, short) = METRICS[idx];
             format!("{short} kendi ortalamanın üzerindeydi — bunu korumaya çalış.")
         }
-        _ if reviewed.win => "Maç kazanıldı — net bir metrik sıçraması olmasa da sonuç lehine.".to_string(),
+        _ if reviewed.win => {
+            "Maç kazanıldı — net bir metrik sıçraması olmasa da sonuç lehine.".to_string()
+        }
         _ => "Bu maçta öne çıkan bir metrik yok; bir sonrakine temiz başla.".to_string(),
     };
     let to_fix = match worst {
         Some(&(idx, m)) if m < -EVEN_BAND => {
             let (_, _, short) = METRICS[idx];
-            format!("{short} kendi ortalamanın altında kaldı — bir sonraki maçın odağı bu olabilir.")
+            format!(
+                "{short} kendi ortalamanın altında kaldı — bir sonraki maçın odağı bu olabilir."
+            )
         }
-        _ if partial => "Karşılaştırma için henüz yeterli geçmiş yok — birkaç maç sonra netleşir.".to_string(),
+        _ if partial => {
+            "Karşılaştırma için henüz yeterli geçmiş yok — birkaç maç sonra netleşir.".to_string()
+        }
         _ => "Belirgin bir zayıf metrik yok — istikrarı sürdür.".to_string(),
     };
 
@@ -240,7 +251,11 @@ pub fn build_game_review(
         let result = match achieved {
             None => "no_data",
             Some(v) => {
-                let met = if g.direction == "at_most" { v <= g.target } else { v >= g.target };
+                let met = if g.direction == "at_most" {
+                    v <= g.target
+                } else {
+                    v >= g.target
+                };
                 if met {
                     "met"
                 } else {
@@ -308,7 +323,10 @@ const FORM_BAND: f32 = 2.0;
 /// `recent_matches`'ten (host AYNI queue-grubunu yollar) draft'ın rolündeki
 /// şampiyon-başına form haritası. Rol baseline'ı = o roldeki TÜM maçların
 /// medyanı; şampiyon değeri = o şampiyondaki ortalama. Rolde maç yoksa boş.
-pub fn build_lane_form(matches: &[MatchRow], my_pos: &str) -> std::collections::HashMap<u32, LaneFormEntry> {
+pub fn build_lane_form(
+    matches: &[MatchRow],
+    my_pos: &str,
+) -> std::collections::HashMap<u32, LaneFormEntry> {
     use std::collections::HashMap;
     let mut out = HashMap::new();
     if my_pos.is_empty() || my_pos == "aram" {
@@ -326,8 +344,7 @@ pub fn build_lane_form(matches: &[MatchRow], my_pos: &str) -> std::collections::
         .iter()
         .filter_map(|m| metric_value(m, "deaths_per_10"))
         .collect();
-    let (Some(cs_base), Some(deaths_base)) = (median(&mut cs_all), median(&mut deaths_all))
-    else {
+    let (Some(cs_base), Some(deaths_base)) = (median(&mut cs_all), median(&mut deaths_all)) else {
         return out;
     };
 
@@ -488,7 +505,10 @@ const TREND_METRICS: &[(&str, &str)] = &[
 ];
 
 fn half_median(matches: &[MatchRow], key: &str) -> Option<f32> {
-    let mut vals: Vec<f32> = matches.iter().filter_map(|m| metric_value(m, key)).collect();
+    let mut vals: Vec<f32> = matches
+        .iter()
+        .filter_map(|m| metric_value(m, key))
+        .collect();
     if vals.len() < 4 {
         return None;
     }
@@ -559,7 +579,11 @@ pub fn build_trend_report(matches: &[MatchRow]) -> TrendReport {
         });
     }
 
-    TrendReport { points, verdicts, partial }
+    TrendReport {
+        points,
+        verdicts,
+        partial,
+    }
 }
 
 #[cfg(test)]
@@ -601,16 +625,28 @@ mod tests {
         let review = build_game_review(&reviewed, &history(), None);
         assert!(!review.partial);
 
-        let cs = review.lines.iter().find(|l| l.metric == "cs_per_min").unwrap();
+        let cs = review
+            .lines
+            .iter()
+            .find(|l| l.metric == "cs_per_min")
+            .unwrap();
         assert_eq!(cs.baseline, Some(6.0));
         assert_eq!(cs.value, Some(8.0));
         assert_eq!(cs.verdict, "better");
 
-        let deaths = review.lines.iter().find(|l| l.metric == "deaths_per_10").unwrap();
+        let deaths = review
+            .lines
+            .iter()
+            .find(|l| l.metric == "deaths_per_10")
+            .unwrap();
         assert_eq!(deaths.verdict, "better"); // at_most ekseni çevrilir
 
         // Timeline metrikleri key'siz kurulumda dürüstçe kilitli.
-        let locked = review.lines.iter().find(|l| l.metric == "cs_at_10").unwrap();
+        let locked = review
+            .lines
+            .iter()
+            .find(|l| l.metric == "cs_at_10")
+            .unwrap();
         assert_eq!(locked.verdict, "locked");
         assert!(review.went_right.contains("ortalamanın üzerinde"));
     }
@@ -700,8 +736,16 @@ mod tests {
         let w = lane_form_score(weak_e);
         assert!(g > 0.5, "iyi form 0.5 üstü: {g}");
         assert!(w < 0.5, "kötü form 0.5 altı: {w}");
-        let one_game = LaneFormEntry { cs_delta: 2.0, deaths_delta: 2.0, games: 1 };
-        let many = LaneFormEntry { cs_delta: 2.0, deaths_delta: 2.0, games: 20 };
+        let one_game = LaneFormEntry {
+            cs_delta: 2.0,
+            deaths_delta: 2.0,
+            games: 1,
+        };
+        let many = LaneFormEntry {
+            cs_delta: 2.0,
+            deaths_delta: 2.0,
+            games: 20,
+        };
         assert!(lane_form_score(&one_game) < lane_form_score(&many));
 
         // ARAM / boş pozisyon → sinyal yok (dürüst).
@@ -726,11 +770,23 @@ mod tests {
         let report = build_trend_report(&matches);
         assert!(!report.partial);
         assert_eq!(report.points.len(), 8);
-        let cs = report.verdicts.iter().find(|v| v.metric == "cs_per_min").unwrap();
+        let cs = report
+            .verdicts
+            .iter()
+            .find(|v| v.metric == "cs_per_min")
+            .unwrap();
         assert_eq!(cs.direction, "improving");
-        let deaths = report.verdicts.iter().find(|v| v.metric == "deaths_per_10").unwrap();
+        let deaths = report
+            .verdicts
+            .iter()
+            .find(|v| v.metric == "deaths_per_10")
+            .unwrap();
         assert_eq!(deaths.direction, "improving"); // 6→3 ölüm, at_most ekseni
-        let wr = report.verdicts.iter().find(|v| v.metric == "win_rate").unwrap();
+        let wr = report
+            .verdicts
+            .iter()
+            .find(|v| v.metric == "win_rate")
+            .unwrap();
         assert_eq!(wr.direction, "improving");
 
         // < 8 maç → hüküm yok, partial true (sparkline noktaları yine döner).

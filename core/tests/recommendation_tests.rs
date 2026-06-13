@@ -5,10 +5,10 @@
 //! carries the `meta_rates` map introduced in Sprint E.
 
 mod scoring_tests {
-    use csa_core::types::{ChampSelectState, TeamSlot};
     use csa_core::scoring::{
         meta_score, risk_score, role_fit_score, MetaRate, ScoringContext, ScoringWeights,
     };
+    use csa_core::types::{ChampSelectState, TeamSlot};
     use std::collections::HashMap;
 
     // -------------------------------------------------------------------------
@@ -224,9 +224,9 @@ mod scoring_tests {
 }
 
 mod build_advisor_tests {
-    use csa_core::types::ItemData;
     use csa_core::build_advisor::{counter_item_advice, situational_item_ids};
     use csa_core::team_analysis::TeamComposition;
+    use csa_core::types::ItemData;
 
     fn make_item(id: u32, tags: &[&str]) -> ItemData {
         ItemData {
@@ -359,13 +359,13 @@ mod build_advisor_tests {
 }
 
 mod engine_di4b_tests {
-    use csa_core::types::ChampionRecord;
-    use csa_core::types::{ChampSelectState, TeamSlot};
     use csa_core::draft_iq::DraftKnowledgeBase;
-    use csa_core::feedback_signal::FeedbackSignal;
     use csa_core::engine::compute_recommendations;
+    use csa_core::feedback_signal::FeedbackSignal;
     use csa_core::scoring::{MetaRate, ScoringContext, ScoringWeights};
+    use csa_core::types::ChampionRecord;
     use csa_core::types::ChampionStats;
+    use csa_core::types::{ChampSelectState, TeamSlot};
     use std::collections::HashMap;
 
     fn make_slot(cell: i32, champ: u32, pos: &str) -> TeamSlot {
@@ -403,11 +403,7 @@ mod engine_di4b_tests {
         }
     }
 
-    fn make_mastery(
-        champion_id: i64,
-        level: i64,
-        points: i64,
-    ) -> csa_core::types::MasteryRow {
+    fn make_mastery(champion_id: i64, level: i64, points: i64) -> csa_core::types::MasteryRow {
         csa_core::types::MasteryRow {
             champion_id,
             level,
@@ -749,15 +745,15 @@ mod engine_di4b_tests {
 }
 
 mod e2e_tests {
+    use csa_core::engine::compute_recommendations;
     use csa_core::types::ChampionRecord;
+    use csa_core::types::ChampionStats;
     use csa_core::types::MasteryRow;
     use csa_core::types::{ChampSelectState, TeamSlot};
-    use csa_core::engine::compute_recommendations;
     use csa_core::{
         draft_iq::DraftKnowledgeBase,
         scoring::{MetaRate, ScoringContext, ScoringWeights},
     };
-    use csa_core::types::ChampionStats;
     use std::collections::HashMap;
 
     fn make_slot(cell: i32, champ: u32, pos: &str) -> TeamSlot {
@@ -885,13 +881,13 @@ mod e2e_tests {
 }
 
 mod analyze_champion_tests {
-    use csa_core::types::ChampionRecord;
-    use csa_core::types::MasteryRow;
-    use csa_core::types::{ChampSelectState, TeamSlot};
     use csa_core::draft_iq::DraftKnowledgeBase;
     use csa_core::engine::{analyze_champion, compute_recommendations};
     use csa_core::scoring::{MetaRate, ScoringContext, ScoringWeights};
+    use csa_core::types::ChampionRecord;
     use csa_core::types::ChampionStats;
+    use csa_core::types::MasteryRow;
+    use csa_core::types::{ChampSelectState, TeamSlot};
     use std::collections::HashMap;
 
     fn champ(id: i64, key: &str) -> ChampionRecord {

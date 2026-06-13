@@ -174,4 +174,3 @@ pub fn audit_soft(
     }
     issues.len()
 }
-

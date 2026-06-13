@@ -333,7 +333,7 @@ fn build_ingame_plan(
 }
 
 /// Pure: the whole `get_ingame_plan` decision path minus I/O — raw `allgamedata`
-/// + the host's champion table → `IngamePlan`. `None` when there is no active
+/// plus the host's champion table → `IngamePlan`. `None` when there is no active
 /// player in the payload or the played champion isn't in the KB (quiet, expected).
 pub fn compute_ingame_plan(
     raw: &serde_json::Value,
@@ -591,8 +591,14 @@ mod tests {
         assert_eq!(plan.champion_key, "Garen");
         assert_eq!(plan.position, "top");
         assert_eq!(plan.opponent_key.as_deref(), Some("Darius"));
-        assert!(!plan.matchup_tips.is_empty(), "known opponent → matchup tips");
-        assert!(plan.lane_note.is_none(), "lane advice folded into matchup tips");
+        assert!(
+            !plan.matchup_tips.is_empty(),
+            "known opponent → matchup tips"
+        );
+        assert!(
+            plan.lane_note.is_none(),
+            "lane advice folded into matchup tips"
+        );
         assert_eq!(plan.cs_per_min, Some(7.0)); // 70 CS / 10 min
         assert!(!plan.win_condition.is_empty());
 

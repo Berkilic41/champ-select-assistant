@@ -275,9 +275,7 @@ pub fn decide_cache_promotion(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::match_v5_aggregator::{
-        aggregate_matches, MatchV5, MatchV5Participant,
-    };
+    use crate::match_v5_aggregator::{aggregate_matches, MatchV5, MatchV5Participant};
 
     fn part(champ: u32, team: u32, pos: &str, win: bool) -> MatchV5Participant {
         MatchV5Participant {

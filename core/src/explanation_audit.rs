@@ -195,15 +195,15 @@ pub fn audit_recommendation(rec: &Recommendation) -> ExplanationReport {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::ChampionRecord;
-    use crate::types::MasteryRow;
-    use crate::types::{ChampSelectState, TeamSlot};
     use crate::draft_brain::{
         local_rules_model_pack, local_seed_data_pack, upgrade_recommendations_with_context,
     };
     use crate::draft_iq::DraftKnowledgeBase;
     use crate::engine::compute_recommendations;
     use crate::scoring::{MetaRate, ScoringContext, ScoringWeights};
+    use crate::types::ChampionRecord;
+    use crate::types::MasteryRow;
+    use crate::types::{ChampSelectState, TeamSlot};
     use std::collections::HashMap;
 
     /// (id, key, name) catalog spanning archetypes/roles used by the scenarios.
@@ -607,10 +607,7 @@ mod tests {
             phase_matchup: None,
         };
         let report = audit_recommendation(&rec);
-        assert!(
-            report.passes_hard_bar(),
-            "no over-promising → hard bar ok"
-        );
+        assert!(report.passes_hard_bar(), "no over-promising → hard bar ok");
         assert!(report
             .gaps
             .contains(&ExplanationGap::Thin(Pillar::LanePlan)));

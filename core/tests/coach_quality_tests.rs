@@ -38,7 +38,7 @@ mod tests {
     #[test]
     fn audit_flags_empty_absolute_and_duplicates() {
         let issues = audit_coaching(
-            "Zed",                                                     // too short → Empty
+            "Zed",                                                   // too short → Empty
             Some("Lvl 1-3 kesin kazanırsın"), // absolute → AbsoluteLanguage(lane_plan)
             Some("Takım savaşında peel ver"), // clean
             &["Risk yüksek".to_string(), "risk yüksek".to_string()], // duplicate
@@ -54,9 +54,7 @@ mod tests {
         assert!(has_absolute_language("free win bu maç"));
         assert!(has_absolute_language("rakip hiçbir şey yapamaz"));
         // Legit coaching with overlapping words must NOT trip:
-        assert!(!has_absolute_language(
-            "Takımı carry'leme potansiyelin var"
-        ));
+        assert!(!has_absolute_language("Takımı carry'leme potansiyelin var"));
         assert!(!has_absolute_language("Win condition: objeye oyna"));
     }
 
@@ -128,16 +126,16 @@ mod tests {
     /// touch the Codex-owned builders.
     #[test]
     fn engine_pipeline_coaching_passes_audit() {
-        use csa_core::types::ChampionRecord;
-        use csa_core::types::MasteryRow;
-        use csa_core::types::{ItemData, RuneTree};
-        use csa_core::types::{ChampSelectState, TeamSlot};
         use csa_core::draft_brain::{
             local_rules_model_pack, local_seed_data_pack, upgrade_recommendations_with_context,
         };
         use csa_core::draft_iq::DraftKnowledgeBase;
         use csa_core::engine::compute_recommendations;
         use csa_core::scoring::{MetaRate, ScoringContext, ScoringWeights};
+        use csa_core::types::ChampionRecord;
+        use csa_core::types::MasteryRow;
+        use csa_core::types::{ChampSelectState, TeamSlot};
+        use csa_core::types::{ItemData, RuneTree};
         use std::collections::HashMap;
 
         let session = ChampSelectState {

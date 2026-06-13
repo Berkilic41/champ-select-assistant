@@ -34,12 +34,12 @@ use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use ts_rs::TS;
 
-use crate::types::ChampionRecord;
-use crate::types::MasteryRow;
-use crate::types::ChampSelectState;
 use crate::champion_types::{type_counter_score, ChampionType};
 use crate::draft_iq::DraftKnowledgeBase;
 use crate::scoring::{shrunk_meta_wr, MetaRate};
+use crate::types::ChampSelectState;
+use crate::types::ChampionRecord;
+use crate::types::MasteryRow;
 
 /// A single ban recommendation surfaced to the UI during the ban phase.
 ///
@@ -269,8 +269,8 @@ pub fn compute_ban_suggestions(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::TeamSlot;
     use crate::draft_iq::DraftKnowledgeBase;
+    use crate::types::TeamSlot;
 
     fn empty_session() -> ChampSelectState {
         ChampSelectState {

@@ -2,9 +2,9 @@ use super::champion_types::{type_counter_score, ChampionType};
 use super::draft_iq::archetype::PowerCurve;
 use super::feedback_signal::FeedbackSignal;
 use super::team_analysis::TeamComposition;
+use crate::types::ChampionStats;
 use crate::types::MasteryRow;
 use crate::types::{ChampSelectState, TeamSlot};
-use crate::types::ChampionStats;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -62,9 +62,7 @@ impl ScoringWeights {
 /// Returns a `±0.20` adjustment applied to the candidate's total score in brawl
 /// modes. Poke / waveclear / disengage / sustain are uplifted (no recall, single
 /// lane, constant trading); melee assassins and short-range divers are penalised.
-pub fn aram_utility_bonus(
-    archetype: &crate::draft_iq::archetype::ChampionArchetype,
-) -> f32 {
+pub fn aram_utility_bonus(archetype: &crate::draft_iq::archetype::ChampionArchetype) -> f32 {
     let mut bonus = 0.0_f32;
     let tags = &archetype.utility_tags;
     let has = |t: &str| tags.iter().any(|x| x == t);
@@ -732,11 +730,19 @@ mod tests {
         let mut meta = HashMap::new();
         meta.insert(
             (1_u32, "top".to_string()),
-            MetaRate { win_rate: 0.55, ban_rate: 0.0, sample_size: 60 },
+            MetaRate {
+                win_rate: 0.55,
+                ban_rate: 0.0,
+                sample_size: 60,
+            },
         );
         meta.insert(
             (2_u32, "top".to_string()),
-            MetaRate { win_rate: 0.53, ban_rate: 0.0, sample_size: 20_000 },
+            MetaRate {
+                win_rate: 0.53,
+                ban_rate: 0.0,
+                sample_size: 20_000,
+            },
         );
         let ctx = make_ctx(&session, &role_map, &meta);
         let spike = meta_score(1, &ctx);
@@ -1163,9 +1169,7 @@ mod tests {
 
     #[test]
     fn aram_bonus_boosts_artillery_with_poke() {
-        use crate::draft_iq::archetype::{
-            CcProfile, ChampionArchetype, DamageProfile, PowerCurve,
-        };
+        use crate::draft_iq::archetype::{CcProfile, ChampionArchetype, DamageProfile, PowerCurve};
         let arty = ChampionArchetype {
             champion_id: 99,
             archetype: "artillery".to_string(),
@@ -1205,9 +1209,7 @@ mod tests {
 
     #[test]
     fn aram_bonus_penalises_assassin() {
-        use crate::draft_iq::archetype::{
-            CcProfile, ChampionArchetype, DamageProfile, PowerCurve,
-        };
+        use crate::draft_iq::archetype::{CcProfile, ChampionArchetype, DamageProfile, PowerCurve};
         let assassin = ChampionArchetype {
             champion_id: 121,
             archetype: "assassin".to_string(),

@@ -9,14 +9,14 @@
 //! only the champion ranking order and tier assignments are captured.
 
 mod snapshot_tests {
+    use csa_core::draft_iq::DraftKnowledgeBase;
+    use csa_core::engine::compute_recommendations;
+    use csa_core::models::Recommendation;
+    use csa_core::scoring::{MetaRate, ScoringContext, ScoringWeights};
+    use csa_core::session_parse::parse_session;
     use csa_core::types::ChampionRecord;
     use csa_core::types::MasteryRow;
     use csa_core::types::{ItemData, RuneTree};
-    use csa_core::session_parse::parse_session;
-    use csa_core::draft_iq::DraftKnowledgeBase;
-    use csa_core::scoring::{MetaRate, ScoringContext, ScoringWeights};
-    use csa_core::engine::compute_recommendations;
-    use csa_core::models::Recommendation;
     use serde::Serialize;
     use std::collections::HashMap;
 

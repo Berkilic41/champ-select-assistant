@@ -496,9 +496,7 @@ fn detect_enemy_wc_empty_returns_mixed() {
 
 #[test]
 fn detect_enemy_wc_pick_requires_two_signals() {
-    use crate::draft_iq::archetype::{
-        CcProfile, ChampionArchetype, DamageProfile, PowerCurve,
-    };
+    use crate::draft_iq::archetype::{CcProfile, ChampionArchetype, DamageProfile, PowerCurve};
     let make_archetype = |archetype: &'static str| ChampionArchetype {
         champion_id: 1,
         archetype: archetype.to_string(),
@@ -569,9 +567,7 @@ fn build_comp_clash_note_teamfight_vs_poke() {
 
 #[test]
 fn spike_note_late_scaler_returns_some() {
-    use crate::draft_iq::archetype::{
-        CcProfile, ChampionArchetype, DamageProfile, PowerCurve,
-    };
+    use crate::draft_iq::archetype::{CcProfile, ChampionArchetype, DamageProfile, PowerCurve};
     let late_champ = ChampionArchetype {
         champion_id: 1,
         archetype: "control_mage".to_string(),
@@ -611,9 +607,7 @@ fn spike_note_late_scaler_returns_some() {
 
 #[test]
 fn matchup_spike_window_reads_curve_difference() {
-    use crate::draft_iq::archetype::{
-        CcProfile, ChampionArchetype, DamageProfile, PowerCurve,
-    };
+    use crate::draft_iq::archetype::{CcProfile, ChampionArchetype, DamageProfile, PowerCurve};
     use crate::draft_iq::narrative::build_matchup_spike_window;
 
     let with_curve = |early: f32, mid: f32, late: f32| ChampionArchetype {
@@ -665,9 +659,7 @@ fn matchup_spike_window_reads_curve_difference() {
 
 #[test]
 fn spike_note_early_dominant_returns_some() {
-    use crate::draft_iq::archetype::{
-        CcProfile, ChampionArchetype, DamageProfile, PowerCurve,
-    };
+    use crate::draft_iq::archetype::{CcProfile, ChampionArchetype, DamageProfile, PowerCurve};
     let early_champ = ChampionArchetype {
         champion_id: 2,
         archetype: "juggernaut".to_string(),
@@ -704,9 +696,7 @@ fn spike_note_early_dominant_returns_some() {
 
 #[test]
 fn spike_note_neutral_curve_returns_none() {
-    use crate::draft_iq::archetype::{
-        CcProfile, ChampionArchetype, DamageProfile, PowerCurve,
-    };
+    use crate::draft_iq::archetype::{CcProfile, ChampionArchetype, DamageProfile, PowerCurve};
     let flat_champ = ChampionArchetype {
         champion_id: 3,
         archetype: "vanguard".to_string(),
@@ -754,9 +744,7 @@ fn b5_make_archetype(
     early: f32,
     late: f32,
 ) -> crate::draft_iq::archetype::ChampionArchetype {
-    use crate::draft_iq::archetype::{
-        CcProfile, ChampionArchetype, DamageProfile, PowerCurve,
-    };
+    use crate::draft_iq::archetype::{CcProfile, ChampionArchetype, DamageProfile, PowerCurve};
     ChampionArchetype {
         champion_id: 1,
         archetype: archetype.to_string(),

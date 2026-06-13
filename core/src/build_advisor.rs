@@ -1,6 +1,6 @@
-use crate::types::{ItemData, RuneTree};
 use crate::champion_types::ChampionType;
 use crate::team_analysis::TeamComposition;
+use crate::types::{ItemData, RuneTree};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::OnceLock;

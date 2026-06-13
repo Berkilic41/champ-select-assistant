@@ -20,36 +20,36 @@
 //! tests relocated to the host crate. Until a module lands here, the desktop crate
 //! keeps owning it.
 
-pub mod types;
 pub mod champion_types;
 pub mod coach_quality;
-pub mod draft_iq;
-pub mod macro_timers;
-pub mod models;
-pub mod pool_coach;
-pub mod postgame;
 pub mod coverage_expansion_policy;
-pub mod data_pipeline_quality;
-pub mod feedback_signal;
-pub mod feedback_sync;
-pub mod match_discovery_planner;
-pub mod match_fetch_planner;
-pub mod match_v5_aggregator;
-pub mod pipeline_scheduler_policy;
-pub mod game_review;
 pub mod coverage_ramp;
+pub mod data_pipeline_quality;
 pub mod draft_brain;
 pub mod draft_brain_data;
 pub mod draft_fork;
+pub mod draft_iq;
 pub mod draft_simulator;
 pub mod draft_simulator_quality;
 pub mod draft_verdict;
 pub mod feedback_analytics;
 pub mod feedback_observability;
+pub mod feedback_signal;
+pub mod feedback_sync;
+pub mod game_review;
 pub mod ingestion_contract;
+pub mod macro_timers;
+pub mod match_discovery_planner;
+pub mod match_fetch_planner;
+pub mod match_v5_aggregator;
 pub mod match_v5_mapper;
+pub mod models;
+pub mod pipeline_scheduler_policy;
+pub mod pool_coach;
 pub mod pool_coach_quality;
+pub mod postgame;
 pub mod team_analysis;
+pub mod types;
 // P0.3d-2: the former "hard cluster" — engine/scoring + advisors. Unblocked by the
 // shared DTOs in `types.rs` (ChampionRecord/MasteryRow/ChampSelectState/TeamSlot/
 // ItemData/RuneTree/ChampionStats); the whole scoring pipeline is now pure core.

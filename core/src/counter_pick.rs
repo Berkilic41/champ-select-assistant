@@ -135,8 +135,8 @@ pub fn compute_counter_picks(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::{ChampSelectState, TeamSlot};
     use crate::scoring::ScoringWeights;
+    use crate::types::{ChampSelectState, TeamSlot};
     use std::collections::HashMap;
 
     fn champ(id: i64, key: &str) -> ChampionRecord {
