@@ -59,9 +59,10 @@
     .step::before { counter-increment: step; content: counter(step); display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; background: var(--gold); color: #1a1408; font-weight: 700; margin-bottom: 10px; }
     .step h3 { margin: 0 0 6px; font-size: 15px; color: var(--gold-2); }
     .step p { margin: 0; color: var(--muted); font-size: 14px; }
-    .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
-    .shot { background: var(--panel-2); border: 1px dashed var(--line); border-radius: 12px; aspect-ratio: 16/10; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 14px; text-align: center; padding: 16px; overflow: hidden; }
-    .shot img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+    .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; align-items: start; }
+    .shotfig { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+    .shotfig img { display: block; width: 100%; height: auto; background: var(--panel-2); }
+    .shotfig figcaption { padding: 11px 14px; color: var(--muted); font-size: 13px; }
     .compliance { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
     .compliance ul { margin: 10px 0 0; padding-left: 20px; color: var(--muted); }
     .compliance li { margin: 6px 0; }
@@ -141,10 +142,18 @@
       <h2>Screenshots</h2>
       <p class="sub">A look at the champion-select recommendations and post-game coaching.</p>
       <div class="shots">
-        <!-- Replace each placeholder with: <img src="screenshots/your-file.png" alt="..."> -->
-        <div class="shot">Champion-select recommendations<br>(add screenshots/champ-select.png)</div>
-        <div class="shot">Ban suggestions &amp; build summary<br>(add screenshots/bans-build.png)</div>
-        <div class="shot">Post-game report &amp; coaching<br>(add screenshots/post-game.png)</div>
+        <figure class="shotfig">
+          <img src="screenshots/champ-select.png" alt="Champion-select view with role selector, ranked pick recommendations, draft-flow tracker, and a one-line reason for each suggestion" />
+          <figcaption>Champion-select recommendations &amp; draft flow</figcaption>
+        </figure>
+        <figure class="shotfig">
+          <img src="screenshots/coaching.png" alt="Stats view showing the rank card, the post-game report card scored against your own baseline, and trend sparklines" />
+          <figcaption>Rank, post-game report card &amp; trends</figcaption>
+        </figure>
+        <figure class="shotfig">
+          <img src="screenshots/draft-simulator.png" alt="Draft simulator showing how a candidate pick shifts the team composition, with risk and reasoning" />
+          <figcaption>Draft simulator — how a pick changes your comp</figcaption>
+        </figure>
       </div>
     </section>
 
