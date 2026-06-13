@@ -415,7 +415,8 @@
     },
     "notePlaceholder": "Note for this game… (stays local)",
     "noteSave": "Save",
-    "noteSaved": "Saved ✓"
+    "noteSaved": "Saved ✓",
+    "noteSaveError": "Couldn't save — retry"
   },
   "rank": {
     "title": "Your Rank",

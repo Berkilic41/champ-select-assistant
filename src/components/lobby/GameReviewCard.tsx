@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Target, TrendingUp, TrendingDown, Minus, Lock } from 'lucide-react';
 import { invoke } from '../../lib/host';
@@ -42,6 +42,8 @@ export const GameReviewCard: React.FC = () => {
   const [note, setNote] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [noteSaved, setNoteSaved] = useState(false);
+  const [noteError, setNoteError] = useState(false);
+  const noteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -82,14 +84,24 @@ export const GameReviewCard: React.FC = () => {
 
   const saveNote = async () => {
     if (!latest || !puuid) return;
+    if (noteTimerRef.current) clearTimeout(noteTimerRef.current);
     try {
       await invoke('set_match_note', { puuid, matchId: latest.match_id, note, tags });
+      setNoteError(false);
       setNoteSaved(true);
-      setTimeout(() => setNoteSaved(false), 1500);
+      noteTimerRef.current = setTimeout(() => setNoteSaved(false), 1500);
     } catch {
-      /* kaydedilemedi — buton durumu değişmez, not yerinde durur */
+      // Surface the failure (the note stays in the box so it isn't lost).
+      setNoteSaved(false);
+      setNoteError(true);
+      noteTimerRef.current = setTimeout(() => setNoteError(false), 2500);
     }
   };
+
+  // Clear any pending status-reset timer on unmount.
+  useEffect(() => () => {
+    if (noteTimerRef.current) clearTimeout(noteTimerRef.current);
+  }, []);
 
   if (!latest) return null;
   const review = latest.review;
@@ -196,7 +208,11 @@ export const GameReviewCard: React.FC = () => {
             maxLength={200}
           />
           <button type="button" className="grc-note-save" onClick={saveNote}>
-            {noteSaved ? t('review.noteSaved') : t('review.noteSave')}
+            {noteError
+              ? t('review.noteSaveError')
+              : noteSaved
+                ? t('review.noteSaved')
+                : t('review.noteSave')}
           </button>
         </div>
       </div>

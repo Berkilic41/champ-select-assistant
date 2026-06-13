@@ -415,7 +415,8 @@
     },
     "notePlaceholder": "Bu maç için not… (yalnız sende kalır)",
     "noteSave": "Kaydet",
-    "noteSaved": "Kaydedildi ✓"
+    "noteSaved": "Kaydedildi ✓",
+    "noteSaveError": "Kaydedilemedi — tekrar dene"
   },
   "rank": {
     "title": "Rankın",
