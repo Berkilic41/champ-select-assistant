@@ -1,3 +1,13 @@
+// ⚠️ PARKED / EXPERIMENTAL — NOT DEPLOYED.
+// This axum + Postgres "draft brain" backend is a scaffold; the shipping data
+// path is the Cloudflare Worker (`cloudflare-worker/`). It is intentionally not
+// reachable by the desktop app. Before this is ever deployed publicly, the
+// following are MANDATORY (do not ship without them):
+//   1. Replace `CorsLayer::permissive()` with an explicit allowlist origin.
+//   2. Gate the write endpoints (POST /v1/*) behind a bearer/secret check.
+//   3. Tighten `validate_feedback`: require a real SHA-256 hash (exactly 64 hex
+//      chars), NOT the current `len >= 16` floor — a raw PUUID (~36–78 chars)
+//      currently slips through (see the note on `validate_feedback`).
 use axum::{
     extract::{Query, State},
     http::StatusCode,
@@ -89,6 +99,8 @@ async fn main() -> anyhow::Result<()> {
         .route("/v1/recommendation-feedback", post(recommendation_feedback))
         .route("/v1/match-outcomes", post(match_outcome))
         .route("/v1/data-quality", get(data_quality))
+        // ⚠️ PARKED-only: permissive CORS is acceptable for local experimentation
+        // but MUST be an explicit origin allowlist before any public deploy.
         .layer(CorsLayer::permissive())
         .layer(TraceLayer::new_for_http())
         .with_state(AppState { db });
@@ -203,8 +215,12 @@ fn verdict_is_canonical(verdict: &str) -> bool {
 
 /// Validate an ingestion payload: canonical verdict, a hashed (not raw) user_hash,
 /// a well-formed champion, and a finite score. Privacy policy: the server must only
-/// ever receive a hashed user/session id — a raw PUUID / summoner name is rejected
-/// by the length floor (a SHA-256 hex is 64 chars; raw names are short).
+/// ever receive a hashed user/session id.
+///
+/// ⚠️ The `len >= 16` floor below is WEAK: a raw PUUID (~36–78 chars) passes it.
+/// Before this backend is deployed (see the PARKED note at the top of the file),
+/// this MUST become a strict SHA-256 check — exactly 64 hex chars — so a raw
+/// identity can never reach the database.
 fn validate_feedback(input: &FeedbackInput) -> Result<(), &'static str> {
     if input.user_hash.trim().len() < 16 {
         return Err("user_hash must be a hash (>= 16 chars), never a raw identity");

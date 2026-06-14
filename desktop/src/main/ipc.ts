@@ -5,7 +5,7 @@
 
 import type { DatabaseSync } from "node:sqlite";
 
-import { BrowserWindow, ipcMain } from "electron";
+import { BrowserWindow, ipcMain, type IpcMainInvokeEvent } from "electron";
 
 import {
   completeOnboarding,
@@ -480,10 +480,25 @@ export function buildCommandRegistry(
   return commands;
 }
 
+/**
+ * Sender allowlist (defence-in-depth). Every IPC handler must only honour calls
+ * that originate from OUR renderer: the packaged `file://` page or the dev-server
+ * origin (HMR). A compromised/iframed remote frame attempting to reach `ipcMain`
+ * is rejected loudly before any handler runs. Mirrors window.ts:will-navigate.
+ */
+function assertTrustedSender(event: IpcMainInvokeEvent): void {
+  const url = event.senderFrame?.url ?? "";
+  if (url.startsWith("file://")) return;
+  const devUrl = process.env.ELECTRON_RENDERER_URL;
+  if (devUrl && url.startsWith(devUrl)) return;
+  throw new Error("yetkisiz IPC göndericisi");
+}
+
 export function registerIpcHandlers(ctx: IpcContext): void {
   const commands = buildCommandRegistry(ctx);
 
-  ipcMain.handle("cmd", (_event, cmd: unknown, args: unknown) => {
+  ipcMain.handle("cmd", (event, cmd: unknown, args: unknown) => {
+    assertTrustedSender(event);
     if (typeof cmd !== "string") throw new Error("geçersiz komut çağrısı");
     const handler = commands.get(cmd);
     if (!handler) {
@@ -493,10 +508,14 @@ export function registerIpcHandlers(ctx: IpcContext): void {
     return handler(args as Record<string, unknown> | undefined);
   });
 
-  ipcMain.handle("core:smoke", () => {
+  ipcMain.handle("core:smoke", (event) => {
+    assertTrustedSender(event);
     if (!ctx.engine) throw new Error("csa-core motoru yüklenemedi");
     return "csa-core wasm alive";
   });
 
-  ipcMain.handle("app:status", (): AppStatus => ctx.status());
+  ipcMain.handle("app:status", (event): AppStatus => {
+    assertTrustedSender(event);
+    return ctx.status();
+  });
 }

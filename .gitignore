@@ -55,6 +55,8 @@ graphify-out/
 cloudflare-worker/.dev.vars
 .wrangler/
 cloudflare-worker/node_modules/
+# Generated on demand via `pnpm cf-typegen` (wrangler types) — not vendored.
+cloudflare-worker/worker-configuration.d.ts
 
 # Electron host build output
 desktop/out/

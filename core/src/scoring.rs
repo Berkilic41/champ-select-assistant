@@ -1162,7 +1162,7 @@ mod tests {
         // Freed weight must redistribute to brawl-relevant components
         let pos_sum = w.comfort + w.team_counter + w.synergy + w.meta;
         assert!(
-            pos_sum >= 0.99 && pos_sum <= 1.01,
+            (0.99..=1.01).contains(&pos_sum),
             "non-zero weights should sum to ~1.0, got {pos_sum}"
         );
     }
@@ -1202,7 +1202,7 @@ mod tests {
         let bonus = aram_utility_bonus(&arty);
         // artillery (+0.10) + poke (+0.08) + waveclear (+0.05) = 0.23, clamped to 0.20
         assert!(
-            bonus >= 0.18 && bonus <= 0.20,
+            (0.18..=0.20).contains(&bonus),
             "expected high ARAM bonus, got {bonus}"
         );
     }

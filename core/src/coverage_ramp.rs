@@ -311,6 +311,9 @@ pub fn classify_data_trajectory(quality_status: &str, ramp_state: &str) -> Strin
 mod tests {
     use super::*;
 
+    // Positional test-fixture builder (8 ramp counters) — a struct would only
+    // move the verbosity to call sites without aiding the tests.
+    #[allow(clippy::too_many_arguments)]
     fn snap(
         taken_at: i64,
         rates: u32,

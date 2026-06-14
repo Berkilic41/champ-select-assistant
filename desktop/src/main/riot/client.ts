@@ -1,9 +1,10 @@
 // Riot API client — port of src-tauri/src/riot/client.rs + endpoints/*.
 //
 // Behaviour parity:
-//   * The key is re-read from the environment (+ nearest `.env`, which OVERRIDES
-//     process env like dotenvy's from_path_override) on EVERY client build — dev
-//     keys rotate daily, the app must pick a new one up without a restart.
+//   * The key is re-read from the environment (+ nearest `.env`, which FILLS gaps
+//     only) on EVERY client build — dev keys rotate daily, the app must pick a new
+//     one up without a restart. The real process environment WINS over the file so
+//     a stray/hostile `.env` in cwd can never silently redirect API traffic.
 //   * `PROXY_URL` set → requests go through `{base}/{host}{path}` WITHOUT the
 //     X-Riot-Token header (the proxy holds the key server-side).
 //   * Rate limit 20 req/s (sequential 50ms spacing — the Rust governor's
@@ -55,17 +56,23 @@ function readNearestEnvFile(start: string): string | null {
   return null;
 }
 
-/** Runtime env: process.env + nearest .env (file values OVERRIDE, dotenvy parity). */
+/** Runtime env: process.env wins; nearest .env only FILLS empty/missing keys. */
 export function runtimeEnv(
   startDirs: string[] = [process.cwd(), __dirname],
 ): Record<string, string | undefined> {
   const merged: Record<string, string | undefined> = { ...process.env };
   for (const start of startDirs) {
     const content = readNearestEnvFile(start);
-    if (content !== null) {
-      Object.assign(merged, parseEnvFile(content));
-      break; // Rust paritesi: İLK bulunan .env kullanılır
+    if (content === null) continue;
+    // Security (defence-in-depth): the real process environment WINS. A `.env`
+    // dropped into cwd by a stray/hostile actor can only fill a gap — it can
+    // never override a RIOT_API_KEY / PROXY_URL already exported, so it cannot
+    // silently redirect API traffic. Dev rotation still works: devs keep the key
+    // in `.env` only, not also as a shell export.
+    for (const [k, v] of Object.entries(parseEnvFile(content))) {
+      if (!nonEmpty(merged[k])) merged[k] = v;
     }
+    break; // İLK bulunan .env kullanılır
   }
   return merged;
 }

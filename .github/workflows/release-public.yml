@@ -3,7 +3,10 @@ name: Release (Public)
 on:
   push:
     tags:
+      # Stable releases ONLY — the negation excludes any prerelease (the -suffix).
+      # Beta/internal tags route to release-internal.yml instead.
       - 'v*.*.*'
+      - '!v*.*.*-*'
   workflow_dispatch: {}
 
 jobs:

@@ -21,8 +21,8 @@ const inferredMatchup = {
 } as LaneMatchup;
 
 const highQualityReport: DraftBrainQualityReport = {
-  feedback_total: BigInt(0),
-  feedback_unsynced: BigInt(0),
+  feedback_total: 0,
+  feedback_unsynced: 0,
   model_pack_version: 'model-v1',
   data_pack_version: 'data-v1',
   data_pack_confidence: 'high',

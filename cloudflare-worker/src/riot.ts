@@ -18,14 +18,54 @@ export function platformHost(platform: string): string {
   return `${platform.toLowerCase()}.api.riotgames.com`;
 }
 
-async function riotGet<T>(host: string, path: string, apiKey: string): Promise<T> {
-  const resp = await fetch(`https://${host}${path}`, {
-    headers: { "X-Riot-Token": apiKey, Accept: "application/json" },
-  });
-  if (!resp.ok) {
+/** Test seams: inject a fake fetch/sleep so backoff is unit-testable without a
+ *  real network or real wall-clock delays. Defaults hit the live Riot API. */
+export interface RiotOpts {
+  fetchImpl?: typeof fetch;
+  sleepImpl?: (ms: number) => Promise<void>;
+  /** Total attempts on a 429 / 5xx before giving up (default 4). */
+  maxAttempts?: number;
+}
+
+const defaultSleep = (ms: number): Promise<void> =>
+  new Promise((r) => setTimeout(r, ms));
+
+/** Backoff for a retryable status: honour Retry-After (seconds) when present,
+ *  else exponential 0.5s·2^n capped at 8s. Pure → directly unit-tested. */
+export function backoffMs(retryAfterHeader: string | null, attempt: number): number {
+  const retryAfter = Number(retryAfterHeader);
+  if (Number.isFinite(retryAfter) && retryAfter > 0) {
+    return Math.min(retryAfter * 1000, 30_000);
+  }
+  return Math.min(500 * 2 ** attempt, 8_000);
+}
+
+const isRetryable = (status: number): boolean => status === 429 || status >= 500;
+
+async function riotGet<T>(
+  host: string,
+  path: string,
+  apiKey: string,
+  opts: RiotOpts = {},
+): Promise<T> {
+  const fetchImpl = opts.fetchImpl ?? fetch;
+  const sleepImpl = opts.sleepImpl ?? defaultSleep;
+  const maxAttempts = opts.maxAttempts ?? 4;
+
+  for (let attempt = 0; ; attempt++) {
+    const resp = await fetchImpl(`https://${host}${path}`, {
+      headers: { "X-Riot-Token": apiKey, Accept: "application/json" },
+    });
+    if (resp.ok) return (await resp.json()) as T;
+
+    // Retry 429 (rate limit) + 5xx (transient) with backoff; surface 4xx at once.
+    if (isRetryable(resp.status) && attempt < maxAttempts - 1) {
+      const jitter = Math.floor(Math.random() * 250);
+      await sleepImpl(backoffMs(resp.headers.get("Retry-After"), attempt) + jitter);
+      continue;
+    }
     throw new Error(`Riot ${resp.status} ${host}${path}`);
   }
-  return (await resp.json()) as T;
 }
 
 interface LeagueEntry {
@@ -41,12 +81,14 @@ export async function challengerPuuids(
   platform: string,
   apiKey: string,
   limit: number,
+  opts: RiotOpts = {},
 ): Promise<string[]> {
   const host = platformHost(platform);
   const list = await riotGet<LeagueList>(
     host,
     "/lol/league/v4/challengerleagues/by-queue/RANKED_SOLO_5x5",
     apiKey,
+    opts,
   );
   const entries = list.entries.slice(0, limit);
   const puuids: string[] = [];
@@ -59,6 +101,7 @@ export async function challengerPuuids(
           host,
           `/lol/summoner/v4/summoners/${e.summonerId}`,
           apiKey,
+          opts,
         );
         puuids.push(s.puuid);
       } catch {
@@ -75,11 +118,13 @@ export async function recentRankedMatchIds(
   puuid: string,
   apiKey: string,
   count: number,
+  opts: RiotOpts = {},
 ): Promise<string[]> {
   return riotGet<string[]>(
     regionalHost(platform),
     `/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=420&type=ranked&count=${count}`,
     apiKey,
+    opts,
   );
 }
 
@@ -119,11 +164,13 @@ export async function matchDetail(
   platform: string,
   matchId: string,
   apiKey: string,
+  opts: RiotOpts = {},
 ): Promise<MatchDto> {
   return riotGet<MatchDto>(
     regionalHost(platform),
     `/lol/match/v5/matches/${matchId}`,
     apiKey,
+    opts,
   );
 }
 

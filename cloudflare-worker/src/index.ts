@@ -11,6 +11,29 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
+/** Log the real cause (visible in `wrangler tail`) but return a generic message —
+ *  never echo `String(e)` to anonymous callers (could leak query/SQL internals). */
+function serverError(label: string, e: unknown): Response {
+  console.error(`${label} failed:`, e);
+  return json({ error: `${label} failed` }, 500);
+}
+
+/** Constant-time string compare via SHA-256 digests (length-blind): both inputs
+ *  collapse to a fixed 32-byte digest, so neither timing nor length leaks the
+ *  secret. Avoids the early-exit short-circuit of `a !== b`. */
+export async function safeEqual(a: string, b: string): Promise<boolean> {
+  const enc = new TextEncoder();
+  const [da, db] = await Promise.all([
+    crypto.subtle.digest("SHA-256", enc.encode(a)),
+    crypto.subtle.digest("SHA-256", enc.encode(b)),
+  ]);
+  const va = new Uint8Array(da);
+  const vb = new Uint8Array(db);
+  let diff = 0;
+  for (let i = 0; i < va.length; i++) diff |= va[i] ^ vb[i];
+  return diff === 0;
+}
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     if (request.method !== "GET") {
@@ -30,7 +53,7 @@ export default {
       try {
         return json(await readRates(env, region, patch));
       } catch (e) {
-        return json({ error: String(e) }, 500);
+        return serverError("rates", e);
       }
     }
     if (path === "/v1/matchups") {
@@ -40,7 +63,7 @@ export default {
       try {
         return json(await readMatchups(env, region, patch));
       } catch (e) {
-        return json({ error: String(e) }, 500);
+        return serverError("matchups", e);
       }
     }
     if (path === "/v1/builds") {
@@ -50,21 +73,22 @@ export default {
       try {
         return json(await readBuilds(env, region, patch));
       } catch (e) {
-        return json({ error: String(e) }, 500);
+        return serverError("builds", e);
       }
     }
     // Manual ingestion trigger — secret-gated so an anonymous caller can't drive
     // the personal Riot key or race the cron. Cron runs this on schedule without
     // HTTP. Requires `Authorization: Bearer <INGEST_SECRET>` (set via wrangler secret).
     if (path === "/v1/ingest") {
-      const auth = request.headers.get("Authorization");
-      if (!env.INGEST_SECRET || auth !== `Bearer ${env.INGEST_SECRET}`) {
+      const auth = request.headers.get("Authorization") ?? "";
+      const expected = env.INGEST_SECRET ? `Bearer ${env.INGEST_SECRET}` : "";
+      if (!env.INGEST_SECRET || !(await safeEqual(auth, expected))) {
         return json({ error: "unauthorized" }, 401);
       }
       try {
         return json(await runIngestion(env));
       } catch (e) {
-        return json({ error: String(e) }, 500);
+        return serverError("ingest", e);
       }
     }
 

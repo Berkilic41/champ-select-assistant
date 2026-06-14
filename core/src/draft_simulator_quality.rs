@@ -407,7 +407,6 @@ mod tests {
 
         use std::collections::BTreeMap;
         let mut per_category: BTreeMap<&str, (u32, u32)> = BTreeMap::new();
-        let mut audit_failures = 0u32;
 
         for sc in &scenarios {
             let result = compare_moves(&sc.state, std::slice::from_ref(&sc.mv))
@@ -418,7 +417,6 @@ mod tests {
             // Sentence + factor re-audit (coach_quality) for EVERY scenario.
             let issues = audit_sim_result(&result);
             if !issues.is_empty() {
-                audit_failures += 1;
                 panic!("[{}] sentence audit failed: {issues:?}", sc.name);
             }
 
@@ -444,7 +442,6 @@ mod tests {
         for (cat, (pass, total)) in &per_category {
             eprintln!("  {cat:>16}: {pass}/{total} held");
         }
-        eprintln!("  sentence-audit failures: {audit_failures}");
         eprintln!("=====================================================\n");
     }
 

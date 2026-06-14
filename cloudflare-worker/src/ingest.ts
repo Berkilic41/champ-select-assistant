@@ -23,6 +23,14 @@ const num = (v: string | undefined, fallback: number): number => {
   return Number.isFinite(n) && n > 0 ? n : fallback;
 };
 
+/** Fair per-region cap so later regions (e.g. KR, last in the list) are not
+ *  starved by earlier ones draining a single global budget. `ceil` guarantees
+ *  every region gets at least its share; a global cap still bounds the total. */
+export function perRegionBudget(total: number, regionCount: number): number {
+  if (regionCount <= 0) return 0;
+  return Math.max(1, Math.ceil(total / regionCount));
+}
+
 /**
  * One bounded ingestion pass: sample Challenger ranked games across the
  * configured regions, aggregate per-champion/role win/pick + per-champion bans
@@ -35,13 +43,18 @@ export async function runIngestion(
   const regions = env.INGEST_REGIONS.split(",").map((s) => s.trim()).filter(Boolean);
   const seedN = num(env.SEED_PLAYERS_PER_REGION, 10);
   const perPlayer = num(env.MATCHES_PER_PLAYER, 5);
-  let remaining = num(env.MAX_MATCHES_PER_RUN, 40);
+  const total = num(env.MAX_MATCHES_PER_RUN, 40);
+  // Each region draws from its own fair share; a global counter still caps the
+  // grand total so we never exceed the Riot budget across all regions combined.
+  const regionCap = perRegionBudget(total, regions.length);
+  let globalRemaining = total;
   const key = env.RIOT_API_KEY;
   const perRegion: Record<string, number> = {};
 
   for (const region of regions) {
-    if (remaining <= 0) break;
+    if (globalRemaining <= 0) break;
     perRegion[region] = 0;
+    let regionRemaining = Math.min(regionCap, globalRemaining);
 
     let puuids: string[] = [];
     try {
@@ -62,7 +75,7 @@ export async function runIngestion(
     }
 
     for (const matchId of candidates) {
-      if (remaining <= 0) break;
+      if (regionRemaining <= 0 || globalRemaining <= 0) break;
 
       let match: MatchDto;
       try {
@@ -93,7 +106,8 @@ export async function runIngestion(
           .catch(() => undefined);
         continue;
       }
-      remaining--;
+      regionRemaining--;
+      globalRemaining--;
       perRegion[region]++;
     }
   }

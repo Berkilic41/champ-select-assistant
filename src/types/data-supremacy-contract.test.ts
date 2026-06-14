@@ -73,8 +73,8 @@ const packSyncStatus: PackSyncStatus = {
 };
 
 const draftBrainQuality: DraftBrainQualityReport = {
-  feedback_total: BigInt(12),
-  feedback_unsynced: BigInt(2),
+  feedback_total: 12,
+  feedback_unsynced: 2,
   model_pack_version: 'draft-brain-rules-v2',
   data_pack_version: dataPack.version,
   data_pack_confidence: 'high',
@@ -99,7 +99,8 @@ describe('data-supremacy generated TS contract', () => {
     expect(dataPack.quality.champion_rates).toBe(172);
     expect(typeof dataPack.generated_at).toBe('number');
     expect(packSyncStatus.confidence).toBe('high');
-    expect(typeof draftBrainQuality.feedback_total).toBe('bigint');
+    // feedback_* serialize as plain JS numbers over IPC (Node host count()).
+    expect(typeof draftBrainQuality.feedback_total).toBe('number');
     expect(draftBrainQuality.data_pack_fresh).toBe(true);
   });
 });

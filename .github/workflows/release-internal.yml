@@ -3,8 +3,10 @@ name: Release (Internal)
 on:
   push:
     tags:
-      - 'v*.*.*-internal'
-      - 'v*.*.*-beta'
+      # Prerelease channels. The trailing * catches dotted suffixes like
+      # v0.10.0-beta.4 / -beta.5 (a bare 'v*.*.*-beta' does NOT match those).
+      - 'v*.*.*-internal*'
+      - 'v*.*.*-beta*'
   workflow_dispatch: {}
 
 jobs:

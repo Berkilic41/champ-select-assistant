@@ -336,6 +336,9 @@ fn main_lesson(
 mod tests {
     use super::*;
 
+    // Positional test-fixture builder (match row) — a struct would only move
+    // the verbosity to the many call sites without aiding the tests.
+    #[allow(clippy::too_many_arguments)]
     fn m(
         id: u32,
         key: &str,

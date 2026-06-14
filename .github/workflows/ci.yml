@@ -36,7 +36,8 @@ jobs:
         run: cargo fmt --all -- --check
 
       - name: cargo clippy
-        run: cargo clippy --all-features -- -D warnings
+        # --all-targets so tests/benches lint too (lib-only missed 8 warnings).
+        run: cargo clippy --all-targets --all-features -- -D warnings
 
       - name: cargo test
         run: cargo test --all
@@ -118,3 +119,28 @@ jobs:
 
       - name: Unit tests (desktop)
         run: pnpm --filter csa-desktop test
+
+  worker:
+    name: Cloudflare Worker checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true
+
+      - name: TypeScript check (worker)
+        run: pnpm --filter champ-select-riot-proxy typecheck
+
+      - name: Unit tests (worker)
+        run: pnpm --filter champ-select-riot-proxy test

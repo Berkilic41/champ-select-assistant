@@ -798,7 +798,7 @@ mod tests {
 
     #[test]
     fn thin_history_is_partial_with_no_goal_and_no_baselines() {
-        let review = build_game_review(&row(200, 3, 20, true), &history()[..3].to_vec(), None);
+        let review = build_game_review(&row(200, 3, 20, true), &history()[..3], None);
         assert!(review.partial);
         assert!(review.next_focus.is_none());
         assert!(review.lines.iter().all(|l| l.baseline.is_none()));

@@ -1,6 +1,6 @@
 # Gizlilik Politikası — Champ Select Assistant
 
-> Yürürlük tarihi: 2026-05-31 · Sürüm: 0.9.0-beta.1
+> Yürürlük tarihi: 2026-06-14 · Sürüm: 0.10.0-beta.4
 
 Champ Select Assistant ("Uygulama") gizliliğini ciddiye alır. Bu belge,
 Uygulamanın hangi verilere eriştiğini, bunları nasıl kullandığını ve neyi
@@ -30,7 +30,12 @@ Bu veriler **yalnızca yerel SQLite veritabanında** saklanır ve cihazından d�
 ## Verileri Nasıl Kullanırız
 
 - Veriler yalnızca champ-select önerileri üretmek için cihazında işlenir.
-- Hiçbir veri üçüncü taraflarla paylaşılmaz, satılmaz veya bir sunucuya yüklenmez.
+- Kişisel verin (maç geçmişi, mastery, PUUID, isim) üçüncü taraflarla **paylaşılmaz,
+  satılmaz veya bir sunucuya yüklenmez** ve cihazından çıkmaz.
+- Cihazından çıkan tek ağ trafiği, kişisel tanımlayıcı **içermeyen** isteklerdir:
+  (a) genel statik içerik (DDragon/CDragon), (b) bölge bazlı toplu meta sorgusu
+  (yalnızca `region`/`patch`), ve (c) yalnızca sen açıkça yapılandırırsan,
+  anonimleştirilmiş öneri geri bildirimi. Detaylar aşağıda.
 
 ## Dış Bağlantılar (Yalnızca Genel Statik İçerik)
 
@@ -39,15 +44,29 @@ bağlanır:
 
 - `ddragon.leagueoflegends.com` ve `cdn.communitydragon.org` — şampiyon/item
   görselleri ve statik oyun verisi (Data Dragon / Community Dragon).
-- `cdn.merakianalytics.com` — genel meta (win/pick/ban rate) verisi.
+- Toplu meta veri servisi (varsayılan: kendi Cloudflare Worker'ımız) — yalnızca
+  `region` (+ opsiyonel `patch`) parametresiyle toplu (anonim, oyuncu-bağımsız)
+  win/pick/ban oranlarını okur. İstekte PUUID/isim/match ID **yoktur**. Bu adres
+  `EDGE_BASE_URL` ile değiştirilebilir veya boşaltılarak kapatılabilir.
 
-Bu isteklerde kişisel tanımlayıcı (PUUID, isim, match ID) gönderilmez.
+Bu isteklerin hiçbirinde kişisel tanımlayıcı (PUUID, isim, match ID) gönderilmez.
 
 ## Riot Developer API Key
 
 - Uygulama normal kullanım için Riot developer API key **istemez**.
 - İsteğe bağlı bir key yalnızca yerel `.env` dosyasında tutulabilir; binary'ye
   gömülmez ve loglanmaz.
+
+## Opsiyonel: Anonim Öneri Geri Bildirimi
+
+- **Varsayılan olarak kapalıdır.** Yalnızca `DRAFT_BRAIN_API_BASE` ortam
+  değişkenini sen açıkça ayarlarsan etkinleşir.
+- Etkinse, öneri kalitesini iyileştirmek için **anonimleştirilmiş** geri bildirim
+  yüklenir: hangi önerinin kabul/ret edildiği + bir oturum **hash**'i (`user_hash`).
+  Ham PUUID, isim veya maç kimliği **gönderilmez**.
+- Hash üretilemeyen (≥16 karakter olmayan) kayıtlar tamamen **atlanır**, asla
+  gönderilmez. Her gönderim, yinelenmeyi önleyen bir idempotency anahtarı taşır.
+- Bu özelliği hiç açmazsan, hiçbir geri bildirim cihazından çıkmaz.
 
 ## Saklama ve Silme
 

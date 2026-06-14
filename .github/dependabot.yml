@@ -1,7 +1,8 @@
 version: 2
 updates:
   - package-ecosystem: cargo
-    directory: /src-tauri
+    # Rust crate lives in /core since the Electron migration (was /src-tauri).
+    directory: /core
     schedule:
       interval: weekly
       day: monday

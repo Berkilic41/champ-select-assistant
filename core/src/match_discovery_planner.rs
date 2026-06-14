@@ -294,6 +294,8 @@ mod tests {
         }
     }
 
+    // Positional test-fixture builder — a struct would only move the verbosity.
+    #[allow(clippy::too_many_arguments)]
     fn input(
         champ: bool,
         budget: u32,

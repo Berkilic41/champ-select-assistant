@@ -39,6 +39,10 @@ import {
 
 export const SCHEDULER_INITIAL_DELAY_MS = 30_000;
 export const SCHEDULER_INTERVAL_MS = 3 * 60_000;
+/** Default edge Worker base (PUBLIC anon-read aggregate, NOT a secret) so a packaged
+ *  install with no .env still reaches live meta. Overridable via EDGE_BASE_URL. */
+export const DEFAULT_EDGE_BASE_URL =
+  "https://champ-select-riot-proxy.aslan0004158.workers.dev";
 /** read_fetch_logs penceresi (30 gün) — Rust build_pipeline_scheduler_status. */
 const FETCH_LOG_WINDOW_SECS = 30 * 24 * 60 * 60;
 /** recent_request_timestamps penceresi (RATE_WINDOW_SECS = 1 saat). */
@@ -230,7 +234,7 @@ export class PipelineScheduler {
       db.prepare("SELECT 1 FROM summoners LIMIT 1").get() !== undefined;
     const edgeBase =
       this.deps.edgeBaseUrl === undefined
-        ? (runtimeEnv().EDGE_BASE_URL ?? "").trim() || null
+        ? (runtimeEnv().EDGE_BASE_URL ?? "").trim() || DEFAULT_EDGE_BASE_URL
         : this.deps.edgeBaseUrl;
 
     const status = engine.pipelineRefreshPlan<RefreshPlanStatus>({

@@ -1,23 +1,26 @@
 # champ-select-assistant — data backend (Cloudflare Worker)
 
 Server-side Riot data service. The Riot API key lives **only** here (Worker
-secret), never in the desktop client. Two jobs:
+secret), never in the desktop client. It aggregates champion win/pick/ban
+rates, lane matchups and builds per role, computed from a rolling sample of
+Challenger ranked games (Match-V5), ingested on a cron schedule into D1.
+Replaces the retired Meraki source.
 
-1. **Aggregated stats** (`/v1/rates`) — champion win/pick/ban rates per role,
-   computed from a rolling sample of Challenger ranked games (Match-V5),
-   ingested on a cron schedule into D1. Replaces the retired Meraki source.
-2. **Per-user proxy** (`/proxy/{riot-host}/{path}`) — pass-through to the Riot
-   API with the key attached (so the desktop client never holds the key).
+> A per-user Riot passthrough (`/proxy/*`) was **removed** — it would have
+> exposed the personal/dev key to anonymous abuse. The app is LCU-first; an
+> auth-gated proxy may return only after a production key is approved.
 
-> Status: scaffold (Phase 1 = rates). Matchups + builds are planned (see
-> `docs/api-key-policy.md` / the project plan). The desktop app keeps working
-> without this backend (neutral meta fallback) — wire it up after deploy.
+> Status: rates + matchups + builds are live read endpoints. The desktop app
+> keeps working without this backend (neutral meta fallback) — wire it up after
+> deploy. See `docs/api-key-policy.md` / the project plan.
 
-## Endpoints
-- `GET /v1/rates?region=tr1[&patch=16.11]` → `{ patch, region, total_games, rates:[{champion_id, role, win_rate, pick_rate, ban_rate, games}] }`
-- `GET /v1/ingest` → run one bounded ingestion pass now (cron does this automatically)
-- `GET /v1/health` → `{ ok: true }`
-- `GET /proxy/{riot-host}/{riot-path}` → Riot API passthrough (allowed hosts only)
+## Endpoints (all GET; non-GET → 405)
+- `/v1/rates?region=tr1[&patch=16.11]` → `{ patch, region, total_games, rates:[{champion_id, role, win_rate, pick_rate, ban_rate, games}] }`
+- `/v1/matchups?region=tr1[&patch=16.11]` → `{ patch, region, matchups:[{champion_id, opponent_id, role, games, wins, win_rate}] }`
+- `/v1/builds?region=tr1[&patch=16.11]` → `{ patch, region, builds:[{champion_id, role, item_ids, rune_ids, summoner_spells, games, wins, win_rate}] }`
+- `/v1/ingest` → run one bounded ingestion pass now. **Auth-gated**: requires
+  `Authorization: Bearer <INGEST_SECRET>` (the cron runs it without HTTP). Returns 401 otherwise.
+- `/v1/health` → `{ ok: true }`
 
 ## One-time setup
 ```bash
@@ -34,6 +37,9 @@ npx wrangler d1 migrations apply champ-select-stats --remote
 # 3) Set the Riot API key (production key once approved; a dev key works for testing)
 npx wrangler secret put RIOT_API_KEY
 
+# 3b) Set the manual-ingest secret (any strong string) — gates POST-less /v1/ingest
+npx wrangler secret put INGEST_SECRET
+
 # 4) Deploy
 npx wrangler deploy
 ```
@@ -41,10 +47,12 @@ npx wrangler deploy
 ## Local test (no deploy needed)
 ```bash
 npx wrangler d1 migrations apply champ-select-stats --local
-# put RIOT_API_KEY in a .dev.vars file (gitignored): RIOT_API_KEY=RGAPI-...
+# put secrets in a .dev.vars file (gitignored):
+#   RIOT_API_KEY=RGAPI-...
+#   INGEST_SECRET=<any-strong-string>   # gates the manual /v1/ingest trigger
 npx wrangler dev
-# then:
-curl "http://localhost:8787/v1/ingest"                 # pull+aggregate a small sample
+# then (ingest is Bearer-gated — the cron runs it without auth):
+curl -H "Authorization: Bearer <INGEST_SECRET>" "http://localhost:8787/v1/ingest"
 curl "http://localhost:8787/v1/rates?region=tr1"       # read back the rates
 ```
 

@@ -325,7 +325,8 @@ mod tests {
         let kb = DraftKnowledgeBase::load().expect("Draft IQ KB yüklenemedi");
         let champions = catalog();
         // (my_pos, enemies[(id,pos)], pool) — visible matchups so `matchup` is applicable.
-        let scenarios: &[(&str, &[(u32, &str)], &[i64])] = &[
+        type Scenario<'a> = (&'a str, &'a [(u32, &'a str)], &'a [i64]);
+        let scenarios: &[Scenario<'_>] = &[
             ("middle", &[(103, "middle")], &[238, 134]),
             ("top", &[(122, "top")], &[54]),
             ("bottom", &[(222, "bottom"), (89, "utility")], &[145]),
