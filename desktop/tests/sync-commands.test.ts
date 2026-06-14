@@ -11,6 +11,7 @@ import { afterEach, beforeAll, describe, expect, it } from "vitest";
 
 import { LcuService } from "../src/main/commands/lcu";
 import { syncRecommendationFeedback } from "../src/main/commands/feedback-flush";
+import { saveSettings, DEFAULT_SETTINGS } from "../src/main/commands/settings";
 import { syncLcuPlayerData } from "../src/main/commands/player-data";
 import { syncDataPipeline } from "../src/main/commands/data-pipeline";
 import {
@@ -446,8 +447,14 @@ describe("sync_recommendation_feedback (feedback_flush.rs parity)", () => {
     return Number(row.id);
   }
 
+  /** Opt in to anonymized feedback upload (default is off → flush no-ops). */
+  function enableConsent(db: DatabaseSync): void {
+    saveSettings(db, { ...DEFAULT_SETTINGS, share_anonymous_feedback: true });
+  }
+
   it("returns offline:true when no cloud base is configured", async () => {
     const db = migratedDb();
+    enableConsent(db);
     const summary = await syncRecommendationFeedback(engine, db, {});
     expect(summary).toEqual({
       offline: true,
@@ -460,6 +467,7 @@ describe("sync_recommendation_feedback (feedback_flush.rs parity)", () => {
 
   it("sends due hashed rows with a core idempotency key; failures stay queued", async () => {
     const db = migratedDb();
+    enableConsent(db);
     const hashedId = seedFeedback(db, "0123456789abcdef0123");
     seedFeedback(db, null); // privacy gate → asla gönderilmez
 
@@ -499,8 +507,36 @@ describe("sync_recommendation_feedback (feedback_flush.rs parity)", () => {
     expect(again.attempted).toBe(0);
   });
 
+  it("never uploads without consent — privacy gate (off by default)", async () => {
+    const db = migratedDb(); // no enableConsent → share_anonymous_feedback stays false
+    const id = seedFeedback(db, "0123456789abcdef0123");
+    let posted = false;
+    const summary = await syncRecommendationFeedback(
+      engine,
+      db,
+      { DRAFT_BRAIN_API_BASE: "https://cloud.example" },
+      async () => {
+        posted = true;
+        return { ok: true };
+      },
+    );
+    expect(posted).toBe(false); // POST must never fire without consent
+    expect(summary).toEqual({
+      offline: true,
+      attempted: 0,
+      synced: 0,
+      failed: 0,
+      skipped_no_hash: 0,
+    });
+    const row = db
+      .prepare("SELECT synced_at FROM recommendation_feedback WHERE rowid = ?")
+      .get(id) as unknown as { synced_at: number | null };
+    expect(row.synced_at).toBeNull(); // row stays queued for a future opted-in flush
+  });
+
   it("a failed POST bumps retry bookkeeping without losing the row", async () => {
     const db = migratedDb();
+    enableConsent(db);
     const id = seedFeedback(db, "0123456789abcdef0123");
     const summary = await syncRecommendationFeedback(
       engine,

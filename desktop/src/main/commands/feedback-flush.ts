@@ -13,6 +13,7 @@ import type { DatabaseSync } from "node:sqlite";
 
 import type { Engine } from "../engine";
 import { runtimeEnv } from "../riot/client";
+import { getSettings } from "./settings";
 
 export interface FeedbackFlushSummary {
   offline: boolean;
@@ -80,6 +81,14 @@ export async function syncRecommendationFeedback(
   env: Record<string, string | undefined> = runtimeEnv(),
   post: PostFeedback = realPost,
 ): Promise<FeedbackFlushSummary> {
+  // Privacy gate (FAZ 2): anonymized feedback only leaves the device with the
+  // user's explicit opt-in (Settings → Gizlilik, OFF by default). Without consent
+  // the feedback backend is treated as unreachable — queued rows stay local and
+  // are never uploaded. This is the authoritative check: it runs before any
+  // network work regardless of caller, so consent can never be bypassed.
+  if (!getSettings(db).share_anonymous_feedback) {
+    return { offline: true, attempted: 0, synced: 0, failed: 0, skipped_no_hash: 0 };
+  }
   const base = env.DRAFT_BRAIN_API_BASE?.trim();
   if (!base) {
     return { offline: true, attempted: 0, synced: 0, failed: 0, skipped_no_hash: 0 };

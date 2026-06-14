@@ -14,6 +14,8 @@ export interface AppSettings {
   sounds_enabled: boolean;
   language?: 'tr' | 'en';
   platform_region: string;
+  // Privacy opt-in: upload anonymized recommendation feedback. OFF by default.
+  share_anonymous_feedback: boolean;
 }
 
 // Normalize the six recommendation weights to sum to 1.0.
@@ -53,6 +55,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   sounds_enabled: false,
   language: 'tr',
   platform_region: 'tr1',
+  share_anonymous_feedback: false,
 };
 
 export { DEFAULT_SETTINGS };

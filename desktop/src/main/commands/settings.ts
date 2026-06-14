@@ -15,6 +15,9 @@ export interface AppSettings {
   sounds_enabled: boolean;
   language: string; // "tr" | "en"
   platform_region: string; // e.g. "tr1", "euw1"
+  // Privacy: explicit opt-in to upload anonymized recommendation feedback.
+  // OFF by default — nothing leaves the device unless the user turns this on.
+  share_anonymous_feedback: boolean;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -30,6 +33,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   sounds_enabled: false,
   language: "tr",
   platform_region: "tr1",
+  share_anonymous_feedback: false,
 };
 
 /** Rust serde paritesi: bu alanlardan biri eksikse TÜM ayarlar default'a düşer
@@ -82,6 +86,12 @@ export function getSettings(db: DatabaseSync): AppSettings {
     language: (parsed.language as string) ?? DEFAULT_SETTINGS.language,
     platform_region:
       (parsed.platform_region as string) ?? DEFAULT_SETTINGS.platform_region,
+    // Optional-default (NOT in REQUIRED_KEYS) so old stored settings without
+    // this key keep all their values instead of resetting to defaults.
+    share_anonymous_feedback:
+      typeof parsed.share_anonymous_feedback === "boolean"
+        ? parsed.share_anonymous_feedback
+        : DEFAULT_SETTINGS.share_anonymous_feedback,
   } as AppSettings;
 }
 

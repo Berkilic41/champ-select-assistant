@@ -226,6 +226,19 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
         </section>
 
         <section className="sp-section">
+          <h3 className="sp-section-title">{t('settings.privacySection')}</h3>
+          <label className="sp-toggle">
+            <input
+              type="checkbox"
+              checked={draft.share_anonymous_feedback}
+              onChange={e => update({ share_anonymous_feedback: e.target.checked })}
+            />
+            {t('settings.shareAnonymousFeedback')}
+          </label>
+          <p className="sp-hint">{t('settings.shareAnonymousFeedbackHint')}</p>
+        </section>
+
+        <section className="sp-section">
           <h3 className="sp-section-title">{t('settings.weightsSection')}</h3>
           <p className="sp-hint">{t('settings.weightsHint')}</p>
           <div className="sp-presets">
