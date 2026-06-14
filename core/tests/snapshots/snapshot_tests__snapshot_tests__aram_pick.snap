@@ -24,13 +24,13 @@ expression: snap
   },
   {
     "rank": 4,
-    "champion_key": "Ekko",
+    "champion_key": "Vi",
     "tier": "C",
     "confidence": "low"
   },
   {
     "rank": 5,
-    "champion_key": "Elise",
+    "champion_key": "Ekko",
     "tier": "C",
     "confidence": "low"
   }

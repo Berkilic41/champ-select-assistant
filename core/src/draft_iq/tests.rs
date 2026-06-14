@@ -87,8 +87,8 @@ fn validate_ddragon_completeness() {
 #[test]
 fn combo_count_matches_json() {
     let dir = load_combos(COMBOS_JSON).expect("combos.json parse failed");
-    // E3 (2026-06-12): +14 mekanik-kesin ikonik combo → 123.
-    assert_eq!(dir.len(), 123, "combos.json should have 123 entries");
+    // 2026-06-14 (Faz 1): +421 audited mekanik-doğru sinerji → 544 (123 baz + 421).
+    assert_eq!(dir.len(), 544, "combos.json should have 544 entries");
 }
 
 #[test]

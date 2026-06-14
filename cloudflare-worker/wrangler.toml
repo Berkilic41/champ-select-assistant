@@ -5,8 +5,18 @@ compatibility_flags = ["nodejs_compat"]
 
 # RIOT_API_KEY is set as a secret (never hardcode):
 #   wrangler secret put RIOT_API_KEY
+#
+# KEY ROTATION (operational reality): a Riot *development/personal* key EXPIRES
+# every ~24 hours. While on a dev key, re-run the `wrangler secret put` above at
+# least daily or the cron ingestion starts returning 401/403 (the worker fails
+# closed and the last-good aggregate is still served to clients). A *production*
+# key does not expire — once approved, rotate only on the normal security cadence.
 [vars]
 # Regions to aggregate ranked stats from (platform routing values, comma-separated).
+# Kept at 4 regions deliberately: live evidence shows a dev key sustains
+# tr1/euw1/na1/kr at the budget below without rate-limit suspension, and wider
+# regional coverage means a richer sample for downstream ML. Narrow this ONLY if
+# Riot suspends the key for rate abuse — not preemptively.
 INGEST_REGIONS = "tr1,euw1,na1,kr"
 # Max match details fetched per cron run — keep well under Riot rate limits.
 # A personal key (20 req/s, 100/2min) needs a small number; a production key can go higher.
