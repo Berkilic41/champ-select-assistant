@@ -75,6 +75,16 @@ export interface LcuServiceOptions {
    * snake_case state alır. Geçersiz payload → null → event YAYINLANMAZ.
    */
   parseSession?: (raw: unknown) => unknown | null;
+  /**
+   * 2B: parse edilmiş ChampSelectState (snake_case) ya da null (seans bitti) —
+   * OutcomeTracker commit edilen pick'i buradan izler. emit'e EK olarak çağrılır.
+   */
+  onChampSelectSession?: (state: unknown | null) => void;
+  /**
+   * 2B: gameflow faz string'i ("ChampSelect"/"InProgress"/"EndOfGame"…) — pick
+   * yazma (InProgress) + oyun-sonu resolve (EndOfGame) tetikleyici. emit'e EK.
+   */
+  onGameflowPhase?: (phase: string) => void;
   /** Test seam. */
   findLockfileFn?: () => Lockfile;
   makeClient?: (lockfile: Lockfile) => LcuHttp;
@@ -134,7 +144,11 @@ export class LcuService {
     // without this the renderer wouldn't reflect an already-live match on connect.
     void client
       .getJson<unknown>("/lol-gameflow/v1/gameflow-phase")
-      .then((p) => this.opts.emit("gameflow-phase", typeof p === "string" ? p : ""))
+      .then((p) => {
+        const phase = typeof p === "string" ? p : "";
+        this.opts.emit("gameflow-phase", phase);
+        this.opts.onGameflowPhase?.(phase);
+      })
       .catch(() => undefined);
     return this.lastStatus;
   }
@@ -173,10 +187,9 @@ export class LcuService {
         // champ-select if the null event below never arrives (dodge / WS drop).
         // data is the phase string ("ChampSelect" / "InProgress" / "Lobby" / "None").
         if (event.topic === GAMEFLOW_PHASE_TOPIC) {
-          this.opts.emit(
-            "gameflow-phase",
-            typeof event.data === "string" ? event.data : "",
-          );
+          const phase = typeof event.data === "string" ? event.data : "";
+          this.opts.emit("gameflow-phase", phase);
+          this.opts.onGameflowPhase?.(phase);
           return;
         }
         // Tauri websocket.rs paritesi (228-237): null → null yayınla (champ select
@@ -184,11 +197,12 @@ export class LcuService {
         // payload → hiç yayınlama.
         if (event.data === null) {
           this.opts.emit("champ-select-session", null);
+          this.opts.onChampSelectSession?.(null);
           return;
         }
         if (!this.opts.parseSession) {
           this.opts.emit("champ-select-session", event.data);
-          return;
+          return; // ham (camelCase) shape — OutcomeTracker'a besleme (yanlış-şekil).
         }
         let state: unknown | null = null;
         try {
@@ -196,7 +210,10 @@ export class LcuService {
         } catch {
           state = null; // core "Geçersiz session JSON" fırlatır — yayınlama.
         }
-        if (state !== null) this.opts.emit("champ-select-session", state);
+        if (state !== null) {
+          this.opts.emit("champ-select-session", state);
+          this.opts.onChampSelectSession?.(state);
+        }
       },
     });
     void this.watcher.start();

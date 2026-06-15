@@ -21,6 +21,7 @@ import {
 } from "../repos-write";
 import type { SummonerInfo } from "../riot/client";
 import type { LcuHttp, LcuService } from "./lcu";
+import { resolveRecommendationOutcomes } from "./outcomes";
 
 export interface LcuPlayerDataSyncResult {
   summoner: SummonerInfo;
@@ -138,6 +139,15 @@ export async function syncLcuPlayerData(
     } catch {
       errors += 1;
     }
+  }
+
+  // 2B: yeni ingest edilen maçlarla bekleyen öneri→pick etiketlerini çöz.
+  // Self-healing: gameflow EndOfGame tetikleyicisi maçı kaçırsa (stat gecikmesi)
+  // bile bir sonraki sync win/loss'u bağlar. Idempotent + best-effort.
+  try {
+    resolveRecommendationOutcomes(db);
+  } catch (err) {
+    console.warn("öneri-sonuç resolve hatası:", (err as Error).message);
   }
 
   return {

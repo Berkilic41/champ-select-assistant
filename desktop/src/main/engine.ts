@@ -20,6 +20,8 @@ export interface CoreModule {
   blended_meta_rates_json(input: string): string;
   feedback_signals_json(input: string): string;
   aram_weights_json(): string;
+  win_prob_estimates_json(input: string): string;
+  train_model_pack_json(input: string): string;
   champion_analysis_json(input: string): string;
   counter_picks_json(input: string): string;
   draft_verdict_full_json(input: string): string;
@@ -121,6 +123,18 @@ export class Engine {
   /** Brawl-mode (ARAM/Arena) ScoringWeights preset — values stay in core. */
   aramWeights<TOut = unknown>(): TOut {
     return JSON.parse(this.core.aram_weights_json()) as TOut;
+  }
+
+  /** {examples:[{score,won}], scores:[f32]} → WinProbReport (FAZ 3 / Sprint 3A:
+   *  kalibre kazanma olasılığı; min-sample altında available=false). */
+  winProbEstimates<TOut = unknown>(input: unknown): TOut {
+    return this.call(this.core.win_prob_estimates_json, input);
+  }
+
+  /** {examples:[{features,won}], prior?} → ModelPack | null (FAZ 3 / Sprint 3B:
+   *  öğrenilen ağırlıklar; min-sample/dejenere veride null → rules fallback). */
+  trainModelPack<TOut = unknown>(input: unknown): TOut {
+    return this.call(this.core.train_model_pack_json, input);
   }
 
   /** RecommendationsInput + champion_id → Recommendation | null. */

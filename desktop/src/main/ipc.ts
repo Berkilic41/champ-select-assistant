@@ -76,6 +76,10 @@ import {
   type RecommendationFeedbackInput,
 } from "./commands/player";
 import { getRecommendations } from "./commands/recommendations";
+import { getWinProbEstimates } from "./commands/win-prob";
+import { trainLocalModelPack } from "./commands/model-training";
+import { getComboOutcomes } from "./commands/combo-outcomes";
+import type { RecsCache } from "./commands/outcomes";
 import {
   getDdragonVersion,
   syncCdragonMeta,
@@ -110,6 +114,9 @@ export interface IpcContext {
   lcu: LcuService | undefined;
   /** DDragon item/rune/version bellek-içi cache'i (AppState paritesi). */
   caches: DdragonCaches;
+  /** 2B: get_recommendations'ın son sonucu — pick anında öneri→sonuç linkage
+   *  için OutcomeTracker okur. Yoksa (test ctx'i) öneri cache'lemesi atlanır. */
+  recsCache?: RecsCache;
   /** Live Client Data (port 2999) fetch'i — null = canlı oyun yok (sessiz). */
   fetchAllGameData: FetchAllGameData;
   /** Arka plan pipeline scheduler'ı (ramp ölçümü trajectory'ye akar);
@@ -194,16 +201,42 @@ export function buildCommandRegistry(
 
   // champ_select.rs (öneri dilimi) — get_draft_brain_recommendations Rust'ta da
   // get_recommendations'a delege eden bir alias (champ_select.rs:584).
-  const recommendations = (args: Record<string, unknown> | undefined) =>
-    getRecommendations(
+  const recommendations = (args: Record<string, unknown> | undefined) => {
+    const puuid = String(args?.puuid ?? "");
+    const recs = getRecommendations(
       requireEngine(ctx),
       requireDb(ctx),
       args?.sessionJson,
-      String(args?.puuid ?? ""),
+      puuid,
       ctx.caches,
     );
+    // 2B: bu seansın öneri listesini cache'le; oyuncu commit edip oyun başlayınca
+    // OutcomeTracker pick'in rank/score'unu buradan okuyup pending etiket yazar.
+    if (puuid) ctx.recsCache?.set(puuid, recs);
+    return recs;
+  };
   commands.set("get_recommendations", recommendations);
   commands.set("get_draft_brain_recommendations", recommendations);
+
+  // FAZ 3 / 3A: öneri skorları → kalibre kazanma olasılığı (ayrı komut; hot
+  // recommendation yolunu DEĞİŞTİRMEZ). Min-sample altında available=false.
+  commands.set("get_win_prob_estimates", (args) =>
+    getWinProbEstimates(
+      requireEngine(ctx),
+      requireDb(ctx),
+      Array.isArray(args?.scores) ? (args.scores as number[]) : [],
+    ),
+  );
+
+  // FAZ 3 / 3B: yerel etiketlerden öğrenilen ModelPack'i (yeniden) eğit + persist.
+  // Gate altı → null (rules fallback). recommendations otomatik tüketir.
+  commands.set("train_local_model_pack", () =>
+    trainLocalModelPack(requireEngine(ctx), requireDb(ctx)),
+  );
+
+  // FAZ 3 / 3C: oyuncunun co-pick combo geçmişi (display-augment; scoring'e
+  // dokunmaz). Renderer combo ipucunda "geçmişin: nM %W" gösterir.
+  commands.set("get_combo_outcomes", () => getComboOutcomes(requireDb(ctx)));
 
   // champ_select.rs (analiz kümesi) — tüm karar mantığı core WASM'da.
   commands.set("get_champion_analysis", (args) =>

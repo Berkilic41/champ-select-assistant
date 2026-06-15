@@ -10,6 +10,9 @@ import type { DatabaseSync } from "node:sqlite";
 import { app, BrowserWindow, session, type Tray } from "electron";
 
 import { LcuService } from "./commands/lcu";
+import { OutcomeTracker, RecsCache } from "./commands/outcomes";
+import { trainLocalModelPack } from "./commands/model-training";
+import { syncLcuPlayerData } from "./commands/player-data";
 import { openDatabaseWithRecovery } from "./db";
 import { emptyCaches } from "./ddragon";
 import { Engine } from "./engine";
@@ -27,8 +30,13 @@ if (!gotLock) {
 } else {
   let mainWindow: BrowserWindow | undefined;
   let engine: Engine | undefined;
+  let db: DatabaseSync | undefined;
   let scheduler: PipelineScheduler | undefined;
   let tray: Tray | undefined;
+  let outcomeTracker: OutcomeTracker | undefined;
+
+  // 2B: son öneri listesi cache'i + öneri→pick→sonuç köprüsü (gameflow-driven).
+  const recsCache = new RecsCache();
 
   const status: AppStatus = {
     engine: "failed",
@@ -50,6 +58,28 @@ if (!gotLock) {
         return null;
       }
       return engine.parseSession(raw);
+    },
+    // 2B: pick yakalama + oyun-sonu resolve OutcomeTracker'a delege edilir
+    // (emit'e EK — renderer event akışı aynen korunur).
+    onChampSelectSession: (state) => outcomeTracker?.onChampSelectSession(state),
+    onGameflowPhase: (phase) => outcomeTracker?.onGameflowPhase(phase),
+  });
+
+  // LcuService'ten SONRA kur (syncMatches `lcu`'yu kapsar); callback'ler boot
+  // sonrası ateşlendiği için `outcomeTracker`/`db` o ana dek atanmış olur.
+  outcomeTracker = new OutcomeTracker({
+    getDb: () => db,
+    recs: recsCache,
+    syncMatches: async () => {
+      if (db) await syncLcuPlayerData(db, lcu, undefined);
+      // 3B: oyun-sonu yeni etiketler çözülünce ModelPack'i tazele (best-effort).
+      if (db && engine) {
+        try {
+          trainLocalModelPack(engine, db);
+        } catch (err) {
+          console.warn("oyun-sonu ModelPack eğitimi atlandı:", (err as Error).message);
+        }
+      }
     },
   });
 
@@ -82,7 +112,7 @@ if (!gotLock) {
 
     // 1. DB + migrations (önce — Rust tarafındaki "migrations before any DB access"
     //    kuralı). G2: bozulmada dosya kenara alınır + taze şema kurulur.
-    let db: DatabaseSync | undefined;
+    //    `db` dış kapsamda (OutcomeTracker.getDb + syncMatches onu kapsar).
     try {
       const opened = openDatabaseWithRecovery(
         join(app.getPath("userData"), "csa-electron.db"),
@@ -113,6 +143,13 @@ if (!gotLock) {
     if (engine && db) {
       scheduler = new PipelineScheduler({ engine, db, lcu, caches });
       scheduler.start();
+      // 3B: boot'ta birikmiş etiketlerden ModelPack'i tazele (best-effort; gate
+      // altıysa no-op → local_rules fallback).
+      try {
+        trainLocalModelPack(engine, db);
+      } catch (err) {
+        console.warn("boot ModelPack eğitimi atlandı:", (err as Error).message);
+      }
     }
 
     // 4. IPC + pencere. LCU bağlantısını Tauri'deki gibi RENDERER tetikler
@@ -122,6 +159,7 @@ if (!gotLock) {
       db,
       lcu,
       caches,
+      recsCache,
       fetchAllGameData: createLiveClientFetcher(),
       scheduler,
       getMainWindow: () => mainWindow,

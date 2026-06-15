@@ -130,6 +130,14 @@ export function championRoleMap(db: DatabaseSync): Record<number, string[]> {
   return map;
 }
 
+/** champion_id → DDragon key ("LeeSin"); champions satırı yoksa null. */
+export function championKeyById(db: DatabaseSync, championId: number): string | null {
+  const row = db
+    .prepare("SELECT key FROM champions WHERE champion_id = ?")
+    .get(championId) as { key?: string } | undefined;
+  return typeof row?.key === "string" ? row.key : null;
+}
+
 /** champion_rates_repo::get_all_for_position — raw per-source rows for one lane. */
 export function championRatesForPosition(
   db: DatabaseSync,
