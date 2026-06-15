@@ -16,6 +16,10 @@ export interface AppSettings {
   platform_region: string;
   // Privacy opt-in: upload anonymized recommendation feedback. OFF by default.
   share_anonymous_feedback: boolean;
+  // FAZ 4: opsiyonel LLM koçluk endpoint'i (OpenAI-uyumlu). Boş = KAPALI
+  // (deterministik). Yerel (Ollama) ise veri makineden çıkmaz.
+  coach_llm_endpoint: string;
+  coach_llm_model: string;
 }
 
 // Normalize the six recommendation weights to sum to 1.0.
@@ -56,6 +60,8 @@ const DEFAULT_SETTINGS: AppSettings = {
   language: 'tr',
   platform_region: 'tr1',
   share_anonymous_feedback: false,
+  coach_llm_endpoint: '',
+  coach_llm_model: '',
 };
 
 export { DEFAULT_SETTINGS };

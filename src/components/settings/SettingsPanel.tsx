@@ -239,6 +239,25 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
         </section>
 
         <section className="sp-section">
+          <h3 className="sp-section-title">{t('settings.coachLlmSection')}</h3>
+          <p className="sp-hint">{t('settings.coachLlmHint')}</p>
+          <input
+            type="text"
+            className="sp-select"
+            placeholder="http://localhost:11434/v1/chat/completions"
+            value={draft.coach_llm_endpoint}
+            onChange={e => update({ coach_llm_endpoint: e.target.value })}
+          />
+          <input
+            type="text"
+            className="sp-select"
+            placeholder={t('settings.coachLlmModelPlaceholder')}
+            value={draft.coach_llm_model}
+            onChange={e => update({ coach_llm_model: e.target.value })}
+          />
+        </section>
+
+        <section className="sp-section">
           <h3 className="sp-section-title">{t('settings.weightsSection')}</h3>
           <p className="sp-hint">{t('settings.weightsHint')}</p>
           <div className="sp-presets">
