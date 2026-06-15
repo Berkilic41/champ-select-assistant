@@ -30,7 +30,7 @@
     "electron": "^40.0.0",
     "electron-builder": "^26.15.2",
     "electron-vite": "^4.0.0",
-    "typescript": "^5.8.0",
+    "typescript": "^6.0.3",
     "vite": "^7.1.0",
     "vitest": "^3.2.0"
   }
