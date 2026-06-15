@@ -71,10 +71,16 @@ export async function getCoachNarrative(
     }
   }
 
-  return engine.coachNarrative<CoachNarrative>({
+  const narrative = engine.coachNarrative<CoachNarrative>({
     recommendation: input.recommendation,
     win_prob,
     combo_history,
     candidate,
   });
+  // V3b: koçluk notunun kaynağı (deterministik mi LLM mi; LLM adayı reddedildi mi).
+  console.info(
+    `[pipeline] coach narrative source=${narrative.source}` +
+      (narrative.external_rejected ? " (external_rejected)" : ""),
+  );
+  return narrative;
 }

@@ -178,11 +178,27 @@ if (!gotLock) {
     // 6. Otomatik güncelleme (yalnız paketli build; hata best-effort loglanır).
     setupAutoUpdater();
 
-    // CSA_SMOKE=1: boot'u doğrula, durumu yaz, çık (CI / headless duman testi).
+    // CSA_SMOKE=1: boot + RENDERER→main→core IPC roundtrip'i (gerçek preload
+    // contextBridge + "cmd" dispatcher + DB) doğrula, durumu yaz, çık. E2E
+    // app-launch smoke testi (tests/e2e) bu `CSA_SMOKE {...}` satırını stdout'tan
+    // okur; ipc_ok renderer'ın window.api üzerinden komut çağırabildiğini kanıtlar.
     if (process.env.CSA_SMOKE) {
-      mainWindow.webContents.once("did-finish-load", () => {
-        console.log(`CSA_SMOKE ${JSON.stringify(status)}`);
-        app.quit();
+      const smokeWin = mainWindow;
+      smokeWin.webContents.once("did-finish-load", () => {
+        void (async () => {
+          let ipcOk = false;
+          try {
+            const settingsJson = await smokeWin.webContents.executeJavaScript(
+              "window.api.invoke('get_settings').then((s) => JSON.stringify(s))",
+            );
+            ipcOk =
+              typeof settingsJson === "string" && settingsJson.includes("weight_");
+          } catch {
+            ipcOk = false; // dürüst: roundtrip başarısız → testte ipc_ok:false görünür
+          }
+          console.log(`CSA_SMOKE ${JSON.stringify({ ...status, ipc_ok: ipcOk })}`);
+          app.quit();
+        })();
       });
     }
   });

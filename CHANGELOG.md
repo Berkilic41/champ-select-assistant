@@ -6,10 +6,34 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 
 ## [Unreleased]
 
+## [0.10.0-beta.5] — 2026-06-16
+
+beta.4'ten bu yana biriken büyük güncelleme: yapay zekâ koçluk, kazanma
+olasılığı kalibrasyonu, yerel öğrenme, genişletilmiş combo bilgisi ve uçtan
+uca doğrulama kalkanları.
+
 ### Eklendi
+- **Yapay zekâ koç notu (opsiyonel, yerel)** — DeepDive'da, OpenAI-uyumlu bir
+  yerel LLM (ör. Ollama) yapılandırılırsa gerekçeli koçluk notu üretir; varsayılan
+  KAPALI ve veri makineden çıkmaz. Aday her zaman deterministik audit'ten geçer,
+  geçemezse yerleşik koç notuna düşer.
+- **Kazanma olasılığı rozeti** — öneri skorları, geçmiş sonuçlardan kalibre
+  edilmiş bir kazanma olasılığına çevrilir (yeterli örnek altında gösterilmez).
+- **Co-pick combo geçmişin** — bir combo ipucunda o eşli geçmişin (oynanan /
+  kazanılan) görüntülenir.
+- **Yerel öğrenme** — maç sonuçları yerelde etiketlenir (sunucuya GİTMEZ); yeterli
+  örnek birikince öneri ağırlıkları muhafazakâr biçimde öğrenilir, deterministik
+  motor hâlâ ana referans.
+- **Genişletilmiş combo bilgisi** — denetlenmiş sinerji combo'ları 123 → 544.
 - **Rank bağlamı** — soloQ ve flex rank'in (tier/division/LP + split rekoru ve
   win-rate) League Client'tan anahtar gerekmeden okunup istatistik sekmesinde
   gösterilir. Yalnız görüntü; öneri/karne motorunu etkilemez.
+- Anonim geri bildirim yüklemesi için açık **rıza kapısı** (varsayılan KAPALI).
+
+### İç / kalite
+- Uçtan uca **app-launch + IPC smoke testi** (E2E), canlı LCU/Live-Client
+  **wire-şekil testleri**, **IPC komut-kayıt sözleşmesi** ve sürüm-senkron
+  kalkanları; boru hattı aşama log'ları (`[pipeline]`).
 
 ## [0.10.0-beta.3] — 2026-06-12
 

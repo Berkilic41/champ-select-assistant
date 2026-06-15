@@ -62,7 +62,9 @@ export function trainLocalModelPack(
 
   const pack = engine.trainModelPack<TrainedPack | null>({ examples });
   if (!pack || typeof pack.version !== "string") {
-    return { trained: false, version: null, samples: examples.length }; // gate altı → rules
+    // V3b: gate altı (yeterli/ayırt edici etiket yok) → rules fallback.
+    console.info(`[pipeline] model not trained (gate) samples=${examples.length} → rules`);
+    return { trained: false, version: null, samples: examples.length };
   }
 
   // Öğrenilen pack YEREL, süresiz bir artefakttır (data_pack'in aksine TTL yok).
@@ -76,5 +78,9 @@ export function trainLocalModelPack(
        source = excluded.source, fetched_at = excluded.fetched_at`,
   ).run(MODEL_PACK_KIND, pack.version, JSON.stringify(pack), nowSecs);
 
+  // V3b: öğrenilen ModelPack tazelendi (kaç etiketle, hangi sürüm).
+  console.info(
+    `[pipeline] model trained samples=${examples.length} version=${pack.version}`,
+  );
   return { trained: true, version: pack.version, samples: examples.length };
 }

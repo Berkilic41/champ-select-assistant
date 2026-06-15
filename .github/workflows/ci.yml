@@ -120,6 +120,17 @@ jobs:
       - name: Unit tests (desktop)
         run: pnpm --filter csa-desktop test
 
+      # E2E app-launch smoke: the unit suite stubs Electron, so it never proves the
+      # real app boots. This launches the BUILT Electron app headless (xvfb) with
+      # CSA_SMOKE=1 and asserts boot + WASM core + DB migration + a renderer→main→
+      # core IPC roundtrip. libnss3/libgbm1 keep their names across the t64 transition;
+      # other GUI libs ship on ubuntu-latest. WASM is already built in the step above.
+      - name: Electron headless deps (Linux)
+        run: sudo apt-get update && sudo apt-get install -y xvfb libnss3 libgbm1
+
+      - name: E2E app-launch smoke (desktop)
+        run: xvfb-run -a pnpm --filter csa-desktop test:e2e
+
   worker:
     name: Cloudflare Worker checks
     runs-on: ubuntu-latest

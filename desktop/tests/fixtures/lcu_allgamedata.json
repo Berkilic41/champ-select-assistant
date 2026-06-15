@@ -1,0 +1,23 @@
+{
+  "activePlayer": {
+    "riotIdGameName": "Berk",
+    "summonerName": "Berk#TR1",
+    "level": 7,
+    "championStats": { "currentHealth": 980.0, "maxHealth": 1340.0, "abilityPower": 0.0, "attackDamage": 92.0 }
+  },
+  "allPlayers": [
+    { "championName": "Lee Sin", "riotIdGameName": "Berk", "summonerName": "Berk#TR1", "team": "ORDER", "position": "JUNGLE", "scores": { "kills": 3, "deaths": 1, "assists": 4, "creepScore": 78, "wardScore": 6.4 } },
+    { "championName": "Lux", "riotIdGameName": "Ally1", "team": "ORDER", "position": "MIDDLE", "scores": { "kills": 2, "deaths": 2, "assists": 5, "creepScore": 95, "wardScore": 8.1 } },
+    { "championName": "Jinx", "riotIdGameName": "Ally2", "team": "ORDER", "position": "BOTTOM", "scores": { "kills": 4, "deaths": 0, "assists": 2, "creepScore": 120, "wardScore": 3.2 } },
+    { "championName": "Garen", "riotIdGameName": "Foe1", "team": "CHAOS", "position": "TOP", "scores": { "kills": 1, "deaths": 3, "assists": 1, "creepScore": 88, "wardScore": 2.0 } },
+    { "championName": "Thresh", "riotIdGameName": "Foe2", "team": "CHAOS", "position": "UTILITY", "scores": { "kills": 0, "deaths": 2, "assists": 6, "creepScore": 18, "wardScore": 14.5 } }
+  ],
+  "events": {
+    "Events": [
+      { "EventID": 0, "EventName": "GameStart", "EventTime": 0.03 },
+      { "EventID": 1, "EventName": "FirstBlood", "EventTime": 92.5 },
+      { "EventID": 2, "EventName": "DragonKill", "EventTime": 480.2 }
+    ]
+  },
+  "gameData": { "gameMode": "CLASSIC", "gameTime": 612.4, "mapNumber": 11, "mapName": "Map11" }
+}

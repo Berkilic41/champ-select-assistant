@@ -257,6 +257,12 @@ export function resolveRecommendationOutcomes(
     resolveRow.run(match.match_id, match.win, nowSecs, row.id);
     resolved += 1;
   }
+  if (resolved > 0) {
+    // V3b: oyun-sonu etiketleme aşaması (kaç pick gerçek maça bağlandı).
+    console.info(
+      `[pipeline] outcomes resolved=${resolved} pending=${pending.length - resolved}`,
+    );
+  }
   return { resolved, pending: pending.length - resolved };
 }
 
@@ -330,7 +336,15 @@ export class OutcomeTracker {
       const db = this.deps.getDb();
       if (!db) return;
       try {
-        recordRecommendationPick(db, this.deps.recs, this.lastCommitted);
+        const id = recordRecommendationPick(db, this.deps.recs, this.lastCommitted);
+        if (id !== null) {
+          // V3b: canlı boru hattı gözlemlenebilirliği (gerçek-maç testinde her
+          // aşamanın ateşlendiğini stdout'tan görmek için).
+          console.info(
+            `[pipeline] pick recorded champ=${this.lastCommitted.champion_id} ` +
+              `queue=${this.lastCommitted.queue_id} allies=${this.lastCommitted.allies?.length ?? 0}`,
+          );
+        }
       } catch (err) {
         console.warn("recordRecommendationPick hatası:", (err as Error).message);
       }

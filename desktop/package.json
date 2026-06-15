@@ -1,6 +1,6 @@
 {
   "name": "csa-desktop",
-  "version": "0.10.0-beta.4",
+  "version": "0.10.0-beta.5",
   "private": true,
   "description": "Electron host for champ-select-assistant — Node I/O layer around the csa-core WASM engine (P1 migration).",
   "type": "commonjs",
@@ -10,6 +10,7 @@
     "build": "electron-vite build",
     "start": "electron-vite preview",
     "test": "vitest run",
+    "test:e2e": "electron-vite build && vitest run --config vitest.e2e.config.ts",
     "typecheck": "tsc --noEmit",
     "build:wasm": "wasm-pack build --target nodejs ../core",
     "predist": "pnpm build:wasm",

@@ -1,12 +1,30 @@
 # Canlı Duman Checklist'i (Faz G4)
 
-> Her release ÖNCESİ elle koşulur. Otomasyon bu yolları kapsamıyor (canlı LCU +
-> canlı oyun gerekir) — bu bilinçli bir kabul; checklist o boşluğun kalkanı.
-> Süre: ~20 dk (1 normal/draft maçı dahil).
+> Her release ÖNCESİ elle koşulur. Otomasyon artık app-launch + IPC roundtrip'i
+> (E2E smoke, `pnpm -C desktop test:e2e`) ve canlı wire-şekillerini (parser
+> fixture testleri) kapsar; ama canlı LCU + canlı oyun yollarını kapsaMAZ — bu
+> bilinçli bir kabul; checklist o boşluğun kalkanı. Süre: ~20 dk (1 maç dahil).
 
 ## Hazırlık
 - [ ] Paketli build kurulu (dev değil) — updater yolu gerçek release'i görür
 - [ ] League Client AÇIK, hesapta en az 5 maçlık geçmiş var
+
+## Boru Hattı Log'larını İzleme (opsiyonel, geliştirici modu)
+Pencere arkasındaki **öneri→pick→sonuç→eğitim→koçluk** zincirini gözlemlemek için
+uygulamayı terminalden çalıştır (`pnpm -C desktop dev`). Ana süreç şu `[pipeline]`
+satırlarını basar — her biri bir aşamanın gerçekten ateşlendiğini kanıtlar:
+
+| Log satırı | Ne zaman | Kanıtladığı |
+|-----------|----------|-------------|
+| `[pipeline] recs ready n=N` | champ-select önerisi hesaplandığında | öneri motoru + cache |
+| `[pipeline] coach narrative source=deterministic\|external` | DeepDive "Koç notu" yüklenince | koçluk + (varsa) LLM audit |
+| `[pipeline] pick recorded champ=… queue=… allies=…` | maç başlarken (InProgress) | öneri→pick etiketi yazıldı |
+| `[pipeline] outcomes resolved=R pending=P` | maç sonrası sync | pick gerçek maç sonucuna bağlandı |
+| `[pipeline] model trained samples=N version=…` | ≥40 etiket biriktiğinde, maç sonrası | yerel ModelPack tazelendi |
+
+> Paketli Windows build'inde GUI'ye konsol bağlı değildir; bu satırlar yalnız
+> terminalden çalıştırınca görünür. UI çıktıları (öneri, koç notu, karne) aynı
+> aşamaları görsel olarak da doğrular.
 
 ## 1. Bağlantı + Boot
 - [ ] Uygulama açılışta "DB hazır" + LCU "bağlandı" durumuna geçiyor

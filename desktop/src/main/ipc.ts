@@ -213,7 +213,11 @@ export function buildCommandRegistry(
     );
     // 2B: bu seansın öneri listesini cache'le; oyuncu commit edip oyun başlayınca
     // OutcomeTracker pick'in rank/score'unu buradan okuyup pending etiket yazar.
-    if (puuid) ctx.recsCache?.set(puuid, recs);
+    if (puuid) {
+      ctx.recsCache?.set(puuid, recs);
+      // V3b: öneri listesi hazır (pick yakalama bu cache'ten rank/score okuyacak).
+      console.info(`[pipeline] recs ready n=${Array.isArray(recs) ? recs.length : 0}`);
+    }
     return recs;
   };
   commands.set("get_recommendations", recommendations);
