@@ -18,6 +18,11 @@ export interface AppSettings {
   // Privacy: explicit opt-in to upload anonymized recommendation feedback.
   // OFF by default — nothing leaves the device unless the user turns this on.
   share_anonymous_feedback: boolean;
+  // FAZ 4: opsiyonel LLM koçluk anlatıcısı. Boş = KAPALI (deterministik). Ayarlı
+  // ise OpenAI-uyumlu chat endpoint'i (ör. yerel Ollama http://localhost:11434/v1/
+  // chat/completions → veri makineden çıkmaz). Üretilen aday core audit'inden geçer.
+  coach_llm_endpoint: string;
+  coach_llm_model: string;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -34,6 +39,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
   language: "tr",
   platform_region: "tr1",
   share_anonymous_feedback: false,
+  coach_llm_endpoint: "",
+  coach_llm_model: "",
 };
 
 /** Rust serde paritesi: bu alanlardan biri eksikse TÜM ayarlar default'a düşer
@@ -92,6 +99,14 @@ export function getSettings(db: DatabaseSync): AppSettings {
       typeof parsed.share_anonymous_feedback === "boolean"
         ? parsed.share_anonymous_feedback
         : DEFAULT_SETTINGS.share_anonymous_feedback,
+    coach_llm_endpoint:
+      typeof parsed.coach_llm_endpoint === "string"
+        ? parsed.coach_llm_endpoint
+        : DEFAULT_SETTINGS.coach_llm_endpoint,
+    coach_llm_model:
+      typeof parsed.coach_llm_model === "string"
+        ? parsed.coach_llm_model
+        : DEFAULT_SETTINGS.coach_llm_model,
   } as AppSettings;
 }
 

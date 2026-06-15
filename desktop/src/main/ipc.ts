@@ -242,7 +242,11 @@ export function buildCommandRegistry(
   // FAZ 4 / Sprint 1: grounded koçluk notu (pluggable seam). candidate yoksa
   // deterministik; gelecekte LLM provider candidate sağlar, core audit'ler+fallback.
   commands.set("get_coach_narrative", (args) =>
-    getCoachNarrative(requireEngine(ctx), (args ?? {}) as unknown as CoachNarrativeInput),
+    getCoachNarrative(
+      requireEngine(ctx),
+      requireDb(ctx),
+      (args ?? {}) as unknown as CoachNarrativeInput,
+    ),
   );
 
   // champ_select.rs (analiz kümesi) — tüm karar mantığı core WASM'da.

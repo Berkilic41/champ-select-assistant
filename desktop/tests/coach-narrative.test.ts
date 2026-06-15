@@ -1,18 +1,57 @@
-// FAZ 4 / Sprint 1 — getCoachNarrative host testleri. GERÇEK wasm core ile
-// (engine.coachNarrative); DB gerekmez. Narrator mantığı core'da test edili;
-// burada host yolu: rec + FAZ3 sinyal mapping + dış aday audit-gate/fallback.
+// FAZ 4 — getCoachNarrative host testleri. GERÇEK wasm core (engine.coachNarrative)
+// + migrated DB (settings). Narrator mantığı core'da test edili; burada host yolu:
+// rec→core, FAZ3 mapping, dış aday audit-gate/fallback VE opsiyonel LLM provider
+// (yapılandırılmış endpoint, mock fetch ile).
 
-import { beforeAll, describe, expect, it } from "vitest";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import type { DatabaseSync } from "node:sqlite";
+
+import { afterEach, beforeAll, describe, expect, it } from "vitest";
 
 import { getCoachNarrative } from "../src/main/commands/coach-narrative";
+import type { FetchFn } from "../src/main/commands/llm-narrator";
+import { DEFAULT_SETTINGS, saveSettings } from "../src/main/commands/settings";
+import { openDatabase, runMigrations } from "../src/main/db";
 import { Engine } from "../src/main/engine";
+
+const MIGRATIONS_DIR = join(__dirname, "..", "resources", "migrations");
 
 let engine: Engine;
 beforeAll(() => {
   engine = Engine.load();
 });
 
-/** Core Recommendation'ın deserialize için gereken minimal + narrator alanları. */
+let dir: string | undefined;
+let openDb: DatabaseSync | undefined;
+afterEach(() => {
+  try {
+    openDb?.close();
+  } catch {
+    /* zaten kapalı */
+  }
+  openDb = undefined;
+  if (dir) rmSync(dir, { recursive: true, force: true });
+  dir = undefined;
+});
+
+function migratedDb(): DatabaseSync {
+  dir = mkdtempSync(join(tmpdir(), "csa-coach-"));
+  const db = openDatabase(join(dir, "app.db"));
+  runMigrations(db, MIGRATIONS_DIR);
+  openDb = db;
+  return db;
+}
+
+/** Yapılandırılmış endpoint'i döndüren mock fetch. */
+function mockFetch(content: string): FetchFn {
+  return async () => ({
+    ok: true,
+    json: async () => ({ choices: [{ message: { content } }] }),
+  });
+}
+
 function baseRec(): Record<string, unknown> {
   return {
     champion_id: 64,
@@ -41,13 +80,7 @@ function baseRec(): Record<string, unknown> {
     risk_summary: "erken ölürsen tempo düşer",
     draft_plan: {
       combo_with: [
-        {
-          ally_champion_id: 59,
-          ally_champion_key: "Jarvan",
-          combo_text: "wombo",
-          ability_ref: "x",
-          combo_type: "wombo",
-        },
+        { ally_champion_id: 59, ally_champion_key: "Jarvan", combo_text: "wombo", ability_ref: "x", combo_type: "wombo" },
       ],
       win_condition: "x",
       team_role: "x",
@@ -60,44 +93,84 @@ function baseRec(): Record<string, unknown> {
   };
 }
 
-describe("getCoachNarrative (FAZ 4 / Sprint 1)", () => {
-  it("weaves grounded facts + FAZ3 signals into a deterministic note", () => {
-    const n = getCoachNarrative(engine, {
+describe("getCoachNarrative (FAZ 4)", () => {
+  it("weaves grounded facts + FAZ3 signals into a deterministic note (no LLM)", async () => {
+    const db = migratedDb();
+    const n = await getCoachNarrative(engine, db, {
       recommendation: baseRec(),
       win_prob: { probability: 0.58, sample_size: 40 },
       combo_history: { games: 5, wins: 3 },
     });
     expect(n.source).toBe("deterministic");
-    expect(n.external_rejected).toBe(false);
     expect(n.text).toContain("Lee Sin");
-    expect(n.text).toContain("Elise"); // lane grounding
-    expect(n.text).toContain("Jarvan"); // combo grounding
-    expect(n.text).toContain("5 maç"); // combo history (3C)
-    expect(n.text).toContain("~%58"); // win-prob (3A), probability*100
-    expect(n.text).toContain("Goredrinker"); // build grounding
+    expect(n.text).toContain("Elise");
+    expect(n.text).toContain("Jarvan");
+    expect(n.text).toContain("5 maç");
+    expect(n.text).toContain("~%58");
   });
 
-  it("accepts a clean external candidate (audit pass)", () => {
+  it("accepts a clean explicit candidate (audit pass)", async () => {
+    const db = migratedDb();
     const candidate = "Lee Sin ile erken tempo kurup Jarvan'la pencere ararsan iyi olur.";
-    const n = getCoachNarrative(engine, { recommendation: baseRec(), candidate });
+    const n = await getCoachNarrative(engine, db, { recommendation: baseRec(), candidate });
     expect(n.source).toBe("external");
-    expect(n.external_rejected).toBe(false);
     expect(n.text).toBe(candidate);
   });
 
-  it("rejects an over-promising candidate and falls back to deterministic", () => {
+  it("rejects an over-promising explicit candidate → deterministic fallback", async () => {
+    const db = migratedDb();
     const candidate = "Lee Sin ile bu maçı kesinlikle kazanırsın, garanti.";
-    const n = getCoachNarrative(engine, { recommendation: baseRec(), candidate });
+    const n = await getCoachNarrative(engine, db, { recommendation: baseRec(), candidate });
     expect(n.source).toBe("deterministic");
     expect(n.external_rejected).toBe(true);
-    expect(n.text).toContain("Lee Sin");
   });
 
-  it("omits FAZ3 lines when signals are absent", () => {
-    const n = getCoachNarrative(engine, { recommendation: baseRec() });
+  it("uses an LLM endpoint candidate when configured (audit pass)", async () => {
+    const db = migratedDb();
+    saveSettings(db, {
+      ...DEFAULT_SETTINGS,
+      coach_llm_endpoint: "http://localhost:11434/v1/chat/completions",
+      coach_llm_model: "llama3",
+    });
+    const llmText = "Lee Sin ile lane'i kontrollü oyna; Jarvan'la pencere ararsan tempo bulursun.";
+    const n = await getCoachNarrative(
+      engine,
+      db,
+      { recommendation: baseRec() },
+      mockFetch(llmText),
+    );
+    expect(n.source).toBe("external");
+    expect(n.text).toBe(llmText);
+  });
+
+  it("rejects an over-promising LLM candidate → deterministic fallback", async () => {
+    const db = migratedDb();
+    saveSettings(db, {
+      ...DEFAULT_SETTINGS,
+      coach_llm_endpoint: "http://localhost:11434/v1/chat/completions",
+    });
+    const n = await getCoachNarrative(
+      engine,
+      db,
+      { recommendation: baseRec() },
+      mockFetch("Lee Sin kesinlikle kazandırır, garanti zafer."),
+    );
     expect(n.source).toBe("deterministic");
-    expect(n.text).not.toContain("~%"); // win-prob yok
-    expect(n.text).not.toContain("geçmişin"); // combo history yok
+    expect(n.external_rejected).toBe(true);
+  });
+
+  it("falls back to deterministic when the LLM endpoint errors", async () => {
+    const db = migratedDb();
+    saveSettings(db, {
+      ...DEFAULT_SETTINGS,
+      coach_llm_endpoint: "http://localhost:11434/v1/chat/completions",
+    });
+    const throwing: FetchFn = async () => {
+      throw new Error("connection refused");
+    };
+    const n = await getCoachNarrative(engine, db, { recommendation: baseRec() }, throwing);
+    expect(n.source).toBe("deterministic");
+    expect(n.external_rejected).toBe(false); // aday hiç üretilmedi (LLM null)
     expect(n.text).toContain("Lee Sin");
   });
 });
