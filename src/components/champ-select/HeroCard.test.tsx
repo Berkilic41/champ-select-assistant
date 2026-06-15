@@ -85,6 +85,23 @@ describe('HeroCard', () => {
     expect(screen.getByText('Stretch pick — sınırlı mastery')).toBeInTheDocument();
   });
 
+  it('shows the calibrated win-prob badge when an estimate is attached', () => {
+    render(
+      <HeroCard
+        rec={{
+          ...mockRec,
+          win_prob: { score: 0.85, probability: 0.64, confidence: 'medium', sample_size: 30 },
+        }}
+      />,
+    );
+    expect(screen.getByText(/Tahmini kazanma ~%64/)).toBeInTheDocument();
+  });
+
+  it('hides the win-prob badge when no estimate (gated / cold start)', () => {
+    render(<HeroCard rec={mockRec} />);
+    expect(screen.queryByText(/Tahmini kazanma/)).not.toBeInTheDocument();
+  });
+
   it('shows score breakdown inline without expanding', () => {
     render(<HeroCard rec={mockRec} />);
     // Scores are part of the card face now, not hidden behind "Detay".
@@ -112,6 +129,47 @@ describe('HeroCard', () => {
     expect(screen.getByText('Teamfight')).toBeInTheDocument();
     expect(screen.getByText('Kaybetme riski')).toBeInTheDocument();
     expect(screen.getByText('Erken ölürsen tempo kaybolur.')).toBeInTheDocument();
+  });
+
+  it('appends co-pick history to the combo line when present (3C)', () => {
+    const plan: DraftPlan = {
+      combo_with: [{
+        ally_champion_id: 61,
+        ally_champion_key: 'Orianna',
+        combo_text: 'Strong wombo',
+        combo_type: 'wombo',
+      }],
+      win_condition: 'x',
+      team_role: 'x',
+      damage_profile: 'x',
+      blind_pick_safety: 0.5,
+      execution_difficulty: 3,
+      threats: [],
+      fills_team_need: [],
+    };
+    render(<HeroCard rec={{ ...mockRec, draft_plan: plan, combo_history: { games: 3, wins: 2 } }} />);
+    // Orianna: Strong wombo · geçmişin 3M %67  (round(2/3*100)=67)
+    expect(screen.getByText(/geçmişin 3M %67/)).toBeInTheDocument();
+  });
+
+  it('omits co-pick history when absent or below the 2-game gate (3C)', () => {
+    const plan: DraftPlan = {
+      combo_with: [{
+        ally_champion_id: 61,
+        ally_champion_key: 'Orianna',
+        combo_text: 'Strong wombo',
+        combo_type: 'wombo',
+      }],
+      win_condition: 'x',
+      team_role: 'x',
+      damage_profile: 'x',
+      blind_pick_safety: 0.5,
+      execution_difficulty: 3,
+      threats: [],
+      fills_team_need: [],
+    };
+    render(<HeroCard rec={{ ...mockRec, draft_plan: plan, combo_history: { games: 1, wins: 1 } }} />);
+    expect(screen.queryByText(/geçmişin/)).not.toBeInTheDocument();
   });
 
 });

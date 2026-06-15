@@ -83,7 +83,16 @@ export const HeroCard: React.FC<Props> = ({ rec, onHover, onExpand, pinned }) =>
     pushPlan('spike', t('heroCard.planSpike'), plan.spike_note);
     if (plan.combo_with.length > 0) {
       const c = plan.combo_with[0];
-      pushPlan('combo', t('heroCard.planCombo'), `${c.ally_champion_key}: ${c.combo_text}`);
+      // 3C: birincil combo müttefikiyle co-pick geçmişin (≥2 maç; host iliştirir).
+      const hist = rec.combo_history;
+      const histSuffix =
+        hist && hist.games >= 2
+          ? ` · ${t('heroCard.comboHistory', {
+              n: hist.games,
+              wr: Math.round((hist.wins / hist.games) * 100),
+            })}`
+          : '';
+      pushPlan('combo', t('heroCard.planCombo'), `${c.ally_champion_key}: ${c.combo_text}${histSuffix}`);
     }
     pushPlan('lane-advice', t('heroCard.planLane'), plan.lane_phase_advice);
     pushPlan('clash', t('heroCard.planClash'), plan.comp_clash_note, 'risk');
@@ -128,6 +137,17 @@ export const HeroCard: React.FC<Props> = ({ rec, onHover, onExpand, pinned }) =>
             </div>
             <p className="hero-card__reason">{headlineText}</p>
             <span className="hero-card__stats">{personalStatsLine(rec, t)}</span>
+            {rec.win_prob && (
+              <span
+                className={`hero-card__winprob hero-card__winprob--${rec.win_prob.confidence}`}
+                title={t('heroCard.winProbHint', { conf: rec.win_prob.confidence })}
+              >
+                {t('heroCard.winProb', {
+                  pct: Math.round(rec.win_prob.probability * 100),
+                  n: rec.win_prob.sample_size,
+                })}
+              </span>
+            )}
           </div>
           <ConfidenceRing
             score={rec.total_score}

@@ -73,6 +73,27 @@
   color: var(--text-muted);
 }
 
+/* FAZ 3 / 3A — kalibre kazanma olasılığı rozeti (yalnız yeterli yerel etiket
+   varsa görünür). Bilgilendirici; determinist skoru temsil etmez. */
+.hero-card__winprob {
+  display: inline-block;
+  margin-top: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--weight-semibold);
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--text-muted) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text-muted) 30%, transparent);
+}
+
+.hero-card__winprob--high {
+  color: var(--info);
+  background: color-mix(in srgb, var(--info) 16%, transparent);
+  border-color: color-mix(in srgb, var(--info) 36%, transparent);
+}
+
 /* Inline score breakdown */
 .hero-card__scores { display: flex; flex-direction: column; gap: 5px; }
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useMemo, useState } from 'react';
 import { invoke } from '../../lib/host';
 import { useTranslation } from 'react-i18next';
 import { useChampSelect } from '../../hooks/useChampSelect';
@@ -13,6 +13,7 @@ import type { PerformanceReport } from '../../types/generated/PerformanceReport'
 import type { DraftSimResult } from '../../types/generated/DraftSimResult';
 import type { PipelineQualityReport } from '../../types/generated/PipelineQualityReport';
 import type { DataTrajectoryView } from '../../types/generated/DataTrajectoryView';
+import type { WinProbReport } from '../../types/generated/WinProbReport';
 import './ChampSelectWrapper.css';
 
 interface ChampionRecord {
@@ -40,6 +41,8 @@ export const ChampSelectWrapper: React.FC<Props> = ({ addToast }) => {
   const [feedbackAnalytics, setFeedbackAnalytics] = useState<FeedbackAnalytics | null>(null);
   const [performanceReport, setPerformanceReport] = useState<PerformanceReport | null>(null);
   const [draftSimulation, setDraftSimulation] = useState<DraftSimResult[] | null>(null);
+  const [winProbReport, setWinProbReport] = useState<WinProbReport | null>(null);
+  const [comboOutcomes, setComboOutcomes] = useState<Record<string, { games: number; wins: number }> | null>(null);
 
   // Resolve the active player's puuid once on mount. Empty string is acceptable
   // — backend gracefully returns empty mastery/stats — but causes empty recs.
@@ -104,6 +107,48 @@ export const ChampSelectWrapper: React.FC<Props> = ({ addToast }) => {
       .catch(() => setDraftSimulation(null));
   }, [session, recommendations]);
 
+  // FAZ 3 / 3A: öneri skorları için kalibre kazanma olasılığı (ayrı komut; hot
+  // recommendation yolunu DEĞİŞTİRMEZ). available=false ise hiç iliştirilmez.
+  useEffect(() => {
+    if (recommendations.length === 0) {
+      setWinProbReport(null);
+      return;
+    }
+    invoke<WinProbReport>('get_win_prob_estimates', {
+      scores: recommendations.map((rec) => rec.total_score),
+    })
+      .then(setWinProbReport)
+      .catch(() => setWinProbReport(null));
+  }, [recommendations]);
+
+  // FAZ 3 / 3C: oyuncunun co-pick combo geçmişi (display-augment; bir kez yeter,
+  // geçmiş seans içinde değişmez). available değilse boş kalır.
+  useEffect(() => {
+    invoke<Record<string, { games: number; wins: number }>>('get_combo_outcomes')
+      .then(setComboOutcomes)
+      .catch(() => setComboOutcomes(null));
+  }, []);
+
+  // 3A win_prob + 3C combo_history'yi recs'e iliştir (ikisi de bağımsız opsiyonel;
+  // scoring'e dokunmaz). win_prob sıraya göre; combo_history birincil combo çiftine.
+  const recsAugmented = useMemo(() => {
+    const estimates =
+      winProbReport?.available && winProbReport.estimates.length === recommendations.length
+        ? winProbReport.estimates
+        : null;
+    const pairKey = (a: string, b: string) => [a.toLowerCase(), b.toLowerCase()].sort().join('|');
+    return recommendations.map((rec, i) => {
+      let next = rec;
+      if (estimates) next = { ...next, win_prob: estimates[i] };
+      const ally = rec.draft_plan?.combo_with?.[0];
+      if (ally && comboOutcomes) {
+        const cr = comboOutcomes[pairKey(rec.champion_key, ally.ally_champion_key)];
+        if (cr && cr.games >= 2) next = { ...next, combo_history: cr };
+      }
+      return next;
+    });
+  }, [recommendations, winProbReport, comboOutcomes]);
+
   // Fetch ban suggestions when it is the local player's ban turn.
   useEffect(() => {
     if (!session || session.action_type !== 'ban') {
@@ -148,7 +193,7 @@ export const ChampSelectWrapper: React.FC<Props> = ({ addToast }) => {
         role={role}
         roleSource={roleSource}
         onRoleChange={setRole}
-        recommendations={recommendations}
+        recommendations={recsAugmented}
         lockedRec={lockedAnalysis}
         gamePlan={gamePlan}
         counterPicks={counterPicks}

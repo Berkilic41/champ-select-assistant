@@ -54,6 +54,23 @@ export interface ScoreBreakdownItem {
   confidence: string;
 }
 
+/** FAZ 3 / 3A — bu öneri skoru seviyesinde kalibre kazanma olasılığı (yerel
+ *  outcome etiketlerinden; min-sample altında HİÇ iliştirilmez). Saf görsel
+ *  augment: total_score'u DEĞİŞTİRMEZ. core win_calibration::WinProbEstimate. */
+export interface WinProbEstimate {
+  score: number;
+  probability: number;
+  confidence: string;
+  sample_size: number;
+}
+
+/** FAZ 3 / 3C — bu pick'in birincil combo müttefikiyle oyuncunun co-pick geçmişi
+ *  (ham maç/galibiyet). Saf görsel; ≥2 maç varsa iliştirilir. scoring'e dokunmaz. */
+export interface ComboRecord {
+  games: number;
+  wins: number;
+}
+
 export interface Recommendation {
   champion_id: number;
   champion_key: string;   // "Aatrox" — icon için
@@ -128,6 +145,12 @@ export interface Recommendation {
   draft_plan?: DraftPlan;
   /** Phase-based matchup advantage [early, mid, late] in [0.0, 1.0]. Present when opponent is visible and KB power-curve data exists. 0.5 = neutral. */
   phase_matchup?: [number, number, number];
+  /** FAZ 3 / 3A — host'un iliştirdiği kalibre kazanma olasılığı (yeterli yerel
+   *  etiket varsa); yoksa absent → HeroCard badge göstermez. */
+  win_prob?: WinProbEstimate | null;
+  /** FAZ 3 / 3C — birincil combo müttefikiyle co-pick geçmişi (≥2 maç varsa);
+   *  yoksa absent → HeroCard combo satırına geçmiş eklemez. */
+  combo_history?: ComboRecord | null;
 }
 
 export interface ChampSelectSession {
