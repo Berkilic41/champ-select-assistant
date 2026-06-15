@@ -79,6 +79,7 @@ import { getRecommendations } from "./commands/recommendations";
 import { getWinProbEstimates } from "./commands/win-prob";
 import { trainLocalModelPack } from "./commands/model-training";
 import { getComboOutcomes } from "./commands/combo-outcomes";
+import { getCoachNarrative, type CoachNarrativeInput } from "./commands/coach-narrative";
 import type { RecsCache } from "./commands/outcomes";
 import {
   getDdragonVersion,
@@ -237,6 +238,12 @@ export function buildCommandRegistry(
   // FAZ 3 / 3C: oyuncunun co-pick combo geçmişi (display-augment; scoring'e
   // dokunmaz). Renderer combo ipucunda "geçmişin: nM %W" gösterir.
   commands.set("get_combo_outcomes", () => getComboOutcomes(requireDb(ctx)));
+
+  // FAZ 4 / Sprint 1: grounded koçluk notu (pluggable seam). candidate yoksa
+  // deterministik; gelecekte LLM provider candidate sağlar, core audit'ler+fallback.
+  commands.set("get_coach_narrative", (args) =>
+    getCoachNarrative(requireEngine(ctx), (args ?? {}) as unknown as CoachNarrativeInput),
+  );
 
   // champ_select.rs (analiz kümesi) — tüm karar mantığı core WASM'da.
   commands.set("get_champion_analysis", (args) =>

@@ -56,6 +56,9 @@ pub mod win_calibration;
 // FAZ 3 / Sprint 3B: yerel feature→win etiketlerinden öğrenilen ModelPack
 // (ridge-to-prior + gate; determinist motor hâlâ oracle).
 pub mod model_training;
+// FAZ 4 / Sprint 1: pluggable coach narrator seam (grounded FACTS → prose;
+// dış LLM adayı aynı audit'ten geçer, yoksa deterministik fallback).
+pub mod coach_narrator;
 // P0.3d-2: the former "hard cluster" — engine/scoring + advisors. Unblocked by the
 // shared DTOs in `types.rs` (ChampionRecord/MasteryRow/ChampSelectState/TeamSlot/
 // ItemData/RuneTree/ChampionStats); the whole scoring pipeline is now pure core.

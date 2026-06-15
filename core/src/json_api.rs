@@ -732,6 +732,50 @@ pub fn train_model_pack_from_json(input_json: &str) -> Result<String, String> {
     serde_json::to_string(&pack).map_err(|e| format!("model pack serialize failed: {e}"))
 }
 
+/// Bir Recommendation + opsiyonel FAZ 3 sinyalleri + opsiyonel dış aday prose →
+/// CoachNarrative JSON. FAZ 4 / Sprint 1: dış aday (LLM) audit'i geçerse o, yoksa
+/// deterministik koçluk notu. Girdi: `{ recommendation, win_prob?, combo_history?,
+/// candidate? }`. Determinist motor hâlâ oracle; bu yalnız anlatım katmanı.
+pub fn coach_narrative_from_json(input_json: &str) -> Result<String, String> {
+    #[derive(serde::Deserialize)]
+    struct WinProbIn {
+        #[serde(default)]
+        pct: u32,
+        #[serde(default)]
+        games: u32,
+    }
+    #[derive(serde::Deserialize)]
+    struct ComboHistIn {
+        #[serde(default)]
+        games: u32,
+        #[serde(default)]
+        wins: u32,
+    }
+    #[derive(serde::Deserialize)]
+    struct CoachNarrativeInput {
+        recommendation: crate::models::Recommendation,
+        #[serde(default)]
+        win_prob: Option<WinProbIn>,
+        #[serde(default)]
+        combo_history: Option<ComboHistIn>,
+        #[serde(default)]
+        candidate: Option<String>,
+    }
+    let input: CoachNarrativeInput = serde_json::from_str(input_json)
+        .map_err(|e| format!("invalid coach-narrative input: {e}"))?;
+    let mut brief = crate::coach_narrator::brief_from_recommendation(&input.recommendation);
+    if let Some(w) = input.win_prob {
+        brief.win_prob_pct = Some(w.pct);
+        brief.win_prob_games = Some(w.games);
+    }
+    if let Some(c) = input.combo_history {
+        brief.combo_history_games = Some(c.games);
+        brief.combo_history_wins = Some(c.wins);
+    }
+    let narrative = crate::coach_narrator::narrate(&brief, input.candidate.as_deref());
+    serde_json::to_string(&narrative).map_err(|e| format!("coach narrative serialize failed: {e}"))
+}
+
 /// The brawl-mode (ARAM/Arena) scoring preset as JSON — single source of truth
 /// stays in core (`ScoringWeights::aram()`); the JS host must not copy the values.
 pub fn aram_weights_json_string() -> String {
@@ -3104,6 +3148,11 @@ mod wasm {
     #[wasm_bindgen]
     pub fn train_model_pack_json(input: &str) -> Result<String, JsValue> {
         super::train_model_pack_from_json(input).map_err(|e| JsValue::from_str(&e))
+    }
+
+    #[wasm_bindgen]
+    pub fn coach_narrative_json(input: &str) -> Result<String, JsValue> {
+        super::coach_narrative_from_json(input).map_err(|e| JsValue::from_str(&e))
     }
 
     #[wasm_bindgen]

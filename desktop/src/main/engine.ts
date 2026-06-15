@@ -22,6 +22,7 @@ export interface CoreModule {
   aram_weights_json(): string;
   win_prob_estimates_json(input: string): string;
   train_model_pack_json(input: string): string;
+  coach_narrative_json(input: string): string;
   champion_analysis_json(input: string): string;
   counter_picks_json(input: string): string;
   draft_verdict_full_json(input: string): string;
@@ -135,6 +136,12 @@ export class Engine {
    *  öğrenilen ağırlıklar; min-sample/dejenere veride null → rules fallback). */
   trainModelPack<TOut = unknown>(input: unknown): TOut {
     return this.call(this.core.train_model_pack_json, input);
+  }
+
+  /** {recommendation, win_prob?, combo_history?, candidate?} → CoachNarrative
+   *  (FAZ 4 / Sprint 1: dış aday audit'i geçerse o, yoksa deterministik not). */
+  coachNarrative<TOut = unknown>(input: unknown): TOut {
+    return this.call(this.core.coach_narrative_json, input);
   }
 
   /** RecommendationsInput + champion_id → Recommendation | null. */
