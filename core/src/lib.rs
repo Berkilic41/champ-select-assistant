@@ -50,6 +50,12 @@ pub mod pool_coach_quality;
 pub mod postgame;
 pub mod team_analysis;
 pub mod types;
+// FAZ 3 / Sprint 3A: yerel outcome etiketlerinden kalibre win-probability (saf
+// görsel augment; determinist skoru değiştirmez).
+pub mod win_calibration;
+// FAZ 3 / Sprint 3B: yerel feature→win etiketlerinden öğrenilen ModelPack
+// (ridge-to-prior + gate; determinist motor hâlâ oracle).
+pub mod model_training;
 // P0.3d-2: the former "hard cluster" — engine/scoring + advisors. Unblocked by the
 // shared DTOs in `types.rs` (ChampionRecord/MasteryRow/ChampSelectState/TeamSlot/
 // ItemData/RuneTree/ChampionStats); the whole scoring pipeline is now pure core.

@@ -693,6 +693,45 @@ pub fn feedback_signals_from_json(input_json: &str) -> Result<String, String> {
     serde_json::to_string(&signals).map_err(|e| format!("feedback signals serialize failed: {e}"))
 }
 
+/// Etiketli outcome örnekleri + sorgu skorları → kalibre win-probability raporu.
+/// Girdi: `{ examples: [{score, won}], scores: [f32] }`. Min-sample altında
+/// `available=false` döner (host hiç göstermez). FAZ 3 / Sprint 3A.
+pub fn win_prob_estimates_from_json(input_json: &str) -> Result<String, String> {
+    #[derive(serde::Deserialize)]
+    struct WinProbInput {
+        #[serde(default)]
+        examples: Vec<crate::win_calibration::WinProbExample>,
+        #[serde(default)]
+        scores: Vec<f32>,
+    }
+    let input: WinProbInput =
+        serde_json::from_str(input_json).map_err(|e| format!("invalid win-prob input: {e}"))?;
+    let report = crate::win_calibration::win_prob_report(&input.examples, &input.scores);
+    serde_json::to_string(&report).map_err(|e| format!("win-prob serialize failed: {e}"))
+}
+
+/// Etiketli örnekler + opsiyonel prior → öğrenilen ModelPack JSON, ya da `"null"`
+/// (min-sample altı / dejenere). Girdi: `{ examples:[{features,won}], prior? }`.
+/// FAZ 3 / Sprint 3B: determinist motoru DEĞİŞTİRMEZ — host bunu draft_brain_packs
+/// kind='model_pack'e yazar; recommendations onu mevcut seam'den (apply_model_score)
+/// tüketir, min-sample altında pack yok → local_rules fallback.
+pub fn train_model_pack_from_json(input_json: &str) -> Result<String, String> {
+    #[derive(serde::Deserialize)]
+    struct TrainInput {
+        #[serde(default)]
+        examples: Vec<crate::model_training::TrainingExample>,
+        #[serde(default)]
+        prior: Option<crate::draft_brain::ModelPack>,
+    }
+    let input: TrainInput = serde_json::from_str(input_json)
+        .map_err(|e| format!("invalid model-training input: {e}"))?;
+    let prior = input
+        .prior
+        .unwrap_or_else(crate::draft_brain::local_rules_model_pack);
+    let pack = crate::model_training::train_model_pack(&input.examples, &prior);
+    serde_json::to_string(&pack).map_err(|e| format!("model pack serialize failed: {e}"))
+}
+
 /// The brawl-mode (ARAM/Arena) scoring preset as JSON — single source of truth
 /// stays in core (`ScoringWeights::aram()`); the JS host must not copy the values.
 pub fn aram_weights_json_string() -> String {
@@ -3055,6 +3094,16 @@ mod wasm {
     #[wasm_bindgen]
     pub fn feedback_signals_json(input: &str) -> Result<String, JsValue> {
         super::feedback_signals_from_json(input).map_err(|e| JsValue::from_str(&e))
+    }
+
+    #[wasm_bindgen]
+    pub fn win_prob_estimates_json(input: &str) -> Result<String, JsValue> {
+        super::win_prob_estimates_from_json(input).map_err(|e| JsValue::from_str(&e))
+    }
+
+    #[wasm_bindgen]
+    pub fn train_model_pack_json(input: &str) -> Result<String, JsValue> {
+        super::train_model_pack_from_json(input).map_err(|e| JsValue::from_str(&e))
     }
 
     #[wasm_bindgen]
