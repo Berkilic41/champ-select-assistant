@@ -246,10 +246,17 @@ mod tests {
     }
 
     fn positive_sum(pack: &ModelPack) -> f32 {
-        ["comfort", "matchup", "team_counter", "synergy", "meta", "role_fit"]
-            .iter()
-            .map(|k| pack.weights.get(*k).copied().unwrap_or(0.0))
-            .sum()
+        [
+            "comfort",
+            "matchup",
+            "team_counter",
+            "synergy",
+            "meta",
+            "role_fit",
+        ]
+        .iter()
+        .map(|k| pack.weights.get(*k).copied().unwrap_or(0.0))
+        .sum()
     }
 
     #[test]

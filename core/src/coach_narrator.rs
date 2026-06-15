@@ -261,7 +261,7 @@ mod tests {
         assert!(n.text.contains("5 maç")); // combo history (FAZ 3C)
         assert!(n.text.contains("~%58")); // win-prob (FAZ 3A)
         assert!(n.text.contains("Goredrinker")); // build grounding
-        // Audit-temiz: mutlak dil yok.
+                                                 // Audit-temiz: mutlak dil yok.
         assert!(!has_absolute_language(&n.text));
     }
 

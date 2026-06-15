@@ -242,7 +242,10 @@ mod tests {
     fn shrinkage_keeps_thin_bin_off_the_extreme() {
         // 1 maçlık bant 1.0 okumamalı (base-rate'e çekilmeli).
         let mut ex = examples(&[(0.5, 10, 10)]); // base ~0.5, 20 maç → available
-        ex.push(WinProbExample { score: 0.95, won: true }); // tek galibiyet bandı
+        ex.push(WinProbExample {
+            score: 0.95,
+            won: true,
+        }); // tek galibiyet bandı
         let report = win_prob_report(&ex, &[0.95]);
         let top = &report.estimates[0];
         assert!(top.probability < 0.95, "shrink yok: {}", top.probability);
