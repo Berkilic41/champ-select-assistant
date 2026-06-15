@@ -74,4 +74,26 @@ describe('DeepDiveTab', () => {
     expect(screen.getByText('Engage eksikliği')).toBeInTheDocument();
     expect(screen.getByText(/AP ağırlıklı/)).toBeInTheDocument();
   });
+
+  it('renders the coach note when a narrative is attached (FAZ 4)', () => {
+    render(
+      <DeepDiveTab
+        rec={{
+          ...baseRec,
+          coach_narrative: {
+            text: 'Zed için matchup penceren iyi.',
+            source: 'deterministic',
+            external_rejected: false,
+          },
+        }}
+      />,
+    );
+    expect(screen.getByText('Koç notu')).toBeInTheDocument();
+    expect(screen.getByText('Zed için matchup penceren iyi.')).toBeInTheDocument();
+  });
+
+  it('hides the coach note when no narrative is attached', () => {
+    render(<DeepDiveTab rec={baseRec} />);
+    expect(screen.queryByText('Koç notu')).not.toBeInTheDocument();
+  });
 });

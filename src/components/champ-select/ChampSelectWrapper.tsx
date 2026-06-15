@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useChampSelect } from '../../hooks/useChampSelect';
 import { detectPhaseView } from '../../hooks/useChampSelectPhase';
 import { ChampSelectScreen } from './ChampSelectScreen';
-import { BanSuggestion } from '../../types/recommendation';
+import { BanSuggestion, CoachNarrative } from '../../types/recommendation';
 import type { DataSourceRegistryReport } from '../../types/generated/DataSourceRegistryReport';
 import type { DraftBrainQualityReport } from '../../types/generated/DraftBrainQualityReport';
 import type { FeedbackAnalytics } from '../../types/generated/FeedbackAnalytics';
@@ -43,6 +43,7 @@ export const ChampSelectWrapper: React.FC<Props> = ({ addToast }) => {
   const [draftSimulation, setDraftSimulation] = useState<DraftSimResult[] | null>(null);
   const [winProbReport, setWinProbReport] = useState<WinProbReport | null>(null);
   const [comboOutcomes, setComboOutcomes] = useState<Record<string, { games: number; wins: number }> | null>(null);
+  const [narratives, setNarratives] = useState<Record<number, CoachNarrative>>({});
 
   // Resolve the active player's puuid once on mount. Empty string is acceptable
   // — backend gracefully returns empty mastery/stats — but causes empty recs.
@@ -149,6 +150,46 @@ export const ChampSelectWrapper: React.FC<Props> = ({ addToast }) => {
     });
   }, [recommendations, winProbReport, comboOutcomes]);
 
+  // FAZ 4 / Sprint 1: her öneri için grounded koçluk notu (pluggable seam;
+  // candidate yok → deterministik). DeepDive'da gösterilir. win_prob/combo_history
+  // zaten rec'e iliştirildi; core'a aktarılır.
+  useEffect(() => {
+    if (recsAugmented.length === 0) {
+      setNarratives({});
+      return;
+    }
+    let cancelled = false;
+    Promise.all(
+      recsAugmented.slice(0, 5).map((rec) =>
+        invoke<CoachNarrative>('get_coach_narrative', {
+          recommendation: rec,
+          win_prob: rec.win_prob ?? null,
+          combo_history: rec.combo_history ?? null,
+        })
+          .then((n) => [rec.champion_id, n] as const)
+          .catch(() => null),
+      ),
+    ).then((pairs) => {
+      if (cancelled) return;
+      const map: Record<number, CoachNarrative> = {};
+      for (const p of pairs) if (p) map[p[0]] = p[1];
+      setNarratives(map);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [recsAugmented]);
+
+  const recsFinal = useMemo(
+    () =>
+      recsAugmented.map((rec) =>
+        narratives[rec.champion_id]
+          ? { ...rec, coach_narrative: narratives[rec.champion_id] }
+          : rec,
+      ),
+    [recsAugmented, narratives],
+  );
+
   // Fetch ban suggestions when it is the local player's ban turn.
   useEffect(() => {
     if (!session || session.action_type !== 'ban') {
@@ -193,7 +234,7 @@ export const ChampSelectWrapper: React.FC<Props> = ({ addToast }) => {
         role={role}
         roleSource={roleSource}
         onRoleChange={setRole}
-        recommendations={recsAugmented}
+        recommendations={recsFinal}
         lockedRec={lockedAnalysis}
         gamePlan={gamePlan}
         counterPicks={counterPicks}

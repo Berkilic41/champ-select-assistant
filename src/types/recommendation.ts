@@ -71,6 +71,14 @@ export interface ComboRecord {
   wins: number;
 }
 
+/** FAZ 4 / Sprint 1 — grounded koçluk notu (deterministik ya da audit'i geçmiş
+ *  LLM adayı). DeepDive'da gösterilir. core coach_narrator::CoachNarrative. */
+export interface CoachNarrative {
+  text: string;
+  source: string;
+  external_rejected: boolean;
+}
+
 export interface Recommendation {
   champion_id: number;
   champion_key: string;   // "Aatrox" — icon için
@@ -151,6 +159,9 @@ export interface Recommendation {
   /** FAZ 3 / 3C — birincil combo müttefikiyle co-pick geçmişi (≥2 maç varsa);
    *  yoksa absent → HeroCard combo satırına geçmiş eklemez. */
   combo_history?: ComboRecord | null;
+  /** FAZ 4 / Sprint 1 — host'un iliştirdiği grounded koçluk notu; DeepDive'da
+   *  "Koç notu" olarak gösterilir. Yoksa absent → bölüm gizli. */
+  coach_narrative?: CoachNarrative | null;
 }
 
 export interface ChampSelectSession {

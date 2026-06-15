@@ -72,6 +72,17 @@ export const DeepDiveTab = React.memo(function DeepDiveTab({ rec, draftSimulatio
 
   return (
     <div className="hero-detail-panel hero-detail-panel--tab">
+      {/* FAZ 4 / Sprint 1: grounded koçluk notu (deterministik ya da audit'i
+          geçmiş LLM adayı; tüm sinyalleri tek paragrafta sentezler). */}
+      {rec.coach_narrative?.text && (
+        <div className="hero-detail-section">
+          <span className="hero-card__plan-label">{t('heroCard.coachNote')}</span>
+          <div className="hero-detail-coach-card hero-detail-coach-card--neutral">
+            <p>{rec.coach_narrative.text}</p>
+          </div>
+        </div>
+      )}
+
       {coachPillars.length > 0 && (
         <div className="hero-detail-section">
           <span className="hero-card__plan-label">{t('heroCard.detailCoachTitle')}</span>
