@@ -31,7 +31,7 @@
 | ~~B-20~~ | low | `outcomes.ts` | `pickRecorded=true` try içine alındı → DB hatasında sonraki IN_GAME event'i retry eder, eğitim etiketi kaybolmaz. retry testi | **done** |
 | ~~B-21~~ | low | `lcu/websocket.ts` | reconnect catch hata sebebini loglar (`catch (err)`+warn) → cert/pin/upgrade hataları sessiz değil. davranışsal test | **done** |
 | ~~B-22~~ | low | `useChampSelect.ts` + `RoleSelector.tsx` | roleSource kalıcı tercih → 'preferred' (nötr "Geçen oyundan hatırlandı" hint), yanlış "Rolü sen seçtin" kalktı | **done** |
-| **B-23** | low | `DataStatusBadges.test.tsx` | noRiotKey + liveDataAge dürüst chip'leri test'siz (en sık canlı durum: prod-key yok) | todo |
+| ~~B-23~~ | low | `DataStatusBadges.test.tsx` | noRiotKey + liveDataAge (bayat>24s) + taze=chip-yok testleri eklendi (baseTrajectory fixture). renderer 18 test | **done** |
 | **B-24** | low | `recommendations.test.ts` / `engine.rs` | cold-start recs e2e — **ERTELENDİ**: motor öneri havuzu mastery-TABANLI (mastery yoksa 0 rec, rates'ten bağımsız); cold-start/noMastery kontratı için motor mantığı derinlemesine anlaşılmalı. ⚠️ potansiyel: DataStatusBadges noMastery chip (`hasRecs && every comfort<0.01`) nadiren tetiklenebilir (recs mastery ister → comfort>0) — doğrula. orWarnDefault/engine-0.3 e2e ayrı | todo |
 | ~~B-06~~ | low | `.claude/CLAUDE.md` | Tauri→Electron güncellendi (stack/komut/klasör/kurallar; PROJECT_STATE/AGENTS/QUALITY_CHECKS'e işaret) | **done** |
 | **B-08** | low | `useSummonerData.ts:83` | fire-and-forget sync yarışları (B-11/B-19 ile örtüşüyor) | todo |

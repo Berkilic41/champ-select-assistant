@@ -6,6 +6,7 @@ import type { DataSourceRegistryReport } from '../../types/generated/DataSourceR
 import type { DraftBrainQualityReport } from '../../types/generated/DraftBrainQualityReport';
 import type { FeedbackObservabilityReport } from '../../types/generated/FeedbackObservabilityReport';
 import type { PipelineQualityReport } from '../../types/generated/PipelineQualityReport';
+import type { DataTrajectoryView } from '../../types/generated/DataTrajectoryView';
 
 // The component reads missing_signals (noMeta) / comfort_score (noMastery) / length.
 // `missing` carries the structural backend signal (e.g. ['meta'] = no meta-rate row).
@@ -60,6 +61,19 @@ const activeFeedbackReport: FeedbackObservabilityReport = {
   status: 'active',
 };
 
+// Sağlıklı taban: prod-key var, Match-V5 açık, taze. Testler ilgili alanı ezer.
+const baseTrajectory: DataTrajectoryView = {
+  trajectory: 'unknown',
+  quality_status: 'degraded',
+  ramp_state: 'unknown',
+  data_growing: false,
+  measured_at: null,
+  riot_key_present: true,
+  match_v5_enabled: true,
+  match_v5_last_success_at: null,
+  match_v5_age_secs: null,
+};
+
 const degradedPipelineReport: PipelineQualityReport = {
   status: 'degraded',
   confidence: 'medium',
@@ -109,6 +123,38 @@ describe('DataStatusBadges', () => {
   it('shows the no-mastery chip when comfort is 0 across the board', () => {
     render(<DataStatusBadges recommendations={[rec(0.55, 0), rec(0.6, 0)]} />);
     expect(screen.getByText('Maç geçmişi yüklenmedi')).toBeInTheDocument();
+  });
+
+  it('shows the no-Riot-key chip when the trajectory reports no production key', () => {
+    render(
+      <DataStatusBadges
+        recommendations={[rec(0.55, 0.5)]}
+        trajectoryReport={{ ...baseTrajectory, riot_key_present: false }}
+      />,
+    );
+    expect(
+      screen.getByText('Riot anahtarı yok · canlı maç verisi kapalı'),
+    ).toBeInTheDocument();
+  });
+
+  it('shows the stale live-data chip when Match-V5 ingest is older than 24h', () => {
+    render(
+      <DataStatusBadges
+        recommendations={[rec(0.55, 0.5)]}
+        trajectoryReport={{ ...baseTrajectory, match_v5_age_secs: 259200 }}
+      />,
+    );
+    expect(screen.getByText('Canlı veri: 3 gün')).toBeInTheDocument();
+  });
+
+  it('does NOT show the stale chip when Match-V5 ingest is fresh', () => {
+    render(
+      <DataStatusBadges
+        recommendations={[rec(0.55, 0.5)]}
+        trajectoryReport={{ ...baseTrajectory, match_v5_age_secs: 3600 }}
+      />,
+    );
+    expect(screen.queryByText(/Canlı veri:/)).not.toBeInTheDocument();
   });
 
   it('shows the inferred-opponent chip from laneMatchup', () => {
