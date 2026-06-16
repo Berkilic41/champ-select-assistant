@@ -170,6 +170,28 @@ describe("worker HTTP surface", () => {
   });
 });
 
+describe("scheduled (cron) handler", () => {
+  it("logs an ingestion failure with context instead of an unlabeled waitUntil rejection", async () => {
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    let captured: Promise<unknown> = Promise.resolve();
+    const capturingCtx = {
+      waitUntil(p: Promise<unknown>) {
+        captured = p;
+      },
+      passThroughOnException() {},
+    } as unknown as ExecutionContext;
+    // INGEST_REGIONS undefined → runIngestion rejects (split of undefined), no network.
+    const badEnv = baseEnv({ INGEST_REGIONS: undefined as unknown as string });
+
+    await worker.scheduled({} as ScheduledController, badEnv, capturingCtx);
+
+    // The .catch must swallow the rejection — without it, `captured` would reject.
+    await expect(captured).resolves.toBeUndefined();
+    expect(errSpy).toHaveBeenCalledWith("scheduled ingest failed:", expect.any(Error));
+    errSpy.mockRestore();
+  });
+});
+
 // ── Per-region fairness (KR no longer starved) ───────────────────────────────
 
 function fairDb(): D1Database {

@@ -98,8 +98,15 @@ export default {
     return new Response("Not found", { status: 404 });
   },
 
-  // Cron-triggered ingestion (see [triggers] in wrangler.toml).
+  // Cron-triggered ingestion (see [triggers] in wrangler.toml). Cron is the PRIMARY
+  // ingestion driver in production, so a failure must be visible in `wrangler tail`
+  // with context — same observability as the manual /v1/ingest path's serverError.
+  // Without the catch, a rejected runIngestion becomes an unlabeled waitUntil error.
   async scheduled(_event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
-    ctx.waitUntil(runIngestion(env).then(() => undefined));
+    ctx.waitUntil(
+      runIngestion(env)
+        .then(() => undefined)
+        .catch((e) => console.error("scheduled ingest failed:", e)),
+    );
   },
 };

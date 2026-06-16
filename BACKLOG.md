@@ -11,6 +11,7 @@
 ## Açık — yüksek/orta değer (koddan teyitli)
 | id | sev | dosya | özet | durum |
 |---|---|---|---|---|
+| ~~B-37~~ | low | worker `index.ts` | (loop-keşif) cron `scheduled` yolu `runIngestion` reddini bağlamlı loglamıyordu (HTTP yolu logluyor) → `.catch(console.error("scheduled ingest failed", e))`. Cron production birincil sürücü; sessiz hata `wrangler tail`'de görünür. +regresyon-kilidi testi (reddi yutar). worker 17 test | **done** |
 | ~~B-36~~ | low | worker `ingest.ts` | (loop-keşif) readRates/readMatchups/readBuilds 3× birebir aynı patch-çözümleme bloğu (B-14 yorumu dâhil) → `resolveLatestPatch` helper'ı. Bakım tuzağı (1 yer); davranış (boş-string dâhil `patch ?? …`) korundu. worker 16 test + typecheck | **done** |
 | ~~B-14~~ | **high** | worker `ingest.ts` | patch leksik-sort → `ORDER BY updated_at DESC` (recency). Worker 16 test. **deploy bekliyor** | **done (deploy bekliyor)** |
 | ~~B-03~~ | med | worker `ingest.ts` + `sources.ts` | freshness sinyali UÇTAN UCA: worker readRates `updated_at` döndürür; desktop syncEdgeRates >48s bayatsa confidence'ı 'low'a düşürür → mevcut data-quality/öneri akışı dürüstçe yansıtır. worker+desktop test. **(prod: worker deploy ister)** | **done** |

@@ -39,6 +39,11 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
   veya DDragon başarısını düşürmez. (B-02)
 
 ### Düzeltildi
+- **Cron ingestion hatası artık görünür** — worker'ın `scheduled` (cron) yolu, production'daki
+  birincil ingestion sürücüsü olmasına rağmen `runIngestion` reddini bağlamsız bırakıyordu
+  (manuel `/v1/ingest` yolu logluyordu). Bağlamlı `console.error("scheduled ingest failed", e)`
+  eklendi → durmuş cron (dev-key expiry vb.) `wrangler tail`'de görünür. Regresyon-kilidi testi
+  reddin yutulduğunu doğrular. (B-37)
 - **"Meta yok" rozeti yapısal sinyale bağlandı** — `DataStatusBadges` artık meta
   eksikliğini core'un yapısal `missing_signals` ('meta') alanından okur (kesin sinyal:
   meta-rate satırı yok). Önceki `meta_score==0.3` sihirli-sabit tespiti, ~%50.1
