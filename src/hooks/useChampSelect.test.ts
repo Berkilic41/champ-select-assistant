@@ -94,6 +94,27 @@ describe('useChampSelect', () => {
     expect(result.current.error).toContain('Geçersiz session JSON');
   });
 
+  it('ignores a stale recommendations response that resolves after the session ends', async () => {
+    let resolveRecs: (v: unknown) => void = () => {};
+    mockInvoke.mockImplementation((cmd: string) => {
+      if (cmd === 'get_draft_brain_recommendations') {
+        return new Promise<unknown>((res) => {
+          resolveRecs = res;
+        });
+      }
+      return Promise.resolve(null);
+    });
+    const { result } = renderHook(() => useChampSelect('puuid-1'));
+    act(() => handler({ payload: makeSession('pick') })); // fetch başlar (resolve olmadı)
+    act(() => handler({ payload: null })); // session biter → seq bump + recs temizlenir
+    expect(result.current.recommendations).toEqual([]);
+    // Bayat fetch GEÇ resolve olur → recs YAZILMAMALI (session bitti).
+    await act(async () => {
+      resolveRecs([{ champion_id: 1, champion_key: 'Annie' }]);
+    });
+    expect(result.current.recommendations).toEqual([]);
+  });
+
   it('clears the session when a null payload arrives', async () => {
     mockInvoke.mockResolvedValue([]);
     const { result } = renderHook(() => useChampSelect('puuid-1'));

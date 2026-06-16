@@ -57,6 +57,9 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
   oyuncu kimliği henüz çözülmeden gelen ilk öneriler, kimlik çözülür çözülmez mevcut
   draft için otomatik olarak yeniden hesaplanır (mastery/konfor dahil) — bir sonraki
   hover/lock'a kadar kişiselleştirmesiz kalmaz. (B-11)
+- **Öneri yarış-koşulu giderildi** — hızlı pick/ban akışında geç gelen eski bir öneri
+  yanıtı artık yeni öneriyi ezmiyor; champ-select bittikten sonra geç gelen yanıt da
+  bayat öneri yazmıyor. (B-26)
 
 ## [0.10.0-beta.6] — 2026-06-16
 

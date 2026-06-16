@@ -36,6 +36,21 @@
 | **B-08** | low | `useSummonerData.ts:83` | fire-and-forget sync yarışları (B-11/B-19 ile örtüşüyor) | todo |
 | **B-02** | med | `scheduler.ts`/`index.ts` | cold-start priming (seed import + ilk edge fetch boot'ta) | todo |
 
+## Discovery-2 batch (a11y/concurrency/arch — 11 doğrulanmış; verify kısmen session-limit'e takıldı)
+| id | sev | dosya | özet | durum |
+|---|---|---|---|---|
+| ~~B-26~~ | med | `useChampSelect.ts` | fetchRecommendations seq-guard'lı: out-of-order yanıt eskiyi ezmiyor + session-null sonrası bayat recs yazılmıyor. test | **done** |
+| **B-25** | med | `Toast.tsx` | toast'lar ekran-okuyucuya duyurulmuyor (live region yok) → `role=status`/`aria-live` (error→alert) | todo |
+| **B-27** | low | `PoolBuilder.tsx:93` | bozuk ARIA tablist (role=tablist ama tab/aria-selected yok) → `role=group`+`aria-pressed` | todo |
+| **B-28** | low | `SettingsPanel.tsx`+`ChampionDetailCard.tsx` | dialog'da `aria-labelledby` + focus trap/restore yok | todo |
+| **B-29** | low | `Timer.tsx` | SVG geri sayım metin karşılığı yok; aciliyet yalnız renkle → `role=img`+`aria-label` | todo |
+| **B-30** | low | `SettingsPanel.tsx` | bölge/pencere-boyutu `<select>` etiketsiz → `aria-label` | todo |
+| **B-31** | low | `ConnectionBadge.tsx` | bağlantı durum değişimi duyurulmuyor → live region | todo |
+| **B-32** | low | `data-pipeline.ts` | `syncDataPipelineInner` 220-satır god-function, 5 kopya source-step bloğu → refactor | todo |
+| **B-33** | low | `useChampSelect.ts` | 7 kopya fetch-on-signature useEffect → ortak helper | todo |
+| **B-34** | low | `riot/client.ts` | renderer puuid/matchId Riot URL'ine `encodeURIComponent`'siz → ekle | todo |
+| **B-35** | low | `useToast.ts` | auto-dismiss setTimeout unmount'ta temizlenmiyor (timer sızıntısı) → cleanup | todo |
+
 ## Tamamlanan / Kapatılan
 - **B-01** (done) — Image fallback: `BanIcon` + `CounterItemIcon` onError. 214 test.
 - **B-05** (done) — `BuildSummary` 'none' → dürüst "build verisi yok" (+tr/en+test). 217 test.

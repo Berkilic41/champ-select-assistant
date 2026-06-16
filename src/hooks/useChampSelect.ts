@@ -88,8 +88,13 @@ export function useChampSelect(puuid: string = ''): {
     };
   }, []);
 
+  const fetchSeqRef = useRef(0);
   const fetchRecommendations = useCallback(
     async (payload: ChampSelectSession) => {
+      // Sonuç-yarışı koruması: her çağrı bir sıra no alır ve yalnız EN GÜNCEL
+      // çağrının sonucu uygulanır. Out-of-order yanıtın eskiyi ezmesini ve session
+      // bittikten (null) sonra bayat recs yazılmasını engeller.
+      const seq = ++fetchSeqRef.current;
       setLoading(true);
       setError(null);
       try {
@@ -97,11 +102,11 @@ export function useChampSelect(puuid: string = ''): {
           sessionJson: payload,
           puuid,
         });
-        setRecommendations(recs);
+        if (seq === fetchSeqRef.current) setRecommendations(recs);
       } catch (e) {
-        setError('Öneri alınamadı: ' + String(e));
+        if (seq === fetchSeqRef.current) setError('Öneri alınamadı: ' + String(e));
       } finally {
-        setLoading(false);
+        if (seq === fetchSeqRef.current) setLoading(false);
       }
     },
     [puuid],
@@ -131,6 +136,7 @@ export function useChampSelect(puuid: string = ''): {
       'champ-select-session',
       (event) => {
         if (!event.payload) {
+          fetchSeqRef.current++; // uçuştaki fetch'leri geçersiz kıl (bayat recs yazılmasın)
           setSession(null);
           setIsActive(false);
           setRecommendations([]);
