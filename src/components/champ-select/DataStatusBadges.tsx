@@ -242,9 +242,18 @@ export const DataStatusBadges: React.FC<Props> = ({
 
   if (chips.length === 0) return null;
 
+  // Cap (ilk 3) uygulanmadan ÖNCE aksiyon-alınabilir chip'leri öne al: kullanıcının
+  // bir şey yapabileceği sinyaller (meta/mastery yok, Riot anahtarı yok, canlı veri
+  // bayat) diagnostik chip'lerce (pack/registry/pipeline/feedback/inferred/source)
+  // ilk-3'ten atılmasın. Stable sort orijinal grup-içi sırayı korur.
+  const ACTIONABLE_KEYS = new Set(['meta', 'mastery', 'match-v5-key', 'match-v5-stale']);
+  const ordered = [...chips].sort(
+    (a, b) => (ACTIONABLE_KEYS.has(a.key) ? 0 : 1) - (ACTIONABLE_KEYS.has(b.key) ? 0 : 1),
+  );
+
   return (
     <div className="data-status" role="status">
-      {chips.slice(0, 3).map((chip) => (
+      {ordered.slice(0, 3).map((chip) => (
         <span
           key={chip.key}
           className={`data-status__chip data-status__chip--${chip.kind ?? 'neutral'}`}

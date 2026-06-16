@@ -22,6 +22,7 @@ export const PoolBuilder: React.FC = () => {
   const [role, setRole] = useState<Role>('middle');
   const [puuid, setPuuid] = useState('');
   const [suggestions, setSuggestions] = useState<PoolSuggestion[]>([]);
+  const [loading, setLoading] = useState(true);
   const [poolPlan, setPoolPlan] = useState<ChampionPoolPlan | null>(null);
   const [progress, setProgress] = useState<MasteryProgressEntry[]>([]);
 
@@ -64,6 +65,7 @@ export const PoolBuilder: React.FC = () => {
 
   useEffect(() => {
     let cancelled = false;
+    setLoading(true);
     Promise.allSettled([
       invoke<PoolSuggestion[]>('get_pool_suggestions', { role, puuid }),
       invoke<ChampionPoolPlan>('get_champion_pool_plan', { role, puuid }),
@@ -72,11 +74,13 @@ export const PoolBuilder: React.FC = () => {
         if (cancelled) return;
         setSuggestions(suggestionResult.status === 'fulfilled' ? suggestionResult.value ?? [] : []);
         setPoolPlan(planResult.status === 'fulfilled' ? planResult.value ?? null : null);
+        setLoading(false);
       })
       .catch(() => {
         if (!cancelled) {
           setSuggestions([]);
           setPoolPlan(null);
+          setLoading(false);
         }
       });
     return () => {
@@ -215,7 +219,9 @@ export const PoolBuilder: React.FC = () => {
       ) : null}
 
       {suggestions.length === 0 ? (
-        <p className="pool-builder__empty">{t('poolBuilder.empty')}</p>
+        <p className="pool-builder__empty">
+          {t(loading || !puuid ? 'poolBuilder.loading' : 'poolBuilder.empty')}
+        </p>
       ) : (
         <div className="pool-builder__grid">
           {suggestions.map((s) => (

@@ -345,10 +345,13 @@ export class OutcomeTracker {
               `queue=${this.lastCommitted.queue_id} allies=${this.lastCommitted.allies?.length ?? 0}`,
           );
         }
+        // Yalnız başarılı INSERT sonrası işaretle; throw olursa pickRecorded false
+        // kalır ve sonraki IN_GAME event'i kaydı tekrar dener (eğitim etiketi
+        // sessizce kaybolmaz — Rust paritesinde de pick best-effort ama retry'lı).
+        this.pickRecorded = true;
       } catch (err) {
         console.warn("recordRecommendationPick hatası:", (err as Error).message);
       }
-      this.pickRecorded = true;
       return;
     }
     if (POSTGAME_PHASES.has(phase)) {

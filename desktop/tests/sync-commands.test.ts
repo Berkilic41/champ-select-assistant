@@ -108,6 +108,7 @@ describe("RiotClient (riot/client.rs parity)", () => {
     expect(env.RIOT_API_KEY).toBe("RGAPI-test");
     expect(routingForRegion("tr1")).toBe("europe");
     expect(routingForRegion("NA1")).toBe("americas");
+    expect(routingForRegion("br1")).toBe("americas"); // BR: account-v1 + match-v5 americas'ta
     expect(routingForRegion("bilinmeyen")).toBe("europe");
     expect(runtimeClientFromEnv({})).toBeNull();
     expect(runtimeClientFromEnv({ RIOT_API_KEY: "  " })).toBeNull();

@@ -242,6 +242,37 @@ describe("sync runners write canonical rows (sync_*_inner parity)", () => {
     expect(Number(mu.c)).toBe(2);
   });
 
+  it("labels u.gg rows with the real source patch when the live patch is ahead", async () => {
+    // Canlı patch 16.11 ama u.gg yalnız 16_9 sunuyor → satırlar 16.9 etiketlenmeli
+    // (16.11 değil); yoksa bayat veri 'güncel patch' sanılıp patch_fresh yanlış olur.
+    const db = migratedDb();
+    db.prepare(
+      "INSERT INTO champions (champion_id, key, name, title, cached_at) VALUES (64, 'LeeSin', 'Lee Sin', '', 0)",
+    ).run();
+
+    const out = await syncUgg(db, { version: "16.11.1", items: [], runeTrees: [] }, async (url) => {
+      if (url.includes("/overview/")) {
+        if (url.includes("16_9")) return OVERVIEW_FIXTURE;
+        throw new Error("404"); // 16_11 ve 16_10 veri sunmuyor
+      }
+      if (url.includes("/matchups/")) {
+        if (url.includes("16_9")) return MATCHUPS_FIXTURE;
+        throw new Error("404");
+      }
+      throw new Error(`beklenmedik url: ${url}`);
+    });
+
+    expect(out.rates).toBe(1);
+    const rate = db
+      .prepare("SELECT patch FROM champion_rates WHERE source = 'u_gg'")
+      .get() as unknown as { patch: string };
+    expect(rate.patch).toBe("16.9");
+    const mu = db
+      .prepare("SELECT patch_version FROM champion_matchups WHERE source = 'u_gg' LIMIT 1")
+      .get() as unknown as { patch_version: string };
+    expect(mu.patch_version).toBe("16.9");
+  });
+
   it("syncUgg fails honestly when no patch serves data", async () => {
     const db = migratedDb();
     db.prepare(

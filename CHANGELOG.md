@@ -6,6 +6,48 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 
 ## [Unreleased]
 
+### Eklendi
+- **Sürekli otonom geliştirme sistemi** — repo kökünde yönetim dosyaları
+  (`AGENTS`, `PROJECT_STATE`, `BACKLOG`, `TASKS`, `DECISIONS`, `QUALITY_CHECKS`)
+  ve Inspect→Discover→Prioritize→Delegate→Implement→Verify→Document→Continue
+  döngüsü kuruldu. Her iterasyon küçük, test-geçen, geri-alınabilir bir
+  iyileştirme üretir; otomatik commit yok.
+
+### Düzeltildi
+- **Kırık görsel yedekleri (ilk-açılış/paketli)** — ban ikonları ve counter-item
+  ikonları görsel yüklenemediğinde (404/403, ör. DDragon sync öncesi) kırık-görsel
+  yerine dürüst yedek kutusu gösterir. Ban ikonu `BanIcon` bileşenine çıkarıldı
+  (`onError` + iki ban bloğu DRY); counter-item ikonu `onError` yedeği kazandı. (B-01)
+- **Dürüst "build verisi yok" durumu** — bir öneri geldiğinde ama o şampiyon için
+  build verisi olmadığında (`build_source = "none"`) build kartı yanıltıcı
+  "Build verisi yükleniyor…" yerine dürüstçe "Bu şampiyon için build verisi yok"
+  gösterir. (B-05)
+- **Veri durumu rozetlerinde öncelik** — düşük-veri/ilk-açılış durumunda en fazla 3
+  rozet gösterilirken, kullanıcının aksiyon alabileceği uyarılar (meta yok, mastery
+  yok, Riot anahtarı yok, canlı veri bayat) artık tanılayıcı rozetlerce (paket/kayıt/
+  pipeline) ekrandan atılmıyor; aksiyon-alınabilir rozetler önceliklendiriliyor. (B-09)
+- **Havuz önerilerinde dürüst yükleniyor durumu** — Lobi'deki havuz oluşturucu,
+  oturum/öneriler henüz çözülürken "Bu rol için öneri yok" yerine "Öneriler
+  yükleniyor…" gösterir; ilk açılışta yanıltıcı boş-durum kalkar. (B-16)
+- **Edge worker: en taze patch seçimi** — toplu meta okunurken "en son patch"
+  artık leksik string yerine ingest tazeliğine (`updated_at`) göre seçilir;
+  "16.9" > "16.10" yanlış sıralaması nedeniyle bayat metanın taze sunulması
+  giderildi. (B-14 — etkili olması için worker yeniden deploy edilmeli)
+- **u.gg verisi doğru patch ile etiketlenir** — u.gg canlı patch'in 1-2 gerisinde
+  veri sunduğunda, çekilen satırlar artık canlı patch yerine gerçek kaynak patch'iyle
+  saklanır; böylece bayat u.gg verisi "güncel patch" sanılıp veri-tazeliği uyarısını
+  yanlışlıkla bastırmıyor. (B-13)
+- **Brezilya (BR) bölgesi için doğru Riot yönlendirmesi** — BR hesap/maç sorguları
+  artık yanlış 'europe' yerine 'americas' bölgesel sunucusuna gider; eskiden BR
+  kullanıcılarının maç geçmişi/öneri verisi sessizce boş dönüyordu. (B-12) (OCE için
+  benzer düzeltme ayrı izleniyor.)
+- **İstatistiklerde dürüst ince-veri durumu** — oyuncunun hiçbir şampiyonu en az 3
+  maça ulaşmadığında, galibiyet oranı bölümü sessizce kaybolmak yerine "≥3 maçlık
+  şampiyon yok" notu gösterir. (B-18)
+- **Öğrenme verisi kaybı önlendi** — bir maç başlarken öneri→pick kaydı geçici bir
+  veritabanı hatasıyla başarısız olursa, kayıt artık "yapıldı" sayılmayıp bir sonraki
+  oyun-içi olayda yeniden denenir; o maçın yerel öğrenme etiketi sessizce kaybolmaz. (B-20)
+
 ## [0.10.0-beta.6] — 2026-06-16
 
 ### Düzeltildi

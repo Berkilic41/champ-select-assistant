@@ -28,7 +28,7 @@ export const CounterItemsPanel: React.FC<Props> = ({ items }) => {
               {h.item_ids.length > 0 && (
                 <div className="counter-items__icons">
                   {h.item_ids.map((id) => (
-                    <img key={id} src={itemIconUrl(id)} alt="" className="counter-items__icon" />
+                    <CounterItemIcon key={id} id={id} />
                   ))}
                 </div>
               )}
@@ -37,5 +37,24 @@ export const CounterItemsPanel: React.FC<Props> = ({ items }) => {
         ))}
       </div>
     </div>
+  );
+};
+
+/**
+ * Tek counter-item ikonu: görsel yüklenemezse (404/403 — DDragon sync öncesi veya
+ * geçersiz id) kırık görsel yerine dürüst boş kutu gösterir.
+ */
+const CounterItemIcon: React.FC<{ id: number }> = ({ id }) => {
+  const [err, setErr] = React.useState(false);
+  if (err || !id) {
+    return <div className="counter-items__icon counter-items__icon--empty" />;
+  }
+  return (
+    <img
+      src={itemIconUrl(id)}
+      alt=""
+      className="counter-items__icon"
+      onError={() => setErr(true)}
+    />
   );
 };

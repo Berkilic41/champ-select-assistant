@@ -39,7 +39,13 @@ export const BuildSummary: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation();
   if (coreItems.length === 0 && keystone === 0) {
-    return <p className="build-empty">{t('build.loading')}</p>;
+    // Rec geldiyse aslında "yüklenmiyor"; build_source 'none' ise dürüstçe
+    // "build verisi yok" göster, aksi halde (henüz gelmemiş) "yükleniyor".
+    return (
+      <p className="build-empty">
+        {t(buildSource === 'none' ? 'build.none' : 'build.loading')}
+      </p>
+    );
   }
   const hasSummoners = summonerSpells.length >= 2;
   const hasSecondary = secondaryRunes.length >= 1;

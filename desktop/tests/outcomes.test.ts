@@ -313,4 +313,36 @@ describe("OutcomeTracker (gameflow-driven)", () => {
     const ctx = JSON.parse(String(pendingRows(db)[0].context_json));
     expect(ctx.allies).toEqual([51, 222]);
   });
+
+  it("retries the pick record on the next in-game phase when the first DB write throws", () => {
+    const realDb = migratedDb();
+    const recs = new RecsCache();
+    let mode: "throw" | "real" = "real";
+    // İlk denemede DB INSERT'ini throw ettir (geçici DB hatası simülasyonu).
+    const throwingDb = {
+      prepare: () => {
+        throw new Error("db busy");
+      },
+    } as unknown as DatabaseSync;
+    const t = new OutcomeTracker({
+      getDb: () => (mode === "throw" ? throwingDb : realDb),
+      recs,
+      syncMatches: async () => {},
+    });
+
+    t.onGameflowPhase("ChampSelect");
+    recs.set(PUUID, [{ champion_id: 64, champion_key: "LeeSin", total_score: 0.9 }]);
+    t.onChampSelectSession({ queue_id: 420, local_player: { champion_id: 64, assigned_position: "jungle" } });
+
+    // 1. IN_GAME: DB yazımı throw → kayıt yok; pickRecorded false KALMALI (yoksa retry ölür).
+    mode = "throw";
+    t.onGameflowPhase("InProgress");
+    expect(pendingRows(realDb)).toHaveLength(0);
+
+    // 2. IN_GAME: gerçek DB → retry çalışır, eğitim etiketi yazılır.
+    mode = "real";
+    t.onGameflowPhase("InProgress");
+    expect(pendingRows(realDb)).toHaveLength(1);
+    expect(pendingRows(realDb)[0].champion_id).toBe(64);
+  });
 });

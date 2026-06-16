@@ -40,7 +40,7 @@ import { DraftForkPanel } from './DraftForkPanel';
 import { LoadingSkeleton } from '../shared/LoadingSkeleton';
 import { ChampionIcon } from '../shared/ChampionIcon';
 import { BanSuggestionList } from './BanSuggestionList';
-import { champIconUrl } from '../../lib/ddragon';
+import { BanIcon } from './BanIcon';
 import { assessPickClarity } from '../../lib/pickClarity';
 import { Badge } from '../shared/ui';
 import './ChampSelectScreen.css';
@@ -235,9 +235,7 @@ export const ChampSelectScreen: React.FC<Props> = ({
               const key = champMap.get(id);
               return (
                 <div key={id} className="cs-ban-icon" title={key ?? `#${id}`}>
-                  {key
-                    ? <img src={champIconUrl(key)} alt={key} className="cs-ban-img" />
-                    : <div className="cs-ban-img cs-ban-img--unknown" />}
+                  <BanIcon champKey={key} />
                 </div>
               );
             })}
@@ -496,9 +494,7 @@ export const ChampSelectScreen: React.FC<Props> = ({
               const key = champMap.get(id);
               return (
                 <div key={id} className="cs-ban-icon" title={key ?? `#${id}`}>
-                  {key
-                    ? <img src={champIconUrl(key)} alt={key} className="cs-ban-img" />
-                    : <div className="cs-ban-img cs-ban-img--unknown" />}
+                  <BanIcon champKey={key} />
                 </div>
               );
             })}

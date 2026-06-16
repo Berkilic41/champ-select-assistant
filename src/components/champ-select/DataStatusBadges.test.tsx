@@ -218,4 +218,21 @@ describe('DataStatusBadges', () => {
     );
     expect(screen.getByText('Feedback sync bekliyor')).toBeInTheDocument();
   });
+
+  it('keeps actionable cold-start chips visible over diagnostic chips when capped', () => {
+    // 5 aday chip: pack-stale + registry-fallback + pipeline (diagnostik) ve
+    // noMeta + noMastery (aksiyon-alınabilir). Cap 3; aksiyon-alınabilir olanlar
+    // diagnostiklerce ilk-3'ten atılmamalı.
+    const { container } = render(
+      <DataStatusBadges
+        recommendations={[rec(0.3, 0)]}
+        qualityReport={{ ...highQualityReport, data_pack_fresh: false }}
+        registryReport={fallbackRegistry}
+        pipelineReport={degradedPipelineReport}
+      />,
+    );
+    expect(container.querySelectorAll('.data-status__chip')).toHaveLength(3);
+    expect(screen.getByText(/genel sıralama/)).toBeInTheDocument(); // noMeta
+    expect(screen.getByText('Maç geçmişi yüklenmedi')).toBeInTheDocument(); // noMastery
+  });
 });

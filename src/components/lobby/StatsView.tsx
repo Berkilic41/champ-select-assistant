@@ -90,7 +90,7 @@ export const StatsView: React.FC<Props> = ({ stats, masteries, champMap }) => {
         </div>
       )}
 
-      {wrData.length > 0 && (
+      {wrData.length > 0 ? (
         <div className="stats-section">
           <h3 className="stats-title">{t('stats.winRateTitle')}</h3>
           <ResponsiveContainer width="100%" height={200}>
@@ -106,7 +106,14 @@ export const StatsView: React.FC<Props> = ({ stats, masteries, champMap }) => {
             </BarChart>
           </ResponsiveContainer>
         </div>
-      )}
+      ) : stats.length > 0 ? (
+        // İnce veri: stat var ama ≥3 maçlık şampiyon yok → bölümü sessizce gizleme,
+        // dürüstçe nedenini söyle.
+        <div className="stats-section">
+          <h3 className="stats-title">{t('stats.winRateTitle')}</h3>
+          <p className="stats-summary">{t('stats.winRateThin')}</p>
+        </div>
+      ) : null}
     </div>
   );
 };

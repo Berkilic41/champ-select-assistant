@@ -534,6 +534,7 @@
   },
   "poolBuilder": {
     "empty": "Bu rol için öneri yok",
+    "loading": "Öneriler yükleniyor…",
     "ease": "Kolaylık {{n}}/5",
     "metaTier": "Meta {{tier}}",
     "role_top": "Üst",
@@ -594,6 +595,7 @@
   },
   "build": {
     "loading": "Build verisi yükleniyor…",
+    "none": "Bu şampiyon için build verisi yok",
     "title": "{{champ}} Build",
     "core": "Temel",
     "situational": "Duruma Göre",
@@ -630,6 +632,7 @@
     "top5": "Top 5: {{names}}",
     "masteryTitle": "Mastery (Top 10)",
     "winRateTitle": "Kazanma Oranı % (min 3 maç)",
+    "winRateThin": "En az 3 maç oynanmış şampiyon yok — galibiyet oranı için daha fazla maç gerek",
     "winLabel": "Kazanma"
   },
   "time": {

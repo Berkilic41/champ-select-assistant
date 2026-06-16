@@ -534,6 +534,7 @@
   },
   "poolBuilder": {
     "empty": "No suggestions for this role",
+    "loading": "Loading suggestions…",
     "ease": "Ease {{n}}/5",
     "metaTier": "Meta {{tier}}",
     "role_top": "Top",
@@ -594,6 +595,7 @@
   },
   "build": {
     "loading": "Loading build data…",
+    "none": "No build data for this champion",
     "title": "{{champ}} Build",
     "core": "Core",
     "situational": "Situational",
@@ -630,6 +632,7 @@
     "top5": "Top 5: {{names}}",
     "masteryTitle": "Mastery (Top 10)",
     "winRateTitle": "Win Rate % (min 3 games)",
+    "winRateThin": "No champion with at least 3 games yet — more games needed for win rate",
     "winLabel": "Win"
   },
   "time": {

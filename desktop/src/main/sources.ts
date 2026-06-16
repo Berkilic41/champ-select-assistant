@@ -296,6 +296,10 @@ export async function syncUgg(
   const patch = normalizePatch(caches.version ?? "");
   const regionTag = "all";
   const uggPatch = await resolveWorkingUggPatch(fetchJson, patch, champions[0]);
+  // u.gg canlı patch'in 1-2 gerisinde olabilir; satırları GERÇEK kaynak patch'iyle
+  // (uggPatch) etiketle — canlı patch ile değil — ki bayat veri 'güncel patch' diye
+  // yazılıp patch_fresh'i yanlış true yapmasın (staleness maskelenmesin).
+  const sourcePatch = uggPatch.replace("_", ".");
 
   const rates: Record<string, unknown>[] = [];
   const builds: Record<string, unknown>[] = [];
@@ -314,12 +318,12 @@ export async function syncUgg(
         continue; // bu patch'te şampiyon yok → atla, diğerleri taşır
       }
       ok += 1;
-      const parsed = parseUggOverview(overview, id, patch, regionTag);
+      const parsed = parseUggOverview(overview, id, sourcePatch, regionTag);
       rates.push(...parsed.rates);
       builds.push(...parsed.builds);
       try {
         const mu = await fetchJson(uggMatchupsUrl(uggPatch, id));
-        matchups.push(...parseUggMatchups(mu, id, patch, regionTag));
+        matchups.push(...parseUggMatchups(mu, id, sourcePatch, regionTag));
       } catch {
         /* matchups best-effort */
       }

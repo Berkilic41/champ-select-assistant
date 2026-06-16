@@ -61,4 +61,25 @@ describe('PoolBuilder', () => {
     // Role tabs present (default mid).
     expect(screen.getByText('Orta')).toBeInTheDocument();
   });
+
+  it('shows a loading message (not "no suggestions") while the summoner is still resolving', async () => {
+    mockInvoke.mockImplementation((cmd: string) => {
+      if (cmd === 'get_active_summoner_puuid') return Promise.resolve(null);
+      if (cmd === 'get_champion_pool_plan') return Promise.resolve(null);
+      return Promise.resolve([]);
+    });
+    render(<PoolBuilder />);
+    expect(await screen.findByText('Öneriler yükleniyor…')).toBeInTheDocument();
+    expect(screen.queryByText('Bu rol için öneri yok')).not.toBeInTheDocument();
+  });
+
+  it('shows the empty message once the summoner resolves with no suggestions', async () => {
+    mockInvoke.mockImplementation((cmd: string) => {
+      if (cmd === 'get_active_summoner_puuid') return Promise.resolve('p');
+      if (cmd === 'get_champion_pool_plan') return Promise.resolve(null);
+      return Promise.resolve([]);
+    });
+    render(<PoolBuilder />);
+    expect(await screen.findByText('Bu rol için öneri yok')).toBeInTheDocument();
+  });
 });

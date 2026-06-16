@@ -93,6 +93,7 @@ export function routingForRegion(region: string): string {
     case "na1":
     case "la1":
     case "la2":
+    case "br1":
       return "americas";
     case "kr":
     case "jp1":

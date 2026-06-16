@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import worker, { safeEqual } from "../src/index";
-import { runIngestion, perRegionBudget, type Env } from "../src/ingest";
+import { readRates, runIngestion, perRegionBudget, type Env } from "../src/ingest";
 import {
   backoffMs,
   matchDetail,
@@ -234,5 +234,58 @@ describe("runIngestion per-region budget", () => {
     // total=8 over 4 regions → cap 2 each; kr must get a non-zero share.
     expect(result.perRegion.kr ?? 0).toBeGreaterThan(0);
     expect(result.processed).toBeLessThanOrEqual(8);
+  });
+});
+
+// ── Patch resolution honours ingest recency, not lexical patch order ──────────
+
+type MetaRow = { patch: string; region: string; total_games: number; updated_at: number };
+
+/** Mock D1 that honours the ORDER BY of the patch-resolution query so the test
+ *  distinguishes the fix (updated_at DESC) from the lexical bug (patch DESC). */
+function metaDb(metaRows: MetaRow[]): D1Database {
+  const prepare = (sql: string) => ({
+    bind: (...args: unknown[]) => ({
+      async first() {
+        if (sql.includes("SELECT patch FROM ingest_meta")) {
+          const sorted = [...metaRows].sort((a, b) =>
+            sql.includes("ORDER BY updated_at DESC")
+              ? b.updated_at - a.updated_at
+              : a.patch < b.patch
+                ? 1
+                : a.patch > b.patch
+                  ? -1
+                  : 0, // leksik patch DESC = eski hatalı davranış
+          );
+          return sorted[0] ? { patch: sorted[0].patch } : null;
+        }
+        if (sql.includes("total_games")) {
+          const row = metaRows.find((m) => m.patch === args[0] && m.region === args[1]);
+          return row ? { total_games: row.total_games } : null;
+        }
+        return null;
+      },
+      async all() {
+        return { results: [] };
+      },
+      async run() {
+        return { success: true, meta: { changes: 0 } };
+      },
+    }),
+  });
+  return { prepare, batch: async () => [] } as unknown as D1Database;
+}
+
+describe("readRates patch resolution", () => {
+  it("picks the freshest patch by ingest recency, not lexical order (16.9 < 16.10)", async () => {
+    const env = baseEnv({
+      DB: metaDb([
+        { patch: "16.9", region: "tr1", total_games: 0, updated_at: 100 },
+        { patch: "16.10", region: "tr1", total_games: 0, updated_at: 200 },
+      ]),
+    });
+    const res = await readRates(env, "tr1");
+    // "16.9" > "16.10" leksik olarak; ama 16.10 daha yeni ingest edildi → seçilmeli.
+    expect(res.patch).toBe("16.10");
   });
 });

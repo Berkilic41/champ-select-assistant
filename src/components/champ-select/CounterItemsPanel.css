@@ -41,3 +41,4 @@
 
 .counter-items__icons { display: flex; gap: 4px; }
 .counter-items__icon { width: 24px; height: 24px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); }
+.counter-items__icon--empty { background: var(--surface-1); border-style: dashed; }

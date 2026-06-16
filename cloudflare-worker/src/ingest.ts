@@ -252,7 +252,10 @@ export async function readRates(
     patch ??
     (
       await env.DB.prepare(
-        "SELECT patch FROM ingest_meta WHERE region = ? ORDER BY patch DESC LIMIT 1",
+        // En taze patch'i ingest RECENCY'sine göre seç (updated_at, epoch ms).
+        // 'ORDER BY patch DESC' leksik sıralardı → "16.9" > "16.10" (byte '9'>'1')
+        // ve Riot 16.10/16.11 çıksa bile bayat "16.9"u 'latest' sanardı.
+        "SELECT patch FROM ingest_meta WHERE region = ? ORDER BY updated_at DESC LIMIT 1",
       )
         .bind(region)
         .first<{ patch: string }>()
@@ -316,7 +319,10 @@ export async function readMatchups(
     patch ??
     (
       await env.DB.prepare(
-        "SELECT patch FROM ingest_meta WHERE region = ? ORDER BY patch DESC LIMIT 1",
+        // En taze patch'i ingest RECENCY'sine göre seç (updated_at, epoch ms).
+        // 'ORDER BY patch DESC' leksik sıralardı → "16.9" > "16.10" (byte '9'>'1')
+        // ve Riot 16.10/16.11 çıksa bile bayat "16.9"u 'latest' sanardı.
+        "SELECT patch FROM ingest_meta WHERE region = ? ORDER BY updated_at DESC LIMIT 1",
       )
         .bind(region)
         .first<{ patch: string }>()
@@ -365,7 +371,10 @@ export async function readBuilds(
     patch ??
     (
       await env.DB.prepare(
-        "SELECT patch FROM ingest_meta WHERE region = ? ORDER BY patch DESC LIMIT 1",
+        // En taze patch'i ingest RECENCY'sine göre seç (updated_at, epoch ms).
+        // 'ORDER BY patch DESC' leksik sıralardı → "16.9" > "16.10" (byte '9'>'1')
+        // ve Riot 16.10/16.11 çıksa bile bayat "16.9"u 'latest' sanardı.
+        "SELECT patch FROM ingest_meta WHERE region = ? ORDER BY updated_at DESC LIMIT 1",
       )
         .bind(region)
         .first<{ patch: string }>()
