@@ -112,4 +112,12 @@ describe('SettingsPanel feedback sync', () => {
 
     expect(await screen.findByText('Cloud endpoint yok; feedback yerelde bekliyor')).toBeInTheDocument();
   });
+
+  it('labels the region and window-size selects for screen readers', () => {
+    invokeMock.mockResolvedValue(null);
+    render(<SettingsPanel settings={DEFAULT_SETTINGS} onSave={vi.fn()} onClose={vi.fn()} />);
+    const selects = screen.getAllByRole('combobox');
+    expect(selects).toHaveLength(2);
+    selects.forEach((s) => expect(s).toHaveAccessibleName());
+  });
 });

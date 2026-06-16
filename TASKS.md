@@ -27,6 +27,15 @@
 
 - **Iter 12** — B-11 puuid çözülünce aktif session için recs refetch + test. ✅ renderer 223.
 
+## Durum (Iter 21 sonu) — hızlı-win backlog tükendi
+**Bitmiş (21 iterasyon, 13 commit):** B-01/05/09/16/14/13/12/18/20/22/15/11/06/21/26/25/35/34/29/31/27/30 + sistem.
+**Kalan (daha büyük / taze bağlam ister):**
+- **B-03** (med) worker freshness sinyali — worker `/v1` response'a `updated_at`/age + desktop tüketim + UI stale-chip (3-katman, deploy ister).
+- **B-28** (low) modal `aria-labelledby` + focus trap/restore (SettingsPanel + ChampionDetailCard).
+- **B-32** (low) `syncDataPipelineInner` 220-satır god-function refactor (5 kopya source-step → ortak helper).
+- **B-33** (low) useChampSelect 7 kopya fetch-on-signature effect → ortak helper.
+- **B-19** (low) App mount global `get_ddragon_version`. **B-17** (low) RankCard/Trend/Weekly puuid retry. **B-24** test gaps (wasm). **B-12b** OC1 routing-split.
+
 ## Iterasyon 13+ — durum
 İlk keşif batch'inin (B-09…B-24) **yüksek-değer + kolay** işleri bitti. Kalan: B-03
 (med, worker freshness — çok-katmanlı), B-19/B-21/B-17 (low), B-24 (wasm), B-12b/B-06.

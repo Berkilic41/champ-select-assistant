@@ -168,6 +168,7 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
             value={draft.platform_region}
             onChange={e => update({ platform_region: e.target.value })}
             className="sp-select"
+            aria-label={t('settings.serverSection')}
           >
             <option value="tr1">{t('settings.regions.tr1')}</option>
             <option value="euw1">{t('settings.regions.euw1')}</option>
@@ -217,6 +218,7 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
                 update({ window_size: e.target.value as AppSettings['window_size'] })
               }
               className="sp-select"
+              aria-label={t('settings.size')}
             >
               <option value="compact">{t('settings.sizeCompact')}</option>
               <option value="standard">{t('settings.sizeStandard')}</option>

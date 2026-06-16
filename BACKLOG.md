@@ -44,7 +44,7 @@
 | ~~B-27~~ | low | `PoolBuilder.tsx` | bozuk `role=tablist` → etiketli `role=group`+`aria-pressed` toggle grubu. test | **done** |
 | **B-28** | low | `SettingsPanel.tsx`+`ChampionDetailCard.tsx` | dialog'da `aria-labelledby` + focus trap/restore yok | todo |
 | ~~B-29~~ | low | `Timer.tsx` | SVG geri sayım `role=img`+`aria-label` ("{{n}} saniye kaldı") → SR'a duyurulur. test | **done** |
-| **B-30** | low | `SettingsPanel.tsx` | bölge/pencere-boyutu `<select>` etiketsiz → `aria-label` | todo |
+| ~~B-30~~ | low | `SettingsPanel.tsx` | bölge + pencere-boyutu `<select>` `aria-label`'lı (SR-etiketli). test | **done** |
 | ~~B-31~~ | low | `ConnectionBadge.tsx` | tek persistent `role=status`+`aria-live` span → bağlantı durum değişimleri SR'a duyurulur. test | **done** |
 | **B-32** | low | `data-pipeline.ts` | `syncDataPipelineInner` 220-satır god-function, 5 kopya source-step bloğu → refactor | todo |
 | **B-33** | low | `useChampSelect.ts` | 7 kopya fetch-on-signature useEffect → ortak helper | todo |
