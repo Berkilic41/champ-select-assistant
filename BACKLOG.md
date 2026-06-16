@@ -32,7 +32,7 @@
 | ~~B-21~~ | low | `lcu/websocket.ts` | reconnect catch hata sebebini loglar (`catch (err)`+warn) → cert/pin/upgrade hataları sessiz değil. davranışsal test | **done** |
 | ~~B-22~~ | low | `useChampSelect.ts` + `RoleSelector.tsx` | roleSource kalıcı tercih → 'preferred' (nötr "Geçen oyundan hatırlandı" hint), yanlış "Rolü sen seçtin" kalktı | **done** |
 | **B-23** | low | `DataStatusBadges.test.tsx` | noRiotKey + liveDataAge dürüst chip'leri test'siz (en sık canlı durum: prod-key yok) | todo |
-| **B-24** | low | `recommendations.test.ts` / `engine.rs` | cold-start recs e2e + orWarnDefault hata-yolu + engine 0.3 nötr fallback e2e test boşlukları (#17/#18/#19) | todo |
+| **B-24** | low | `recommendations.test.ts` / `engine.rs` | cold-start recs e2e — **ERTELENDİ**: motor öneri havuzu mastery-TABANLI (mastery yoksa 0 rec, rates'ten bağımsız); cold-start/noMastery kontratı için motor mantığı derinlemesine anlaşılmalı. ⚠️ potansiyel: DataStatusBadges noMastery chip (`hasRecs && every comfort<0.01`) nadiren tetiklenebilir (recs mastery ister → comfort>0) — doğrula. orWarnDefault/engine-0.3 e2e ayrı | todo |
 | ~~B-06~~ | low | `.claude/CLAUDE.md` | Tauri→Electron güncellendi (stack/komut/klasör/kurallar; PROJECT_STATE/AGENTS/QUALITY_CHECKS'e işaret) | **done** |
 | **B-08** | low | `useSummonerData.ts:83` | fire-and-forget sync yarışları (B-11/B-19 ile örtüşüyor) | todo |
 | **B-02** | med | `scheduler.ts`/`index.ts` | cold-start priming (seed import + ilk edge fetch boot'ta) | todo |
@@ -47,8 +47,8 @@
 | ~~B-29~~ | low | `Timer.tsx` | SVG geri sayım `role=img`+`aria-label` ("{{n}} saniye kaldı") → SR'a duyurulur. test | **done** |
 | ~~B-30~~ | low | `SettingsPanel.tsx` | bölge + pencere-boyutu `<select>` `aria-label`'lı (SR-etiketli). test | **done** |
 | ~~B-31~~ | low | `ConnectionBadge.tsx` | tek persistent `role=status`+`aria-live` span → bağlantı durum değişimleri SR'a duyurulur. test | **done** |
-| **B-32** | low | `data-pipeline.ts` | `syncDataPipelineInner` 220-satır god-function, 5 kopya source-step bloğu → refactor | todo |
-| **B-33** | low | `useChampSelect.ts` | 7 kopya fetch-on-signature useEffect → ortak helper | todo |
+| **B-32** | low | `data-pipeline.ts` | `syncDataPipelineInner` god-function refactor — **ERTELENDİ**: bloklar tekdüze değil (match_v5 çok-alanlı obje vs diğerleri tek-sayım), error-array+result akışı ince; maintainability-only, taze bağlamda dikkatle (e2e-testli) | todo |
+| **B-33** | low | `useChampSelect.ts` | 7 kopya fetch-on-signature useEffect → helper — **ERTELENDİ**: ağır-testli + yakında effect eklendi (B-11/B-26), riskli; maintainability-only, taze bağlamda | todo |
 | ~~B-34~~ | low | `riot/client.ts` | puuid/matchId path segment'leri `encodeURIComponent`'li (4 URL builder) — path/query injection defensive. test | **done** |
 | ~~B-35~~ | low | `useToast.ts` | auto-dismiss timer'ları ref'te tutulup unmount'ta temizlenir (sızıntı + unmounted state-update giderildi). test | **done** |
 
