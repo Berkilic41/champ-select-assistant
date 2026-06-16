@@ -34,8 +34,8 @@
 | ~~B-23~~ | low | `DataStatusBadges.test.tsx` | noRiotKey + liveDataAge (bayat>24s) + taze=chip-yok testleri eklendi (baseTrajectory fixture). renderer 18 test | **done** |
 | **B-24** | low | `recommendations.test.ts` / `engine.rs` | cold-start recs e2e — **ERTELENDİ**: motor öneri havuzu mastery-TABANLI (mastery yoksa 0 rec, rates'ten bağımsız); cold-start/noMastery kontratı için motor mantığı derinlemesine anlaşılmalı. ⚠️ potansiyel: DataStatusBadges noMastery chip (`hasRecs && every comfort<0.01`) nadiren tetiklenebilir (recs mastery ister → comfort>0) — doğrula. orWarnDefault/engine-0.3 e2e ayrı | todo |
 | ~~B-06~~ | low | `.claude/CLAUDE.md` | Tauri→Electron güncellendi (stack/komut/klasör/kurallar; PROJECT_STATE/AGENTS/QUALITY_CHECKS'e işaret) | **done** |
-| **B-08** | low | `useSummonerData.ts:83` | fire-and-forget sync yarışları (B-11/B-19 ile örtüşüyor) | todo |
-| **B-02** | med | `scheduler.ts`/`index.ts` | cold-start priming (seed import + ilk edge fetch boot'ta) | todo |
+| ~~B-08~~ | low | `useSummonerData.ts:83` | **wontfix (kapsanmış)**: cold-DB boş-champMap riski dar; görünür semptom (bozuk ikon) **B-01 onError fallback'iyle** çözülü, onboarding yolu **B-15** ddragon-önce-sync. Guard warm-path'i yavaşlatır + re-render riski → değer/risk düşük | **wontfix** |
+| ~~B-02~~ | med | `scheduler.ts` + `data-pipeline.ts` | cold-start priming: `primeColdStartSeeds` (atomik, boş-tablo guard) DDragon source'undan HEMEN sonra (FK-valid champions) bundled offline seed'leri içe aktarır → otomatik yol artık manuel Settings sync'i beklemeden offline build/matchup kapsaması verir. **Not:** boot'ta DEĞİL (FK ON + champions boş → silent-fail); ilk edge fetch zaten 30s scheduler tick'inde. best-effort+atomik. desktop 155 test | **done** |
 
 ## Discovery-2 batch (a11y/concurrency/arch — 11 doğrulanmış; verify kısmen session-limit'e takıldı)
 | id | sev | dosya | özet | durum |

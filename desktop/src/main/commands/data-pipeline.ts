@@ -169,6 +169,36 @@ export function importMatchupsSeed(db: DatabaseSync): number {
   return entries.length;
 }
 
+/** Bir seed import'unu ATOMİK koş: champions tablosu seed'lerin referansladığı tüm
+ *  şampiyonları henüz içermiyorsa (tam DDragon sync'inden önce) FK ihlali tek bir
+ *  satır kalmadan geri sarılır — kısmi import + yanlış coverage-ramp ölçümü olmaz.
+ *  FK/IO hatasında re-throw eder; çağıran (scheduler) best-effort sarar. */
+function importSeedAtomic(db: DatabaseSync, fn: (db: DatabaseSync) => number): number {
+  db.exec("BEGIN");
+  try {
+    const n = fn(db);
+    db.exec("COMMIT");
+    return n;
+  } catch (err) {
+    db.exec("ROLLBACK");
+    throw err;
+  }
+}
+
+/** Cold-start priming: bundled offline seed'leri YALNIZ ilgili tablo boşken içe
+ *  aktar. İdempotent upsert + boş-tablo guard'ı warm DB'de gereksiz işi atlar.
+ *  Tam DDragon sync'inden HEMEN sonra çağrılmalı (FK için champions dolu olmalı);
+ *  champions eksikse atomik import temizce geri sarılır ve hata fırlatılır. */
+export function primeColdStartSeeds(db: DatabaseSync): { builds: number; matchups: number } {
+  const buildsEmpty = db.prepare("SELECT 1 FROM builds LIMIT 1").get() === undefined;
+  const matchupsEmpty =
+    db.prepare("SELECT 1 FROM champion_matchups LIMIT 1").get() === undefined;
+  return {
+    builds: buildsEmpty ? importSeedAtomic(db, importBuildsSeed) : 0,
+    matchups: matchupsEmpty ? importSeedAtomic(db, importMatchupsSeed) : 0,
+  };
+}
+
 // ── Meraki rates (meta/meraki.rs portu — kaynak ölü olabilir, hata dürüst) ────
 
 interface MerakiPositionStats {

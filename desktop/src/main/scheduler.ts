@@ -17,6 +17,7 @@ import {
   cachedPackRow,
   defaultJsonFetch,
   isChampSelectActive,
+  primeColdStartSeeds,
   promoteDataPack,
   recordFetchLog,
   syncMerakiRates,
@@ -326,7 +327,19 @@ export class PipelineScheduler {
     switch (source) {
       case "ddragon": {
         const n = await syncDdragonChampions(db, caches, this.deps.ddragonFetch);
-        return `${n} champions`;
+        // Cold-start priming: champions TAM sync olduğuna göre (FK-valid) bundled
+        // offline seed'leri bir kez içe aktar (builds/matchups boşsa). Best-effort:
+        // seed FK/IO hatası ddragon başarısını düşürmez (atomik → kısmi satır kalmaz).
+        let seedNote = "";
+        try {
+          const primed = primeColdStartSeeds(db);
+          if (primed.builds || primed.matchups) {
+            seedNote = ` (+${primed.builds} build, +${primed.matchups} matchup seed)`;
+          }
+        } catch (err) {
+          console.warn("cold-start seed priming atlandı:", (err as Error).message);
+        }
+        return `${n} champions${seedNote}`;
       }
       case "meraki": {
         const n = await syncMerakiRates(db, this.deps.merakiFetch ?? defaultJsonFetch);

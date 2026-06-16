@@ -13,7 +13,7 @@ import { LcuService } from "../src/main/commands/lcu";
 import { syncRecommendationFeedback } from "../src/main/commands/feedback-flush";
 import { saveSettings, DEFAULT_SETTINGS } from "../src/main/commands/settings";
 import { syncLcuPlayerData } from "../src/main/commands/player-data";
-import { syncDataPipeline } from "../src/main/commands/data-pipeline";
+import { syncDataPipeline, primeColdStartSeeds } from "../src/main/commands/data-pipeline";
 import {
   hashPuuid,
   RollingBudget,
@@ -639,6 +639,64 @@ describe("data-quality read trio (data_quality.rs parity)", () => {
     };
     expect(typeof quality.status).toBe("string");
     expect(["high", "medium", "low"]).toContain(quality.confidence);
+  });
+});
+
+describe("primeColdStartSeeds (cold-start priming, B-02)", () => {
+  /** Seed'lerin FK ile referansladığı şampiyonları önceden ekle (post-ddragon durumu). */
+  function insertSeedChampions(db: DatabaseSync): void {
+    const seedIds = new Set<number>();
+    for (const file of [
+      join(__dirname, "..", "resources", "seeds", "builds_seed.json"),
+      join(__dirname, "..", "resources", "seeds", "meta", "matchup_seed.json"),
+    ]) {
+      for (const entry of JSON.parse(readFileSync(file, "utf8")) as {
+        champion_id: number;
+        opponent_id?: number;
+      }[]) {
+        seedIds.add(entry.champion_id);
+        if (entry.opponent_id) seedIds.add(entry.opponent_id);
+      }
+    }
+    const insertChamp = db.prepare(
+      "INSERT OR IGNORE INTO champions (champion_id, key, name, title, cached_at) VALUES (?, ?, ?, '', 0)",
+    );
+    for (const id of seedIds) insertChamp.run(id, String(id), `Champion ${id}`);
+  }
+
+  const buildCount = (db: DatabaseSync) =>
+    Number((db.prepare("SELECT COUNT(*) c FROM builds").get() as { c: number }).c);
+  const matchupCount = (db: DatabaseSync) =>
+    Number((db.prepare("SELECT COUNT(*) c FROM champion_matchups").get() as { c: number }).c);
+
+  it("imports bundled seeds when builds/matchups are empty (fresh install)", () => {
+    const db = migratedDb();
+    insertSeedChampions(db);
+    expect(buildCount(db)).toBe(0);
+    expect(matchupCount(db)).toBe(0);
+
+    const primed = primeColdStartSeeds(db);
+
+    expect(primed.builds).toBeGreaterThan(0);
+    expect(primed.matchups).toBeGreaterThan(0);
+    expect(buildCount(db)).toBe(primed.builds);
+    expect(matchupCount(db)).toBe(primed.matchups);
+  });
+
+  it("skips import when tables already have rows (warm DB → ~zero cost)", () => {
+    const db = migratedDb();
+    insertSeedChampions(db);
+    primeColdStartSeeds(db); // ilk priming doldurur
+    const buildsAfterFirst = buildCount(db);
+    const matchupsAfterFirst = matchupCount(db);
+
+    const second = primeColdStartSeeds(db); // tablolar dolu → atla
+
+    expect(second.builds).toBe(0);
+    expect(second.matchups).toBe(0);
+    // Satır sayıları değişmez (yeniden import yok).
+    expect(buildCount(db)).toBe(buildsAfterFirst);
+    expect(matchupCount(db)).toBe(matchupsAfterFirst);
   });
 });
 

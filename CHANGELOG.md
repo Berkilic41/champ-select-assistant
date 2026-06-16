@@ -13,6 +13,14 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
   döngüsü kuruldu. Her iterasyon küçük, test-geçen, geri-alınabilir bir
   iyileştirme üretir; otomatik commit yok.
 
+### Eklendi
+- **Cold-start seed priming** — arka plan scheduler'ı, DDragon şampiyon sync'inden
+  hemen sonra (FK-valid) bundled offline build/matchup seed'lerini bir kez içe aktarır
+  (`primeColdStartSeeds`; yalnız ilgili tablo boşken, atomik transaction ile). Böylece
+  otomatik yol, kullanıcının manuel "Settings → senkronize et" butonuna basmasını
+  beklemeden ilk açılışta offline kapsamaya kavuşur. Best-effort: seed hatası tick'i
+  veya DDragon başarısını düşürmez. (B-02)
+
 ### Düzeltildi
 - **"Meta yok" rozeti yapısal sinyale bağlandı** — `DataStatusBadges` artık meta
   eksikliğini core'un yapısal `missing_signals` ('meta') alanından okur (kesin sinyal:
