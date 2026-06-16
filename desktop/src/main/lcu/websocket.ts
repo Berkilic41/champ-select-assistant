@@ -98,9 +98,13 @@ export class LcuEventWatcher {
         if (this.stopped) return;
         // Normal close (LCU shut down) — treat like an error: back off, retry.
         consecutiveErrors += 1;
-      } catch {
+      } catch (err) {
         if (this.stopped) return;
         consecutiveErrors += 1;
+        // Sebebi logla (TLS/pin hatası, non-401 upgrade reddi vb.); yoksa kalıcı bir
+        // cert/pin sorunu sonsuz SESSİZ backoff olarak görünür. Kod tabanının diğer
+        // degradation/retry yollarıyla tutarlı (console.warn + .message).
+        console.warn("LCU WS reconnect hatası:", (err as Error).message);
       }
       this.opts.onStatus?.("disconnected");
       await sleep(backoffDelayMs(consecutiveErrors));

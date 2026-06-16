@@ -1,10 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   backoffDelayMs,
   CHAMP_SELECT_TOPIC,
+  LcuEventWatcher,
   parseWampEvent,
 } from "../src/main/lcu/websocket";
+import type { Lockfile } from "../src/main/lcu/lockfile";
 
 describe("backoffDelayMs (mirrors the Rust backoff tests)", () => {
   it("grows 2s → 4s → 8s → 16s then caps at 30s (+ <1s jitter)", () => {
@@ -51,5 +53,25 @@ describe("parseWampEvent", () => {
     expect(parseWampEvent(JSON.stringify([5, CHAMP_SELECT_TOPIC]))).toBeNull();
     expect(parseWampEvent(JSON.stringify({ hello: 1 }))).toBeNull();
     expect(parseWampEvent("{not json")).toBeNull();
+  });
+});
+
+describe("LcuEventWatcher reconnect logging", () => {
+  it("logs the reason when a reconnect cycle throws (no silent backoff)", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const lockfile = { port: 1, password: "x" } as unknown as Lockfile;
+    const watcher = new LcuEventWatcher(lockfile, {
+      onEvent: () => {},
+      onStatus: () => {},
+      makeSocket: () => {
+        throw new Error("TLS pin fail");
+      },
+      sleep: async () => {
+        watcher.stop(); // ilk iterasyondan sonra döngüyü durdur
+      },
+    });
+    await watcher.start();
+    expect(warn).toHaveBeenCalledWith("LCU WS reconnect hatası:", "TLS pin fail");
+    warn.mockRestore();
   });
 });

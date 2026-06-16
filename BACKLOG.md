@@ -28,7 +28,7 @@
 | ~~B-18~~ | low | `StatsView.tsx` | WR grafiği <3 maçlık havuzda ince-veri notu gösterir (notsuz gizleme yok) | **done** |
 | **B-19** | low | `src/lib/ddragon.ts` | renderer DDragon patch'i yalnız LobbyView sync'iyle set; onboarding/direkt-champ-select yolunda set edilmez → App mount'ta global `get_ddragon_version` | todo |
 | ~~B-20~~ | low | `outcomes.ts` | `pickRecorded=true` try içine alındı → DB hatasında sonraki IN_GAME event'i retry eder, eğitim etiketi kaybolmaz. retry testi | **done** |
-| **B-21** | low | `lcu/websocket.ts:101-104` | reconnect catch hatayı bind/log etmiyor → kalıcı cert/pin sorunu sessiz backoff (`catch (err)`+warn) | todo |
+| ~~B-21~~ | low | `lcu/websocket.ts` | reconnect catch hata sebebini loglar (`catch (err)`+warn) → cert/pin/upgrade hataları sessiz değil. davranışsal test | **done** |
 | ~~B-22~~ | low | `useChampSelect.ts` + `RoleSelector.tsx` | roleSource kalıcı tercih → 'preferred' (nötr "Geçen oyundan hatırlandı" hint), yanlış "Rolü sen seçtin" kalktı | **done** |
 | **B-23** | low | `DataStatusBadges.test.tsx` | noRiotKey + liveDataAge dürüst chip'leri test'siz (en sık canlı durum: prod-key yok) | todo |
 | **B-24** | low | `recommendations.test.ts` / `engine.rs` | cold-start recs e2e + orWarnDefault hata-yolu + engine 0.3 nötr fallback e2e test boşlukları (#17/#18/#19) | todo |
