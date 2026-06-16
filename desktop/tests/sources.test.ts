@@ -419,6 +419,34 @@ describe("edge rates source (cloudflare-worker /v1/rates app-wiring)", () => {
     });
   });
 
+  it("downgrades cloud_edge confidence to low when the worker data is stale", async () => {
+    const db = migratedDb();
+    db.prepare(
+      "INSERT INTO summoners (puuid, game_name, tag_line, region, cached_at) VALUES ('p1', 'Me', 'TR', 'eun1', 5)",
+    ).run();
+    const n = await syncEdgeRates(db, "https://edge.example/", async (url) => {
+      if (url.includes("/v1/rates")) {
+        return {
+          patch: "16.11",
+          region: "eun1",
+          total_games: 600,
+          updated_at: 1, // 1970 → >48s bayat
+          rates: [
+            { champion_id: 86, role: "top", games: 600, win_rate: 0.52, pick_rate: 0.1, ban_rate: 0.05 },
+          ],
+        };
+      }
+      return { patch: "16.11", region: "eun1", matchups: [], builds: [] };
+    });
+    expect(n.rates).toBe(1);
+    const row = db
+      .prepare("SELECT sample_size, confidence FROM champion_rates WHERE source = 'cloud_edge'")
+      .get() as unknown as { sample_size: number; confidence: string };
+    expect(row.sample_size).toBe(600);
+    // 600 örnek normalde 'medium'; ama veri bayat (updated_at çok eski) → 'low'.
+    expect(row.confidence).toBe("low");
+  });
+
   it("syncEdgeRates keeps rates when matchups/builds endpoints fail (best-effort)", async () => {
     const db = migratedDb();
     const n = await syncEdgeRates(db, "https://edge.example", async (url) => {

@@ -574,11 +574,22 @@ export async function syncEdgeRates(
   const resp = (await fetchJson(edgeRatesUrl(baseUrl, region))) as {
     patch?: string;
     region?: string;
+    updated_at?: number;
     rates?: EdgeRateRow[];
   };
   if (!resp || !Array.isArray(resp.rates) || typeof resp.patch !== "string") {
     throw new Error("edge: geçersiz /v1/rates yanıtı");
   }
+
+  // Tazelik: worker'ın updated_at'i (epoch ms) >48s eskiyse (durmuş ingestion /
+  // dev-key expiry) confidence'ı 'low'a düşür — bayat veri 'taze yüksek-güven' diye
+  // yazılmasın; data-quality raporu + öneri ağırlığı bunu dürüstçe yansıtır.
+  // (updated_at yoksa/0 ise — eski/deploy edilmemiş worker — düşürme yok, geriye uyumlu.)
+  const EDGE_STALE_MS = 48 * 60 * 60 * 1000;
+  const stale =
+    typeof resp.updated_at === "number" &&
+    resp.updated_at > 0 &&
+    Date.now() - resp.updated_at > EDGE_STALE_MS;
 
   const rates = resp.rates
     .filter((r) => Number(r.games) > 0 && Number(r.champion_id) > 0)
@@ -592,7 +603,7 @@ export async function syncEdgeRates(
       ban_rate: Number(r.ban_rate),
       sample_size: Number(r.games),
       source: "cloud_edge",
-      confidence: confidenceFromMatches(Number(r.games)),
+      confidence: stale ? "low" : confidenceFromMatches(Number(r.games)),
     }));
 
   // Matchups best-effort: endpoint/tablo henüz boşsa veya hata dönerse rates

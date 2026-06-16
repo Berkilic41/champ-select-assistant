@@ -65,6 +65,10 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 - **Erişilebilirlik: sayaç ve bağlantı durumu** — champ-select geri sayım sayacı
   ekran okuyucuya "{{n}} saniye kaldı" olarak okunur ve bağlantı durumu (bağlanıyor/
   bağlantı yok/bağlı) değişimleri otomatik duyurulur. (B-29, B-31)
+- **Bayat meta dürüstçe işaretlenir** — edge sunucusunun toplu meta verisi 48 saatten
+  eskiyse (örn. veri toplama duraklamışsa) artık "düşük güven" olarak kaydedilir ve
+  öneri/veri-durumu rozetlerine yansır; eskiden bayat veri sessizce "taze" sunuluyordu.
+  (B-03 — worker tarafının etkili olması için yeniden deploy gerekir)
 
 ## [0.10.0-beta.6] — 2026-06-16
 
