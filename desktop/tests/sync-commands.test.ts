@@ -109,6 +109,7 @@ describe("RiotClient (riot/client.rs parity)", () => {
     expect(routingForRegion("tr1")).toBe("europe");
     expect(routingForRegion("NA1")).toBe("americas");
     expect(routingForRegion("br1")).toBe("americas"); // BR: account-v1 + match-v5 americas'ta
+    expect(routingForRegion("oc1")).toBe("americas"); // OCE account-v1 americas'ta (eskiden 'europe')
     expect(routingForRegion("bilinmeyen")).toBe("europe");
     expect(runtimeClientFromEnv({})).toBeNull();
     expect(runtimeClientFromEnv({ RIOT_API_KEY: "  " })).toBeNull();

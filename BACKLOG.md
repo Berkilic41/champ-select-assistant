@@ -16,7 +16,8 @@
 | **B-10** | med | `DataStatusBadges.tsx:155` | noMeta `meta_score==0.3` sihirli-sabitiyle tespit ediliyor; core'un yapısal `missing_signals` ('meta') alanı zaten var → kırılgan kuplajı kaldır | todo |
 | ~~B-11~~ | med | `useChampSelect.ts` | puuid çözülünce aktif session için recs yeni puuid'le refetch edilir (ayrı effect); boş-puuid stale öneriler kalmıyor | **done** |
 | ~~B-12~~ | med | `riot/client.ts` | routingForRegion **br1→americas** eklendi (BR account-v1+match-v5 doğru host). desktop test | **done (br1)** |
-| **B-12b** | low | `riot/client.ts` + `getByRiotId`/`match-v5.ts` | OC1 routing: account-v1 `americas` ister, match-v5 `sea` ister (paylaşılan fonksiyon çakışıyor) → routing'i API'ye göre ayır (account vs match) ki OCE match-v5 `sea`'ya gitsin | todo |
+| ~~B-12b~~ | low | `riot/client.ts` | `oc1→americas` (account-v1 OCE doğru host; eskiden 'europe' default → 404). test. | **done** |
+| **B-12c** | low | `match-v5.ts` + `client.ts` | (nice-to-have) match-v5 için ayrı routing (oc1→`sea`); account-v1 ile çakışmasız OCE maç-çekimi. paylaşılan routing'i API'ye göre ayır | todo |
 | ~~B-13~~ | med | `sources.ts` | u.gg fallback satırları `uggPatch` (gerçek kaynak patch) ile etiketleniyor → staleness maskesi kalktı. desktop 16 sources test | **done** |
 | ~~B-15~~ | med | `OnboardingWizard.tsx` | onboarding LCU sync'inden ÖNCE `sync_ddragon_champions` çağırır → şampiyon tablosu gerçek anahtarla dolar, placeholder numeric key (ikon 404) yazılmaz | **done** |
 

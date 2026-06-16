@@ -94,6 +94,7 @@ export function routingForRegion(region: string): string {
     case "la1":
     case "la2":
     case "br1":
+    case "oc1": // OCE: account-v1 americas'ta (match-v5 ideali sea → ayrı routing, B-12c)
       return "americas";
     case "kr":
     case "jp1":
