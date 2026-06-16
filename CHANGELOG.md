@@ -62,6 +62,9 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
   bayat öneri yazmıyor. (B-26)
 - **Erişilebilirlik: bildirimler ekran okuyucuya duyurulur** — toast bildirimleri
   artık ekran okuyucu tarafından okunur (hata/uyarı acil, bilgi/başarı kibar). (B-25)
+- **Erişilebilirlik: sayaç ve bağlantı durumu** — champ-select geri sayım sayacı
+  ekran okuyucuya "{{n}} saniye kaldı" olarak okunur ve bağlantı durumu (bağlanıyor/
+  bağlantı yok/bağlı) değişimleri otomatik duyurulur. (B-29, B-31)
 
 ## [0.10.0-beta.6] — 2026-06-16
 

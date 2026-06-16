@@ -646,7 +646,8 @@
     "yourTurn": "SIRANIZ",
     "waiting": "BEKLIYORSUNUZ",
     "lobby": "LOBI",
-    "locking": "KİLİTLENİYOR"
+    "locking": "KİLİTLENİYOR",
+    "secondsLeft": "{{n}} saniye kaldı"
   },
   "quickPick": {
     "title": "Alternatifler",

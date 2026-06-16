@@ -646,7 +646,8 @@
     "yourTurn": "YOUR TURN",
     "waiting": "WAITING",
     "lobby": "LOBBY",
-    "locking": "LOCKING IN"
+    "locking": "LOCKING IN",
+    "secondsLeft": "{{n}} seconds left"
   },
   "quickPick": {
     "title": "Alternatives",

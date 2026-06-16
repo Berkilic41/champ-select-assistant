@@ -43,9 +43,9 @@
 | ~~B-25~~ | med | `Toast.tsx` | toast'lar SR'a duyuruluyor: error/warning `role=alert`/assertive, info/success `role=status`/polite. test | **done** |
 | **B-27** | low | `PoolBuilder.tsx:93` | bozuk ARIA tablist (role=tablist ama tab/aria-selected yok) → `role=group`+`aria-pressed` | todo |
 | **B-28** | low | `SettingsPanel.tsx`+`ChampionDetailCard.tsx` | dialog'da `aria-labelledby` + focus trap/restore yok | todo |
-| **B-29** | low | `Timer.tsx` | SVG geri sayım metin karşılığı yok; aciliyet yalnız renkle → `role=img`+`aria-label` | todo |
+| ~~B-29~~ | low | `Timer.tsx` | SVG geri sayım `role=img`+`aria-label` ("{{n}} saniye kaldı") → SR'a duyurulur. test | **done** |
 | **B-30** | low | `SettingsPanel.tsx` | bölge/pencere-boyutu `<select>` etiketsiz → `aria-label` | todo |
-| **B-31** | low | `ConnectionBadge.tsx` | bağlantı durum değişimi duyurulmuyor → live region | todo |
+| ~~B-31~~ | low | `ConnectionBadge.tsx` | tek persistent `role=status`+`aria-live` span → bağlantı durum değişimleri SR'a duyurulur. test | **done** |
 | **B-32** | low | `data-pipeline.ts` | `syncDataPipelineInner` 220-satır god-function, 5 kopya source-step bloğu → refactor | todo |
 | **B-33** | low | `useChampSelect.ts` | 7 kopya fetch-on-signature useEffect → ortak helper | todo |
 | ~~B-34~~ | low | `riot/client.ts` | puuid/matchId path segment'leri `encodeURIComponent`'li (4 URL builder) — path/query injection defensive. test | **done** |

@@ -10,17 +10,18 @@ interface Props {
 export const ConnectionBadge: React.FC<Props> = ({ status }) => {
   const { t } = useTranslation();
 
-  if (status.kind === 'connecting') {
-    return <span className="badge badge--connecting">{t('connection.badgeConnecting')}</span>;
-  }
-
-  if (status.kind === 'disconnected') {
-    return <span className="badge badge--disconnected">{t('connection.badgeDisconnected')}</span>;
-  }
+  // Tek persistent live region (role=status) — bağlantı durumu değişimleri ekran
+  // okuyucuya duyurulur (eskiden her durum ayrı span'di, değişim duyurulmuyordu).
+  const { cls, text } =
+    status.kind === 'connecting'
+      ? { cls: 'connecting', text: t('connection.badgeConnecting') }
+      : status.kind === 'disconnected'
+        ? { cls: 'disconnected', text: t('connection.badgeDisconnected') }
+        : { cls: 'connected', text: status.summonerName || t('connection.badgeConnected') };
 
   return (
-    <span className="badge badge--connected">
-      {status.summonerName || t('connection.badgeConnected')}
+    <span className={`badge badge--${cls}`} role="status" aria-live="polite">
+      {text}
     </span>
   );
 };

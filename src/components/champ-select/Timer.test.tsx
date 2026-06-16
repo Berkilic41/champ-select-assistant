@@ -48,4 +48,11 @@ describe('Timer', () => {
     rerender(<Timer timeLeftMs={8000} phase="BAN_PICK" isActing={false} />);
     expect(container.querySelector('.cs-timer')?.className).not.toContain('animate-urgency');
   });
+
+  it('exposes the countdown to screen readers via role=img + aria-label', () => {
+    const { container } = render(<Timer timeLeftMs={25000} phase="BAN_PICK" isActing />);
+    const svg = container.querySelector('svg');
+    expect(svg).toHaveAttribute('role', 'img');
+    expect(svg?.getAttribute('aria-label')).toMatch(/25/);
+  });
 });

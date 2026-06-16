@@ -27,4 +27,13 @@ describe('ConnectionBadge', () => {
     expect(container.textContent).toContain('Faker#KR1');
     expect(container.querySelector('.badge--connected')).not.toBeNull();
   });
+
+  it('exposes connection state as a polite live region (role=status)', () => {
+    const { container } = render(
+      <ConnectionBadge status={{ kind: 'disconnected' } as AppStatus} />,
+    );
+    const el = container.querySelector('.badge');
+    expect(el).toHaveAttribute('role', 'status');
+    expect(el).toHaveAttribute('aria-live', 'polite');
+  });
 });

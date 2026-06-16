@@ -43,7 +43,13 @@ export const Timer: React.FC<Props> = ({ timeLeftMs, phase, isActing }) => {
 
   return (
     <div className={`cs-timer ${urgency === 'critical' && isActing ? 'animate-urgency' : ''}`}>
-      <svg width="60" height="60" viewBox="0 0 60 60">
+      <svg
+        width="60"
+        height="60"
+        viewBox="0 0 60 60"
+        role="img"
+        aria-label={t('timer.secondsLeft', { n: seconds })}
+      >
         {/* Track */}
         <circle cx="30" cy="30" r={RADIUS} fill="none" stroke="var(--color-border)" strokeWidth="4" />
         {/* Progress */}
