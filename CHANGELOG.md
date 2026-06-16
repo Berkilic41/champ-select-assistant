@@ -39,6 +39,14 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
   veya DDragon başarısını düşürmez. (B-02)
 
 ### Düzeltildi
+- **`docs/api-key-policy.md` Tauri→Electron güncellendi** — doküman geliştiriciyi var
+  olmayan bir kuruluma yönlendiriyordu: `src-tauri/.env`, `dotenvy::dotenv()`,
+  `tauri.conf.json` checklist'i ve `target/release/*.exe` binary-tarama — hepsi Tauri/Rust
+  dönemine ait. Gerçek mekanizma: anahtar Node host'ta `process.env.RIOT_API_KEY`
+  (+ en yakın `.env`, process.env öncelikli) `desktop/src/main/riot/client.ts`
+  `runtimeEnv()` ile okunur; Rust/WASM core hiç görmez. LCU hover compliance notundaki
+  stale `commands/champ_select.rs` referansı da gerçek konuma (`desktop/src/main/commands/lcu.ts`
+  `hoverChampion`) çekildi. (B-40)
 - **Arena (queue 1700) artık laneless sayılıyor** — `json_api.rs` `my_pos()` yalnız
   ARAM'ı (450) sentetik "aram" lane'ine eşliyordu; Arena (1700) `else` dalında atanan
   LCU pozisyonunu döndürüyordu. LCU Arena'da pozisyonu boş bırakır ama renderer kalıcı

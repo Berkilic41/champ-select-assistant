@@ -39,8 +39,12 @@
   `matches!(queue_id, 450 | 1700)` (engine.rs is_aram ile hizalı) → sızan tercih-rolü
   Arena önerilerine yanlış "lane_performance eksik" basmaz. Regresyon testi. ✅ core
   570 test + clippy temiz.
-- **Kalan (Discovery-3):** B-40 (stale `docs/api-key-policy.md` Tauri→Electron) · B-24
-  (ertelenmiş motor-e2e).
+- **Iter 15** — **B-40** `docs/api-key-policy.md` Tauri→Electron: dev-bölümü
+  (`src-tauri/.env`+`dotenvy`→`process.env.RIOT_API_KEY`/`runtimeEnv()`), checklist
+  (`tauri.conf.json`/`target/release` → bundled config + `app.asar` taraması), LCU-note
+  (`champ_select.rs`→`commands/lcu.ts`). ✅ saf-doküman (253f3dd sonrası, commit'siz→commit).
+- **Kalan (Discovery-3 tükendi):** yalnız B-24 (ertelenmiş motor-e2e). Sıradaki tur
+  taze keşif tarar (core/desktop/renderer/worker az-kapsanmış alanlar).
 
 ## Durum — backlog esas olarak TÜKENDİ (2026-06-16, ~30 commit)
 

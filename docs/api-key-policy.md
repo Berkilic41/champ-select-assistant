@@ -6,12 +6,18 @@ The Riot API key is **never embedded in the application binary**.
 
 ## Development
 
-- Store your key in `src-tauri/.env`:
+> Stack note: the app is **Electron + Node** (it migrated off Tauri). The Riot key
+> is handled in the Node host layer (`desktop/src/main/`), never in the Rust/WASM core.
+
+- Provide your key as the `RIOT_API_KEY` environment variable, or place it in a
+  `.env` file the host loads at startup:
   ```
   RIOT_API_KEY=RGAPI-your-key-here
   ```
-- The `.env` file is in `.gitignore` and must never be committed.
-- The app reads the key at runtime via `dotenvy::dotenv()` on startup.
+- Any `.env` file is in `.gitignore` and must never be committed.
+- The Electron host reads the key at runtime from `process.env.RIOT_API_KEY`
+  (`desktop/src/main/riot/client.ts` → `runtimeEnv()`; `process.env` takes priority
+  over the nearest `.env`). It is never read by the Rust/WASM core.
 
 ## Production / Public Release (Sprint J2)
 
@@ -39,9 +45,11 @@ All responses are JSON-passthrough from Riot API, optionally cached (TTL: 5 min 
 ## Security Checklist
 
 - [ ] `.env` in `.gitignore` ✅
-- [ ] `RIOT_API_KEY` not in `tauri.conf.json`
+- [ ] `RIOT_API_KEY` not hard-coded in any bundled config or source file
 - [ ] `RIOT_API_KEY` not in any `.github/workflows/` (use secrets only)
-- [ ] Binary scan: `strings target/release/*.exe | grep RGAPI` returns empty
+- [ ] Packaged-app scan: grepping the built host bundle + packaged `app.asar` for
+      `RGAPI` returns empty (the key lives in the Node main process at runtime, not in
+      the binary or the Rust core)
 - [ ] Public release: proxy deployed, app points to proxy URL
 
 ## Riot Developer Portal Registration (Public Beta Blocker)
@@ -62,7 +70,7 @@ products to be **registered in and audited through the Developer Portal**.
 
 The League Client (LCU) API is **unofficial/undocumented** — Riot does not list it
 as a "supported service." This app uses it read-only plus a single **user-initiated
-hover** action (`hover_champion`, `commands/champ_select.rs`) that never completes
+hover** action (`hover_champion` → `desktop/src/main/commands/lcu.ts` `hoverChampion`) that never completes
 (locks) a pick. This is the same tolerated category as Blitz / op.gg / Mobalytics.
 No game process/memory is accessed (Vanguard-safe). Because LCU is unofficial, no
 LCU-based tool can claim "officially fully compliant"; this product follows all
