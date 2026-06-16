@@ -48,7 +48,7 @@
 | **B-31** | low | `ConnectionBadge.tsx` | bağlantı durum değişimi duyurulmuyor → live region | todo |
 | **B-32** | low | `data-pipeline.ts` | `syncDataPipelineInner` 220-satır god-function, 5 kopya source-step bloğu → refactor | todo |
 | **B-33** | low | `useChampSelect.ts` | 7 kopya fetch-on-signature useEffect → ortak helper | todo |
-| **B-34** | low | `riot/client.ts` | renderer puuid/matchId Riot URL'ine `encodeURIComponent`'siz → ekle | todo |
+| ~~B-34~~ | low | `riot/client.ts` | puuid/matchId path segment'leri `encodeURIComponent`'li (4 URL builder) — path/query injection defensive. test | **done** |
 | ~~B-35~~ | low | `useToast.ts` | auto-dismiss timer'ları ref'te tutulup unmount'ta temizlenir (sızıntı + unmounted state-update giderildi). test | **done** |
 
 ## Tamamlanan / Kapatılan

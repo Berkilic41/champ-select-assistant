@@ -120,6 +120,8 @@ describe("RiotClient (riot/client.rs parity)", () => {
     const url = buildListIdsUrl("p", "europe", "ranked", 420, 5);
     expect(url).toContain("&type=ranked");
     expect(url).toContain("&queue=420");
+    // Defensive: puuid path segment'i encode edilir (path/query injection önlenir).
+    expect(buildListIdsUrl("a/b c", "europe", null, null, 5)).toContain("by-puuid/a%2Fb%20c/");
   });
 
   it("retries once on 429 honoring Retry-After, throws on persistent failure", async () => {

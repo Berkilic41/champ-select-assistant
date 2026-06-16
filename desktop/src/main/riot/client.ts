@@ -252,7 +252,7 @@ export function buildListIdsUrl(
 ): string {
   const typeParam = matchType ? `&type=${matchType}` : "";
   const queueParam = queue !== null ? `&queue=${queue}` : "";
-  return `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?count=${count}${typeParam}${queueParam}`;
+  return `https://${routing}.api.riotgames.com/lol/match/v5/matches/by-puuid/${encodeURIComponent(puuid)}/ids?count=${count}${typeParam}${queueParam}`;
 }
 
 export function listMatchIds(
@@ -272,7 +272,7 @@ export function getMatchDetail(
   routing: string,
 ): Promise<Record<string, unknown>> {
   return client.get(
-    `https://${routing}.api.riotgames.com/lol/match/v5/matches/${matchId}`,
+    `https://${routing}.api.riotgames.com/lol/match/v5/matches/${encodeURIComponent(matchId)}`,
   );
 }
 
@@ -284,7 +284,7 @@ export function getMatchTimeline(
   routing: string,
 ): Promise<Record<string, unknown>> {
   return client.get(
-    `https://${routing}.api.riotgames.com/lol/match/v5/matches/${matchId}/timeline`,
+    `https://${routing}.api.riotgames.com/lol/match/v5/matches/${encodeURIComponent(matchId)}/timeline`,
   );
 }
 
@@ -295,6 +295,6 @@ export function masteryTopByPuuid(
   count: number,
 ): Promise<Record<string, unknown>[]> {
   return client.get(
-    `https://${platform}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/top?count=${count}`,
+    `https://${platform}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${encodeURIComponent(puuid)}/top?count=${count}`,
   );
 }
