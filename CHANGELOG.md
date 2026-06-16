@@ -72,6 +72,9 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 - **İstatistik kartları ilk açılışta dolar** — rank, trend ve haftalık özet kartları,
   oyuncu kimliği henüz çözülmeden açıldığında artık kalıcı boş kalmıyor; kimlik
   çözülür çözülmez verilerini otomatik çekiyor. (B-17)
+- **Erişilebilirlik: modal odak yönetimi** — Ayarlar ve Şampiyon Detayı pencereleri
+  açıldığında klavye odağı pencere içine taşınır, kapandığında onu açan öğeye geri
+  döner (klavye/ekran-okuyucu kullanıcıları için). (B-28)
 
 ## [0.10.0-beta.6] — 2026-06-16
 

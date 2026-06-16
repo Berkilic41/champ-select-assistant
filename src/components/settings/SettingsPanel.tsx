@@ -2,6 +2,7 @@ import React from 'react';
 import { invoke } from '../../lib/host';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
+import { useModalFocus } from '../../hooks/useModalFocus';
 import { AppSettings, WEIGHT_PRESETS, WeightPresetName, matchesPreset } from '../../hooks/useSettings';
 import type { DataPipelineRefreshSummary } from '../../types/generated/DataPipelineRefreshSummary';
 import type { FeedbackFlushSummary } from '../../types/generated/FeedbackFlushSummary';
@@ -43,6 +44,10 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
   const { t } = useTranslation();
   const [draft, setDraft] = React.useState<AppSettings>(settings);
   const update = (patch: Partial<AppSettings>) => setDraft(d => ({ ...d, ...patch }));
+
+  // Modal odak yönetimi: açılışta panel'in ilk öğesine odak, kapanışta tetikleyiciye geri.
+  const panelRef = React.useRef<HTMLDivElement>(null);
+  useModalFocus(panelRef);
 
   // Warn before discarding unsaved edits (the draft only persists on Save).
   const dirty = React.useMemo(
@@ -130,6 +135,7 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
   return (
     <div className="settings-overlay" onClick={handleClose}>
       <div
+        ref={panelRef}
         className="settings-panel"
         onClick={e => e.stopPropagation()}
         role="dialog"

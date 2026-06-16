@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { invoke } from '../../lib/host';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
+import { useModalFocus } from '../../hooks/useModalFocus';
 import type { ChampionDetail } from '../../types/recommendation';
 import { ChampionIcon } from '../shared/ChampionIcon';
 import { archetypeLabel } from '../../lib/archetype';
@@ -141,6 +142,10 @@ export const ChampionDetailCard: React.FC<Props> = ({ championId, championKey, o
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
+  // Modal odak yönetimi: championId set olunca panel'in ilk öğesine odak, kapanışta geri.
+  const panelRef = useRef<HTMLDivElement>(null);
+  useModalFocus(panelRef, championId !== null);
+
   if (championId === null) return null;
 
   const total = detail ? detail.damage_ad + detail.damage_ap : 0;
@@ -149,6 +154,7 @@ export const ChampionDetailCard: React.FC<Props> = ({ championId, championKey, o
   return (
     <div className="cdc-overlay" onClick={onClose}>
       <div
+        ref={panelRef}
         className="cdc-panel"
         onClick={(e) => e.stopPropagation()}
         role="dialog"

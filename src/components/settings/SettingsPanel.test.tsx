@@ -126,4 +126,23 @@ describe('SettingsPanel feedback sync', () => {
     render(<SettingsPanel settings={DEFAULT_SETTINGS} onSave={vi.fn()} onClose={vi.fn()} />);
     expect(screen.getByRole('dialog')).toHaveAccessibleName();
   });
+
+  it('moves focus into the dialog on open and restores it to the trigger on close', () => {
+    invokeMock.mockResolvedValue(null);
+    const trigger = document.createElement('button');
+    document.body.appendChild(trigger);
+    trigger.focus();
+    expect(document.activeElement).toBe(trigger);
+
+    const { unmount } = render(
+      <SettingsPanel settings={DEFAULT_SETTINGS} onSave={vi.fn()} onClose={vi.fn()} />,
+    );
+    // Açılış: odak modal içine taşınır.
+    expect(screen.getByRole('dialog').contains(document.activeElement)).toBe(true);
+
+    unmount();
+    // Kapanış: odak tetikleyiciye geri verilir.
+    expect(document.activeElement).toBe(trigger);
+    trigger.remove();
+  });
 });
