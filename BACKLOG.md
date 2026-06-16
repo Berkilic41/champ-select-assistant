@@ -26,7 +26,7 @@
 | ~~B-16~~ | low | `PoolBuilder.tsx` | loading vs empty (loading state + `poolBuilder.loading`) | **done** |
 | **B-17** | low | `RankCard/TrendPanel/WeeklySummaryCard` | puuid null → kalıcı null render, retry yok (PoolBuilder retry desenine bağla) | todo |
 | ~~B-18~~ | low | `StatsView.tsx` | WR grafiği <3 maçlık havuzda ince-veri notu gösterir (notsuz gizleme yok) | **done** |
-| **B-19** | low | `src/lib/ddragon.ts` | renderer DDragon patch'i yalnız LobbyView sync'iyle set; onboarding/direkt-champ-select yolunda set edilmez → App mount'ta global `get_ddragon_version` | todo |
+| ~~B-19~~ | low | `src/lib/ddragon.ts` + `App.tsx` | App mount'ta global `get_ddragon_version`→`applyDdragonVersion` (sentinel-guard'lı); tüm giriş yolları canlı patch alır. test | **done** |
 | ~~B-20~~ | low | `outcomes.ts` | `pickRecorded=true` try içine alındı → DB hatasında sonraki IN_GAME event'i retry eder, eğitim etiketi kaybolmaz. retry testi | **done** |
 | ~~B-21~~ | low | `lcu/websocket.ts` | reconnect catch hata sebebini loglar (`catch (err)`+warn) → cert/pin/upgrade hataları sessiz değil. davranışsal test | **done** |
 | ~~B-22~~ | low | `useChampSelect.ts` + `RoleSelector.tsx` | roleSource kalıcı tercih → 'preferred' (nötr "Geçen oyundan hatırlandı" hint), yanlış "Rolü sen seçtin" kalktı | **done** |

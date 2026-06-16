@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
   setDdragonVersion,
+  applyDdragonVersion,
   getDdragonVersion,
   champIconUrl,
   itemIconUrl,
@@ -34,6 +35,17 @@ describe('ddragon version', () => {
     expect(splashUrl('Zed')).toBe(
       'https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Zed_0.jpg',
     );
+  });
+
+  it('applyDdragonVersion applies a valid version but rejects the unknown sentinel + empty/null', () => {
+    applyDdragonVersion('15.2.1');
+    expect(getDdragonVersion()).toBe('15.2.1');
+    applyDdragonVersion('unknown'); // sentinel → değişmez (ikon URL'i bozulmasın)
+    expect(getDdragonVersion()).toBe('15.2.1');
+    applyDdragonVersion(''); // boş → değişmez
+    expect(getDdragonVersion()).toBe('15.2.1');
+    applyDdragonVersion(null); // null → değişmez
+    expect(getDdragonVersion()).toBe('15.2.1');
   });
 });
 

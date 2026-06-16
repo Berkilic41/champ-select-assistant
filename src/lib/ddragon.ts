@@ -6,6 +6,13 @@ export const setDdragonVersion = (v: string): void => {
 
 export const getDdragonVersion = (): string => _version;
 
+/** Backend'den gelen DDragon sürümünü uygula; "unknown" sentinel'i (henüz sync
+ *  olmadı) ve boş değeri reddet — geçerli fallback (14.10.1) korunur, ikon URL'i
+ *  bozulmaz. App mount + summoner sync giriş yollarının ortak guard'ı. */
+export const applyDdragonVersion = (v: string | null | undefined): void => {
+  if (v && v !== 'unknown') _version = v;
+};
+
 export const champIconUrl = (key: string): string =>
   `https://ddragon.leagueoflegends.com/cdn/${_version}/img/champion/${key}.png`;
 

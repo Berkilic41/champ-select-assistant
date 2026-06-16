@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { invoke } from './lib/host';
 import { listen } from './lib/host';
+import { applyDdragonVersion } from './lib/ddragon';
 import { useTranslation } from 'react-i18next';
 import i18n from './i18n';
 import { AppShell } from './components/AppShell';
@@ -36,6 +37,14 @@ function App(): React.ReactElement {
     invoke<boolean>('is_onboarding_complete')
       .then(done => setOnboardingDone(done))
       .catch(() => setOnboardingDone(true));
+  }, []);
+
+  // Renderer ikon URL'leri için canlı DDragon patch'ini mount'ta çöz — yalnız
+  // LobbyView sync'iyle değil. Onboarding'den ya da doğrudan champ-select'e açılan
+  // yolda da renderer canlı patch'i alsın (yoksa 14.10.1 fallback'iyle o patch'ten
+  // sonra eklenen şampiyon/item ikonları 404 → baş-harf yedeği).
+  useEffect(() => {
+    invoke<string>('get_ddragon_version').then(applyDdragonVersion).catch(() => {});
   }, []);
 
   useEffect(() => {
