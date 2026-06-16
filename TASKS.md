@@ -30,8 +30,8 @@
 ## Iterasyon 13+ — durum
 İlk keşif batch'inin (B-09…B-24) **yüksek-değer + kolay** işleri bitti. Kalan: B-03
 (med, worker freshness — çok-katmanlı), B-19/B-21/B-17 (low), B-24 (wasm), B-12b/B-06.
-→ **İkinci keşif workflow'u** çalışıyor (perf/a11y/mimari/güvenlik-derinliği/error-completeness)
-yeni yüksek-değer batch için. Paralelde B-06 (docs: stale `.claude/CLAUDE.md`).
+→ **İkinci keşif workflow'u** (wtpa90ort) çalışıyor (perf/a11y/mimari/güvenlik/concurrency/robustness).
+**B-06** (docs: `.claude/CLAUDE.md` Tauri→Electron) ✅ tamam. Workflow bulguları gelince yeni batch.
 
 ### Sonraki adaylar (önceki liste)
 - **B-22** (low, renderer) — roleSource kalıcı tercihi 'manual' etiketliyor → 'preferred' ekle.

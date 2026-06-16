@@ -1,72 +1,67 @@
 # champ-select-assistant — Claude Code Config
 
+> **Mimari pivot (2026-06): proje Tauri'den Electron'a göçtü.** Eski Tauri /
+> `src-tauri/` referansları GEÇERSİZDİR. Tam güncel durum: `PROJECT_STATE.md`.
+> Otonom geliştirme döngüsü + kurallar: `AGENTS.md`; kalite kapıları: `QUALITY_CHECKS.md`.
+
 ## Stack
 
-- **Backend**: Rust 1.80+ (Tauri 2), async/tokio, `src-tauri/src/`
-- **Frontend**: React 19 + TypeScript 5 + Vite, `src/`
-- **Package manager**: pnpm
-- **Shared types**: ts-rs (Rust → TypeScript codegen), `shared/types/`
+- **core** — Rust → WASM (`wasm-pack --target nodejs`), deterministik motor: scoring,
+  draft_brain, pipeline policy, json_api. `core/src/`. **Test-oracle.**
+- **desktop host** — Electron 40 + Node (node:sqlite, LCU, IPC, scheduler, kaynak
+  fetch'leri, WASM `Engine` sarmalı). `desktop/src/main/`.
+- **renderer** — React 19 + TypeScript 5 + Vite 7, i18n (tr/en). `src/`.
+- **worker** — Cloudflare Worker (wrangler): Match-V5 ingestion → D1 → `/v1/{rates,
+  matchups,builds}`. `cloudflare-worker/`.
+- **Shared types** — ts-rs (Rust → TS), `src/types/generated/`.
+- **Paket yöneticisi** — pnpm 11 workspace (`desktop`, `cloudflare-worker`; renderer = kök paket).
 
-## Build & Test
+## Build & Test (tam liste: QUALITY_CHECKS.md)
 
 ```powershell
-pnpm tauri dev          # dev (hot reload)
-cargo test              # Rust unit tests (run from src-tauri/)
-pnpm test               # Vitest
-pnpm typecheck          # tsc --noEmit
-cargo clippy            # lint
+pnpm dev                                       # renderer (Vite)
+pnpm --filter csa-desktop dev                  # Electron host (dev)
+pnpm typecheck ; pnpm test:run                 # renderer: tsc --noEmit + vitest
+pnpm --filter csa-desktop test                 # host testleri (+ test:e2e app-launch smoke)
+# core (cwd core/):
+cargo test --all ; cargo clippy --all-targets --all-features -- -D warnings
+pnpm --filter champ-select-riot-proxy test     # worker
 ```
 
 ## Folder Conventions
 
 | Path | Contents |
 |------|----------|
-| `src-tauri/src/lcu/` | LCU lockfile, HTTP client, WebSocket |
-| `src-tauri/src/db/` | SQLite repo (rusqlite + refinery) |
-| `src-tauri/src/riot/` | Riot API client + rate limiter |
-| `src-tauri/src/ddragon/` | Data Dragon downloader + cache |
-| `src-tauri/src/recommendation/` | Recommendation engine |
-| `src-tauri/migrations/` | refinery SQL migration files (V001__*.sql) |
-| `src/components/` | React UI components |
-| `src/hooks/` | Custom React hooks |
-| `shared/types/` | ts-rs generated TypeScript types |
-| `docs/` | Project docs (sprint plan, ADRs) |
-| `tests/` | Integration tests |
+| `core/src/` | Rust/WASM motor: scoring, draft_brain, pipeline policy, json_api |
+| `desktop/src/main/` | Electron host; `ipc.ts` = tek `"cmd"` dispatcher + `buildCommandRegistry()` |
+| `desktop/src/main/commands/` | IPC komut handler'ları |
+| `desktop/resources/migrations/` | SQL migration'lar (`V0NN__*.sql`, node:sqlite) |
+| `desktop/resources/seeds/` | Bundled seed JSON (`builds_seed`, `meta/matchup_seed`) |
+| `src/components/` | React UI |
+| `src/hooks/` | Custom hooks |
+| `src/i18n/` | `tr.json` + `en.json` (parite zorunlu) |
+| `src/types/generated/` | ts-rs üretilen TS tipleri |
+| `cloudflare-worker/src/` | Edge worker (ingest + `/v1` read) |
+| `docs/` | Landing (GitHub Pages) + `live-smoke-checklist.md` |
 
 ## Critical Rules
 
-- NEVER commit `src-tauri/.env` or API keys
-- ALWAYS use `rustls-tls` feature for reqwest (not native-tls) — LCU self-signed cert
-- ALWAYS run migrations on app startup before any DB access
-- Rate limit Riot API with `governor` — 20 req/s max
-- LCU lockfile path: try 4 candidates (see `lol-lcu-api` skill)
-- Tauri commands return `Result<T, String>` — use `anyhow` internally, convert with `.map_err(|e| e.to_string())`
-
-## Agent Team (see docs/agent-team.md for full details)
-
-| Role | Agent Type | Main Responsibility |
-|------|------------|---------------------|
-| lol-architect | system-architect | Module design, API contracts |
-| lol-rust-dev | rust-pro | src-tauri/ implementation |
-| lol-ts-dev | typescript-pro | src/ + shared/types/ |
-| lol-frontend | frontend-developer | UI components, state |
-| lol-ux | ui-designer | Overlay UX, 30s champ-select |
-| lol-tester | test-automator | Tests, LCU mock |
-| lol-reviewer | code-reviewer | Code quality + security |
-| lol-perf | performance-engineer | Latency, render time |
-| lol-debugger | debugger | LCU/cert/lockfile issues |
-| lol-data-eng | data-engineer | SQLite schema, Riot ETL |
-| lol-ml | ml-engineer | Recommendation engine (Sprint 3) |
-| lol-security | security-auditor | Riot ToS, credential audit |
+- NEVER commit `.env` / API key / secret.
+- IPC: renderer `window.api.invoke(name, args)` → tek `"cmd"` dispatcher → `buildCommandRegistry()` Map. Yeni komut renderer'da çağrılıyorsa dispatcher'a da eklenmeli (ipc-contract testi yakalar).
+- ALWAYS run migrations on startup before any DB access (`index.ts` boot sırası: DB+migrations → `Engine.load()` → scheduler → IPC).
+- Deterministik motor (core) **test-oracle**'dır; ML/LLM yalnız fallback seam'iyle AUGMENT eder, sessizce değiştirmez.
+- i18n paritesi: `src/i18n/{tr,en}.json` anahtarları senkron olmalı (i18n-parity testi).
+- DDragon sürüm fallback `14.10.1`; `"unknown"` sentinel reddedilir (ikon URL'i bozulmasın).
+- combo `ability_ref` mekanik olarak doğru olmalı (abartı/kesin dil yok).
 
 ## Commit Convention
 
 ```
-feat(lcu): add WebSocket champ-select listener
-fix(db): handle migration failure on first launch
-perf(ui): reduce champion grid rerender on hover
+feat(scope): ...
+fix(scope): ...
+perf(scope): ...
 ```
 
 ## Performance Target
 
-Champ-select event → recommendation displayed: **< 500ms**
+Champ-select event → öneri görüntülenmesi: **< 500ms**

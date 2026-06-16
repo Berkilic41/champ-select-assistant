@@ -32,7 +32,7 @@
 | ~~B-22~~ | low | `useChampSelect.ts` + `RoleSelector.tsx` | roleSource kalıcı tercih → 'preferred' (nötr "Geçen oyundan hatırlandı" hint), yanlış "Rolü sen seçtin" kalktı | **done** |
 | **B-23** | low | `DataStatusBadges.test.tsx` | noRiotKey + liveDataAge dürüst chip'leri test'siz (en sık canlı durum: prod-key yok) | todo |
 | **B-24** | low | `recommendations.test.ts` / `engine.rs` | cold-start recs e2e + orWarnDefault hata-yolu + engine 0.3 nötr fallback e2e test boşlukları (#17/#18/#19) | todo |
-| **B-06** | low | `.claude/CLAUDE.md` | stale (Tauri→Electron) güncelle | todo |
+| ~~B-06~~ | low | `.claude/CLAUDE.md` | Tauri→Electron güncellendi (stack/komut/klasör/kurallar; PROJECT_STATE/AGENTS/QUALITY_CHECKS'e işaret) | **done** |
 | **B-08** | low | `useSummonerData.ts:83` | fire-and-forget sync yarışları (B-11/B-19 ile örtüşüyor) | todo |
 | **B-02** | med | `scheduler.ts`/`index.ts` | cold-start priming (seed import + ilk edge fetch boot'ta) | todo |
 
