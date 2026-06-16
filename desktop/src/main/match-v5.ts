@@ -18,7 +18,7 @@ import {
   getByRiotId,
   listMatchIds,
   getMatchDetail,
-  routingForRegion,
+  matchRoutingForRegion,
   type RiotClient,
 } from "./riot/client";
 
@@ -524,7 +524,7 @@ export async function syncMatchV5Ingestion(
     upsertSummoner(db, resolved);
   }
 
-  const routing = routingForRegion(region);
+  const routing = matchRoutingForRegion(region);
   const ids = await listMatchIds(
     riot,
     puuid,

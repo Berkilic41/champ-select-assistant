@@ -40,6 +40,7 @@ import {
 } from "../src/main/lcu/player-sync";
 import {
   buildListIdsUrl,
+  matchRoutingForRegion,
   parseEnvFile,
   RiotClient,
   routingForRegion,
@@ -111,6 +112,12 @@ describe("RiotClient (riot/client.rs parity)", () => {
     expect(routingForRegion("br1")).toBe("americas"); // BR: account-v1 + match-v5 americas'ta
     expect(routingForRegion("oc1")).toBe("americas"); // OCE account-v1 americas'ta (eskiden 'europe')
     expect(routingForRegion("bilinmeyen")).toBe("europe");
+    // Match-V5 routing OCE hariç account-v1 ile aynı; oc1 → SEA kümesi (B-12c)
+    expect(matchRoutingForRegion("oc1")).toBe("sea");
+    expect(matchRoutingForRegion("OC1")).toBe("sea");
+    expect(matchRoutingForRegion("na1")).toBe("americas");
+    expect(matchRoutingForRegion("tr1")).toBe("europe");
+    expect(matchRoutingForRegion("kr")).toBe("asia");
     expect(runtimeClientFromEnv({})).toBeNull();
     expect(runtimeClientFromEnv({ RIOT_API_KEY: "  " })).toBeNull();
     expect(runtimeClientFromEnv({ RIOT_API_KEY: "k" })).not.toBeNull();

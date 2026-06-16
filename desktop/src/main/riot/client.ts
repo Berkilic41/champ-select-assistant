@@ -94,7 +94,7 @@ export function routingForRegion(region: string): string {
     case "la1":
     case "la2":
     case "br1":
-    case "oc1": // OCE: account-v1 americas'ta (match-v5 ideali sea → ayrı routing, B-12c)
+    case "oc1": // OCE: account-v1 yalnız americas/asia/europe sunar → americas
       return "americas";
     case "kr":
     case "jp1":
@@ -102,6 +102,18 @@ export function routingForRegion(region: string): string {
     default:
       return "europe";
   }
+}
+
+/**
+ * Platform region → Match-V5 routing region. `routingForRegion` ile aynıdır,
+ * TEK istisna OCE (oc1): account-v1 yalnız americas/asia/europe sunduğu için
+ * `getByRiotId` americas'a gider, AMA Match-V5 OCE maçlarını SEA kümesinden
+ * sunar. Match-V5'i oc1 için "americas" ile çağırmak 404 döndürür → OCE oyuncu
+ * maç geçmişi sessizce hiç eşitlenmez. (B-12c)
+ */
+export function matchRoutingForRegion(region: string): string {
+  if (region.toLowerCase() === "oc1") return "sea";
+  return routingForRegion(region);
 }
 
 export interface SummonerInfo {

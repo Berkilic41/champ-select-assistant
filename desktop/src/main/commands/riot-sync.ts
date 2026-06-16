@@ -11,7 +11,7 @@ import {
   getMatchTimeline,
   listMatchIds,
   masteryTopByPuuid,
-  routingForRegion,
+  matchRoutingForRegion,
   runtimeClientFromEnv,
   type RiotClient,
   type SummonerInfo,
@@ -119,7 +119,7 @@ export async function syncMatchHistory(
   client?: RiotClient | null,
 ): Promise<SyncResult> {
   const riot = requireRiot(client);
-  const routing = routingForRegion(summonerRegion(db, puuid));
+  const routing = matchRoutingForRegion(summonerRegion(db, puuid));
 
   const ids = await listMatchIds(
     riot,

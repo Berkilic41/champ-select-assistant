@@ -14,6 +14,12 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
   iyileştirme üretir; otomatik commit yok.
 
 ### Düzeltildi
+- **OCE (oc1) Match-V5 yönlendirmesi** — Match-V5, OCE maçlarını SEA kümesinden
+  sunar; account-v1 ise yalnız americas/asia/europe sunar. Eskiden her iki çağrı da
+  `routingForRegion`→`americas` kullandığından OCE oyuncularının maç geçmişi
+  Match-V5'te sessizce 404'lenip hiç eşitlenmiyordu. Yeni `matchRoutingForRegion`
+  (oc1→`sea`) eklendi; `syncMatchHistory` ve Match-V5 ingestion ona geçti, account-v1
+  yolu americas'ta kaldı. (B-12c)
 - **Kırık görsel yedekleri (ilk-açılış/paketli)** — ban ikonları ve counter-item
   ikonları görsel yüklenemediğinde (404/403, ör. DDragon sync öncesi) kırık-görsel
   yerine dürüst yedek kutusu gösterir. Ban ikonu `BanIcon` bileşenine çıkarıldı
