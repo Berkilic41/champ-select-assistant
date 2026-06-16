@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 export interface Toast {
   id: string;
@@ -10,14 +10,26 @@ export interface Toast {
 export function useToast() {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const counterRef = useRef(0);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const addToast = useCallback(
     (message: string, type: Toast['type'] = 'info', duration = 3000) => {
       const id = `toast-${++counterRef.current}`;
       setToasts(prev => [...prev, { id, message, type, duration }]);
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         setToasts(prev => prev.filter(t => t.id !== id));
       }, duration);
+      timersRef.current.push(timer);
+    },
+    [],
+  );
+
+  // Unmount'ta bekleyen auto-dismiss timer'larını temizle — yoksa timer sızıntısı
+  // + unmounted bileşende setToasts uyarısı olur.
+  useEffect(
+    () => () => {
+      timersRef.current.forEach(clearTimeout);
+      timersRef.current = [];
     },
     [],
   );

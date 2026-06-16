@@ -49,7 +49,7 @@
 | **B-32** | low | `data-pipeline.ts` | `syncDataPipelineInner` 220-satır god-function, 5 kopya source-step bloğu → refactor | todo |
 | **B-33** | low | `useChampSelect.ts` | 7 kopya fetch-on-signature useEffect → ortak helper | todo |
 | **B-34** | low | `riot/client.ts` | renderer puuid/matchId Riot URL'ine `encodeURIComponent`'siz → ekle | todo |
-| **B-35** | low | `useToast.ts` | auto-dismiss setTimeout unmount'ta temizlenmiyor (timer sızıntısı) → cleanup | todo |
+| ~~B-35~~ | low | `useToast.ts` | auto-dismiss timer'ları ref'te tutulup unmount'ta temizlenir (sızıntı + unmounted state-update giderildi). test | **done** |
 
 ## Tamamlanan / Kapatılan
 - **B-01** (done) — Image fallback: `BanIcon` + `CounterItemIcon` onError. 214 test.

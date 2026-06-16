@@ -34,4 +34,14 @@ describe('useToast', () => {
     act(() => result.current.removeToast(id));
     expect(result.current.toasts).toHaveLength(0);
   });
+
+  it('clears pending auto-dismiss timers on unmount (no leak / late state update)', () => {
+    const clearSpy = vi.spyOn(globalThis, 'clearTimeout');
+    const { result, unmount } = renderHook(() => useToast());
+    act(() => result.current.addToast('leak', 'info', 5000));
+    const before = clearSpy.mock.calls.length;
+    unmount();
+    expect(clearSpy.mock.calls.length).toBeGreaterThan(before);
+    clearSpy.mockRestore();
+  });
 });
