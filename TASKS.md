@@ -34,7 +34,13 @@
   doğrulanmış** (B-38 high, B-39/B-40 med, B-24 low=mevcut). 11 yanlış-alarm elendi.
 - **Iter 13** — **B-38** stretch-pick risk notu u32 underflow koruması: not-üretimi
   saf `stretch_risk_note`'a çıkarıldı + `saturating_sub` + 3 birim testi
-  (zero/normal/bozuk-wins>games). ✅ core 569 test + clippy `--all-targets` temiz.
+  (zero/normal/bozuk-wins>games). ✅ core 569 test + clippy `--all-targets` temiz. (a0c586c)
+- **Iter 14** — **B-39** Arena (queue 1700) laneless: `my_pos()` →
+  `matches!(queue_id, 450 | 1700)` (engine.rs is_aram ile hizalı) → sızan tercih-rolü
+  Arena önerilerine yanlış "lane_performance eksik" basmaz. Regresyon testi. ✅ core
+  570 test + clippy temiz.
+- **Kalan (Discovery-3):** B-40 (stale `docs/api-key-policy.md` Tauri→Electron) · B-24
+  (ertelenmiş motor-e2e).
 
 ## Durum — backlog esas olarak TÜKENDİ (2026-06-16, ~30 commit)
 

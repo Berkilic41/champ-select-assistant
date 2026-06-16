@@ -326,10 +326,13 @@ impl EngineInputs {
         }
     }
 
-    /// Lane key (`load_scoring_inputs` parity): ARAM → synthetic "aram",
-    /// otherwise the assigned LCU position lowercase.
+    /// Lane key (`load_scoring_inputs` parity): brawl modes (ARAM=450,
+    /// Arena/Hexakill=1700) → synthetic "aram", otherwise the assigned LCU
+    /// position lowercase. Treating 1700 as laneless matches `engine.rs`'
+    /// `is_aram` so a renderer-leaked persisted role (LCU omits position in
+    /// Arena) can't spuriously flag "lane_performance" as missing.
     fn my_pos(&self) -> String {
-        if self.session.queue_id == 450 {
+        if matches!(self.session.queue_id, 450 | 1700) {
             "aram".to_string()
         } else {
             self.session.local_player.assigned_position.to_lowercase()
@@ -3545,6 +3548,34 @@ mod tests {
             .find(|r| r["champion_id"] == 54)
             .unwrap();
         assert!(malphite["lane_form_score"].as_f64().unwrap() < 0.5);
+    }
+
+    /// Arena (queue 1700) bir brawl modu: lane yok. LCU pozisyonu boş bıraksa da
+    /// renderer kalıcı tercih-rolünü ("top" gibi) session'a enjekte edebilir; core
+    /// bunu laneless saymalı (engine.rs is_aram ile hizalı) → "lane_performance"
+    /// eksik sinyali Arena önerilerine basılmamalı. Eski kod (yalnız 450→aram)
+    /// sızan "top" rolüyle bu sinyali yanlışça basardı.
+    #[test]
+    fn arena_queue_does_not_flag_lane_performance() {
+        let mut input: serde_json::Value =
+            serde_json::from_str(RECOMMENDATIONS_FIXTURE).unwrap();
+        // Sızan SR-rol ("top", fixture'da sabit) korunur; yalnız queue Arena'ya çevrilir.
+        input["session"]["queue_id"] = serde_json::json!(1700);
+        let out = recommendations_from_json(&input.to_string()).unwrap();
+        let recs: serde_json::Value = serde_json::from_str(&out).unwrap();
+        let arr = recs.as_array().unwrap();
+        assert!(!arr.is_empty(), "Arena fixture'ı en az bir öneri vermeli");
+        for rec in arr {
+            let missing: Vec<&str> = rec["missing_signals"]
+                .as_array()
+                .map(|a| a.iter().filter_map(|v| v.as_str()).collect())
+                .unwrap_or_default();
+            assert!(
+                !missing.contains(&"lane_performance"),
+                "Arena'da lane_performance eksik sinyali basılmamalı: champ {}",
+                rec["champion_id"]
+            );
+        }
     }
 
     /// D3: veto hard-filtre + learning sınırlı boost.

@@ -6,7 +6,7 @@
 > **21 doğrulanmış bulgu**, adversaryal koddan-teyit) çıktısıdır.
 
 ## Aktif
-(boş — Discovery-3 sonrası sıradaki: B-39 Arena my_pos / B-40 stale doc)
+(boş — Discovery-3 sonrası sıradaki: B-40 stale api-key-policy doc)
 
 ## Açık — yüksek/orta değer (koddan teyitli)
 | id | sev | dosya | özet | durum |
@@ -43,7 +43,7 @@
 | id | sev | dosya | özet | durum |
 |---|---|---|---|---|
 | ~~B-38~~ | **high** | `engine.rs:110` | stretch-pick risk notu `losses = games - wins` korumasız u32 çıkarma; host SQLite `wins<=games` zorlamıyor (`SUM(win)`, CHECK yok) → bozuk satır `wins>games` → release/WASM `overflow-checks` kapalı, sessiz underflow "4294967290L" çöp not (debug panik). Not-üretimi saf `stretch_risk_note`'a çıkarıldı + `saturating_sub` (crate konvansiyonu) + 3 birim testi. core 569 test + clippy | **done** |
-| B-39 | med | `json_api.rs:332-337` | `my_pos()` Arena (queue 1700) brawl'ı ele almıyor → `else` dalında `assigned_position` döner; renderer `applyRole` kalıcı tercih-rolünü (örn. "middle") queue-koşulsuz enjekte edince Arena session'a SR-rol sızar → satır 497 yanlış "lane_performance eksik" rozeti basar (Arena'da lane yok). Fix: `matches!(queue_id, 450\|1700)` (engine.rs:356 ile hizalı). Test: json_api.rs:3485 deseni, queue 1700 fixture | todo |
+| ~~B-39~~ | med | `json_api.rs:332-337` | `my_pos()` Arena (queue 1700) brawl'ı ele almıyordu → `else` dalında `assigned_position` döner; renderer `applyRole` kalıcı tercih-rolünü (örn. "middle") queue-koşulsuz enjekte edince Arena session'a SR-rol sızar → satır 497 yanlış "lane_performance eksik" rozeti basar (Arena'da lane yok). Fix: `matches!(queue_id, 450\|1700)` (engine.rs `is_aram` ile hizalı). Regresyon testi (queue 1700 fixture → sinyal yok). core 570 test + clippy | **done** |
 | B-40 | med | `docs/api-key-policy.md` | stale Tauri referansları: `src-tauri/.env` (s.9), `dotenvy::dotenv()` (s.14), `tauri.conf.json` checklist (s.42) — proje Electron+Node'a göçtü; gerçek mekanizma `desktop/src/main/riot/client.ts:231` `process.env.RIOT_API_KEY` (+ yakın `.env`, process.env öncelikli). Saf-doküman fix | todo |
 
 ## Discovery-2 batch (a11y/concurrency/arch — 11 doğrulanmış; verify kısmen session-limit'e takıldı)

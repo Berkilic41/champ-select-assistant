@@ -39,6 +39,14 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
   veya DDragon başarısını düşürmez. (B-02)
 
 ### Düzeltildi
+- **Arena (queue 1700) artık laneless sayılıyor** — `json_api.rs` `my_pos()` yalnız
+  ARAM'ı (450) sentetik "aram" lane'ine eşliyordu; Arena (1700) `else` dalında atanan
+  LCU pozisyonunu döndürüyordu. LCU Arena'da pozisyonu boş bırakır ama renderer kalıcı
+  tercih-rolünü (örn. "middle") queue'dan bağımsız enjekte ettiğinden bu rol Arena
+  session'a sızıp önerilere anlamsız "lane_performance eksik" rozeti bastırabiliyordu
+  (Arena'da lane yok). `my_pos()` artık `matches!(queue_id, 450 | 1700)` ile her iki
+  brawl modunu da laneless sayar (engine.rs `is_aram` ile hizalı). Regresyon testi
+  (queue 1700 fixture → hiçbir öneride lane_performance sinyali yok). (B-39)
 - **Stretch-pick risk notunda u32 underflow koruması** — `engine.rs`'in düşük-deneyim
   stretch önerisi için ürettiği risk notu `losses = games - wins` ile korumasız
   çıkarma yapıyordu. `wins`/`games` host SQLite'tan (`COUNT(*) AS games, SUM(win) AS wins`)
