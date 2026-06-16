@@ -6,7 +6,7 @@
 > **21 doğrulanmış bulgu**, adversaryal koddan-teyit) çıktısıdır.
 
 ## Aktif
-(boş — Discovery-4: B-41 done; sıradaki teyit-bekleyen adaylar B-42 (lcu floating-promise) / B-46 / B-47. B-24 ertelenmiş.)
+(boş — Discovery-4: B-41+B-46 done, B-42 deferred (doğrulandı, marjinal). Teyit-bekleyen: B-43/44/45/47. B-24 ertelenmiş.)
 
 ## Açık — yüksek/orta değer (koddan teyitli)
 | id | sev | dosya | özet | durum |
@@ -53,11 +53,11 @@
 |---|---|---|---|---|
 | ~~B-41~~ | med | `sources.ts` | (DB-003) u.gg+edge matchup ingestion `wins > games` (win_rate >1.0) bozuk satırı filtrelemiyordu → `champion_matchups`'a sızıp skoru şişirir. İki yola defensive guard. B-38'in upstream tamamlayıcısı. desktop 156 test + typecheck | **done** |
 | ~~DB-001~~ | — | `V006__matchups.sql` | CHECK(wins<=games) migration önerisi **REDDEDİLDİ**: SQLite `ALTER TABLE ADD CONSTRAINT` desteklemez → tablo-rebuild gerekir (destructive, lane kuralı yasak). Aynı koruma B-41 ile ingestion'da sağlandı | **wontfix** |
-| B-42 | high? | `lcu.ts:219` | (FLOATING_PROMISE_WATCHER_START, koddan-doğrulanmadı) `void this.watcher.start()` floating promise; reconnect döngüsü kendisi throw ederse sessizce yutulur, kullanıcı süresiz offline. Fix: `.catch()` → log + status 'disconnected'. **Önce koddan teyit** (B-21 reconnect-catch zaten loglar mı, çakışma?) | todo |
+| B-42 | low | `lcu.ts:219` | (FLOATING_PROMISE) **KODDAN DOĞRULANDI + ERTELENDİ**: agent'ın "süresiz offline felaketi" çerçevesi YANLIŞ — `start()` döngüsü (websocket.ts:91-111) `runOnce()`'ı try/catch'le sarıyor ve B-21 iç-catch'i zaten logluyor. `void this.watcher.start()` yalnız `onStatus` callback'i throw ederse veya gelecekteki korumasız bir throw'da reddeder → nadir `unhandledRejection`. Gerçek-ama-marjinal floating-promise hijyeni (`.catch`→log+status). Test: `startWsListener` watcher'ı İÇERİDE kurar (181, injectable değil); mevcut testler stub'lar (commands.test.ts:153) → düzgün test watcher-injection refactor'ı ister, marjinal değere oransız. Uydurma değer üretme | **deferred** |
 | B-43 | low | `IngameView.tsx` | (TIMING_RACE_INGAME_POLLING, doğrulanmadı) iki bağımsız setInterval (1.5s/5s) seq-guard'sız; yavaş tick'te out-of-order state. `useChampSelect` fetchSeqRef deseni uygulanabilir. **Önce teyit** | todo |
 | B-44 | low | `ChampSelectWrapper.tsx:199` | (BAN_SUGGESTIONS_FETCH_RACE, doğrulanmadı) ban-fetch seq-guard'sız; hızlı faz değişiminde out-of-order. **Önce teyit** | todo |
 | B-45 | low | `recommendations.ts:47` | (IPC-PARSE-UNVALIDATED-CAST, doğrulanmadı) `parseSessionArg` parsed-session'ı `as SessionLike` runtime-guard'sız cast eder. **Önce teyit** (engine.parseSession yolu zaten core-validate mi?) | todo |
-| B-46 | low | `engine.test.ts` | (MISSING_RECOMMENDATIONS_JSON_ERROR_TEST, doğrulanmadı) recommendations_from_json zorunlu-alan-eksik error path'i test'siz. Saf test ekleme. **Önce teyit** | todo |
+| ~~B-46~~ | low | `engine.test.ts` | recommendations error-path test'siz (yalnız draftVerdict kilitliydi). KODDAN DOĞRULANDI: RecommendationsInput session/weights/all_champions `#[serde(default)]` YOK → `recommendations({})` WASM sınırında `/invalid recommendations input/` fırlatır (sessizce boş liste DÖNMEZ). Saf test eklendi; #[serde(default)] eklenirse sessiz-degrade regresyonunu yakalar. desktop 157 test + typecheck | **done** |
 | B-47 | low | `sources.test.ts` | (SECONDARY_RUNES partial-perk, doğrulanmadı) parseUggOverview 4-5 perk sınır durumu test'siz. Saf test. **Önce teyit** | todo |
 | ~~DB-002~~ | low | `repos.ts:167` | COALESCE eksik — ama `Number(null)→0` zaten doğru sonuç veriyor → kozmetik. **Düşük değer** | wontfix |
 | UNHANDLED_CATCH_SCHEDULER | — | `scheduler.ts` | circuit-breaker önerisi: efor M + "her zaman reschedule" aslında dayanıklılık (kasıt). Marjinal | wontfix |

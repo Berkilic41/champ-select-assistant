@@ -37,4 +37,12 @@ describe("Engine (core.wasm bridge)", () => {
     const engine = Engine.load();
     expect(() => engine.draftVerdict({})).toThrow(/invalid draft verdict input/);
   });
+
+  it("surfaces recommendations errors on malformed input", () => {
+    const engine = Engine.load();
+    // session/weights/all_champions zorunlu (json_api RecommendationsInput'ta
+    // #[serde(default)] yok) → boş obje serde'de reddedilir ve WASM sınırında
+    // exception olarak yüzeye çıkar (sessizce boş liste DÖNMEZ).
+    expect(() => engine.recommendations({})).toThrow(/invalid recommendations input/);
+  });
 });

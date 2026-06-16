@@ -50,9 +50,14 @@
   `parseUggMatchups` + edge `syncEdgeRates` bozuk satırı (win_rate >1.0) filtreler →
   B-38'in upstream tamamlayıcısı. 2 regresyon testi. ✅ desktop 156 test + typecheck temiz.
   DB-001 (CHECK migration) reddedildi (SQLite ALTER ADD CONSTRAINT yok).
-- **Kalan:** B-42 (lcu floating-promise — önce teyit, B-21 ile çakışma kontrolü) ·
-  B-43/44 (seq-guard) · B-45 (IPC cast) · B-46/47 (saf test) · B-24 (ertelenmiş).
-  Hepsi ÖNCE koddan teyit ister (Verify session-limit'te çalışmadı).
+- **Iter 17** — **B-46** recommendations error-path testi: `recommendations({})` WASM
+  sınırında `/invalid recommendations input/` fırlatır (draftVerdict zaten kilitliydi,
+  bu birincil-input'u kilitler). Saf test, sıfır-risk. ✅ desktop 157 test + typecheck.
+- **B-42 deferred** — KODDAN DOĞRULANDI: "süresiz offline" çerçevesi yanlış (döngü B-21
+  ile korunlu); kalan marjinal floating-promise hijyeni, düzgün test watcher-injection
+  refactor'ı ister → oransız. Uydurma değer yerine dürüst erteleme.
+- **Kalan teyit-bekleyen:** B-43/44 (renderer seq-guard) · B-45 (IPC cast — engine.parseSession
+  zaten core-validate mi?) · B-47 (saf perk-sınır testi) · B-24 (ertelenmiş motor-e2e).
 
 ## Durum — backlog esas olarak TÜKENDİ (2026-06-16, ~30 commit)
 
