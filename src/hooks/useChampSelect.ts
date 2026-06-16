@@ -182,6 +182,21 @@ export function useChampSelect(puuid: string = ''): {
     };
   }, [fetchRecommendations, applyRole]);
 
+  // puuid mount'ta asenkron çözülür (ChampSelectWrapper). İlk 'champ-select-session'
+  // event'i puuid '' iken gelmiş olabilir → öneriler kişiselleştirmesiz (mastery'siz)
+  // hesaplanır ve session listener son event'i replay etmediğinden yeniden tetiklenmez.
+  // puuid çözülünce mevcut session için önerileri YENİDEN çek (sonraki hover/lock'a
+  // bağlı kalmasın).
+  const puuidRef = useRef(puuid);
+  useEffect(() => {
+    const prevPuuid = puuidRef.current;
+    puuidRef.current = puuid;
+    if (puuid && puuid !== prevPuuid && rawSessionRef.current) {
+      const eff = applyRole(rawSessionRef.current);
+      if (eff) fetchRecommendations(eff);
+    }
+  }, [puuid, applyRole, fetchRecommendations]);
+
   // Fetch the LOCKED champion's full analysis so the UI can pin to YOUR pick
   // after lock. `compute_recommendations` excludes already-picked champions, so
   // without this the finalization view falls back to recommendations[0] — a

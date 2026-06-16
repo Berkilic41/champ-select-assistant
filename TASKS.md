@@ -25,12 +25,13 @@
 
 - **Iter 11** — B-15 onboarding'de ddragon sync (placeholder key önlendi) + sıra testi. ✅ renderer 222.
 
-## Iterasyon 12 — sıradaki adaylar (skorla)
-- **B-19** (low, renderer) — App mount'ta global `get_ddragon_version`→setDdragonVersion (champ-select/onboarding yolu da canlı patch).
-- **B-21** (low, host) — LCU WS reconnect catch'i logla (`catch (err)`+warn).
-- **B-11** (med, renderer) — puuid yarışı: puuid çözülünce mevcut session için recs refetch (useChampSelect — dikkatli).
-- **B-17** (low, renderer) — RankCard/TrendPanel/WeeklySummaryCard puuid null → retry yok.
-- **B-24** (low, test) — cold-start recs e2e / orWarnDefault / engine 0.3 e2e (wasm build gerektirir).
+- **Iter 12** — B-11 puuid çözülünce aktif session için recs refetch + test. ✅ renderer 223.
+
+## Iterasyon 13+ — durum
+İlk keşif batch'inin (B-09…B-24) **yüksek-değer + kolay** işleri bitti. Kalan: B-03
+(med, worker freshness — çok-katmanlı), B-19/B-21/B-17 (low), B-24 (wasm), B-12b/B-06.
+→ **İkinci keşif workflow'u** çalışıyor (perf/a11y/mimari/güvenlik-derinliği/error-completeness)
+yeni yüksek-değer batch için. Paralelde B-06 (docs: stale `.claude/CLAUDE.md`).
 
 ### Sonraki adaylar (önceki liste)
 - **B-22** (low, renderer) — roleSource kalıcı tercihi 'manual' etiketliyor → 'preferred' ekle.

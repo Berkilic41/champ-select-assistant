@@ -14,7 +14,7 @@
 | ~~B-14~~ | **high** | worker `ingest.ts` | patch leksik-sort → `ORDER BY updated_at DESC` (recency). Worker 16 test. **deploy bekliyor** | **done (deploy bekliyor)** |
 | **B-03** | med | worker `ingest.ts` + `sources.ts:570` | Worker okuma uçları yaş sinyali içermez + dev-key 24h expiry sessiz + desktop edge patch'i körlemesine kabul → stale "taze" sunulur (cluster: #8/#9/#11) | todo |
 | **B-10** | med | `DataStatusBadges.tsx:155` | noMeta `meta_score==0.3` sihirli-sabitiyle tespit ediliyor; core'un yapısal `missing_signals` ('meta') alanı zaten var → kırılgan kuplajı kaldır | todo |
-| **B-11** | med | `useChampSelect.ts:91-183` | puuid yarışı: öneriler boş puuid ile hesaplanıp puuid gelince mevcut session için YENİDEN çekilmiyor (hover/lock olmazsa stale) | todo |
+| ~~B-11~~ | med | `useChampSelect.ts` | puuid çözülünce aktif session için recs yeni puuid'le refetch edilir (ayrı effect); boş-puuid stale öneriler kalmıyor | **done** |
 | ~~B-12~~ | med | `riot/client.ts` | routingForRegion **br1→americas** eklendi (BR account-v1+match-v5 doğru host). desktop test | **done (br1)** |
 | **B-12b** | low | `riot/client.ts` + `getByRiotId`/`match-v5.ts` | OC1 routing: account-v1 `americas` ister, match-v5 `sea` ister (paylaşılan fonksiyon çakışıyor) → routing'i API'ye göre ayır (account vs match) ki OCE match-v5 `sea`'ya gitsin | todo |
 | ~~B-13~~ | med | `sources.ts` | u.gg fallback satırları `uggPatch` (gerçek kaynak patch) ile etiketleniyor → staleness maskesi kalktı. desktop 16 sources test | **done** |
@@ -47,6 +47,7 @@
 - **B-18** (done) — `StatsView` WR bölümü, havuzdaki tüm şampiyonlar <3 maçsa sessizce gizlenmek yerine "≥3 maçlık şampiyon yok" ince-veri notu gösterir (+tr/en `stats.winRateThin` + 2 test). renderer 222 test.
 - **B-20** (done) — `OutcomeTracker.onGameflowPhase`: `pickRecorded=true` koşulsuz set ediliyordu; pick-record INSERT throw ederse o maçın öneri→pick eğitim etiketi kalıcı kaybolurdu. Flag artık yalnız başarılı INSERT sonrası set edilir → sonraki IN_GAME event'i retry eder. Davranışsal retry testi (throwing-db → boş; gerçek db → kayıt). desktop 15 outcomes test.
 - **B-22** (done, 6c5024c) — `roleSource` kalıcı tercihten gelen rolü 'manual' yerine yeni 'preferred' provenance'ıyla etiketler; `RoleSelector` "Rolü sen seçtin" yerine nötr "Geçen oyundan hatırlandı" gösterir (+tr/en `rolePreferredHint` + test assertion). renderer 222 test.
+- **B-11** (done) — `useChampSelect`: puuid mount'ta asenkron çözüldüğünden ilk öneriler boş-puuid (kişiselleştirmesiz) hesaplanıyordu; ayrı bir effect puuid çözülünce aktif session için recs'i yeni puuid'le yeniden çeker. Davranışsal test (puuid '' → 'puuid-9' rerender → refetch). renderer 223 test.
 - **B-15** (done) — Onboarding `handleDone`, LCU mastery/maç sync'inden ÖNCE `sync_ddragon_champions` (best-effort) çağırır → şampiyon tablosu gerçek anahtarlarla dolar, kullanıcının kendi şampiyonları için numeric placeholder key (ikon 404→"26" baş-harf) yazılmaz. Sıra testi (ddragon < lcu). renderer 222 test. (B-04 reopen kapandı)
 - **B-07** (done — renderer) — cold-start dürüst-UI `DataStatusBadges.test.tsx`'te kapsanmış; host-tarafı e2e boşluğu B-24'e taşındı.
 - ~~**B-04** wontfix~~ → **B-15 reopen**: workflow placeholder-key'in kullanıcının kendi mastery ikonlarını bozduğunu doğruladı (kendi-iyileşse de pencere gerçek).

@@ -53,6 +53,10 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 - **İlk açılışta kendi şampiyon ikonların** — onboarding tamamlanırken şampiyon
   verisi (DDragon), maç geçmişi çekilmeden önce yüklenir; böylece yeni kullanıcının
   kendi uzmanlık şampiyonlarının ikonları ilk açılışta kırık (404) görünmez. (B-15)
+- **İlk öneriler artık kişiselleştirilir** — uygulamayı champ-select açıkken başlatıp
+  oyuncu kimliği henüz çözülmeden gelen ilk öneriler, kimlik çözülür çözülmez mevcut
+  draft için otomatik olarak yeniden hesaplanır (mastery/konfor dahil) — bir sonraki
+  hover/lock'a kadar kişiselleştirmesiz kalmaz. (B-11)
 
 ## [0.10.0-beta.6] — 2026-06-16
 

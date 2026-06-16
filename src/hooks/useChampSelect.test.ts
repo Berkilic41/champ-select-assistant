@@ -59,6 +59,29 @@ describe('useChampSelect', () => {
     expect(result.current.error).toBeNull();
   });
 
+  it('refetches recommendations for the active session when the puuid resolves', async () => {
+    const { rerender } = renderHook((p: string) => useChampSelect(p), {
+      initialProps: '',
+    });
+    // İlk session puuid çözülmeden gelir → öneriler boş puuid ile çekilir.
+    act(() => handler({ payload: makeSession('pick') }));
+    await waitFor(() =>
+      expect(mockInvoke).toHaveBeenCalledWith(
+        'get_draft_brain_recommendations',
+        expect.objectContaining({ puuid: '' }),
+      ),
+    );
+
+    // puuid çözülür → mevcut session için öneriler yeni puuid'le YENİDEN çekilmeli.
+    rerender('puuid-9');
+    await waitFor(() =>
+      expect(mockInvoke).toHaveBeenCalledWith(
+        'get_draft_brain_recommendations',
+        expect.objectContaining({ puuid: 'puuid-9' }),
+      ),
+    );
+  });
+
   it('surfaces a friendly error when get_draft_brain_recommendations rejects', async () => {
     mockInvoke.mockRejectedValueOnce('Geçersiz session JSON');
     const { result } = renderHook(() => useChampSelect('puuid-1'));
