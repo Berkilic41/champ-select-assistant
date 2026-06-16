@@ -6,7 +6,7 @@
 > **21 doğrulanmış bulgu**, adversaryal koddan-teyit) çıktısıdır.
 
 ## Aktif
-(boş — sıradaki iterasyonda skorla seçilecek: B-10 / B-12 / B-14)
+(boş — Discovery-3 sonrası sıradaki: B-39 Arena my_pos / B-40 stale doc)
 
 ## Açık — yüksek/orta değer (koddan teyitli)
 | id | sev | dosya | özet | durum |
@@ -38,6 +38,13 @@
 | ~~B-06~~ | low | `.claude/CLAUDE.md` | Tauri→Electron güncellendi (stack/komut/klasör/kurallar; PROJECT_STATE/AGENTS/QUALITY_CHECKS'e işaret) | **done** |
 | ~~B-08~~ | low | `useSummonerData.ts:83` | **wontfix (kapsanmış)**: cold-DB boş-champMap riski dar; görünür semptom (bozuk ikon) **B-01 onError fallback'iyle** çözülü, onboarding yolu **B-15** ddragon-önce-sync. Guard warm-path'i yavaşlatır + re-render riski → değer/risk düşük | **wontfix** |
 | ~~B-02~~ | med | `scheduler.ts` + `data-pipeline.ts` | cold-start priming: `primeColdStartSeeds` (atomik, boş-tablo guard) DDragon source'undan HEMEN sonra (FK-valid champions) bundled offline seed'leri içe aktarır → otomatik yol artık manuel Settings sync'i beklemeden offline build/matchup kapsaması verir. **Not:** boot'ta DEĞİL (FK ON + champions boş → silent-fail); ilk edge fetch zaten 30s scheduler tick'inde. best-effort+atomik. desktop 155 test | **done** |
+
+## Discovery-3 batch (loop, 2026-06-17 — `csa-loop-discovery-3`: 20 ajan, 15 aday → 4 doğrulanmış)
+| id | sev | dosya | özet | durum |
+|---|---|---|---|---|
+| ~~B-38~~ | **high** | `engine.rs:110` | stretch-pick risk notu `losses = games - wins` korumasız u32 çıkarma; host SQLite `wins<=games` zorlamıyor (`SUM(win)`, CHECK yok) → bozuk satır `wins>games` → release/WASM `overflow-checks` kapalı, sessiz underflow "4294967290L" çöp not (debug panik). Not-üretimi saf `stretch_risk_note`'a çıkarıldı + `saturating_sub` (crate konvansiyonu) + 3 birim testi. core 569 test + clippy | **done** |
+| B-39 | med | `json_api.rs:332-337` | `my_pos()` Arena (queue 1700) brawl'ı ele almıyor → `else` dalında `assigned_position` döner; renderer `applyRole` kalıcı tercih-rolünü (örn. "middle") queue-koşulsuz enjekte edince Arena session'a SR-rol sızar → satır 497 yanlış "lane_performance eksik" rozeti basar (Arena'da lane yok). Fix: `matches!(queue_id, 450\|1700)` (engine.rs:356 ile hizalı). Test: json_api.rs:3485 deseni, queue 1700 fixture | todo |
+| B-40 | med | `docs/api-key-policy.md` | stale Tauri referansları: `src-tauri/.env` (s.9), `dotenvy::dotenv()` (s.14), `tauri.conf.json` checklist (s.42) — proje Electron+Node'a göçtü; gerçek mekanizma `desktop/src/main/riot/client.ts:231` `process.env.RIOT_API_KEY` (+ yakın `.env`, process.env öncelikli). Saf-doküman fix | todo |
 
 ## Discovery-2 batch (a11y/concurrency/arch — 11 doğrulanmış; verify kısmen session-limit'e takıldı)
 | id | sev | dosya | özet | durum |

@@ -27,6 +27,15 @@
 
 - **Iter 12** — B-11 puuid çözülünce aktif session için recs refetch + test. ✅ renderer 223.
 
+## Iter 13+ — loop keşif (Discovery-3, 2026-06-17)
+
+- **Discover** — `csa-loop-discovery-3` workflow (20 ajan, 5 lane: core-correctness/
+  core-data/host/renderer/cross-cutting) → 15 aday → adversaryal koddan-teyit → **4
+  doğrulanmış** (B-38 high, B-39/B-40 med, B-24 low=mevcut). 11 yanlış-alarm elendi.
+- **Iter 13** — **B-38** stretch-pick risk notu u32 underflow koruması: not-üretimi
+  saf `stretch_risk_note`'a çıkarıldı + `saturating_sub` + 3 birim testi
+  (zero/normal/bozuk-wins>games). ✅ core 569 test + clippy `--all-targets` temiz.
+
 ## Durum — backlog esas olarak TÜKENDİ (2026-06-16, ~30 commit)
 
 **Bu oturumda (devam, 8 commit `1967d79…0f8d64b`):**

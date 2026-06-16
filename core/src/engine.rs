@@ -102,16 +102,7 @@ pub fn compute_recommendations(
                 continue;
             }
             if let Some(ref mut plan) = rec.draft_plan {
-                let games = rec.games_on_champ;
-                let wins = rec.wins_on_champ;
-                let note = if games == 0 {
-                    "0 maç — kombo'ya bağımlı".to_string()
-                } else {
-                    let losses = games - wins;
-                    let wr = (wins as f32 / games as f32 * 100.0).round() as u32;
-                    format!("{wins}G-{losses}L (%{wr}) — düşük deneyim")
-                };
-                plan.risk_note = Some(note);
+                plan.risk_note = Some(stretch_risk_note(rec.games_on_champ, rec.wins_on_champ));
             }
             rec.confidence = "low".to_string();
             stretch_count += 1;
@@ -132,6 +123,22 @@ const ROLE_MISMATCH_FACTOR: f32 = 0.8;
 /// in the hard role filter. Below this, an off-role row (a handful of troll games on
 /// e.g. ADC Olaf) does not qualify a champion for the lane.
 const ROLE_FIT_MIN_SAMPLE: u32 = 100;
+
+/// Stretch-pick için kullanıcı-görünür risk notunu üretir.
+///
+/// `wins`/`games` host SQLite'tan `wins <= games` invariant'ı zorlanmadan gelir
+/// (kaynak: `COUNT(*) AS games, SUM(win) AS wins`, CHECK yok). Bozuk tek bir satır
+/// `wins > games` yapabilir; `saturating_sub` mağlubiyeti 0'a kıstırır → release/
+/// WASM build'inde (`overflow-checks` kapalı) u32 underflow'la "4294967290L" gibi
+/// çöp not üretilmez, debug'da panik atılmaz.
+fn stretch_risk_note(games: u32, wins: u32) -> String {
+    if games == 0 {
+        return "0 maç — kombo'ya bağımlı".to_string();
+    }
+    let losses = games.saturating_sub(wins);
+    let wr = (wins as f32 / games as f32 * 100.0).round() as u32;
+    format!("{wins}G-{losses}L (%{wr}) — düşük deneyim")
+}
 
 fn sample_confidence(sample_size: u32) -> &'static str {
     match sample_size {
@@ -792,4 +799,28 @@ fn find_team_gap<'a>(ally: &TeamComposition, types: &[ChampionType]) -> Option<&
         }
     }
     None
+}
+
+#[cfg(test)]
+mod tests {
+    use super::stretch_risk_note;
+
+    #[test]
+    fn stretch_risk_note_zero_games_is_combo_dependent() {
+        assert_eq!(stretch_risk_note(0, 0), "0 maç — kombo'ya bağımlı");
+    }
+
+    #[test]
+    fn stretch_risk_note_normal_split() {
+        // 10 oyun, 4 galibiyet → 6 mağlubiyet, %40.
+        assert_eq!(stretch_risk_note(10, 4), "4G-6L (%40) — düşük deneyim");
+    }
+
+    #[test]
+    fn stretch_risk_note_corrupt_wins_gt_games_does_not_underflow() {
+        // Bozuk satır: wins (10) > games (5). Eski `games - wins` debug'da panik,
+        // release'de u32 underflow ile çöp not üretirdi. saturating_sub → 0 mağlubiyet.
+        let note = stretch_risk_note(5, 10);
+        assert!(note.starts_with("10G-0L"), "underflow korunmadı: {note}");
+    }
 }

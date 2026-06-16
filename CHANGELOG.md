@@ -39,6 +39,15 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
   veya DDragon başarısını düşürmez. (B-02)
 
 ### Düzeltildi
+- **Stretch-pick risk notunda u32 underflow koruması** — `engine.rs`'in düşük-deneyim
+  stretch önerisi için ürettiği risk notu `losses = games - wins` ile korumasız
+  çıkarma yapıyordu. `wins`/`games` host SQLite'tan (`COUNT(*) AS games, SUM(win) AS wins`)
+  `wins <= games` invariant'ı zorlanmadan gelir; bozuk tek bir satır `wins > games`
+  yapabilir. `[profile.release]`'de `overflow-checks` kapalı olduğundan release/WASM
+  build'inde bu sessizce underflow'la sarıp kullanıcıya "…4294967290L…" gibi çöp not
+  gösterir (debug'da panik). Not-üretimi saf `stretch_risk_note` yardımcısına çıkarıldı
+  ve mağlubiyet `saturating_sub` ile (crate konvansiyonu) hesaplanıyor. 3 birim testi
+  (sıfır maç / normal / bozuk wins>games). Geçerli veride çıktı birebir aynı. (B-38)
 - **Cron ingestion hatası artık görünür** — worker'ın `scheduled` (cron) yolu, production'daki
   birincil ingestion sürücüsü olmasına rağmen `runIngestion` reddini bağlamsız bırakıyordu
   (manuel `/v1/ingest` yolu logluyordu). Bağlamlı `console.error("scheduled ingest failed", e)`
