@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { invoke } from '../../lib/host';
+import { useActiveSummonerPuuid } from '../../hooks/useActiveSummonerPuuid';
 import { useTranslation } from 'react-i18next';
 import type { PoolSuggestion } from '../../types/recommendation';
 import type { ChampionPoolPlan } from '../../types/generated/ChampionPoolPlan';
@@ -20,40 +21,13 @@ type Role = (typeof ROLES)[number];
 export const PoolBuilder: React.FC = () => {
   const { t } = useTranslation();
   const [role, setRole] = useState<Role>('middle');
-  const [puuid, setPuuid] = useState('');
+  // Ortak puuid çözümü (retry'lı) — stats kartlarıyla aynı hook. puuid çözülünce
+  // [puuid]'e key'li suggestions/mastery effect'leri kendiliğinden yeniden koşar.
+  const puuid = useActiveSummonerPuuid();
   const [suggestions, setSuggestions] = useState<PoolSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [poolPlan, setPoolPlan] = useState<ChampionPoolPlan | null>(null);
   const [progress, setProgress] = useState<MasteryProgressEntry[]>([]);
-
-  // Resolve the active summoner's puuid. On first open the active summoner may not be
-  // stored yet (LCU/sync still settling), which used to leave the pool un-personalized
-  // until a manual refresh — so we retry a few times until it resolves, then the
-  // suggestions effect (keyed on puuid) re-runs on its own.
-  useEffect(() => {
-    let cancelled = false;
-    let attempts = 0;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const fetchPuuid = () => {
-      invoke<string | null>('get_active_summoner_puuid')
-        .then((p) => {
-          if (cancelled) return;
-          if (p) {
-            setPuuid(p);
-          } else if (attempts++ < 8) {
-            timer = setTimeout(fetchPuuid, 1500);
-          }
-        })
-        .catch(() => {
-          if (!cancelled && attempts++ < 8) timer = setTimeout(fetchPuuid, 1500);
-        });
-    };
-    fetchPuuid();
-    return () => {
-      cancelled = true;
-      if (timer) clearTimeout(timer);
-    };
-  }, []);
 
   // Mastery progress is role-independent — fetch once per player.
   useEffect(() => {
