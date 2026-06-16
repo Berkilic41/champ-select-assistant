@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { invoke } from '../../lib/host';
+import { useActiveSummonerPuuid } from '../../hooks/useActiveSummonerPuuid';
 import type { TrendReport } from '../../types/generated/TrendReport';
 import './GameReviewCard.css';
 
@@ -21,15 +22,15 @@ const SPARK_METRICS = ['cs_per_min', 'deaths_per_10', 'vision_score'] as const;
  */
 export const TrendPanel: React.FC = () => {
   const { t } = useTranslation();
+  const puuid = useActiveSummonerPuuid();
   const [data, setData] = useState<TrendResult | null>(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    if (!puuid) return;
     let alive = true;
     (async () => {
       try {
-        const puuid = await invoke<string | null>('get_active_summoner_puuid');
-        if (!puuid) return;
         const res = await invoke<TrendResult | null>('get_trend_report', { puuid });
         if (alive && res) setData(res);
       } catch {
@@ -39,7 +40,7 @@ export const TrendPanel: React.FC = () => {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [puuid]);
 
   if (error) {
     return (

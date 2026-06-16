@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CalendarCheck } from 'lucide-react';
 import { invoke } from '../../lib/host';
+import { useActiveSummonerPuuid } from '../../hooks/useActiveSummonerPuuid';
 import './GameReviewCard.css';
 
 interface WeeklySummary {
@@ -16,15 +17,15 @@ interface WeeklySummary {
 /** F3: haftalık koç özeti — son 7 günün hedef isabeti + W/L + karne sayısı. */
 export const WeeklySummaryCard: React.FC = () => {
   const { t } = useTranslation();
+  const puuid = useActiveSummonerPuuid();
   const [summary, setSummary] = useState<WeeklySummary | null>(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    if (!puuid) return;
     let alive = true;
     (async () => {
       try {
-        const puuid = await invoke<string | null>('get_active_summoner_puuid');
-        if (!puuid) return;
         const res = await invoke<WeeklySummary>('get_weekly_summary', { puuid });
         if (alive) setSummary(res);
       } catch {
@@ -34,7 +35,7 @@ export const WeeklySummaryCard: React.FC = () => {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [puuid]);
 
   if (error) {
     return (

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Trophy } from 'lucide-react';
 import { invoke } from '../../lib/host';
+import { useActiveSummonerPuuid } from '../../hooks/useActiveSummonerPuuid';
 import './GameReviewCard.css';
 
 interface RankedStat {
@@ -35,15 +36,15 @@ const TIER_COLOR: Record<string, string> = {
  */
 export const RankCard: React.FC = () => {
   const { t } = useTranslation();
+  const puuid = useActiveSummonerPuuid();
   const [ranks, setRanks] = useState<RankedStat[]>([]);
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    if (!puuid) return;
     let alive = true;
     (async () => {
       try {
-        const puuid = await invoke<string | null>('get_active_summoner_puuid');
-        if (!puuid) return;
         const res = await invoke<RankedStat[]>('get_ranked_stats', { puuid });
         if (alive) setRanks(res);
       } catch {
@@ -54,7 +55,7 @@ export const RankCard: React.FC = () => {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [puuid]);
 
   if (error) {
     return (

@@ -69,6 +69,9 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
   eskiyse (örn. veri toplama duraklamışsa) artık "düşük güven" olarak kaydedilir ve
   öneri/veri-durumu rozetlerine yansır; eskiden bayat veri sessizce "taze" sunuluyordu.
   (B-03 — worker tarafının etkili olması için yeniden deploy gerekir)
+- **İstatistik kartları ilk açılışta dolar** — rank, trend ve haftalık özet kartları,
+  oyuncu kimliği henüz çözülmeden açıldığında artık kalıcı boş kalmıyor; kimlik
+  çözülür çözülmez verilerini otomatik çekiyor. (B-17)
 
 ## [0.10.0-beta.6] — 2026-06-16
 

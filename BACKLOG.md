@@ -24,7 +24,7 @@
 | id | sev | dosya | özet | durum |
 |---|---|---|---|---|
 | ~~B-16~~ | low | `PoolBuilder.tsx` | loading vs empty (loading state + `poolBuilder.loading`) | **done** |
-| **B-17** | low | `RankCard/TrendPanel/WeeklySummaryCard` | puuid null → kalıcı null render, retry yok (PoolBuilder retry desenine bağla) | todo |
+| ~~B-17~~ | low | `RankCard/TrendPanel/WeeklySummaryCard` | ortak `useActiveSummonerPuuid` hook'u (retry'lı); puuid çözülünce kartlar verilerini yeniden çeker (kalıcı-null giderildi + DRY). test | **done** |
 | ~~B-18~~ | low | `StatsView.tsx` | WR grafiği <3 maçlık havuzda ince-veri notu gösterir (notsuz gizleme yok) | **done** |
 | ~~B-19~~ | low | `src/lib/ddragon.ts` + `App.tsx` | App mount'ta global `get_ddragon_version`→`applyDdragonVersion` (sentinel-guard'lı); tüm giriş yolları canlı patch alır. test | **done** |
 | ~~B-20~~ | low | `outcomes.ts` | `pickRecorded=true` try içine alındı → DB hatasında sonraki IN_GAME event'i retry eder, eğitim etiketi kaybolmaz. retry testi | **done** |
