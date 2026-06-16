@@ -50,6 +50,9 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 - **Rol kaynağı etiketi dürüstleşti** — rol bir önceki oyundan hatırlanan tercihten
   geldiğinde, rol seçici artık yanıltıcı "Rolü sen seçtin" yerine "Geçen oyundan
   hatırlandı" der. (B-22)
+- **İlk açılışta kendi şampiyon ikonların** — onboarding tamamlanırken şampiyon
+  verisi (DDragon), maç geçmişi çekilmeden önce yüklenir; böylece yeni kullanıcının
+  kendi uzmanlık şampiyonlarının ikonları ilk açılışta kırık (404) görünmez. (B-15)
 
 ## [0.10.0-beta.6] — 2026-06-16
 

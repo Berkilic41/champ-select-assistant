@@ -18,7 +18,7 @@
 | ~~B-12~~ | med | `riot/client.ts` | routingForRegion **br1→americas** eklendi (BR account-v1+match-v5 doğru host). desktop test | **done (br1)** |
 | **B-12b** | low | `riot/client.ts` + `getByRiotId`/`match-v5.ts` | OC1 routing: account-v1 `americas` ister, match-v5 `sea` ister (paylaşılan fonksiyon çakışıyor) → routing'i API'ye göre ayır (account vs match) ki OCE match-v5 `sea`'ya gitsin | todo |
 | ~~B-13~~ | med | `sources.ts` | u.gg fallback satırları `uggPatch` (gerçek kaynak patch) ile etiketleniyor → staleness maskesi kalktı. desktop 16 sources test | **done** |
-| **B-15** | med | `repos-write.ts:33-43` | (B-04 reopen) ensureChampion numeric placeholder key; onboarding `sync_ddragon_champions` çağırmıyor + getChampions placeholder'ı filtrelemiyor → kullanıcının KENDİ mastery şampiyonları "26" baş-harfiyle kırık. Fix: champMap'te all-digit key'i atla VEYA onboarding'de ddragon sync | todo |
+| ~~B-15~~ | med | `OnboardingWizard.tsx` | onboarding LCU sync'inden ÖNCE `sync_ddragon_champions` çağırır → şampiyon tablosu gerçek anahtarla dolar, placeholder numeric key (ikon 404) yazılmaz | **done** |
 
 ## Açık — düşük değer / cila
 | id | sev | dosya | özet | durum |
@@ -46,6 +46,7 @@
 - **B-12** (done — br1) — `routingForRegion`'a `br1→americas` eklendi (account-v1 + Match-V5 doğru bölgesel host; eskiden 'europe' default'una düşüp BR maç/öneri verisini sessizce 404'lüyordu). Test eklendi. oc1 → B-12b (routing-split gerekir).
 - **B-18** (done) — `StatsView` WR bölümü, havuzdaki tüm şampiyonlar <3 maçsa sessizce gizlenmek yerine "≥3 maçlık şampiyon yok" ince-veri notu gösterir (+tr/en `stats.winRateThin` + 2 test). renderer 222 test.
 - **B-20** (done) — `OutcomeTracker.onGameflowPhase`: `pickRecorded=true` koşulsuz set ediliyordu; pick-record INSERT throw ederse o maçın öneri→pick eğitim etiketi kalıcı kaybolurdu. Flag artık yalnız başarılı INSERT sonrası set edilir → sonraki IN_GAME event'i retry eder. Davranışsal retry testi (throwing-db → boş; gerçek db → kayıt). desktop 15 outcomes test.
-- **B-22** (done) — `roleSource` kalıcı tercihten gelen rolü 'manual' yerine yeni 'preferred' provenance'ıyla etiketler; `RoleSelector` "Rolü sen seçtin" yerine nötr "Geçen oyundan hatırlandı" gösterir (+tr/en `rolePreferredHint` + test assertion). renderer 222 test. (commit 94037dd SONRASI — henüz commit'siz)
+- **B-22** (done, 6c5024c) — `roleSource` kalıcı tercihten gelen rolü 'manual' yerine yeni 'preferred' provenance'ıyla etiketler; `RoleSelector` "Rolü sen seçtin" yerine nötr "Geçen oyundan hatırlandı" gösterir (+tr/en `rolePreferredHint` + test assertion). renderer 222 test.
+- **B-15** (done) — Onboarding `handleDone`, LCU mastery/maç sync'inden ÖNCE `sync_ddragon_champions` (best-effort) çağırır → şampiyon tablosu gerçek anahtarlarla dolar, kullanıcının kendi şampiyonları için numeric placeholder key (ikon 404→"26" baş-harf) yazılmaz. Sıra testi (ddragon < lcu). renderer 222 test. (B-04 reopen kapandı)
 - **B-07** (done — renderer) — cold-start dürüst-UI `DataStatusBadges.test.tsx`'te kapsanmış; host-tarafı e2e boşluğu B-24'e taşındı.
 - ~~**B-04** wontfix~~ → **B-15 reopen**: workflow placeholder-key'in kullanıcının kendi mastery ikonlarını bozduğunu doğruladı (kendi-iyileşse de pencere gerçek).

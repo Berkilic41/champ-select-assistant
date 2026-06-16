@@ -21,6 +21,12 @@ describe('OnboardingWizard', () => {
 
     await waitFor(() => expect(onComplete).toHaveBeenCalled());
     expect(mockInvoke).toHaveBeenCalledWith('complete_onboarding');
+    expect(mockInvoke).toHaveBeenCalledWith('sync_ddragon_champions');
     expect(mockInvoke).toHaveBeenCalledWith('sync_lcu_player_data', {});
+    // DDragon sync, LCU mastery sync'inden ÖNCE gelmeli (placeholder numeric key önlensin).
+    const order = mockInvoke.mock.calls.map((c) => c[0]);
+    expect(order.indexOf('sync_ddragon_champions')).toBeLessThan(
+      order.indexOf('sync_lcu_player_data'),
+    );
   });
 });

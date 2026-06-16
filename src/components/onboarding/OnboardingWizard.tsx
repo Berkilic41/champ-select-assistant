@@ -25,6 +25,11 @@ export const OnboardingWizard: React.FC<Props> = ({ onComplete }) => {
     // user lands with personalized data instead of an empty champ-select (Faz C).
     // Fails fast (and silently) if League isn't running — lobby still offers sync.
     setPreparing(true);
+    // Şampiyon tablosunu önce DDragon'la doldur ki sonraki LCU mastery/maç sync'i
+    // sırasında ensureChampion gerçek anahtarları bulsun; aksi halde kullanıcının
+    // kendi şampiyonları için numeric placeholder key yazılır ve ikon URL'i 404 olur
+    // (DDragon scheduler tick'ine kadar). Best-effort — League/ağ yoksa sessiz geçer.
+    await invoke('sync_ddragon_champions').catch(() => {});
     const syncOk = await invoke('sync_lcu_player_data', {})
       .then(() => true)
       .catch(() => false);
