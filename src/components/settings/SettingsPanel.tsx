@@ -134,9 +134,10 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
         onClick={e => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
+        aria-labelledby="settings-panel-title"
       >
         <div className="settings-panel__header">
-          <h2>{t('settings.title')}</h2>
+          <h2 id="settings-panel-title">{t('settings.title')}</h2>
           <button className="settings-panel__close" onClick={handleClose} aria-label={t('app.close')}>
             <X size={18} />
           </button>

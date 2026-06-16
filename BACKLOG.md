@@ -42,7 +42,7 @@
 | ~~B-26~~ | med | `useChampSelect.ts` | fetchRecommendations seq-guard'lı: out-of-order yanıt eskiyi ezmiyor + session-null sonrası bayat recs yazılmıyor. test | **done** |
 | ~~B-25~~ | med | `Toast.tsx` | toast'lar SR'a duyuruluyor: error/warning `role=alert`/assertive, info/success `role=status`/polite. test | **done** |
 | ~~B-27~~ | low | `PoolBuilder.tsx` | bozuk `role=tablist` → etiketli `role=group`+`aria-pressed` toggle grubu. test | **done** |
-| **B-28** | low | `SettingsPanel.tsx`+`ChampionDetailCard.tsx` | dialog'da `aria-labelledby` + focus trap/restore yok | todo |
+| **B-28** | low | `SettingsPanel.tsx`+`ChampionDetailCard.tsx` | **a)** dialog `aria-labelledby`→başlık ✅ **b)** focus trap/initial/restore (pending) | doing |
 | ~~B-29~~ | low | `Timer.tsx` | SVG geri sayım `role=img`+`aria-label` ("{{n}} saniye kaldı") → SR'a duyurulur. test | **done** |
 | ~~B-30~~ | low | `SettingsPanel.tsx` | bölge + pencere-boyutu `<select>` `aria-label`'lı (SR-etiketli). test | **done** |
 | ~~B-31~~ | low | `ConnectionBadge.tsx` | tek persistent `role=status`+`aria-live` span → bağlantı durum değişimleri SR'a duyurulur. test | **done** |

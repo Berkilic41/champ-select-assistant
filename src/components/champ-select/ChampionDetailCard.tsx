@@ -153,10 +153,11 @@ export const ChampionDetailCard: React.FC<Props> = ({ championId, championKey, o
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
+        aria-labelledby="cdc-title"
       >
         <div className="cdc-header">
           <ChampionIcon championKey={championKey ?? detail?.champion_key ?? ''} size="md" />
-          <h2 className="cdc-name">{championKey ?? detail?.champion_key ?? ''}</h2>
+          <h2 id="cdc-title" className="cdc-name">{championKey ?? detail?.champion_key ?? ''}</h2>
           <button className="cdc-close" onClick={onClose} type="button" aria-label={t('app.close')}>
             <X size={18} />
           </button>

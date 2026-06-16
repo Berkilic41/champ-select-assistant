@@ -120,4 +120,10 @@ describe('SettingsPanel feedback sync', () => {
     expect(selects).toHaveLength(2);
     selects.forEach((s) => expect(s).toHaveAccessibleName());
   });
+
+  it('gives the settings dialog an accessible name via aria-labelledby (title)', () => {
+    invokeMock.mockResolvedValue(null);
+    render(<SettingsPanel settings={DEFAULT_SETTINGS} onSave={vi.fn()} onClose={vi.fn()} />);
+    expect(screen.getByRole('dialog')).toHaveAccessibleName();
+  });
 });
