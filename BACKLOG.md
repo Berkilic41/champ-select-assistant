@@ -13,7 +13,7 @@
 |---|---|---|---|---|
 | ~~B-14~~ | **high** | worker `ingest.ts` | patch leksik-sort → `ORDER BY updated_at DESC` (recency). Worker 16 test. **deploy bekliyor** | **done (deploy bekliyor)** |
 | ~~B-03~~ | med | worker `ingest.ts` + `sources.ts` | freshness sinyali UÇTAN UCA: worker readRates `updated_at` döndürür; desktop syncEdgeRates >48s bayatsa confidence'ı 'low'a düşürür → mevcut data-quality/öneri akışı dürüstçe yansıtır. worker+desktop test. **(prod: worker deploy ister)** | **done** |
-| **B-10** | med | `DataStatusBadges.tsx:155` | noMeta `meta_score==0.3` sihirli-sabitiyle tespit ediliyor; core'un yapısal `missing_signals` ('meta') alanı zaten var → kırılgan kuplajı kaldır | todo |
+| ~~B-10~~ | med | `DataStatusBadges.tsx` | noMeta artık yapısal `missing_signals` ('meta') alanını kullanır (core json_api::compute_missing_signals); `meta_score==0.3` sihirli-sabiti kalktı → ~%50.1 WR yanlış-pozitifi de giderildi. renderer 15 test | **done** |
 | ~~B-11~~ | med | `useChampSelect.ts` | puuid çözülünce aktif session için recs yeni puuid'le refetch edilir (ayrı effect); boş-puuid stale öneriler kalmıyor | **done** |
 | ~~B-12~~ | med | `riot/client.ts` | routingForRegion **br1→americas** eklendi (BR account-v1+match-v5 doğru host). desktop test | **done (br1)** |
 | ~~B-12b~~ | low | `riot/client.ts` | `oc1→americas` (account-v1 OCE doğru host; eskiden 'europe' default → 404). test. | **done** |

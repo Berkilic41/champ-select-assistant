@@ -152,7 +152,11 @@ export const DataStatusBadges: React.FC<Props> = ({
   }
 
   const hasRecs = recommendations.length > 0;
-  const noMeta = hasRecs && recommendations.every((r) => Math.abs(r.meta_score - 0.3) < 0.001);
+  // noMeta: core'un yapısal `missing_signals` ('meta') alanını kullan — bu, meta-rate
+  // satırı eksik olduğunda backend'in kesin sinyali (json_api::compute_missing_signals).
+  // Eski `meta_score==0.3` sihirli-sabiti, ~%50.1 WR'li gerçek-meta şampiyonu yanlışlıkla
+  // "meta yok" sayabiliyordu; yapısal alan bu yanlış-pozitifi de giderir.
+  const noMeta = hasRecs && recommendations.every((r) => (r.missing_signals ?? []).includes('meta'));
   const noMastery = hasRecs && recommendations.every((r) => r.comfort_score < 0.01);
 
   if (noMeta) {

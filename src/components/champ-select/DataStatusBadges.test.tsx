@@ -7,9 +7,10 @@ import type { DraftBrainQualityReport } from '../../types/generated/DraftBrainQu
 import type { FeedbackObservabilityReport } from '../../types/generated/FeedbackObservabilityReport';
 import type { PipelineQualityReport } from '../../types/generated/PipelineQualityReport';
 
-// The component only reads meta_score / comfort_score / length, so minimal casts suffice.
-function rec(meta: number, comfort: number): Recommendation {
-  return { meta_score: meta, comfort_score: comfort } as Recommendation;
+// The component reads missing_signals (noMeta) / comfort_score (noMastery) / length.
+// `missing` carries the structural backend signal (e.g. ['meta'] = no meta-rate row).
+function rec(meta: number, comfort: number, missing: string[] = []): Recommendation {
+  return { meta_score: meta, comfort_score: comfort, missing_signals: missing } as Recommendation;
 }
 
 const inferredMatchup = {
@@ -91,9 +92,18 @@ describe('DataStatusBadges', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('shows the no-meta chip when every rec is meta-neutral (0.3)', () => {
-    render(<DataStatusBadges recommendations={[rec(0.3, 0.5), rec(0.3, 0.7)]} />);
+  it('shows the no-meta chip when every rec structurally lacks meta', () => {
+    render(
+      <DataStatusBadges recommendations={[rec(0.3, 0.5, ['meta']), rec(0.3, 0.7, ['meta'])]} />,
+    );
     expect(screen.getByText(/genel sıralama/)).toBeInTheDocument();
+  });
+
+  it('does NOT show no-meta when meta_score happens to be 0.3 but meta IS present', () => {
+    // Eski sihirli-sabit yanlış-pozitifi: ~%50.1 WR → meta_score 0.3 ama gerçek meta var.
+    // Yapısal missing_signals boş → chip çıkmamalı.
+    render(<DataStatusBadges recommendations={[rec(0.3, 0.5, []), rec(0.3, 0.7, [])]} />);
+    expect(screen.queryByText(/genel sıralama/)).not.toBeInTheDocument();
   });
 
   it('shows the no-mastery chip when comfort is 0 across the board', () => {
@@ -110,7 +120,7 @@ describe('DataStatusBadges', () => {
 
   it('caps at 3 chips', () => {
     const { container } = render(
-      <DataStatusBadges recommendations={[rec(0.3, 0)]} laneMatchup={inferredMatchup} />,
+      <DataStatusBadges recommendations={[rec(0.3, 0, ['meta'])]} laneMatchup={inferredMatchup} />,
     );
     expect(container.querySelectorAll('.data-status__chip')).toHaveLength(3);
   });
@@ -225,7 +235,7 @@ describe('DataStatusBadges', () => {
     // diagnostiklerce ilk-3'ten atılmamalı.
     const { container } = render(
       <DataStatusBadges
-        recommendations={[rec(0.3, 0)]}
+        recommendations={[rec(0.3, 0, ['meta'])]}
         qualityReport={{ ...highQualityReport, data_pack_fresh: false }}
         registryReport={fallbackRegistry}
         pipelineReport={degradedPipelineReport}

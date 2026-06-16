@@ -14,6 +14,11 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
   iyileştirme üretir; otomatik commit yok.
 
 ### Düzeltildi
+- **"Meta yok" rozeti yapısal sinyale bağlandı** — `DataStatusBadges` artık meta
+  eksikliğini core'un yapısal `missing_signals` ('meta') alanından okur (kesin sinyal:
+  meta-rate satırı yok). Önceki `meta_score==0.3` sihirli-sabit tespiti, ~%50.1
+  kazanma oranına sahip gerçek-meta şampiyonu yanlışlıkla "meta yok" sayabiliyordu;
+  yapısal alan bu yanlış-pozitifi de giderir. (B-10)
 - **OCE (oc1) Match-V5 yönlendirmesi** — Match-V5, OCE maçlarını SEA kümesinden
   sunar; account-v1 ise yalnız americas/asia/europe sunar. Eskiden her iki çağrı da
   `routingForRegion`→`americas` kullandığından OCE oyuncularının maç geçmişi
