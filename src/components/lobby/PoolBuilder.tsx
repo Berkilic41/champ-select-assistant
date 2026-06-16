@@ -90,12 +90,13 @@ export const PoolBuilder: React.FC = () => {
 
   return (
     <div className="pool-builder">
-      <div className="pool-builder__roles" role="tablist">
+      <div className="pool-builder__roles" role="group" aria-label={t('poolBuilder.roleGroupLabel')}>
         {ROLES.map((r) => (
           <button
             key={r}
             type="button"
             className={`pool-builder__role${r === role ? ' pool-builder__role--active' : ''}`}
+            aria-pressed={r === role}
             onClick={() => setRole(r)}
           >
             {t(`poolBuilder.role_${r}`)}

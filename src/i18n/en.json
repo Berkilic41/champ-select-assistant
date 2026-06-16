@@ -536,6 +536,7 @@
   "poolBuilder": {
     "empty": "No suggestions for this role",
     "loading": "Loading suggestions…",
+    "roleGroupLabel": "Select role",
     "ease": "Ease {{n}}/5",
     "metaTier": "Meta {{tier}}",
     "role_top": "Top",

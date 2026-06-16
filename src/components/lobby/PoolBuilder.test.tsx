@@ -82,4 +82,13 @@ describe('PoolBuilder', () => {
     render(<PoolBuilder />);
     expect(await screen.findByText('Bu rol için öneri yok')).toBeInTheDocument();
   });
+
+  it('exposes the role buttons as a labelled group with aria-pressed (a11y)', () => {
+    mockInvoke.mockResolvedValue(null);
+    const { container } = render(<PoolBuilder />);
+    expect(container.querySelector('.pool-builder__roles')).toHaveAttribute('role', 'group');
+    // Varsayılan rol (orta) aktif → aria-pressed=true.
+    const active = container.querySelector('.pool-builder__role--active');
+    expect(active).toHaveAttribute('aria-pressed', 'true');
+  });
 });

@@ -536,6 +536,7 @@
   "poolBuilder": {
     "empty": "Bu rol için öneri yok",
     "loading": "Öneriler yükleniyor…",
+    "roleGroupLabel": "Rol seç",
     "ease": "Kolaylık {{n}}/5",
     "metaTier": "Meta {{tier}}",
     "role_top": "Üst",
