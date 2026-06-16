@@ -505,6 +505,29 @@ export function syncDataPipeline(
   );
 }
 
+/** Tek bir pipeline kaynağını koş: başarıda success fetch-log + sonucu döndür;
+ *  hatada failed fetch-log + `errors`'a `source: mesaj` ekle + undefined döndür.
+ *  syncDataPipelineInner'daki beş yakın-aynı try/catch/recordFetchLog bloğunu
+ *  DRY'lar — kaynağa özgü tek fark `fn` (sync/async) ve `message(result)`. */
+async function runSource<T>(
+  db: DatabaseSync,
+  source: string,
+  errors: string[],
+  fn: () => T | Promise<T>,
+  message: (result: T) => string,
+): Promise<T | undefined> {
+  const started = nowSecs();
+  try {
+    const result = await fn();
+    recordFetchLog(db, source, "success", "refresh", message(result), started, nowSecs());
+    return result;
+  } catch (err) {
+    recordFetchLog(db, source, "failed", "refresh", (err as Error).message, started, nowSecs());
+    errors.push(`${source}: ${(err as Error).message}`);
+    return undefined;
+  }
+}
+
 async function syncDataPipelineInner(
   engine: Engine,
   db: DatabaseSync,
@@ -556,145 +579,56 @@ async function syncDataPipelineInner(
   const currentPack = cachedPackRow(db);
   const errors: string[] = [];
 
-  const ddragonStarted = nowSecs();
-  let ddragonChampions = 0;
-  try {
-    ddragonChampions = await syncDdragonChampions(db, caches, ddragonFetch);
-    recordFetchLog(
+  const ddragonChampions =
+    (await runSource(
       db,
       "ddragon",
-      "success",
-      "refresh",
-      `${ddragonChampions} champions`,
-      ddragonStarted,
-      nowSecs(),
-    );
-  } catch (err) {
-    recordFetchLog(
-      db,
-      "ddragon",
-      "failed",
-      "refresh",
-      (err as Error).message,
-      ddragonStarted,
-      nowSecs(),
-    );
-    errors.push(`ddragon: ${(err as Error).message}`);
-  }
+      errors,
+      () => syncDdragonChampions(db, caches, ddragonFetch),
+      (n) => `${n} champions`,
+    )) ?? 0;
 
-  const merakiStarted = nowSecs();
-  let merakiRates = 0;
-  try {
-    merakiRates = await syncMerakiRates(db, merakiFetch ?? defaultJsonFetch);
-    recordFetchLog(
+  const merakiRates =
+    (await runSource(
       db,
       "meraki",
-      "success",
-      "refresh",
-      `${merakiRates} rates`,
-      merakiStarted,
-      nowSecs(),
-    );
-  } catch (err) {
-    recordFetchLog(
-      db,
-      "meraki",
-      "failed",
-      "refresh",
-      (err as Error).message,
-      merakiStarted,
-      nowSecs(),
-    );
-    errors.push(`meraki: ${(err as Error).message}`);
-  }
+      errors,
+      () => syncMerakiRates(db, merakiFetch ?? defaultJsonFetch),
+      (n) => `${n} rates`,
+    )) ?? 0;
 
-  let buildsImported = 0;
-  const buildsStarted = nowSecs();
-  try {
-    buildsImported = importBuildsSeed(db);
-    recordFetchLog(
+  const buildsImported =
+    (await runSource(
       db,
       "build_seed",
-      "success",
-      "refresh",
-      `${buildsImported} builds`,
-      buildsStarted,
-      nowSecs(),
-    );
-  } catch (err) {
-    recordFetchLog(
-      db,
-      "build_seed",
-      "failed",
-      "refresh",
-      (err as Error).message,
-      buildsStarted,
-      nowSecs(),
-    );
-    errors.push(`build_seed: ${(err as Error).message}`);
-  }
+      errors,
+      () => importBuildsSeed(db),
+      (n) => `${n} builds`,
+    )) ?? 0;
 
-  let matchupsImported = 0;
-  const matchupsStarted = nowSecs();
-  try {
-    matchupsImported = importMatchupsSeed(db);
-    recordFetchLog(
+  const matchupsImported =
+    (await runSource(
       db,
       "matchup_seed",
-      "success",
-      "refresh",
-      `${matchupsImported} matchups`,
-      matchupsStarted,
-      nowSecs(),
-    );
-  } catch (err) {
-    recordFetchLog(
-      db,
-      "matchup_seed",
-      "failed",
-      "refresh",
-      (err as Error).message,
-      matchupsStarted,
-      nowSecs(),
-    );
-    errors.push(`matchup_seed: ${(err as Error).message}`);
-  }
+      errors,
+      () => importMatchupsSeed(db),
+      (n) => `${n} matchups`,
+    )) ?? 0;
 
   // Match-V5 ingestion (key yoksa Rust gibi sessiz 0'lı başarı).
-  const matchV5Started = nowSecs();
-  let matchV5: MatchV5IngestionOutcome = {
-    fetched_matches: 0,
-    detail_errors: 0,
-    rates: 0,
-    matchups: 0,
-    builds: 0,
-  };
-  try {
-    const riot = riotClient === undefined ? runtimeClientFromEnv() : riotClient;
-    matchV5 = await syncMatchV5Ingestion(engine, db, caches, riot);
-    recordFetchLog(
+  const matchV5 =
+    (await runSource<MatchV5IngestionOutcome>(
       db,
       "match_v5",
-      "success",
-      "refresh",
-      `${matchV5.fetched_matches} matches, ${matchV5.rates} rates, ` +
-        `${matchV5.matchups} matchups, ${matchV5.builds} builds, ` +
-        `${matchV5.detail_errors} errors`,
-      matchV5Started,
-      nowSecs(),
-    );
-  } catch (err) {
-    recordFetchLog(
-      db,
-      "match_v5",
-      "failed",
-      "refresh",
-      (err as Error).message,
-      matchV5Started,
-      nowSecs(),
-    );
-    errors.push(`match_v5: ${(err as Error).message}`);
-  }
+      errors,
+      () => {
+        const riot = riotClient === undefined ? runtimeClientFromEnv() : riotClient;
+        return syncMatchV5Ingestion(engine, db, caches, riot);
+      },
+      (m) =>
+        `${m.fetched_matches} matches, ${m.rates} rates, ` +
+        `${m.matchups} matchups, ${m.builds} builds, ${m.detail_errors} errors`,
+    )) ?? { fetched_matches: 0, detail_errors: 0, rates: 0, matchups: 0, builds: 0 };
 
   // Cache promotion — karar + yeni pack core'da.
   const promotion = promoteDataPack(engine, db, caches, currentPack);

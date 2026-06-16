@@ -47,7 +47,7 @@
 | ~~B-29~~ | low | `Timer.tsx` | SVG geri sayım `role=img`+`aria-label` ("{{n}} saniye kaldı") → SR'a duyurulur. test | **done** |
 | ~~B-30~~ | low | `SettingsPanel.tsx` | bölge + pencere-boyutu `<select>` `aria-label`'lı (SR-etiketli). test | **done** |
 | ~~B-31~~ | low | `ConnectionBadge.tsx` | tek persistent `role=status`+`aria-live` span → bağlantı durum değişimleri SR'a duyurulur. test | **done** |
-| **B-32** | low | `data-pipeline.ts` | `syncDataPipelineInner` god-function refactor — **ERTELENDİ**: bloklar tekdüze değil (match_v5 çok-alanlı obje vs diğerleri tek-sayım), error-array+result akışı ince; maintainability-only, taze bağlamda dikkatle (e2e-testli) | todo |
+| ~~B-32~~ | low | `data-pipeline.ts` | `syncDataPipelineInner` god-function (~140 satır) → `runSource<T>` helper (5 kaynak bloğu DRY). "tekdüze değil" endişesi çözüldü: kaynağa-özgü tek fark `fn`+`message(result)` callback'i; match_v5 çok-alanlı mesaj/default sadece farklı argüman. Mevcut güçlü e2e (summary+errors+log) net olarak korudu; 155 desktop test yeşil | **done** |
 | ~~B-33~~ | low | `useChampSelect.ts` | 7 kopya fetch-on-signature useEffect → `useSessionDerived` helper (~140 satır tekrar kalktı). ÖNCE derived-state güvenlik-ağı testleri eklendi (gamePlan fetch+clear, puuid-threading, list-fallback), refactor davranış-koruyarak yapıldı; 243 renderer test yeşil + typecheck temiz | **done** |
 | ~~B-34~~ | low | `riot/client.ts` | puuid/matchId path segment'leri `encodeURIComponent`'li (4 URL builder) — path/query injection defensive. test | **done** |
 | ~~B-35~~ | low | `useToast.ts` | auto-dismiss timer'ları ref'te tutulup unmount'ta temizlenir (sızıntı + unmounted state-update giderildi). test | **done** |

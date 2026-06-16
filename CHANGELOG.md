@@ -14,6 +14,11 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
   iyileştirme üretir; otomatik commit yok.
 
 ### Değişti
+- **`syncDataPipelineInner` DRY** — manuel veri-pipeline'ındaki beş kaynak (ddragon,
+  meraki, build/matchup seed, match-v5) birebir aynı try/catch/fetch-log/error-push
+  bloğunu tekrarlıyordu (~140 satır). Ortak `runSource<T>` helper'ına indirildi;
+  kaynağa özgü tek fark sync fonksiyonu + başarı mesajı callback'i. Davranış,
+  fetch-log'lar ve hata-dizisi korundu (mevcut uçtan-uca pipeline testi doğrular). (B-32)
 - **`useChampSelect` türev-state'leri DRY** — yedi koçluk çıktısı (game plan,
   counter-pick, team comp, combo board, draft verdict, counter-item, lane matchup)
   birebir aynı "session imzasından türet" effect'ini tekrarlıyordu (~140 satır).
