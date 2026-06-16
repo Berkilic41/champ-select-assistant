@@ -147,6 +147,15 @@ describe("sync commands (ddragon.rs parity)", () => {
     expect(row).toMatchObject({ key: "Garen", name: "Garen" });
   });
 
+  it("getDdragonVersion: pre-sync fallback is a servable version, not the 'unknown' sentinel", () => {
+    // Regression: "unknown" ikon URL'ine gömülünce (.../cdn/unknown/img/...) 403 →
+    // ikonlar baş-harf yedeğine düşer (paketli build'de görünür). Sync bitmeden de
+    // servable bir patch sürümü dönmeli; sync sonrası canlı patch'le güncellenir.
+    const v = getDdragonVersion(emptyCaches());
+    expect(v).not.toBe("unknown");
+    expect(v).toMatch(/^\d+\.\d+\.\d+$/);
+  });
+
   it("sync_cdragon_meta: writes roles + melee heuristic to champion_meta", async () => {
     const db = migratedDb();
     const fetchJson: FetchJson = async () => [

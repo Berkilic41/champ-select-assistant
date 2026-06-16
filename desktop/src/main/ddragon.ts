@@ -188,7 +188,13 @@ export function upsertChampion(db: DatabaseSync, c: ChampionListEntry): void {
 }
 
 export function getDdragonVersion(caches: DdragonCaches): string {
-  return caches.version ?? "unknown";
+  // İlk açılışta sync henüz bitmeden çağrılırsa `caches.version` undefined olur.
+  // ESKİDEN "unknown" dönerdi → renderer bunu geçerli sürüm sanıp ikon URL'ine
+  // gömerdi (.../cdn/unknown/img/...) → 403 → ikonlar baş-harfe düşerdi (paketli
+  // build'de görünür; dev'de sync genelde önce yetiştiği için fark edilmezdi).
+  // Servable bir fallback dön (renderer'ın src/lib/ddragon.ts varsayılanıyla aynı);
+  // sync tamamlanınca caches.version canlı patch'le güncellenir.
+  return caches.version ?? "14.10.1";
 }
 
 /** sync_ddragon_champions: şampiyon listesi → DB; item+rune cache paralel doldur. */

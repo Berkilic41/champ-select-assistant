@@ -6,6 +6,16 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 
 ## [Unreleased]
 
+## [0.10.0-beta.6] — 2026-06-16
+
+### Düzeltildi
+- **Şampiyon ikonları görünmüyordu (paketli kurulum)** — ilk açılışta DDragon
+  sürümü henüz sync olmadan `"unknown"` sentinel'i ikon URL'lerine gömülüyordu
+  (`.../cdn/unknown/img/...` → 403), ikonlar baş-harf yedeğine düşüyordu. Artık
+  sync öncesi servable bir fallback patch kullanılır ve sentinel reddedilir;
+  ikonlar ilk açılıştan itibaren görünür, sync bitince canlı patch'e geçer.
+  (Splash art sürüm içermediği için zaten etkilenmiyordu.)
+
 ## [0.10.0-beta.5] — 2026-06-16
 
 beta.4'ten bu yana biriken büyük güncelleme: yapay zekâ koçluk, kazanma

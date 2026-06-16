@@ -75,7 +75,9 @@ export function useSummonerData(gameName: string, tagLine: string, region: strin
         lcuResult.summoner.puuid,
       );
 
-      if (ddragonVersion) setDdragonVersion(ddragonVersion);
+      // "unknown" = backend henüz sync olmamış sentinel'i; geçerli sürüm sanıp
+      // ikon URL'ini bozmamak için reddet (iyi olan 14.10.1 fallback'i korunur).
+      if (ddragonVersion && ddragonVersion !== 'unknown') setDdragonVersion(ddragonVersion);
 
       // Also kick off background tasks that don't block the UI
       void Promise.allSettled([
@@ -118,7 +120,11 @@ export function useSummonerData(gameName: string, tagLine: string, region: strin
         invoke<string>('get_ddragon_version'),
       ]);
 
-      if (ddragonVerResult.status === 'fulfilled' && ddragonVerResult.value) {
+      if (
+        ddragonVerResult.status === 'fulfilled' &&
+        ddragonVerResult.value &&
+        ddragonVerResult.value !== 'unknown'
+      ) {
         setDdragonVersion(ddragonVerResult.value);
       }
 
