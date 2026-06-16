@@ -13,6 +13,14 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
   döngüsü kuruldu. Her iterasyon küçük, test-geçen, geri-alınabilir bir
   iyileştirme üretir; otomatik commit yok.
 
+### Değişti
+- **`useChampSelect` türev-state'leri DRY** — yedi koçluk çıktısı (game plan,
+  counter-pick, team comp, combo board, draft verdict, counter-item, lane matchup)
+  birebir aynı "session imzasından türet" effect'ini tekrarlıyordu (~140 satır).
+  Ortak `useSessionDerived` helper'ına indirildi (iptal-edilebilir, en-güncel-kazanır,
+  no-session'da temizler). Davranış korundu; önce türev-state'lere güvenlik-ağı
+  testleri eklendi. (B-33)
+
 ### Eklendi
 - **Cold-start seed priming** — arka plan scheduler'ı, DDragon şampiyon sync'inden
   hemen sonra (FK-valid) bundled offline build/matchup seed'lerini bir kez içe aktarır

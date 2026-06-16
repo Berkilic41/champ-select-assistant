@@ -127,6 +127,59 @@ describe('useChampSelect', () => {
     expect(result.current.isActive).toBe(false);
   });
 
+  // ── Session-derived coaching outputs (B-33 refactor safety net) ────────────
+
+  it('derives the game plan from the session and clears it when the session ends', async () => {
+    mockInvoke.mockImplementation((cmd: string) => {
+      if (cmd === 'get_game_plan') return Promise.resolve({ team_identity: 'poke' });
+      return Promise.resolve(null);
+    });
+    const { result } = renderHook(() => useChampSelect('p'));
+
+    act(() => handler({ payload: makeSession('pick') }));
+    await waitFor(() =>
+      expect(result.current.gamePlan).toMatchObject({ team_identity: 'poke' }),
+    );
+
+    act(() => handler({ payload: null }));
+    expect(result.current.gamePlan).toBeNull();
+  });
+
+  it('threads the puuid into puuid-keyed derived commands (counter-picks, draft verdict)', async () => {
+    mockInvoke.mockImplementation((cmd: string) => {
+      if (cmd === 'get_counter_picks') return Promise.resolve([{ champion_id: 7 }]);
+      return Promise.resolve(null);
+    });
+    const { result } = renderHook(() => useChampSelect('puuid-77'));
+
+    act(() => handler({ payload: makeSession('pick') }));
+    await waitFor(() => expect(result.current.counterPicks).toHaveLength(1));
+
+    expect(mockInvoke).toHaveBeenCalledWith(
+      'get_counter_picks',
+      expect.objectContaining({ puuid: 'puuid-77' }),
+    );
+    expect(mockInvoke).toHaveBeenCalledWith(
+      'get_draft_verdict',
+      expect.objectContaining({ puuid: 'puuid-77' }),
+    );
+  });
+
+  it('clears a list-valued derived state (counter-items) to [] when the session ends', async () => {
+    mockInvoke.mockImplementation((cmd: string) => {
+      if (cmd === 'get_counter_items')
+        return Promise.resolve([{ category: 'armor', reason: 'r', item_ids: [] }]);
+      return Promise.resolve(null);
+    });
+    const { result } = renderHook(() => useChampSelect('p'));
+
+    act(() => handler({ payload: makeSession('pick') }));
+    await waitFor(() => expect(result.current.counterItems).toHaveLength(1));
+
+    act(() => handler({ payload: null }));
+    expect(result.current.counterItems).toEqual([]);
+  });
+
   // ── Role resolution (Faz 8 regression lock) ────────────────────────────────
 
   it('uses the LCU assigned position as the role', async () => {

@@ -12,6 +12,45 @@ function normPos(pos: string | undefined | null): string {
   return (pos ?? '').trim().toLowerCase();
 }
 
+/** Cancellable "derive state from the current champ-select session" fetch,
+ *  re-run whenever `signature` (or the puuid) changes. Centralizes the identical
+ *  derived-coaching effects: clears to `fallback` when no session, latest-wins
+ *  cancel guard, `fallback` on error/nullish. `withPuuid=null` omits the puuid
+ *  arg + dep; a string threads it into both the args and the dep list. */
+function useSessionDerived<T>(
+  session: ChampSelectSession | null,
+  signature: string,
+  command: string,
+  fallback: T,
+  withPuuid: string | null = null,
+): T {
+  const [value, setValue] = useState<T>(fallback);
+  useEffect(() => {
+    if (!session) {
+      setValue(fallback);
+      return;
+    }
+    let cancelled = false;
+    const args =
+      withPuuid !== null
+        ? { sessionJson: session, puuid: withPuuid }
+        : { sessionJson: session };
+    invoke<T>(command, args)
+      .then((v) => {
+        if (!cancelled) setValue((v ?? fallback) as T);
+      })
+      .catch(() => {
+        if (!cancelled) setValue(fallback);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // `session` is read fresh each run; keyed on the signature (+ puuid).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signature, withPuuid]);
+  return value;
+}
+
 export function useChampSelect(puuid: string = ''): {
   session: ChampSelectSession | null;
   recommendations: Recommendation[];
@@ -46,13 +85,6 @@ export function useChampSelect(puuid: string = ''): {
   const [session, setSession] = useState<ChampSelectSession | null>(null);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [lockedAnalysis, setLockedAnalysis] = useState<Recommendation | null>(null);
-  const [gamePlan, setGamePlan] = useState<GamePlan | null>(null);
-  const [counterPicks, setCounterPicks] = useState<CounterPickHint[]>([]);
-  const [teamComp, setTeamComp] = useState<TeamCompBoard | null>(null);
-  const [comboBoard, setComboBoard] = useState<ComboBoardEntry[]>([]);
-  const [draftVerdict, setDraftVerdict] = useState<DraftVerdict | null>(null);
-  const [counterItems, setCounterItems] = useState<CounterItemHint[]>([]);
-  const [laneMatchup, setLaneMatchup] = useState<LaneMatchup | null>(null);
   const [isActive, setIsActive] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -234,8 +266,9 @@ export function useChampSelect(puuid: string = ''): {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lockedChampionId, puuid, effectivePos]);
 
-  // Team-level macro game plan — recompute whenever the visible composition or
-  // the local player's role changes (any lock on either team, hover, role pick).
+  // Shared signature for the session-derived coaching outputs below — changes
+  // whenever the visible composition or the local player's role changes (any lock
+  // on either team, hover, role pick), re-running every derived fetch.
   const teamSignature = session
     ? JSON.stringify([
         ...session.my_team.map((s) => s.champion_id),
@@ -244,147 +277,32 @@ export function useChampSelect(puuid: string = ''): {
         effectivePos,
       ])
     : '';
-  useEffect(() => {
-    if (!session) {
-      setGamePlan(null);
-      return;
-    }
-    let cancelled = false;
-    invoke<GamePlan>('get_game_plan', { sessionJson: session })
-      .then((p) => {
-        if (!cancelled) setGamePlan(p);
-      })
-      .catch(() => {
-        if (!cancelled) setGamePlan(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-    // `session` is read fresh each run; keyed on the composition signature.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [teamSignature]);
-
-  // Counter-picks from the player's pool vs the visible lane opponent.
-  // Backend returns [] when no opponent is locked, so we can fetch on any
-  // composition change without gating on opponent presence here.
-  useEffect(() => {
-    if (!session) {
-      setCounterPicks([]);
-      return;
-    }
-    let cancelled = false;
-    invoke<CounterPickHint[]>('get_counter_picks', { sessionJson: session, puuid })
-      .then((c) => {
-        if (!cancelled) setCounterPicks(c ?? []);
-      })
-      .catch(() => {
-        if (!cancelled) setCounterPicks([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [teamSignature, puuid]);
-
-  // Both teams' composition summaries for the draft board.
-  useEffect(() => {
-    if (!session) {
-      setTeamComp(null);
-      return;
-    }
-    let cancelled = false;
-    invoke<TeamCompBoard>('get_team_comp', { sessionJson: session })
-      .then((tc) => {
-        if (!cancelled) setTeamComp(tc);
-      })
-      .catch(() => {
-        if (!cancelled) setTeamComp(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [teamSignature]);
-
-  // Ally combos for the local player's pick (locked or hovered).
-  useEffect(() => {
-    if (!session) {
-      setComboBoard([]);
-      return;
-    }
-    let cancelled = false;
-    invoke<ComboBoardEntry[]>('get_combo_board', { sessionJson: session })
-      .then((c) => {
-        if (!cancelled) setComboBoard(c ?? []);
-      })
-      .catch(() => {
-        if (!cancelled) setComboBoard([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [teamSignature]);
-
-  // Draft verdict — one decisive read; recomputed as the composition changes.
-  useEffect(() => {
-    if (!session) {
-      setDraftVerdict(null);
-      return;
-    }
-    let cancelled = false;
-    invoke<DraftVerdict>('get_draft_verdict', { sessionJson: session, puuid })
-      .then((v) => {
-        if (!cancelled) setDraftVerdict(v);
-      })
-      .catch(() => {
-        if (!cancelled) setDraftVerdict(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [teamSignature, puuid]);
-
-  // Counter-item advice vs the enemy comp.
-  useEffect(() => {
-    if (!session) {
-      setCounterItems([]);
-      return;
-    }
-    let cancelled = false;
-    invoke<CounterItemHint[]>('get_counter_items', { sessionJson: session })
-      .then((c) => {
-        if (!cancelled) setCounterItems(c ?? []);
-      })
-      .catch(() => {
-        if (!cancelled) setCounterItems([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [teamSignature]);
-
-  // Lane matchup for the local pick vs the visible lane opponent.
-  useEffect(() => {
-    if (!session) {
-      setLaneMatchup(null);
-      return;
-    }
-    let cancelled = false;
-    invoke<LaneMatchup | null>('get_lane_matchup', { sessionJson: session })
-      .then((m) => {
-        if (!cancelled) setLaneMatchup(m ?? null);
-      })
-      .catch(() => {
-        if (!cancelled) setLaneMatchup(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [teamSignature]);
+  // All seven coaching outputs derive from the same composition signature via the
+  // shared cancellable fetch helper (clears on no-session, latest-wins guard).
+  // The two personalized reads (counter-picks, draft verdict) thread the puuid;
+  // counter-picks return [] backend-side when no opponent is locked, so fetching
+  // on any composition change is safe.
+  const gamePlan = useSessionDerived<GamePlan | null>(
+    session, teamSignature, 'get_game_plan', null,
+  );
+  const counterPicks = useSessionDerived<CounterPickHint[]>(
+    session, teamSignature, 'get_counter_picks', [], puuid,
+  );
+  const teamComp = useSessionDerived<TeamCompBoard | null>(
+    session, teamSignature, 'get_team_comp', null,
+  );
+  const comboBoard = useSessionDerived<ComboBoardEntry[]>(
+    session, teamSignature, 'get_combo_board', [],
+  );
+  const draftVerdict = useSessionDerived<DraftVerdict | null>(
+    session, teamSignature, 'get_draft_verdict', null, puuid,
+  );
+  const counterItems = useSessionDerived<CounterItemHint[]>(
+    session, teamSignature, 'get_counter_items', [],
+  );
+  const laneMatchup = useSessionDerived<LaneMatchup | null>(
+    session, teamSignature, 'get_lane_matchup', null,
+  );
 
   // Effective role + its provenance (for the RoleSelector UI).
   const role = manualRole || lcuRole || preferredRef.current || '';
