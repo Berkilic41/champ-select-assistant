@@ -43,8 +43,16 @@
   (`src-tauri/.env`+`dotenvy`→`process.env.RIOT_API_KEY`/`runtimeEnv()`), checklist
   (`tauri.conf.json`/`target/release` → bundled config + `app.asar` taraması), LCU-note
   (`champ_select.rs`→`commands/lcu.ts`). ✅ saf-doküman (253f3dd sonrası, commit'siz→commit).
-- **Kalan (Discovery-3 tükendi):** yalnız B-24 (ertelenmiş motor-e2e). Sıradaki tur
-  taze keşif tarar (core/desktop/renderer/worker az-kapsanmış alanlar).
+- **Discover-4** — `csa-loop-discovery-4` (derin lane'ler: test-quality/concurrency/
+  migration/contract/honesty-deep) → 11 aday. Verify fazı session-limit'e takıldı (2:10
+  reset) → lider KODDAN self-verify etti.
+- **Iter 16** — **B-41** (DB-003) matchup ingestion `wins > games` guard: u.gg
+  `parseUggMatchups` + edge `syncEdgeRates` bozuk satırı (win_rate >1.0) filtreler →
+  B-38'in upstream tamamlayıcısı. 2 regresyon testi. ✅ desktop 156 test + typecheck temiz.
+  DB-001 (CHECK migration) reddedildi (SQLite ALTER ADD CONSTRAINT yok).
+- **Kalan:** B-42 (lcu floating-promise — önce teyit, B-21 ile çakışma kontrolü) ·
+  B-43/44 (seq-guard) · B-45 (IPC cast) · B-46/47 (saf test) · B-24 (ertelenmiş).
+  Hepsi ÖNCE koddan teyit ister (Verify session-limit'te çalışmadı).
 
 ## Durum — backlog esas olarak TÜKENDİ (2026-06-16, ~30 commit)
 

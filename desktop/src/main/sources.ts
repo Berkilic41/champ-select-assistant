@@ -211,7 +211,10 @@ export function parseUggMatchups(
       if (opponentId === undefined || wins === undefined || games === undefined) {
         continue;
       }
-      if (games < MATCHUP_GAMES_FLOOR || games === 0 || opponentId === 0) continue;
+      // wins > games = bozuk dış veri (win_rate >1.0 olur); DB'ye sokma.
+      if (games < MATCHUP_GAMES_FLOOR || games === 0 || opponentId === 0 || wins > games) {
+        continue;
+      }
       out.push({
         region: regionTag,
         patch,
@@ -618,7 +621,11 @@ export async function syncEdgeRates(
       matchups = mu.matchups
         .filter(
           (m) =>
-            Number(m.games) > 0 && Number(m.champion_id) > 0 && Number(m.opponent_id) > 0,
+            Number(m.games) > 0 &&
+            Number(m.champion_id) > 0 &&
+            Number(m.opponent_id) > 0 &&
+            // wins > games = bozuk edge verisi (win_rate >1.0); DB'ye sokma.
+            Number(m.wins) <= Number(m.games),
         )
         .map((m) => ({
           region: resp.region ?? region,

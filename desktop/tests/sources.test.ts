@@ -156,6 +156,21 @@ describe("u.gg parsers (ugg.rs parity)", () => {
     expect(rows.every((r) => r.opponent_id !== 99)).toBe(true);
   });
 
+  it("drops corrupt wins>games matchup rows (defensive)", () => {
+    // İkinci satır taban-üstü örneklemli (5000 ≥ 500) ama wins (9000) > games (5000)
+    // → bozuk dış veri (win_rate >1.0 olur); düşürülmeli. Geçerli komşu kalır.
+    const fixture = JSON.parse(`{
+      "12": { "8": { "1": [[
+        [104, 28682, 56764, 0, 0],
+        [266, 9000, 5000, 0, 0]
+      ],"2026-06-07T12:06:15Z"] } }
+    }`);
+    const rows = parseUggMatchups(fixture, 64, "16.11", "all");
+    expect(rows).toHaveLength(1);
+    expect(rows[0].opponent_id).toBe(104);
+    expect(rows.every((r) => Number(r.wins) <= Number(r.games))).toBe(true);
+  });
+
   it("drops low-sample roles and missing region without panicking", () => {
     const low = JSON.parse(`{"12":{"8":{"1":[[
       [26,17,8000,8300,[8010]],[10,5,[4,11]],[1,1,[1102]],[1,1,[6692]],
@@ -337,6 +352,7 @@ describe("edge rates source (cloudflare-worker /v1/rates app-wiring)", () => {
           matchups: [
             { champion_id: 86, opponent_id: 103, role: "top", games: 30, wins: 17, win_rate: 17 / 30 },
             { champion_id: 86, opponent_id: 0, role: "top", games: 5, wins: 3, win_rate: 0.6 }, // geçersiz opponent → atılır
+            { champion_id: 86, opponent_id: 64, role: "top", games: 30, wins: 45, win_rate: 1.5 }, // wins>games bozuk → atılır
           ],
         };
       }

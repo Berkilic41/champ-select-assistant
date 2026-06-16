@@ -39,6 +39,14 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
   veya DDragon başarısını düşürmez. (B-02)
 
 ### Düzeltildi
+- **Bozuk `wins > games` matchup satırları ingestion'da elenir** — dış kaynaklardan
+  (u.gg `parseUggMatchups`, edge worker `syncEdgeRates`) gelen matchup satırları yalnız
+  `games > 0` / geçerli-id için filtreleniyordu; `wins > games` (win_rate >1.0) bozuk
+  satırlar `champion_matchups`'a sızabiliyordu ve matchup skorunu şişirebiliyordu. İki
+  yola da defensive guard eklendi (u.gg `|| wins > games` continue; edge filter
+  `Number(m.wins) <= Number(m.games)`). Bu, B-38'in (motor risk-notu `saturating_sub`)
+  **upstream tamamlayıcısı** — kötü veri DB'ye hiç girmez. Geçerli veri (wins ≤ games)
+  etkilenmez. 2 regresyon testi (u.gg birim + edge fixture). (B-41)
 - **`docs/api-key-policy.md` Tauri→Electron güncellendi** — doküman geliştiriciyi var
   olmayan bir kuruluma yönlendiriyordu: `src-tauri/.env`, `dotenvy::dotenv()`,
   `tauri.conf.json` checklist'i ve `target/release/*.exe` binary-tarama — hepsi Tauri/Rust

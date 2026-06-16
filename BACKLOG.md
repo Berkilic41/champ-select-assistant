@@ -6,7 +6,7 @@
 > **21 doğrulanmış bulgu**, adversaryal koddan-teyit) çıktısıdır.
 
 ## Aktif
-(boş — Discovery-3 tükendi: B-38/B-39/B-40 done; yalnız B-24 ertelenmiş. Sıradaki tur yeni keşif tarar.)
+(boş — Discovery-4: B-41 done; sıradaki teyit-bekleyen adaylar B-42 (lcu floating-promise) / B-46 / B-47. B-24 ertelenmiş.)
 
 ## Açık — yüksek/orta değer (koddan teyitli)
 | id | sev | dosya | özet | durum |
@@ -45,6 +45,23 @@
 | ~~B-38~~ | **high** | `engine.rs:110` | stretch-pick risk notu `losses = games - wins` korumasız u32 çıkarma; host SQLite `wins<=games` zorlamıyor (`SUM(win)`, CHECK yok) → bozuk satır `wins>games` → release/WASM `overflow-checks` kapalı, sessiz underflow "4294967290L" çöp not (debug panik). Not-üretimi saf `stretch_risk_note`'a çıkarıldı + `saturating_sub` (crate konvansiyonu) + 3 birim testi. core 569 test + clippy | **done** |
 | ~~B-39~~ | med | `json_api.rs:332-337` | `my_pos()` Arena (queue 1700) brawl'ı ele almıyordu → `else` dalında `assigned_position` döner; renderer `applyRole` kalıcı tercih-rolünü (örn. "middle") queue-koşulsuz enjekte edince Arena session'a SR-rol sızar → satır 497 yanlış "lane_performance eksik" rozeti basar (Arena'da lane yok). Fix: `matches!(queue_id, 450\|1700)` (engine.rs `is_aram` ile hizalı). Regresyon testi (queue 1700 fixture → sinyal yok). core 570 test + clippy | **done** |
 | ~~B-40~~ | med | `docs/api-key-policy.md` | stale Tauri referansları: `src-tauri/.env`, `dotenvy::dotenv()`, `tauri.conf.json` checklist, `target/release/*.exe` tarama — Electron+Node'a göçtü; gerçek mekanizma `desktop/src/main/riot/client.ts` `process.env.RIOT_API_KEY` (+ yakın `.env`). Dev-bölümü+checklist+LCU-note (`champ_select.rs`→`commands/lcu.ts`) güncellendi. Saf-doküman | **done** |
+
+## Discovery-4 batch (loop, 2026-06-17 — `csa-loop-discovery-4`: derin tarama, 11 aday; Verify fazı session-limit → lider KODDAN self-verify)
+> Not: 5 derin lane 11 aday buldu ama tüm Verify ajanları session-limit'e (2:10 reset) takıldı.
+> Lider (ana döngü, subagent değil) gerçek kodu okuyarak doğruladı — standing kural zaten "koddan teyit".
+| id | sev | dosya | özet | durum |
+|---|---|---|---|---|
+| ~~B-41~~ | med | `sources.ts` | (DB-003) u.gg+edge matchup ingestion `wins > games` (win_rate >1.0) bozuk satırı filtrelemiyordu → `champion_matchups`'a sızıp skoru şişirir. İki yola defensive guard. B-38'in upstream tamamlayıcısı. desktop 156 test + typecheck | **done** |
+| ~~DB-001~~ | — | `V006__matchups.sql` | CHECK(wins<=games) migration önerisi **REDDEDİLDİ**: SQLite `ALTER TABLE ADD CONSTRAINT` desteklemez → tablo-rebuild gerekir (destructive, lane kuralı yasak). Aynı koruma B-41 ile ingestion'da sağlandı | **wontfix** |
+| B-42 | high? | `lcu.ts:219` | (FLOATING_PROMISE_WATCHER_START, koddan-doğrulanmadı) `void this.watcher.start()` floating promise; reconnect döngüsü kendisi throw ederse sessizce yutulur, kullanıcı süresiz offline. Fix: `.catch()` → log + status 'disconnected'. **Önce koddan teyit** (B-21 reconnect-catch zaten loglar mı, çakışma?) | todo |
+| B-43 | low | `IngameView.tsx` | (TIMING_RACE_INGAME_POLLING, doğrulanmadı) iki bağımsız setInterval (1.5s/5s) seq-guard'sız; yavaş tick'te out-of-order state. `useChampSelect` fetchSeqRef deseni uygulanabilir. **Önce teyit** | todo |
+| B-44 | low | `ChampSelectWrapper.tsx:199` | (BAN_SUGGESTIONS_FETCH_RACE, doğrulanmadı) ban-fetch seq-guard'sız; hızlı faz değişiminde out-of-order. **Önce teyit** | todo |
+| B-45 | low | `recommendations.ts:47` | (IPC-PARSE-UNVALIDATED-CAST, doğrulanmadı) `parseSessionArg` parsed-session'ı `as SessionLike` runtime-guard'sız cast eder. **Önce teyit** (engine.parseSession yolu zaten core-validate mi?) | todo |
+| B-46 | low | `engine.test.ts` | (MISSING_RECOMMENDATIONS_JSON_ERROR_TEST, doğrulanmadı) recommendations_from_json zorunlu-alan-eksik error path'i test'siz. Saf test ekleme. **Önce teyit** | todo |
+| B-47 | low | `sources.test.ts` | (SECONDARY_RUNES partial-perk, doğrulanmadı) parseUggOverview 4-5 perk sınır durumu test'siz. Saf test. **Önce teyit** | todo |
+| ~~DB-002~~ | low | `repos.ts:167` | COALESCE eksik — ama `Number(null)→0` zaten doğru sonuç veriyor → kozmetik. **Düşük değer** | wontfix |
+| UNHANDLED_CATCH_SCHEDULER | — | `scheduler.ts` | circuit-breaker önerisi: efor M + "her zaman reschedule" aslında dayanıklılık (kasıt). Marjinal | wontfix |
+| SAMPLE_SIZE_ZERO | — | engine.rs+2 renderer | "n=0" yanıltıcı iddiası: n=0 aslında dürüst (0 maç). Subjektif/çok-katman | wontfix |
 
 ## Discovery-2 batch (a11y/concurrency/arch — 11 doğrulanmış; verify kısmen session-limit'e takıldı)
 | id | sev | dosya | özet | durum |
