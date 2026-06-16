@@ -247,7 +247,13 @@ export async function readRates(
   env: Env,
   region: string,
   patch?: string,
-): Promise<{ patch: string; region: string; total_games: number; rates: RateRow[] }> {
+): Promise<{
+  patch: string;
+  region: string;
+  total_games: number;
+  updated_at: number;
+  rates: RateRow[];
+}> {
   const resolvedPatch =
     patch ??
     (
@@ -263,13 +269,16 @@ export async function readRates(
     "";
 
   const meta = await env.DB.prepare(
-    "SELECT total_games FROM ingest_meta WHERE patch = ? AND region = ?",
+    "SELECT total_games, updated_at FROM ingest_meta WHERE patch = ? AND region = ?",
   )
     .bind(resolvedPatch, region)
-    .first<{ total_games: number }>();
+    .first<{ total_games: number; updated_at: number }>();
   const total = meta?.total_games ?? 0;
+  // updated_at (epoch ms): ingest tazeliği — durmuş ingestion'ı (dev-key expiry vb.)
+  // istemcinin YAŞ üzerinden tespit edebilmesi için response'ta sunulur.
+  const updatedAt = meta?.updated_at ?? 0;
   if (total === 0) {
-    return { patch: resolvedPatch, region, total_games: 0, rates: [] };
+    return { patch: resolvedPatch, region, total_games: 0, updated_at: updatedAt, rates: [] };
   }
 
   const rows = await env.DB.prepare(
@@ -295,7 +304,7 @@ export async function readRates(
     ban_rate: (banMap.get(r.champion_id) ?? 0) / total,
   }));
 
-  return { patch: resolvedPatch, region, total_games: total, rates };
+  return { patch: resolvedPatch, region, total_games: total, updated_at: updatedAt, rates };
 }
 
 export interface MatchupRow {

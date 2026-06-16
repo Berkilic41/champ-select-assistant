@@ -261,7 +261,7 @@ function metaDb(metaRows: MetaRow[]): D1Database {
         }
         if (sql.includes("total_games")) {
           const row = metaRows.find((m) => m.patch === args[0] && m.region === args[1]);
-          return row ? { total_games: row.total_games } : null;
+          return row ? { total_games: row.total_games, updated_at: row.updated_at } : null;
         }
         return null;
       },
@@ -287,5 +287,8 @@ describe("readRates patch resolution", () => {
     const res = await readRates(env, "tr1");
     // "16.9" > "16.10" leksik olarak; ama 16.10 daha yeni ingest edildi → seçilmeli.
     expect(res.patch).toBe("16.10");
+    // updated_at (ingest tazeliği) response'ta sunulur → istemci durmuş ingestion'ı
+    // yaş üzerinden tespit edebilir.
+    expect(res.updated_at).toBe(200);
   });
 });
