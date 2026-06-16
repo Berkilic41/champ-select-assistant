@@ -14,6 +14,10 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
   iyileştirme üretir; otomatik commit yok.
 
 ### Değişti
+- **Worker okuma-yolu patch çözümlemesi DRY** — `readRates`/`readMatchups`/`readBuilds`
+  aynı "en taze patch'i recency ile seç" bloğunu (B-14 recency yorumu dâhil) birebir
+  3× tekrarlıyordu; ortak `resolveLatestPatch` helper'ına indirildi. Tek bakım noktası,
+  davranış (açık boş-string patch dâhil) korundu. (B-36)
 - **`syncDataPipelineInner` DRY** — manuel veri-pipeline'ındaki beş kaynak (ddragon,
   meraki, build/matchup seed, match-v5) birebir aynı try/catch/fetch-log/error-push
   bloğunu tekrarlıyordu (~140 satır). Ortak `runSource<T>` helper'ına indirildi;

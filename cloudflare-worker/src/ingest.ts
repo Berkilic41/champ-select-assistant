@@ -242,6 +242,21 @@ export interface RateRow {
   ban_rate: number;
 }
 
+/** Resolve the patch to serve: the caller's explicit `patch` (including an empty
+ *  string, matching the prior `patch ?? …` behavior), else the latest ingested
+ *  patch for the region by RECENCY (updated_at, epoch ms — NOT lexical 'patch
+ *  DESC', which ranks "16.9" > "16.10" since byte '9'>'1' and would serve a stale
+ *  patch once 16.10/16.11 ship). '' when the region has no ingested data. */
+async function resolveLatestPatch(env: Env, region: string, patch?: string): Promise<string> {
+  if (patch !== undefined) return patch;
+  const row = await env.DB.prepare(
+    "SELECT patch FROM ingest_meta WHERE region = ? ORDER BY updated_at DESC LIMIT 1",
+  )
+    .bind(region)
+    .first<{ patch: string }>();
+  return row?.patch ?? "";
+}
+
 /** Read aggregated rates for a (patch, region). Patch defaults to the latest seen. */
 export async function readRates(
   env: Env,
@@ -254,19 +269,7 @@ export async function readRates(
   updated_at: number;
   rates: RateRow[];
 }> {
-  const resolvedPatch =
-    patch ??
-    (
-      await env.DB.prepare(
-        // En taze patch'i ingest RECENCY'sine göre seç (updated_at, epoch ms).
-        // 'ORDER BY patch DESC' leksik sıralardı → "16.9" > "16.10" (byte '9'>'1')
-        // ve Riot 16.10/16.11 çıksa bile bayat "16.9"u 'latest' sanardı.
-        "SELECT patch FROM ingest_meta WHERE region = ? ORDER BY updated_at DESC LIMIT 1",
-      )
-        .bind(region)
-        .first<{ patch: string }>()
-    )?.patch ??
-    "";
+  const resolvedPatch = await resolveLatestPatch(env, region, patch);
 
   const meta = await env.DB.prepare(
     "SELECT total_games, updated_at FROM ingest_meta WHERE patch = ? AND region = ?",
@@ -324,19 +327,7 @@ export async function readMatchups(
   region: string,
   patch?: string,
 ): Promise<{ patch: string; region: string; matchups: MatchupRow[] }> {
-  const resolvedPatch =
-    patch ??
-    (
-      await env.DB.prepare(
-        // En taze patch'i ingest RECENCY'sine göre seç (updated_at, epoch ms).
-        // 'ORDER BY patch DESC' leksik sıralardı → "16.9" > "16.10" (byte '9'>'1')
-        // ve Riot 16.10/16.11 çıksa bile bayat "16.9"u 'latest' sanardı.
-        "SELECT patch FROM ingest_meta WHERE region = ? ORDER BY updated_at DESC LIMIT 1",
-      )
-        .bind(region)
-        .first<{ patch: string }>()
-    )?.patch ??
-    "";
+  const resolvedPatch = await resolveLatestPatch(env, region, patch);
 
   const rows = await env.DB.prepare(
     `SELECT champion_id, opponent_id, role, games, wins
@@ -376,19 +367,7 @@ export async function readBuilds(
   region: string,
   patch?: string,
 ): Promise<{ patch: string; region: string; builds: BuildRow[] }> {
-  const resolvedPatch =
-    patch ??
-    (
-      await env.DB.prepare(
-        // En taze patch'i ingest RECENCY'sine göre seç (updated_at, epoch ms).
-        // 'ORDER BY patch DESC' leksik sıralardı → "16.9" > "16.10" (byte '9'>'1')
-        // ve Riot 16.10/16.11 çıksa bile bayat "16.9"u 'latest' sanardı.
-        "SELECT patch FROM ingest_meta WHERE region = ? ORDER BY updated_at DESC LIMIT 1",
-      )
-        .bind(region)
-        .first<{ patch: string }>()
-    )?.patch ??
-    "";
+  const resolvedPatch = await resolveLatestPatch(env, region, patch);
 
   const items = await env.DB.prepare(
     `SELECT champion_id, role, item_id, games
