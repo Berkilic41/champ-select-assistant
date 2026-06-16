@@ -372,7 +372,7 @@ export function useChampSelect(puuid: string = ''): {
     : lcuRole
       ? 'lcu'
       : preferredRef.current
-        ? 'manual'
+        ? 'preferred'
         : 'none';
 
   return { session, recommendations, lockedAnalysis, gamePlan, counterPicks, teamComp, comboBoard, draftVerdict, counterItems, laneMatchup, role, roleSource, setRole, isActive, loading, error };

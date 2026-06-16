@@ -29,7 +29,7 @@
 | **B-19** | low | `src/lib/ddragon.ts` | renderer DDragon patch'i yalnız LobbyView sync'iyle set; onboarding/direkt-champ-select yolunda set edilmez → App mount'ta global `get_ddragon_version` | todo |
 | ~~B-20~~ | low | `outcomes.ts` | `pickRecorded=true` try içine alındı → DB hatasında sonraki IN_GAME event'i retry eder, eğitim etiketi kaybolmaz. retry testi | **done** |
 | **B-21** | low | `lcu/websocket.ts:101-104` | reconnect catch hatayı bind/log etmiyor → kalıcı cert/pin sorunu sessiz backoff (`catch (err)`+warn) | todo |
-| **B-22** | low | `useChampSelect.ts:370-376` | roleSource kalıcı tercihi 'manual' etiketliyor → "Rolü sen seçtin" yanlış; `RoleSource`'a 'preferred' ekle | todo |
+| ~~B-22~~ | low | `useChampSelect.ts` + `RoleSelector.tsx` | roleSource kalıcı tercih → 'preferred' (nötr "Geçen oyundan hatırlandı" hint), yanlış "Rolü sen seçtin" kalktı | **done** |
 | **B-23** | low | `DataStatusBadges.test.tsx` | noRiotKey + liveDataAge dürüst chip'leri test'siz (en sık canlı durum: prod-key yok) | todo |
 | **B-24** | low | `recommendations.test.ts` / `engine.rs` | cold-start recs e2e + orWarnDefault hata-yolu + engine 0.3 nötr fallback e2e test boşlukları (#17/#18/#19) | todo |
 | **B-06** | low | `.claude/CLAUDE.md` | stale (Tauri→Electron) güncelle | todo |
@@ -46,5 +46,6 @@
 - **B-12** (done — br1) — `routingForRegion`'a `br1→americas` eklendi (account-v1 + Match-V5 doğru bölgesel host; eskiden 'europe' default'una düşüp BR maç/öneri verisini sessizce 404'lüyordu). Test eklendi. oc1 → B-12b (routing-split gerekir).
 - **B-18** (done) — `StatsView` WR bölümü, havuzdaki tüm şampiyonlar <3 maçsa sessizce gizlenmek yerine "≥3 maçlık şampiyon yok" ince-veri notu gösterir (+tr/en `stats.winRateThin` + 2 test). renderer 222 test.
 - **B-20** (done) — `OutcomeTracker.onGameflowPhase`: `pickRecorded=true` koşulsuz set ediliyordu; pick-record INSERT throw ederse o maçın öneri→pick eğitim etiketi kalıcı kaybolurdu. Flag artık yalnız başarılı INSERT sonrası set edilir → sonraki IN_GAME event'i retry eder. Davranışsal retry testi (throwing-db → boş; gerçek db → kayıt). desktop 15 outcomes test.
+- **B-22** (done) — `roleSource` kalıcı tercihten gelen rolü 'manual' yerine yeni 'preferred' provenance'ıyla etiketler; `RoleSelector` "Rolü sen seçtin" yerine nötr "Geçen oyundan hatırlandı" gösterir (+tr/en `rolePreferredHint` + test assertion). renderer 222 test. (commit 94037dd SONRASI — henüz commit'siz)
 - **B-07** (done — renderer) — cold-start dürüst-UI `DataStatusBadges.test.tsx`'te kapsanmış; host-tarafı e2e boşluğu B-24'e taşındı.
 - ~~**B-04** wontfix~~ → **B-15 reopen**: workflow placeholder-key'in kullanıcının kendi mastery ikonlarını bozduğunu doğruladı (kendi-iyileşse de pencere gerçek).

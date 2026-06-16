@@ -47,6 +47,9 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 - **Öğrenme verisi kaybı önlendi** — bir maç başlarken öneri→pick kaydı geçici bir
   veritabanı hatasıyla başarısız olursa, kayıt artık "yapıldı" sayılmayıp bir sonraki
   oyun-içi olayda yeniden denenir; o maçın yerel öğrenme etiketi sessizce kaybolmaz. (B-20)
+- **Rol kaynağı etiketi dürüstleşti** — rol bir önceki oyundan hatırlanan tercihten
+  geldiğinde, rol seçici artık yanıltıcı "Rolü sen seçtin" yerine "Geçen oyundan
+  hatırlandı" der. (B-22)
 
 ## [0.10.0-beta.6] — 2026-06-16
 

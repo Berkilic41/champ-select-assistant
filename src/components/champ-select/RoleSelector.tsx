@@ -6,7 +6,7 @@ import './RoleSelector.css';
 export const ROLES = ['top', 'jungle', 'middle', 'bottom', 'utility'] as const;
 export type Role = (typeof ROLES)[number];
 
-export type RoleSource = 'lcu' | 'manual' | 'none';
+export type RoleSource = 'lcu' | 'manual' | 'preferred' | 'none';
 
 interface Props {
   /** Currently effective role (one of ROLES, or '' when unknown). */
@@ -46,7 +46,11 @@ export const RoleSelector: React.FC<Props> = ({ role, source, onChange }) => {
       </div>
       {!unknown && (
         <span className="role-selector__hint">
-          {source === 'lcu' ? t('champSelect.roleAutoHint') : t('champSelect.roleManualHint')}
+          {source === 'lcu'
+            ? t('champSelect.roleAutoHint')
+            : source === 'preferred'
+              ? t('champSelect.rolePreferredHint')
+              : t('champSelect.roleManualHint')}
         </span>
       )}
     </div>

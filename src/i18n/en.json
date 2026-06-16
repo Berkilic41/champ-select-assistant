@@ -161,6 +161,7 @@
     "rolePrompt": "Pick your role — picks and bans adjust to it",
     "roleAutoHint": "Role auto-detected",
     "roleManualHint": "Role set by you",
+    "rolePreferredHint": "Remembered from your last game",
     "roleTitle": "Your role",
     "roles": {
       "top": "Top",

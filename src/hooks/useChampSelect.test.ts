@@ -123,6 +123,8 @@ describe('useChampSelect', () => {
     await waitFor(() => expect(result.current.session).not.toBeNull());
     // Persisted default fills in and is applied to the session.
     expect(result.current.role).toBe('bottom');
+    // Kaynak 'preferred' olmalı (bu seansta kullanıcı seçmedi → 'manual' yanlış olurdu).
+    expect(result.current.roleSource).toBe('preferred');
     expect(result.current.session?.local_player.assigned_position).toBe('bottom');
   });
 });

@@ -21,12 +21,14 @@
 
 - **Iter 9** — B-20 outcomes `pickRecorded` retry-safe (flag try içine) + retry testi. ✅ desktop 15 outcomes test.
 
-## Iterasyon 10 — sıradaki adaylar (skorla)
-- **B-22** (low, renderer) — roleSource kalıcı tercihi 'manual' etiketliyor → `RoleSource`'a 'preferred' + nötr hint.
+- **Iter 10** — B-22 roleSource 'preferred' provenance + nötr hint (+tr/en+test). ✅ renderer 222. (commit 94037dd SONRASI, henüz commit'siz)
+
+## Iterasyon 11 — sıradaki adaylar (skorla)
 - **B-11** (med, renderer) — puuid yarışı: puuid çözülünce mevcut session için recs refetch (useChampSelect — dikkatli).
 - **B-19** (low, renderer) — App mount'ta global `get_ddragon_version`→setDdragonVersion (champ-select yolu da canlı patch).
 - **B-21** (low, host) — LCU WS reconnect catch'i logla (`catch (err)`+warn).
-- **B-15** (med, renderer) — ensureChampion numeric placeholder: champMap'te all-digit key'i atla.
+- **B-15** (med, renderer/host) — ensureChampion numeric placeholder: champMap'te/getChampions'da all-digit key'i atla.
+- **B-24** (low, test) — cold-start recs e2e / orWarnDefault / engine 0.3 e2e (wasm build gerektirir).
 
 ### Sonraki adaylar (önceki liste)
 - **B-22** (low, renderer) — roleSource kalıcı tercihi 'manual' etiketliyor → 'preferred' ekle.

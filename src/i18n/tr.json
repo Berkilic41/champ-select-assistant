@@ -161,6 +161,7 @@
     "rolePrompt": "Rolünü seç — öneriler ve ban'lar buna göre düzenlenir",
     "roleAutoHint": "Rol otomatik algılandı",
     "roleManualHint": "Rolü sen seçtin",
+    "rolePreferredHint": "Geçen oyundan hatırlandı",
     "roleTitle": "Rolün",
     "roles": {
       "top": "Üst",
