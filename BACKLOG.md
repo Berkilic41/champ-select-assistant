@@ -40,7 +40,7 @@
 | id | sev | dosya | özet | durum |
 |---|---|---|---|---|
 | ~~B-26~~ | med | `useChampSelect.ts` | fetchRecommendations seq-guard'lı: out-of-order yanıt eskiyi ezmiyor + session-null sonrası bayat recs yazılmıyor. test | **done** |
-| **B-25** | med | `Toast.tsx` | toast'lar ekran-okuyucuya duyurulmuyor (live region yok) → `role=status`/`aria-live` (error→alert) | todo |
+| ~~B-25~~ | med | `Toast.tsx` | toast'lar SR'a duyuruluyor: error/warning `role=alert`/assertive, info/success `role=status`/polite. test | **done** |
 | **B-27** | low | `PoolBuilder.tsx:93` | bozuk ARIA tablist (role=tablist ama tab/aria-selected yok) → `role=group`+`aria-pressed` | todo |
 | **B-28** | low | `SettingsPanel.tsx`+`ChampionDetailCard.tsx` | dialog'da `aria-labelledby` + focus trap/restore yok | todo |
 | **B-29** | low | `Timer.tsx` | SVG geri sayım metin karşılığı yok; aciliyet yalnız renkle → `role=img`+`aria-label` | todo |

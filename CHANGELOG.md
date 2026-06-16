@@ -60,6 +60,8 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 - **Öneri yarış-koşulu giderildi** — hızlı pick/ban akışında geç gelen eski bir öneri
   yanıtı artık yeni öneriyi ezmiyor; champ-select bittikten sonra geç gelen yanıt da
   bayat öneri yazmıyor. (B-26)
+- **Erişilebilirlik: bildirimler ekran okuyucuya duyurulur** — toast bildirimleri
+  artık ekran okuyucu tarafından okunur (hata/uyarı acil, bilgi/başarı kibar). (B-25)
 
 ## [0.10.0-beta.6] — 2026-06-16
 
