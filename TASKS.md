@@ -27,29 +27,24 @@
 
 - **Iter 12** — B-11 puuid çözülünce aktif session için recs refetch + test. ✅ renderer 223.
 
-## Durum (Iter 21 sonu) — hızlı-win backlog tükendi
-**Bitmiş (21 iterasyon, 13 commit):** B-01/05/09/16/14/13/12/18/20/22/15/11/06/21/26/25/35/34/29/31/27/30 + sistem.
-**Kalan (daha büyük / taze bağlam ister):**
-- **B-03** (med) worker freshness sinyali — worker `/v1` response'a `updated_at`/age + desktop tüketim + UI stale-chip (3-katman, deploy ister).
-- **B-28** (low) modal `aria-labelledby` + focus trap/restore (SettingsPanel + ChampionDetailCard).
-- **B-32** (low) `syncDataPipelineInner` 220-satır god-function refactor (5 kopya source-step → ortak helper).
-- **B-33** (low) useChampSelect 7 kopya fetch-on-signature effect → ortak helper.
-- **B-19** (low) App mount global `get_ddragon_version`. **B-17** (low) RankCard/Trend/Weekly puuid retry. **B-24** test gaps (wasm). **B-12b** OC1 routing-split.
+## Durum — backlog esas olarak TÜKENDİ (2026-06-16, ~30 commit)
 
-## Iterasyon 13+ — durum
-İlk keşif batch'inin (B-09…B-24) **yüksek-değer + kolay** işleri bitti. Kalan: B-03
-(med, worker freshness — çok-katmanlı), B-19/B-21/B-17 (low), B-24 (wasm), B-12b/B-06.
-→ **İkinci keşif workflow'u** (wtpa90ort) çalışıyor (perf/a11y/mimari/güvenlik/concurrency/robustness).
-**B-06** (docs: `.claude/CLAUDE.md` Tauri→Electron) ✅ tamam. Workflow bulguları gelince yeni batch.
+**Bu oturumda (devam, 8 commit `1967d79…0f8d64b`):**
+- **B-12c** OCE match-v5 routing-split (`matchRoutingForRegion` oc1→sea; account-v1 americas'ta).
+- **B-10** noMeta yapısal `missing_signals`'a (sihirli-sabit `meta_score==0.3` kalktı, %50.1 yanlış-poz. giderildi).
+- **B-23** canlı-veri dürüst chip testleri (noRiotKey + bayat liveDataAge + taze=yok).
+- **B-08** wontfix (cold-DB champMap riski B-01 onError + B-15 ile kapsanmış).
+- **B-02** cold-start seed priming (`primeColdStartSeeds`, scheduler DDragon-sonrası, atomik+best-effort; FK silent-fail tuzağı yakalanıp doğru yere kondu).
+- **B-24** kısmen çözüldü (noMastery chip ölü DEĞİL — engine.rs:73-117 doğrulandı); motor-e2e ertelendi.
+- **B-33** useChampSelect 7 türev-effect → `useSessionDerived` (TDD-first: önce güvenlik-ağı testleri).
+- **B-32** `syncDataPipelineInner` god-function → `runSource<T>` helper (5 kaynak DRY).
 
-### Sonraki adaylar (önceki liste)
-- **B-22** (low, renderer) — roleSource kalıcı tercihi 'manual' etiketliyor → 'preferred' ekle.
-- **B-11** (med, renderer) — puuid yarışı (puuid gelince refetch yok) — dikkatli (useChampSelect).
-- **B-19** (low, renderer) — App mount'ta global `get_ddragon_version` (champ-select yolu da canlı patch alsın).
+**Tüm test yeşil:** renderer 243 · desktop 155 · worker 16 · core (clippy) — typecheck temiz, i18n parite.
 
-### Diğer adaylar (data-honesty cluster kalanı)
-- **B-14** (high, worker) — patch leksik-sort → `ORDER BY updated_at DESC` (deploy gerekir; worker test).
-- **B-12** (med, desktop) — routingForRegion: br1→americas NET; oc1 account-v1(`americas`) vs match-v5(`sea`) çakışması → routing'i API'ye göre ayırmak gerekebilir (dikkatli).
-- **B-10** (med, renderer) — noMeta `missing_signals`'a geçir; AMA test fixture `rec()` missing_signals set etmeli (14 test etkilenir) → dikkatli.
-- **B-13** (med, desktop) — u.gg satırlarını `uggPatch` ile etiketle (staleness maskesini kaldır).
-- **B-11** (med, renderer) — puuid yarışı: puuid çözülünce mevcut session için recs refetch.
+**Kalan (1 açık, ERTELENDİ):**
+- **B-24** (low) — kalan motor-e2e: mastery'siz+kombo'lu session fixture'ı kurup engine'in
+  combo-backed stretch (comfort 0) listesi ürettiğini kilitlemek + orWarnDefault/engine-0.3.
+  Yüksek-efor fixture; chip davranışı zaten DataStatusBadges testinde kapsalı. Taze bağlam ister.
+
+> Lider değerlendirmesi: güvenli + değerli + doğrulanabilir backlog bitti. Kalan tek iş
+> (B-24 motor-e2e) elaborate fixture gerektiren, görünür-değeri düşük bir test-kilidi.
