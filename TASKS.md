@@ -62,8 +62,12 @@
   Saf test, sıfır prod-kodu. ✅ desktop 158 test + typecheck temiz. (CHANGELOG'a yazılmaz — davranış değişmedi, B-46 emsali.)
 - **Discovery-4 KAPANDI** — kalan adayların koddan-disposition'u: **B-45 wontfix** (yanlış alarm:
   cast'ın altı null-safe + core yeniden-doğruluyor) · **B-43/B-44 deferred** (renderer effect-race;
-  self-correcting + deterministik race-test'i oransız ağır harness). Kalan tek açık iş: **B-24**
-  (yüksek-efor motor-e2e fixture, taze bağlam ister).
+  self-correcting + deterministik race-test'i oransız ağır harness).
+- **B-24 wontfix** — KODDAN DOĞRULANDI: "kalan motor-e2e" aslında AÇIK DEĞİL. `core/tests/recommendation_tests.rs`
+  üç testle tam kilitliyor: `combo_backed_stretch_appears_even_with_no_mastery` (mastery'siz Orianna,
+  Nocturne kombosu cb≥0.80 → çıkar), `stretch_pick_has_risk_note_and_one_at_most` (`comfort_score<0.10`
+  stretch'in risk_note'u + max-1 gate), `no_stretch_when_no_strong_combo` (negatif). Bunlar test-oracle
+  (core) seviyesinde — B-24'ün önerdiği WASM/TS tekrarı oracle kapsamını boilerplate'le KOPYALAR (churn).
 
 ## Durum — backlog esas olarak TÜKENDİ (2026-06-16, ~30 commit)
 
@@ -79,10 +83,13 @@
 
 **Tüm test yeşil:** renderer 243 · desktop 155 · worker 16 · core (clippy) — typecheck temiz, i18n parite.
 
-**Kalan (1 açık, ERTELENDİ):**
-- **B-24** (low) — kalan motor-e2e: mastery'siz+kombo'lu session fixture'ı kurup engine'in
-  combo-backed stretch (comfort 0) listesi ürettiğini kilitlemek + orWarnDefault/engine-0.3.
-  Yüksek-efor fixture; chip davranışı zaten DataStatusBadges testinde kapsalı. Taze bağlam ister.
+**Kalan: YOK — açık/güvenli/değerli micro-iş kalmadı (2026-06-17).**
+- B-24 (son açık iş) wontfix → motor-e2e zaten `core/tests/recommendation_tests.rs`'te
+  oracle seviyesinde kapsalı (yukarıda kanıt). Yeni bir test eklemek churn olurdu.
 
-> Lider değerlendirmesi: güvenli + değerli + doğrulanabilir backlog bitti. Kalan tek iş
-> (B-24 motor-e2e) elaborate fixture gerektiren, görünür-değeri düşük bir test-kilidi.
+> **Lider değerlendirmesi (2026-06-17):** 4 keşif turu + her adayın koddan-teyidi sonrası
+> güvenli + değerli + doğrulanabilir backlog TÜKENDİ. Olgun kod tabanı (~620+ test, clippy
+> temiz, 4-job CI). Bundan sonraki değer küçük otonom adımlarda DEĞİL — roadmap'in
+> ürün-kararı gerektiren büyük kalemlerinde: canlı-veri (Riot prod-key inceleme), ML/LLM
+> faz, overlay. Bunlar kullanıcı yönü ister; spekülatif 5. tur micro-tarama churn olur.
+> Döngü burada kullanıcı girdisi için duruyor (manufacture-churn kuralı).
