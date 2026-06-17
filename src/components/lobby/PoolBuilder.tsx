@@ -26,6 +26,7 @@ export const PoolBuilder: React.FC = () => {
   const puuid = useActiveSummonerPuuid();
   const [suggestions, setSuggestions] = useState<PoolSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [poolPlan, setPoolPlan] = useState<ChampionPoolPlan | null>(null);
   const [progress, setProgress] = useState<MasteryProgressEntry[]>([]);
 
@@ -40,6 +41,7 @@ export const PoolBuilder: React.FC = () => {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
+    setError(false);
     Promise.allSettled([
       invoke<PoolSuggestion[]>('get_pool_suggestions', { role, puuid }),
       invoke<ChampionPoolPlan>('get_champion_pool_plan', { role, puuid }),
@@ -48,12 +50,16 @@ export const PoolBuilder: React.FC = () => {
         if (cancelled) return;
         setSuggestions(suggestionResult.status === 'fulfilled' ? suggestionResult.value ?? [] : []);
         setPoolPlan(planResult.status === 'fulfilled' ? planResult.value ?? null : null);
+        // Sessiz hata yutma yok: öneri fetch'i reddedilirse "öneri yok" değil
+        // "veri alınamadı" göster (kardeş kartlar — RankCard vb. — ile tutarlı).
+        setError(suggestionResult.status === 'rejected');
         setLoading(false);
       })
       .catch(() => {
         if (!cancelled) {
           setSuggestions([]);
           setPoolPlan(null);
+          setError(true);
           setLoading(false);
         }
       });
@@ -195,7 +201,11 @@ export const PoolBuilder: React.FC = () => {
 
       {suggestions.length === 0 ? (
         <p className="pool-builder__empty">
-          {t(loading || !puuid ? 'poolBuilder.loading' : 'poolBuilder.empty')}
+          {loading || !puuid
+            ? t('poolBuilder.loading')
+            : error
+              ? t('app.dataError')
+              : t('poolBuilder.empty')}
         </p>
       ) : (
         <div className="pool-builder__grid">

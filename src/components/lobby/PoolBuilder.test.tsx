@@ -83,6 +83,19 @@ describe('PoolBuilder', () => {
     expect(await screen.findByText('Bu rol için öneri yok')).toBeInTheDocument();
   });
 
+  it('shows an honest data-error (not "no suggestions") when the pool fetch fails', async () => {
+    mockInvoke.mockImplementation((cmd: string) => {
+      if (cmd === 'get_active_summoner_puuid') return Promise.resolve('p');
+      if (cmd === 'get_pool_suggestions') return Promise.reject(new Error('backend down'));
+      if (cmd === 'get_champion_pool_plan') return Promise.resolve(null);
+      return Promise.resolve(null);
+    });
+    render(<PoolBuilder />);
+    // Backend/DB hatası "bu rol için öneri yok" gibi değil dürüst hata gösterir.
+    expect(await screen.findByText('Veri alınamadı')).toBeInTheDocument();
+    expect(screen.queryByText('Bu rol için öneri yok')).not.toBeInTheDocument();
+  });
+
   it('exposes the role buttons as a labelled group with aria-pressed (a11y)', () => {
     mockInvoke.mockResolvedValue(null);
     const { container } = render(<PoolBuilder />);

@@ -25,9 +25,16 @@
   (düşük mimari risk) → tercih edildi. Agent-3 bulgusu KODDAN teyit (SettingsPanel:58,66 gerçekten window.confirm).
   `confirmingClose` state + Escape-önce-onayı-kapat; footer İptal dokunulmadı (explicit discard). `.settings-confirm`
   CSS, tr/en parite, +1 test. ✅ renderer 257 + typecheck + i18n. (commit bekliyor)
-- **Sıradaki:** P-02 (LLM "Bağlantı test et" — dar kitle) · P-04 (klavye yardımı) · P-05 (lobby snapshot) — hepsi
-  dar/kısmen-kapsalı. **Lider notu: küçük-özellik yüzeyi neredeyse tükendi (P-01/P-03/P-06 son temiz olanlardı).**
-  Sonraki tur ya kalan dar adayı ya da daha BÜYÜK bir özellik (match-history browser) için yön/onay önerilecek.
+- **Iter P-07 (done)** — PoolBuilder dürüst veri-hatası: `error` state + üç-durum render (loading/error/empty);
+  `get_pool_suggestions` reddedilince `app.dataError` (RankCard:41,60 deseni), `Promise.allSettled` reject'i
+  artık sessizce "öneri yok"a düşmüyor. Lider seçimi: 5-boyutlu doğrulanmış keşif (19 ajan, 14 aday/0 çürütüldü)
+  sonrası window-opacity (IPC ölü AMA `setWindowOpacity` event-only+saydamlık tasarımı belirsiz) ve
+  lane-matchup-badge (core plumbing/engine-purity) ertelendi → P-07 en temiz küçük+güvenli+tema-uyumlu aday.
+  Koddan doğrulandı (app.dataError tr+en'de var). Renderer-only, sıfır yeni i18n, +1 test.
+  ✅ renderer 258 + typecheck 0 + i18n parite. (commit hazırlanıyor)
+- **Sıradaki:** dar/kısmen-kapsalı küçük adaylar tükeniyor (P-02 LLM-test dar · P-04 klavye · P-05 snapshot ·
+  düşük-değer rozetler/skeleton'lar). **Lider notu: gerçek değer artık BÜYÜK özelliklerde** — match-history browser
+  (geniş, yüksek-değer; ürün-kararı/onay ister) ya da lane-matchup veri-dürüstlüğü (core, ayrı dikkatli tur).
 
 ## Tamamlanan iterasyonlar
 - **Iter 0** — Sistem kurulumu (7 yönetim dosyası + döngü). ✅

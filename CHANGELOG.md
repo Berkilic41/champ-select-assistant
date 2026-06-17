@@ -7,6 +7,13 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Havuz koçunda dürüst veri-hatası durumu** — `PoolBuilder` öneri fetch'i
+  (`get_pool_suggestions`) reddedildiğinde artık sessizce "bu rol için öneri yok"
+  demiyor; backend/DB hatasını kardeş kartlarla (RankCard/TrendPanel/WeeklySummaryCard)
+  tutarlı biçimde dürüstçe `app.dataError` ("Veri alınamadı") olarak gösteriyor.
+  Yükleniyor / hata / boş üç durumu net ayrıldı (sessiz hata yutma giderildi —
+  bir kullanıcı backend çökmesini "havuzun zayıf" sanmaz). Renderer-only, sıfır yeni
+  i18n (mevcut `app.dataError`), +1 test. (P-07)
 - **Ayarlarda temalı "değişiklikleri at" onayı** — kaydedilmemiş değişikliklerle ayar
   panelini kapatma denemesi (X düğmesi / Escape / arka-plana tık) artık native
   `window.confirm` yerine uygulamanın koyu temasıyla uyumlu, odaklanabilir bir

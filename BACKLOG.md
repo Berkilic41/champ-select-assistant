@@ -21,6 +21,17 @@ kod tabanında çok "açık" abarttı; drills/win-prob/combo-history zaten rende
   SettingsPanel:58,66 window.confirm kullanıyordu). Dirty kapatma (X/Escape/backdrop) `role="alertdialog"` gösterir;
   Escape önce onayı kapatır; footer İptal doğrudan atar. Geniş (tüm ayar kullanıcıları) + profesyonel + renderer-only.
   `.settings-confirm` CSS, tr/en `settings.keepEditing`/`discardChanges` parite, +1 test (dirty→dialog→dön/at). renderer 257.
+- **P-07 done** — PoolBuilder dürüst veri-hatası durumu: öneri fetch'i (`get_pool_suggestions`) reddedilince
+  sessizce "öneri yok" yerine `app.dataError` ("Veri alınamadı") gösterir (kardeş RankCard/TrendPanel/
+  WeeklySummaryCard deseni; `Promise.allSettled` reject'i artık silent-empty'ye düşmüyor). 5-boyutlu DOĞRULANMIŞ
+  keşif workflow'u (19 ajan, 14 aday → çekişmeli "zaten var mı" doğrulaması, 0 çürütüldü) bu turun en temiz
+  küçük+güvenli+tema-uyumlu (veri-dürüstlüğü) adayıydı. `error` state + üç-durum render. Renderer-only, sıfır
+  yeni i18n, +1 test. renderer 258.
+- **Yeni keşif (2026-06-17) ertelenenler (koddan teyitli, "küçük" değil):** window-opacity-control (IPC yazılı
+  ama `setWindowOpacity` native değil event-only → renderer CSS-listener + saydamlık tasarım kararı gerekir) ·
+  lane-matchup-heuristic-badge (ORTA değer; core `ScoringContext`→`lane_matchup_from_json`'a geniş plumbing →
+  engine-purity riski, ayrı tur) · poolbuilder-loading-skeleton / lobby-cards-shimmer / objective-absolute-clock /
+  sound-section-relocation / lane-form & draft-winrate rozetleri (düşük değer, sıradaki turlara).
 - **Aday kuyruğu (koddan teyitli; ajanlar olgun kodda abarttı):** P-02 LLM-koç "Bağlantı test et" (host-fetch,
   gizlilik copy'si ZATEN var → yalnız test-butonu kaldı, dar kitle) · P-04 klavye-kısayol yardımı (HeroCard
   selectHint kısmen kapsıyor) · P-05 lobby Performance Snapshot (GameReviewCard kısmen kapsıyor). ELENEN: pool
