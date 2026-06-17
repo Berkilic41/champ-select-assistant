@@ -64,6 +64,13 @@
       "role": "Takım rolü",
       "spike": "Güç tepesi",
       "spikeWindow": "Güç penceresi",
+      "power": {
+        "title": "Güç eğrisi",
+        "early": "Erken",
+        "mid": "Orta",
+        "late": "Geç",
+        "aria": "Güç eğrisi — erken %{{early}}, orta %{{mid}}, geç %{{late}}"
+      },
       "lane": "Erken (lane)",
       "wave": "Dalga",
       "matchup": "Matchup",

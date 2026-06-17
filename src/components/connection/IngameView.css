@@ -157,6 +157,51 @@
   line-height: 1.4;
 }
 
+/* ── Power curve (glance HUD visual; peak phase highlighted) ───────────── */
+.overlay-power {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+  height: 36px;
+}
+
+.overlay-power-col {
+  display: flex;
+  flex: 1;
+  max-width: 44px;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.overlay-power-track {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  height: 24px;
+  background: var(--surface-3);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.overlay-power-fill {
+  width: 100%;
+  min-height: 2px;
+  background: var(--text-muted);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  transition: height var(--motion-normal);
+}
+.overlay-power-fill--peak {
+  background: var(--teal-bright, #2dd4bf);
+}
+
+.overlay-power-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 /* ── Macro overlay (live game) ─────────────────────────────────────────── */
 .overlay-macro {
   display: flex;

@@ -64,6 +64,13 @@
       "role": "Team role",
       "spike": "Power spike",
       "spikeWindow": "Power window",
+      "power": {
+        "title": "Power curve",
+        "early": "Early",
+        "mid": "Mid",
+        "late": "Late",
+        "aria": "Power curve — early {{early}}%, mid {{mid}}%, late {{late}}%"
+      },
       "lane": "Early (lane)",
       "wave": "Wave",
       "matchup": "Matchup",

@@ -157,6 +157,14 @@ export const IngameView: React.FC<Props> = ({ summonerName }) => {
                 : t('overlay.plan.cs', { cs: plan.cs })}
             </span>
           </div>
+          <div className="overlay-plan-row">
+            <span className="overlay-plan-label">{t('overlay.plan.power.title')}</span>
+            <PowerCurveBar
+              early={plan.power_early}
+              mid={plan.power_mid}
+              late={plan.power_late}
+            />
+          </div>
           <PlanRow label={t('overlay.plan.win')} text={plan.win_condition} />
           <PlanRow label={t('overlay.plan.role')} text={plan.team_role} />
           {plan.spike_note && <PlanRow label={t('overlay.plan.spike')} text={plan.spike_note} />}
@@ -228,3 +236,47 @@ const PlanRow: React.FC<{ label: string; text: string }> = ({ label, text }) => 
     <span className="overlay-plan-text">{text}</span>
   </div>
 );
+
+const POWER_PHASES = ['early', 'mid', 'late'] as const;
+
+const pct = (v: number): number => Math.round(Math.max(0, Math.min(1, v)) * 100);
+
+// Glance-edilebilir güç eğrisi: 3 dikey çubuk (erken/orta/geç), her biri
+// arketipin 0..1 gücüyle orantılı yükseklikte; zirve faz(lar)ı vurgulanır.
+// Metinsel spike_note'u görsel bir HUD öğesiyle tamamlar. role=img + aria-label
+// ile SR'a tek özet olarak duyurulur (a11y: B-29 Timer deseni gibi).
+export const PowerCurveBar: React.FC<{
+  early: number;
+  mid: number;
+  late: number;
+}> = ({ early, mid, late }) => {
+  const { t } = useTranslation();
+  const vals = { early, mid, late };
+  const peak = Math.max(early, mid, late);
+  return (
+    <div
+      className="overlay-power"
+      role="img"
+      aria-label={t('overlay.plan.power.aria', {
+        early: pct(early),
+        mid: pct(mid),
+        late: pct(late),
+      })}
+    >
+      {POWER_PHASES.map((phase) => {
+        const isPeak = peak > 0 && vals[phase] >= peak - 1e-6;
+        return (
+          <div key={phase} className="overlay-power-col" aria-hidden="true">
+            <div className="overlay-power-track">
+              <div
+                className={`overlay-power-fill${isPeak ? ' overlay-power-fill--peak' : ''}`}
+                style={{ height: `${pct(vals[phase])}%` }}
+              />
+            </div>
+            <span className="overlay-power-label">{t(`overlay.plan.power.${phase}`)}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
