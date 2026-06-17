@@ -83,6 +83,37 @@ export function recentMatches(db: DatabaseSync, puuid: string, limit: number): D
     .all(puuid, limit) as unknown as DbMatchRow[];
 }
 
+export interface MatchHistoryRow extends DbMatchRow {
+  /** 1 = bu maçın game_reviews karnesi var (Slice 2 detay paneli için). */
+  has_review: number;
+}
+
+/**
+ * Maç geçmişi listesi (Epic Slice 1). `recentMatches` ile aynı matches+champions
+ * JOIN'i + per-maç "karne var mı" işareti (EXISTS). recentMatches/review
+ * pipeline'ına DOKUNMAZ — yalnız additive okuma. Yeni Riot çağrısı/cloud yok.
+ */
+export function getMatchHistory(
+  db: DatabaseSync,
+  puuid: string,
+  limit: number,
+): MatchHistoryRow[] {
+  return db
+    .prepare(
+      `SELECT m.match_id, m.champion_id, COALESCE(c.key, '') AS champion_key,
+              m.position, m.queue_id, m.win, m.kills, m.deaths, m.assists,
+              m.duration_secs, m.played_at, m.cs, m.cs_at_10, m.deaths_pre_14,
+              m.vision_score,
+              EXISTS(SELECT 1 FROM game_reviews gr WHERE gr.match_id = m.match_id) AS has_review
+       FROM matches m
+       LEFT JOIN champions c ON c.champion_id = m.champion_id
+       WHERE m.puuid = ?
+       ORDER BY m.played_at DESC
+       LIMIT ?`,
+    )
+    .all(puuid, limit) as unknown as MatchHistoryRow[];
+}
+
 function openGoal(db: DatabaseSync, puuid: string, group: string): FocusGoalRow | undefined {
   return db
     .prepare(

@@ -12,6 +12,7 @@ import {
   focusStreak,
   generateGameReviews,
   getGameReviews,
+  getMatchHistory,
   getMatchNote,
   getTrendReport,
   queueGroup,
@@ -89,6 +90,28 @@ describe("koç döngüsü (game_review.rs + game-review.ts)", () => {
     expect(queueGroup(440)).toBe("flex");
     expect(queueGroup(450)).toBe("aram");
     expect(queueGroup(400)).toBe("normal");
+  });
+
+  it("lists match history newest-first with champion JOIN + has_review flag (Epic Slice 1)", () => {
+    const db = seededDb();
+    // Yalnız bir maça karne ekle → has_review tek satırda 1, diğerlerinde 0.
+    db.prepare(
+      `INSERT INTO game_reviews (match_id, puuid, queue_group, created_at, review_json)
+       VALUES ('TR1_r3', ?, 'soloq', 0, '{}')`,
+    ).run(PUUID);
+
+    const hist = getMatchHistory(db, PUUID, 20);
+    expect(hist).toHaveLength(7);
+    // played_at DESC: en yeni (7000) ilk, en eski (1000) son.
+    expect(hist[0].match_id).toBe("TR1_r7");
+    expect(hist[6].match_id).toBe("TR1_r1");
+    // champions JOIN → champion_key dolu.
+    expect(hist[0].champion_key).toBe("Garen");
+    // has_review yalnız karnesi olan maçta.
+    expect(hist.find((r) => r.match_id === "TR1_r3")!.has_review).toBe(1);
+    expect(hist.find((r) => r.match_id === "TR1_r7")!.has_review).toBe(0);
+    // limit uygulanır.
+    expect(getMatchHistory(db, PUUID, 3)).toHaveLength(3);
   });
 
   it("generates reviews oldest-first, runs the goal loop, and is idempotent", () => {

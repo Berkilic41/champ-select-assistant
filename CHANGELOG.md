@@ -7,6 +7,15 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Maç Geçmişi sekmesi** (Match-History Browser Epic — Slice 1) — Lobby'ye 4. sekme
+  ("Maç Geçmişi"): yerel DB'deki son 20 maç şampiyon ikonu, rol, galibiyet/mağlubiyet,
+  relatif tarih, KDA, CS/dk ve vision ile listeleniyor; karnesi olan maçlar "İncelendi"
+  rozetiyle işaretli. Yeni host komutu `get_match_history` (mevcut `recentMatches` JOIN'i
+  + `game_reviews` EXISTS işareti — **yeni Riot çağrısı / cloud YOK, sadece local DB**).
+  Dürüst durumlar (P-07 deseni): yükleniyor / veri alınamadı / boş ayrı. CS/dk hesaplanır,
+  eski (cs null) maçlarda "—". Saf host+renderer (core/ts-rs/WASM değişmedi); tr/en parite,
+  +4 renderer testi + 1 host testi (sıralama/JOIN/has_review). Sonraki dilimler: maça
+  tıklayınca game-review detay paneli (Slice 2), champion/rol/win-loss filtreleri (Slice 3).
 - **Havuz koçunda dürüst veri-hatası durumu** — `PoolBuilder` öneri fetch'i
   (`get_pool_suggestions`) reddedildiğinde artık sessizce "bu rol için öneri yok"
   demiyor; backend/DB hatasını kardeş kartlarla (RankCard/TrendPanel/WeeklySummaryCard)

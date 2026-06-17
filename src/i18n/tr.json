@@ -102,10 +102,22 @@
     "tabChampions": "Şampiyonlarım",
     "tabStats": "İstatistiklerim",
     "tabPool": "Havuz Geliştir",
+    "tabMatchHistory": "Maç Geçmişi",
     "gridEmpty": "Henüz veri yok — \"Maç geçmişini yükle\" butonuna tıkla.",
     "patchBadge": "Patch {{version}}",
     "metaBadge": "Meta: {{rel}}",
     "masteryTitle": "Mastery {{level}}"
+  },
+  "matchHistory": {
+    "title": "Maç Geçmişi",
+    "loading": "Maçlar yükleniyor…",
+    "empty": "Henüz maç kaydı yok",
+    "win": "Galibiyet",
+    "loss": "Mağlubiyet",
+    "kda": "KDA",
+    "csPerMin": "CS/dk",
+    "vision": "Vizyon",
+    "reviewed": "İncelendi"
   },
   "champSelect": {
     "yourTeam": "Takımın",

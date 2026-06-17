@@ -7,6 +7,7 @@ import { ChampionGrid } from '../ChampionGrid';
 import { SessionCoachCard } from './SessionCoachCard';
 import { StatsView } from './StatsView';
 import { PoolBuilder } from './PoolBuilder';
+import { MatchHistoryView } from './MatchHistoryView';
 import './LobbyView.css';
 
 interface Props {
@@ -15,7 +16,7 @@ interface Props {
   platformRegion: string;
 }
 
-type Tab = 'champions' | 'stats' | 'pool';
+type Tab = 'champions' | 'stats' | 'pool' | 'matchHistory';
 
 function parseSummoner(summonerName: string): { gameName: string; tagLine: string } {
   const sep = summonerName.indexOf('#');
@@ -52,7 +53,9 @@ export const LobbyView: React.FC<Props> = ({ summonerName, platformRegion }) => 
   // restores it instead of snapping back to "champions" every time.
   const [activeTab, setActiveTab] = useState<Tab>(() => {
     const stored = localStorage.getItem('lobbyActiveTab');
-    return stored === 'stats' || stored === 'pool' ? stored : 'champions';
+    return stored === 'stats' || stored === 'pool' || stored === 'matchHistory'
+      ? stored
+      : 'champions';
   });
   const [patchVersion, setPatchVersion] = useState<string | null>(null);
   const [lastMetaSync, setLastMetaSync] = useState<number | null>(null);
@@ -144,6 +147,15 @@ export const LobbyView: React.FC<Props> = ({ summonerName, platformRegion }) => 
         >
           {t('lobby.tabPool')}
         </button>
+        <button
+          role="tab"
+          aria-selected={activeTab === 'matchHistory'}
+          className={`lobby-tab${activeTab === 'matchHistory' ? ' lobby-tab--active' : ''}`}
+          onClick={() => setActiveTab('matchHistory')}
+          type="button"
+        >
+          {t('lobby.tabMatchHistory')}
+        </button>
       </div>
 
       <div className="lobby__grid-wrap">
@@ -151,6 +163,8 @@ export const LobbyView: React.FC<Props> = ({ summonerName, platformRegion }) => 
           <ChampionGrid stats={stats} masteries={masteries} champMap={champMap} isLoading={loading} />
         ) : activeTab === 'stats' ? (
           <StatsView stats={stats} masteries={masteries} champMap={champMap} />
+        ) : activeTab === 'matchHistory' ? (
+          <MatchHistoryView />
         ) : (
           <PoolBuilder />
         )}

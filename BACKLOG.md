@@ -6,6 +6,20 @@
 > **21 doğrulanmış bulgu**, adversaryal koddan-teyit) çıktısıdır.
 
 ## Aktif
+**MOD: Büyük geliştirme — EPIC (2026-06-17 kullanıcı direktifi).** Küçük-yüzey tükendi → en yüksek-değerli
+BÜYÜK yönü Epic seç, MVP'ye böl, her tur tek dikey dilim (salt kozmetik yok). Öncelik: 1) match-history
+2) lane-matchup dürüstlük 3) post-game koçluk 4) havuz gelişim 5) in-game makro. Kapsam belirsizse sorma,
+makul varsay (→ DECISIONS ADR-004). Test+typecheck+desktop testleri geçmeden bitmiş sayılmaz.
+- **EPIC: Match-History Browser** (yerel DB; cloud/yeni Riot çağrısı YOK).
+  - **Slice 1 done** — "Maç Geçmişi" liste sekmesi: yeni host `get_match_history` (`recentMatches` JOIN +
+    `game_reviews` EXISTS has_review) + `MatchHistoryView` (4. lobby sekmesi). Şampiyon/rol/sonuç/tarih/KDA/
+    CS-dk/vision + "İncelendi" rozeti; P-07 dürüst loading/error/empty; cs null→"—". Saf host+renderer
+    (core/ts-rs/WASM değişmedi). renderer 262 + host 160 + typecheck 0; tr/en parite; +4 renderer +1 host test.
+    Varsayımlar ADR-004 (A1–A7). GOTCHA: played_at Unix SANİYE (×1000); getByText doğrudan-metin-düğümü → rol regex.
+  - **Slice 2 todo** — satıra tıkla → detay paneli; `GameReviewCard`'a `matchId`/`review` prop refactor (şu an
+    "en yeni"e sabit) → tam review verdict (lines/went_right/to_fix/focus). Host `getGameReviewByMatchId` veya filter.
+  - **Slice 3 todo** — filtreler: champion + rol (PoolBuilder rol-buton deseni) + win/loss; client-side.
+
 **MOD: Otonom ürün geliştirme (2026-06-17 kullanıcı direktifi).** Artık bugfix/audit değil — her
 iterasyonda fırsat keşfet → P0/P1 yoksa en yüksek-değerli KÜÇÜK özelliği seç → uygula+test+dokümante+commit.
 Keşif: 3 Explore ajanı (feature/latent-intelligence/polish) + lider koddan-çapraz-doğrulama (ajanlar olgun

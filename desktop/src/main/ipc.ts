@@ -40,6 +40,7 @@ import { syncRecommendationFeedback } from "./commands/feedback-flush";
 import {
   generateGameReviews,
   getGameReviews,
+  getMatchHistory,
   getMatchNote,
   getTrendReport,
   setMatchNote,
@@ -469,6 +470,14 @@ export function buildCommandRegistry(
   );
   commands.set("get_trend_report", (args) =>
     getTrendReport(requireEngine(ctx), requireDb(ctx), String(args?.puuid ?? "")),
+  );
+  // Epic Slice 1: maç geçmişi listesi (yerel DB, yeni Riot çağrısı yok).
+  commands.set("get_match_history", (args) =>
+    getMatchHistory(
+      requireDb(ctx),
+      String(args?.puuid ?? ""),
+      typeof args?.limit === "number" ? args.limit : 20,
+    ),
   );
   // D3 tercihler + D4 meta trend.
   commands.set("get_champion_preferences", (args) =>

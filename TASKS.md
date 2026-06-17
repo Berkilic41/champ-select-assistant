@@ -2,6 +2,19 @@
 
 > Tek seferde tek küçük görev. Tarih: 2026-06-16.
 
+## Büyük geliştirme modu — EPIC: Match-History Browser (2026-06-17, kullanıcı direktifi)
+> "Küçük-yüzey tükendiyse durma. En yüksek-değerli büyük yönü Epic seç, MVP'ye böl, ilk dikey dilimi uygula.
+> Kapsam belirsizse soru sormadan makul varsay (→ DECISIONS ADR-004). Her tur tek dikey değer; salt kozmetik yok.
+> Test+typecheck+desktop testleri geçmeden bitmiş sayma." Öncelik: match-history (#1) → lane-matchup dürüstlük → …
+- **Plan** — 3 paralel Explore (DB/data-layer, GameReviewCard reuse, lobby nav/test). Koddan doğrulandı: `matches`
+  (V003) tüm alanlar var; `recentMatches` JOIN hazır; LobbyView 3→4 sekme additive; ipc-contract testi yeni komutu yakalar.
+- **Iter Slice-1 (done)** — Maç Geçmişi liste sekmesi. Host: `getMatchHistory` (game-review.ts, `game_reviews` EXISTS
+  → has_review) + ipc.ts kayıt. Renderer: `match-history.ts` tipi + `MatchHistoryView.tsx`/`.css` + LobbyView 4. sekme +
+  i18n `matchHistory.*`/`lobby.tabMatchHistory` (tr/en). GOTCHA: played_at Unix SANİYE (×1000); RTL getByText doğrudan-
+  metin-düğümü eşler → rol meta satırında regex. Testler: host getMatchHistory (sıralama/JOIN/has_review/limit) + 4
+  renderer (satır/rozet-gizleme/boş/hata). ✅ renderer 262 + host 160 + typecheck 0 + i18n parite. (commit hazırlanıyor)
+- **Sıradaki:** Slice 2 (detay paneli — `GameReviewCard` `matchId`/`review` refactor) → Slice 3 (champion/rol/win-loss filtreleri).
+
 ## Ürün geliştirme modu (2026-06-17, kullanıcı direktifi)
 > "Artık yalnızca bugfix/audit değil — otonom ürün geliştirme lideri. Her iterasyonda fırsat keşfet,
 > P0/P1 yoksa en yüksek kullanıcı-değerli küçük özelliği seç, uygula+test+dokümante+commit, sonra devam."
