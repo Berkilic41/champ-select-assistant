@@ -83,6 +83,57 @@ export function getMasteryProgress(
   }));
 }
 
+export interface LearningProgressEntry {
+  champion_id: number;
+  champion_key: string;
+  points_gained: number;
+  current_level: number;
+}
+
+/**
+ * Kullanıcının "Öğreniyorum" işaretlediği (user_preferences.preference='learning')
+ * şampiyonların son `days` gündeki mastery ilerlemesi. gained=0 olanlar da döner
+ * ("işaretli ama henüz hareket yok"). recommend→işaretle→ilerleme döngüsünü kapatır.
+ * Sadece mastery_snapshot verisi olan learning hedefleri döner (gelecekte LEFT JOIN).
+ */
+export function getLearningProgress(
+  db: DatabaseSync,
+  puuid: string,
+  days: number,
+): LearningProgressEntry[] {
+  const learning = db
+    .prepare(
+      "SELECT champion_id FROM user_preferences WHERE puuid = ? AND preference = 'learning'",
+    )
+    .all(puuid) as unknown as { champion_id: number }[];
+  if (learning.length === 0) return [];
+  const ids = learning.map((r) => Number(r.champion_id));
+  const since = Math.floor(Date.now() / 1000) - Math.max(days, 1) * 86_400;
+  const keys = championKeyMap(db);
+  const placeholders = ids.map(() => "?").join(",");
+  const rows = db
+    .prepare(
+      `SELECT champion_id,
+              MAX(mastery_points) - MIN(mastery_points) AS gained,
+              MAX(mastery_level)  AS current_level
+       FROM mastery_snapshots
+       WHERE puuid = ? AND snapshot_at >= ? AND champion_id IN (${placeholders})
+       GROUP BY champion_id
+       ORDER BY gained DESC`,
+    )
+    .all(puuid, since, ...ids) as unknown as {
+    champion_id: number;
+    gained: number;
+    current_level: number;
+  }[];
+  return rows.map((r) => ({
+    champion_id: Number(r.champion_id),
+    champion_key: keys.get(Number(r.champion_id)) ?? "",
+    points_gained: Number(r.gained),
+    current_level: Number(r.current_level),
+  }));
+}
+
 /** Son maçlardan performans-trend raporu — satırlar host'tan, rapor core'dan. */
 export function getPerformanceReport(
   engine: Engine,

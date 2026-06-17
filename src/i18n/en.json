@@ -626,6 +626,9 @@
     "drillsTitle": "Practice",
     "progressTitle": "Last 30 days progress",
     "progressGain": "+{{pts}} mastery points",
+    "learningTitle": "Your learning targets",
+    "learningGain": "+{{pts}} pts · Lv {{level}}",
+    "learningNoMove": "Marked — no movement yet",
     "training": {
       "blind_safe": "Blind-safe anchor",
       "counter_pick": "Reactive counter pick",

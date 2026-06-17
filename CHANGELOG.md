@@ -7,6 +7,12 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Havuz koçunda öğrenme-hedefi ilerleme kartı** (Havuz Gelişim Epic — Slice 1) — Havuz koçu artık
+  kullanıcının "Öğreniyorum" işaretlediği (ChampionDetailCard) şampiyonların son 30 günlük mastery
+  ilerlemesini ayrı "Öğrenme hedeflerin" bölümünde gösteriyor ("+N puan · Sv X" ya da işaretli-ama-hareket-yok).
+  recommend→işaretle→ilerleme döngüsünü kapatır. Yeni host `get_learning_progress` (user_preferences.learning ⋈
+  mastery_snapshots; mevcut mastery-progress'ten ayrı, learning-filtreli). Core değişmedi (engine purity);
+  tr/en parite + host/renderer testleri (player komutlarının ilk test dosyası).
 - **In-game objective mutlak doğuş saati** (Overlay Makro Epic — Slice 1) — Oyun-içi overlay'de obje
   zamanlayıcıları (ejder/baron vb.) artık geri sayımın yanında mutlak doğuş oyun-saatini de gösteriyor
   (ör. "1:30" altında "@24:00") — oyuncu kendi oyun-saatiyle toplama yapmadan "ne zaman doğacak"ı bir bakışta

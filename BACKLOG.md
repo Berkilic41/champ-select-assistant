@@ -17,11 +17,14 @@ makul varsay (→ DECISIONS ADR-004). Test+typecheck+desktop testleri geçmeden 
     renderer 272 + typecheck 0 + i18n parite. core/host değişmedi. Lider seçimi: geniş kitle (tüm in-game
     kullanıcısı) + minik + sıfır-risk → öğrenme-progress'ten (dar kitle, orta efor) önce.
 - **EPIC #4: Havuz Gelişim Sistemi** (renderer+host-query; core DEĞİŞMEZ).
-  - **Slice 1 (aday, KODDAN DOĞRULANDI)** — öğrenme-hedefi ilerleme kartı: kullanıcının "Öğreniyorum"
-    işaretlediği (ChampionDetailCard.tsx:95-96 set_champion_preference 'learning') şampiyonların mastery
-    ilerlemesi PoolBuilder'da gösterilmiyor (get_mastery_progress top-5/learning-filtresiz, player.ts:51-84).
-    Yeni host `getLearningProgress` (user_preferences.learning ⋈ mastery_snapshots) + PoolBuilder "Öğrenme
-    hedeflerin" bölümü + i18n. Recommend→işaretle→ilerleme döngüsünü kapatır. Sıradaki tur.
+  - **Slice 1 done** — öğrenme-hedefi ilerleme kartı: kullanıcının "Öğreniyorum" işaretlediği
+    (ChampionDetailCard.tsx:95-96) şampiyonların son-30g mastery ilerlemesi PoolBuilder "Öğrenme hedeflerin"
+    bölümünde ("+N puan · Sv X" / işaretli-ama-hareket-yok). Yeni host `getLearningProgress`
+    (user_preferences.learning ⋈ mastery_snapshots; gained>=0 dahil) + `get_learning_progress` kaydı +
+    i18n poolCoach.learningTitle/learningGain/learningNoMove (tr/en). `.pool-progress` CSS yeniden kullanıldı
+    (yeni CSS yok). Core değişmedi. renderer 273 + host 164 + typecheck 0 + i18n parite; player komutlarının ilk testi.
+  - **Slice 2 (aday, ertelendi)** — havuz-derinlik/kapsam ZAMAN-İÇİ trendi (mastery_snapshots pool-aggregate);
+    learning hedefinde maç-sayısı/WR (matches join). Daha büyük, ayrı tur.
 - **EPIC #3: Post-game Gelişim Koçluğu** (gelişim geri-bildirimi; core DEĞİŞMEZ — engine purity).
   - **Slice 1 done** — Maç Sonu Karnesinde hedef-tutturma serisi görseli: focus_goals met/missed geçmişi ✓/✗
     dot dizisiyle (önceden yalnız streak SAYISI). Yeni host `get_focus_history` (met/missed, en yeni önce,

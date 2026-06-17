@@ -71,6 +71,7 @@ import {
 import type { LcuService } from "./commands/lcu";
 import {
   getActiveSummonerPuuid,
+  getLearningProgress,
   getMasteries,
   getMasteryProgress,
   getPerformanceReport,
@@ -426,6 +427,14 @@ export function buildCommandRegistry(
       requireDb(ctx),
       String(args?.puuid ?? ""),
       Number(args?.days ?? 7),
+    ),
+  );
+  // Epic #4: öğrenme-hedefi ilerleme (havuz gelişim koçluğu).
+  commands.set("get_learning_progress", (args) =>
+    getLearningProgress(
+      requireDb(ctx),
+      String(args?.puuid ?? ""),
+      Number(args?.days ?? 30),
     ),
   );
   commands.set("get_performance_report", (args) =>

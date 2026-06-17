@@ -2,6 +2,17 @@
 
 > Tek seferde tek küçük görev. Tarih: 2026-06-16.
 
+## Büyük geliştirme modu — EPIC #4: Havuz Gelişim Sistemi (2026-06-17)
+> Mesaj-beklemeden otonom devam. In-game Makro S1 bitti → priority-#4 havuz gelişim.
+- **Iter Slice-1 (done)** — öğrenme-hedefi ilerleme kartı. Host `getLearningProgress` (player.ts; user_preferences
+  preference='learning' ⋈ mastery_snapshots, gained>=0 dahil, championKeyMap key, gain DESC) + `get_learning_progress`
+  kaydı (ipc.ts). PoolBuilder: `learning` state + fetch (mastery effect'ine eklendi) + "Öğrenme hedeflerin" bölümü
+  (`.pool-progress` deseni yeniden kullanıldı → yeni CSS yok; gain>0 "+N puan·Sv X", gain=0 "işaretli—hareket yok";
+  boşsa gizli). i18n poolCoach.learningTitle/learningGain/learningNoMove (tr/en). Engine purity (core el değmedi).
+  Test: yeni player.test.ts getLearningProgress (learning-filtre/0-gain/never+tercihsiz-hariç/boş) + PoolBuilder render.
+  ✅ renderer 273 + host 164 + typecheck 0 + i18n parite. (commit hazırlanıyor)
+- **Sıradaki:** Epic #4 Slice 2 (havuz-derinlik zaman-trendi / learning maç-sayısı — büyük) ya da kalan Epic adayları.
+
 ## Büyük geliştirme modu — EPIC #5: In-game Overlay Makro/Objective (2026-06-17)
 > Mesaj-beklemeden otonom devam. Post-game S1 bitti → koddan-doğrulanmış temiz in-game adayı.
 - **Iter Slice-1 (done)** — objective satırına mutlak doğuş saati (@mm:ss). Koddan doğrulandı: `next_spawn_secs`

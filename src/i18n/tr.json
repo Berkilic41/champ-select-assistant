@@ -626,6 +626,9 @@
     "drillsTitle": "Antrenman",
     "progressTitle": "Son 30 günde ilerleme",
     "progressGain": "+{{pts}} mastery puanı",
+    "learningTitle": "Öğrenme hedeflerin",
+    "learningGain": "+{{pts}} puan · Sv {{level}}",
+    "learningNoMove": "İşaretli — henüz hareket yok",
     "training": {
       "blind_safe": "Blind-safe temel",
       "counter_pick": "Tepki/counter pick",

@@ -12,6 +12,14 @@ import './PoolBuilder.css';
 const ROLES = ['top', 'jungle', 'middle', 'bottom', 'utility'] as const;
 type Role = (typeof ROLES)[number];
 
+/** Host get_learning_progress satırı (elle; user_preferences ⋈ mastery_snapshots). */
+interface LearningProgressEntry {
+  champion_id: number;
+  champion_key: string;
+  points_gained: number;
+  current_level: number;
+}
+
 /**
  * Pool builder: champions to learn for a chosen role. Meta-led (current win-rate
  * from blended champion_rates) tempered by learnability (role fit + ease + blind
@@ -29,13 +37,17 @@ export const PoolBuilder: React.FC = () => {
   const [error, setError] = useState(false);
   const [poolPlan, setPoolPlan] = useState<ChampionPoolPlan | null>(null);
   const [progress, setProgress] = useState<MasteryProgressEntry[]>([]);
+  const [learning, setLearning] = useState<LearningProgressEntry[]>([]);
 
-  // Mastery progress is role-independent — fetch once per player.
+  // Mastery + öğrenme-hedefi ilerlemesi rol-bağımsız — oyuncu başına bir kez çek.
   useEffect(() => {
     if (!puuid) return;
     invoke<MasteryProgressEntry[]>('get_mastery_progress', { puuid, days: 30 })
       .then((p) => setProgress(p ?? []))
       .catch(() => setProgress([]));
+    invoke<LearningProgressEntry[]>('get_learning_progress', { puuid, days: 30 })
+      .then((l) => setLearning(l ?? []))
+      .catch(() => setLearning([]));
   }, [puuid]);
 
   useEffect(() => {
@@ -94,6 +106,30 @@ export const PoolBuilder: React.FC = () => {
                 <div className="pool-progress__copy">
                   <strong>{p.champion_key || `#${p.champion_id}`}</strong>
                   <span>{t('poolCoach.progressGain', { pts: p.points_gained.toLocaleString() })}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {learning.length > 0 && (
+        <section className="pool-progress" aria-label={t('poolCoach.learningTitle')}>
+          <span className="pool-progress__title">{t('poolCoach.learningTitle')}</span>
+          <div className="pool-progress__items">
+            {learning.map((l) => (
+              <div key={l.champion_id} className="pool-progress__item">
+                <ChampionIcon championKey={l.champion_key} size="sm" />
+                <div className="pool-progress__copy">
+                  <strong>{l.champion_key || `#${l.champion_id}`}</strong>
+                  <span>
+                    {l.points_gained > 0
+                      ? t('poolCoach.learningGain', {
+                          pts: l.points_gained.toLocaleString(),
+                          level: l.current_level,
+                        })
+                      : t('poolCoach.learningNoMove')}
+                  </span>
                 </div>
               </div>
             ))}

@@ -96,6 +96,26 @@ describe('PoolBuilder', () => {
     expect(screen.queryByText('Bu rol için öneri yok')).not.toBeInTheDocument();
   });
 
+  it('renders the learning-targets section with gain and no-movement states (Epic #4)', async () => {
+    mockInvoke.mockImplementation((cmd: string) => {
+      if (cmd === 'get_active_summoner_puuid') return Promise.resolve('p');
+      if (cmd === 'get_learning_progress')
+        return Promise.resolve([
+          { champion_id: 86, champion_key: 'Garen', points_gained: 500, current_level: 6 },
+          { champion_id: 64, champion_key: 'LeeSin', points_gained: 0, current_level: 7 },
+        ]);
+      if (cmd === 'get_champion_pool_plan') return Promise.resolve(null);
+      return Promise.resolve([]);
+    });
+    render(<PoolBuilder />);
+    expect(await screen.findByText('Öğrenme hedeflerin')).toBeInTheDocument();
+    expect(screen.getByText('Garen')).toBeInTheDocument();
+    expect(screen.getByText('LeeSin')).toBeInTheDocument();
+    // gain>0 → puan satırı; gain=0 → "henüz hareket yok".
+    expect(screen.getByText('+500 puan · Sv 6')).toBeInTheDocument();
+    expect(screen.getByText('İşaretli — henüz hareket yok')).toBeInTheDocument();
+  });
+
   it('exposes the role buttons as a labelled group with aria-pressed (a11y)', () => {
     mockInvoke.mockResolvedValue(null);
     const { container } = render(<PoolBuilder />);
