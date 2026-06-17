@@ -150,6 +150,8 @@ export const IngameView: React.FC<Props> = ({ summonerName }) => {
             )}
             {plan.opponent_key && <ChampionIcon championKey={plan.opponent_key} size="sm" />}
             <span className="overlay-plan-kda">
+              {t('overlay.plan.level', { n: plan.level })}
+              {' · '}
               {plan.kills}/{plan.deaths}/{plan.assists}
               {' · '}
               {plan.cs_per_min != null
@@ -168,6 +170,9 @@ export const IngameView: React.FC<Props> = ({ summonerName }) => {
           </div>
           <PlanRow label={t('overlay.plan.win')} text={plan.win_condition} />
           <PlanRow label={t('overlay.plan.role')} text={plan.team_role} />
+          {plan.damage_profile && (
+            <PlanRow label={t('overlay.plan.damage')} text={plan.damage_profile} />
+          )}
           {plan.spike_note && <PlanRow label={t('overlay.plan.spike')} text={plan.spike_note} />}
           {plan.spike_window && (
             <PlanRow label={t('overlay.plan.spikeWindow')} text={plan.spike_window} />

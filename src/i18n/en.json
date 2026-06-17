@@ -62,6 +62,7 @@
       "title": "Your Game Plan",
       "win": "Win condition",
       "role": "Team role",
+      "damage": "Damage type",
       "spike": "Power spike",
       "spikeWindow": "Power window",
       "power": {
@@ -79,7 +80,8 @@
       "late": "Late game",
       "vs": "vs {{name}}",
       "cs": "{{cs}} CS",
-      "csPace": "{{cs}} CS ({{pace}}/min)"
+      "csPace": "{{cs}} CS ({{pace}}/min)",
+      "level": "Lv{{n}}"
     }
   },
   "pickClarity": {

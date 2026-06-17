@@ -62,6 +62,7 @@
       "title": "Oyun Planın",
       "win": "Kazanma koşulu",
       "role": "Takım rolü",
+      "damage": "Hasar tipi",
       "spike": "Güç tepesi",
       "spikeWindow": "Güç penceresi",
       "power": {
@@ -79,7 +80,8 @@
       "late": "Geç oyun",
       "vs": "vs {{name}}",
       "cs": "{{cs}} CS",
-      "csPace": "{{cs}} CS ({{pace}}/dk)"
+      "csPace": "{{cs}} CS ({{pace}}/dk)",
+      "level": "Sv{{n}}"
     }
   },
   "pickClarity": {
