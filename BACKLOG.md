@@ -6,7 +6,14 @@
 > **21 doğrulanmış bulgu**, adversaryal koddan-teyit) çıktısıdır.
 
 ## Aktif
-(boş — backlog TÜKENDİ. Discovery-4 KAPANDI: B-41+B-46+B-47 done; B-45 wontfix (yanlış alarm); B-42/B-43/B-44 deferred (koddan doğrulandı, marjinal+test'i oransız). B-24 wontfix (motor-e2e zaten `core/tests/recommendation_tests.rs`'te oracle seviyesinde kapsalı). Açık/güvenli/değerli micro-iş kalmadı; sıradaki değer roadmap'te (ML/LLM/canlı-veri/prod-key) — ürün-kararı gerektirir, otonom micro-döngü değil.)
+**Yön: WS3 — overlay / in-game UX polish** (kullanıcı 2026-06-17 seçti; otonom-yapılabilir, ürün-engeli yok).
+- **W-01 done** — in-game güç eğrisi görsel çubuğu (PowerCurveBar): core `IngamePlan`'a
+  `power_early/mid/late` (91aaa12) + renderer 3-segment HUD çubuğu (64f4c27). Glance "şu an
+  güçlü müyüm?" — spike_note'u görselleştirir, redundant değil. core 505 + renderer 247 +
+  desktop 158 + i18n parite + WASM rebuild temiz.
+
+> Önceki tur (Discovery-4) KAPANDI: B-41+B-46+B-47 done; B-45 wontfix (yanlış alarm);
+> B-42/B-43/B-44 deferred; B-24 wontfix (motor-e2e zaten oracle seviyesinde kapsalı).
 
 ## Açık — yüksek/orta değer (koddan teyitli)
 | id | sev | dosya | özet | durum |

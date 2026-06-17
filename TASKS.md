@@ -83,9 +83,20 @@
 
 **Tüm test yeşil:** renderer 243 · desktop 155 · worker 16 · core (clippy) — typecheck temiz, i18n parite.
 
-**Kalan: YOK — açık/güvenli/değerli micro-iş kalmadı (2026-06-17).**
+**Discovery-4 sonrası micro-backlog tükendi → kullanıcı YÖN seçti: WS3 overlay polish.**
 - B-24 (son açık iş) wontfix → motor-e2e zaten `core/tests/recommendation_tests.rs`'te
   oracle seviyesinde kapsalı (yukarıda kanıt). Yeni bir test eklemek churn olurdu.
+
+## WS3 — overlay / in-game UX polish (2026-06-17, kullanıcı onaylı yön)
+- **Iter 19 (W-01 core)** — `IngamePlan`'a `power_early/mid/late: f32` eklendi,
+  `build_ingame_plan` arketipten doldurur; e2e testi arketiple birebir kilitler.
+  Bulgu: core `IngamePlan` artık `#[ts(export)]` TÜRETMİYOR (Tauri host göçte öldü) →
+  `IngamePlan.ts` orphan/elle-bakımlı; paralel elle senkronlandı. ✅ core 505 + clippy. (91aaa12)
+- **Iter 20 (W-01 renderer)** — PowerCurveBar: 3-segment (erken/orta/geç) HUD çubuğu,
+  zirve faz teal; tek `role=img`+yüzdeli aria-label (çubuklar aria-hidden); tr/en parite;
+  4 izole test (named export). ✅ renderer 247 + typecheck + WASM rebuild + desktop 158. (64f4c27)
+  > Teyit: spike_window/matchup_tips/opponent core'da ZATEN tam+test'li+render'lı (memory
+  > notu kısmen bayatmış); gerçek açık "HUD görsel" → power-curve viz (yeni glance-değeri).
 
 > **Lider değerlendirmesi (2026-06-17):** 4 keşif turu + her adayın koddan-teyidi sonrası
 > güvenli + değerli + doğrulanabilir backlog TÜKENDİ. Olgun kod tabanı (~620+ test, clippy
