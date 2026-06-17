@@ -2,6 +2,15 @@
 
 > Tek seferde tek küçük görev. Tarih: 2026-06-16.
 
+## Büyük geliştirme modu — EPIC #2: Lane-Matchup Veri-Dürüstlüğü (2026-06-17)
+> Mesaj-beklemeden otonom devam. Match-History Epic bitti → öncelik #2 lane-matchup dürüstlük.
+- **Iter Slice-1 (done)** — LaneMatchup barlarına "KB tahmini" kaynak etiketi. Koddan doğrulandı: phase_advantage
+  yalnız arketip power_curve'den (`adv()`), ölçülen matchup'a bakmıyor → hep heuristic. core `LaneMatchup.source`
+  ("kb_estimate") + recommendation.ts `source?` + LaneMatchupPanel rozeti (tooltip) + i18n kbEstimate/Hint (tr/en)
+  + core/renderer testleri. Engine purity korundu (yalnız read etiketi; engine.rs/scoring.rs el değmedi). WASM rebuild
+  (core/pkg gitignore). ✅ core 570 + renderer 268 + host 161 + clippy + typecheck 0 + i18n parite. (commit hazırlanıyor)
+- **Sıradaki:** Slice 2 (ölçülen matchup plumbing → source="measured"; geniş core, ayrı tur) ya da Epic #3 (post-game koçluk).
+
 ## Büyük geliştirme modu — EPIC: Match-History Browser (2026-06-17, kullanıcı direktifi)
 > "Küçük-yüzey tükendiyse durma. En yüksek-değerli büyük yönü Epic seç, MVP'ye böl, ilk dikey dilimi uygula.
 > Kapsam belirsizse soru sormadan makul varsay (→ DECISIONS ADR-004). Her tur tek dikey değer; salt kozmetik yok.

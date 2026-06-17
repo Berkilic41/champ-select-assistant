@@ -2,6 +2,17 @@
 
 > Format: bağlam → karar → gerekçe → sonuç. En yeni üstte.
 
+## ADR-005 — Lane-matchup faz-avantajı dürüstçe "KB tahmini" etiketlenir (2026-06-17)
+- **Bağlam:** `lane_matchup_from_json` phase_advantage'ı YALNIZ arketip `power_curve`'den (`adv()`) hesaplıyor —
+  ölçülen matchup verisine hiç bakmıyor — ama panel barları kaynak etiketsiz gösteriyordu → kullanıcı bunları
+  ölçülen win-rate sanabilir. `inferred` yalnız rakip KİMLİĞİNİN tahmin olduğunu söyler, avantaj sayılarının değil.
+- **Karar:** `LaneMatchup` struct'a `source: String` ekle (şimdilik sabit "kb_estimate"); panelde "KB tahmini"
+  rozeti + tooltip göster. Ölçülen veriyi plumb etmek (source="measured") sonraki dilime ertelendi (geniş core değişikliği).
+- **Gerekçe:** Dürüstlük DNA'sı (B-03/B-10/B-23 hattı); minimal + güvenli; **scoring/engine DEĞİŞMEZ (engine purity)**.
+  Geniş `ctx.matchups` plumbing'i olmadan kullanıcı barların arketip-tahmini olduğunu anlar.
+- **Sonuç:** core 570 + renderer 268 + host 161 yeşil; recommendation.ts `source?` (Rust hep emit, TS opsiyonel —
+  `inferred?` deseni). WASM rebuild gerekti (host runtime'da alanı emit etsin; core/pkg gitignore'da → commit'lenmez).
+
 ## ADR-004 — Match-History Browser Epic: MVP kapsam varsayımları (2026-06-17)
 - **Bağlam:** Kullanıcı "büyük geliştirme modu" + öncelik #1 match-history browser; kapsam belirsizse "soru sormadan makul varsay" dedi. Epic MVP'ye bölündü, ilk dikey dilim (liste sekmesi) uygulandı.
 - **Karar (varsayımlar):**

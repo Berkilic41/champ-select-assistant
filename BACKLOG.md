@@ -10,6 +10,15 @@
 BÜYÜK yönü Epic seç, MVP'ye böl, her tur tek dikey dilim (salt kozmetik yok). Öncelik: 1) match-history
 2) lane-matchup dürüstlük 3) post-game koçluk 4) havuz gelişim 5) in-game makro. Kapsam belirsizse sorma,
 makul varsay (→ DECISIONS ADR-004). Test+typecheck+desktop testleri geçmeden bitmiş sayılmaz.
+- **EPIC #2: Lane-Matchup Veri-Dürüstlüğü** (core read etiketi; scoring DEĞİŞMEZ — engine purity).
+  - **Slice 1 done** — LaneMatchup faz-avantaj barları artık dürüstçe "KB tahmini" etiketli. Koddan doğrulandı:
+    `lane_matchup_from_json` (json_api.rs) phase_advantage'ı YALNIZ arketip `power_curve`'den (`adv()`) üretiyor,
+    ölçülen matchup'a hiç bakmıyor → her zaman heuristic. Eklendi: `LaneMatchup.source: String` ("kb_estimate"
+    sabit; ileride "measured") + recommendation.ts `source?` + LaneMatchupPanel "KB tahmini" rozeti (tooltip'li)
+    + i18n `laneMatchup.kbEstimate`/`kbEstimateHint` (tr/en). core 570 + renderer 268 + host 161 + clippy temiz +
+    typecheck 0 + i18n parite. WASM rebuild (core/pkg gitignore). engine.rs/scoring.rs el değmedi.
+  - **Slice 2 (ertelendi)** — ölçülen matchup verisini `lane_matchup_from_json`'a plumb et (input→ScoringContext) →
+    veri varsa source="measured"; geniş core değişikliği, ayrı/dikkatli tur.
 - **EPIC: Match-History Browser** (yerel DB; cloud/yeni Riot çağrısı YOK).
   - **Slice 1 done** — "Maç Geçmişi" liste sekmesi: yeni host `get_match_history` (`recentMatches` JOIN +
     `game_reviews` EXISTS has_review) + `MatchHistoryView` (4. lobby sekmesi). Şampiyon/rol/sonuç/tarih/KDA/

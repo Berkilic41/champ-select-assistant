@@ -57,6 +57,11 @@ export const LaneMatchupPanel: React.FC<Props> = ({ matchup }) => {
           </div>
         ))}
       </div>
+      {matchup.source === 'kb_estimate' && (
+        <span className="lane-matchup__estimate" title={t('laneMatchup.kbEstimateHint')}>
+          {t('laneMatchup.kbEstimate')}
+        </span>
+      )}
       {matchup.tips.length > 0 && (
         <ul className="lane-matchup__tips">
           {matchup.tips.map((tip, i) => (

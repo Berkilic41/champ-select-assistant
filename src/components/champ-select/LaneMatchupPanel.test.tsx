@@ -20,4 +20,27 @@ describe('LaneMatchupPanel', () => {
     expect(screen.getByText('Zed')).toBeInTheDocument();
     expect(screen.getByText(/agresif bas/)).toBeInTheDocument();
   });
+
+  it('labels the advantage bars as a KB estimate (data honesty)', () => {
+    const m: LaneMatchup = {
+      opponent_key: 'Zed',
+      opponent_name: 'Zed',
+      phase_advantage: [0.7, 0.5, 0.3],
+      source: 'kb_estimate',
+      tips: [],
+    };
+    render(<LaneMatchupPanel matchup={m} />);
+    expect(screen.getByText('KB tahmini')).toBeInTheDocument();
+  });
+
+  it('omits the estimate badge when source is absent', () => {
+    const m: LaneMatchup = {
+      opponent_key: 'Zed',
+      opponent_name: 'Zed',
+      phase_advantage: [0.7, 0.5, 0.3],
+      tips: [],
+    };
+    render(<LaneMatchupPanel matchup={m} />);
+    expect(screen.queryByText('KB tahmini')).not.toBeInTheDocument();
+  });
 });

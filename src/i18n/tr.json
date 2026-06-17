@@ -563,7 +563,9 @@
   "laneMatchup": {
     "title": "Lane Eşleşmesi",
     "inferred": "Tahmini rakip",
-    "inferredHint": "Pozisyon bilgisi yok — rakip arketipe göre tahmin edildi"
+    "inferredHint": "Pozisyon bilgisi yok — rakip arketipe göre tahmin edildi",
+    "kbEstimate": "KB tahmini",
+    "kbEstimateHint": "Faz avantajı arketip güç-eğrisinden tahmin edilir — ölçülen kazanma oranı değil"
   },
   "poolBuilder": {
     "empty": "Bu rol için öneri yok",

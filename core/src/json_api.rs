@@ -1185,6 +1185,11 @@ pub struct LaneMatchup {
     pub opponent_key: String,
     pub opponent_name: String,
     pub phase_advantage: [f32; 3],
+    /// Provenance of `phase_advantage`: currently always `"kb_estimate"` — the
+    /// bars are derived from archetype `power_curve`s, NOT measured win-rates.
+    /// (Forward: `"measured"` once real matchup data is plumbed in.) The UI shows
+    /// a "KB tahmini" badge so the bars aren't read as measured rates.
+    pub source: String,
     pub tips: Vec<String>,
     /// True when the opponent was inferred (Blind/Normal — no LCU positions) by
     /// archetype fit rather than read directly. UI labels it "Tahmini rakip".
@@ -1255,6 +1260,8 @@ pub fn lane_matchup_from_json(input_json: &str) -> Result<String, String> {
             adv(cand.power_curve.mid, opp_arch.power_curve.mid),
             adv(cand.power_curve.late, opp_arch.power_curve.late),
         ],
+        // Bars are archetype power_curve estimates, not measured matchup rates.
+        source: "kb_estimate".to_string(),
         tips: build_matchup_tips(cand, opp_arch, &my_pos),
         inferred,
     };
@@ -3861,6 +3868,10 @@ mod tests {
         let lane = lane_matchup_from_json(&team_input.to_string()).unwrap();
         let lane_v: serde_json::Value = serde_json::from_str(&lane).unwrap();
         assert!(lane_v.is_object() || lane_v.is_null());
+        if lane_v.is_object() {
+            // Faz avantajı arketip power_curve türevi → dürüstçe "kb_estimate" etiketli.
+            assert_eq!(lane_v["source"], "kb_estimate");
+        }
     }
 
     #[test]

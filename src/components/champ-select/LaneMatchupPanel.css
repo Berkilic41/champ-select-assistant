@@ -46,6 +46,14 @@
 .lane-matchup__phase--down .lane-matchup__pct { color: var(--danger); }
 .lane-matchup__phase--even .lane-matchup__pct { color: var(--text-muted); }
 
+.lane-matchup__estimate {
+  align-self: flex-start;
+  font-size: 0.6rem; font-weight: var(--weight-semibold);
+  color: var(--text-muted); background: color-mix(in srgb, var(--text-muted) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text-muted) 32%, transparent);
+  border-radius: var(--radius-pill, 999px); padding: 1px 7px; cursor: help; white-space: nowrap;
+}
+
 .lane-matchup__tips { list-style: none; display: flex; flex-direction: column; gap: 3px; }
 .lane-matchup__tip {
   font-size: var(--font-size-sm);

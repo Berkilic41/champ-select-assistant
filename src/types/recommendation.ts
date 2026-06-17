@@ -322,6 +322,9 @@ export interface LaneMatchup {
   opponent_name: string;
   /** [early, mid, late] advantage 0..1 (0.5 = even). */
   phase_advantage: [number, number, number];
+  /** Provenance of phase_advantage. 'kb_estimate' = archetype power-curve estimate
+   *  (current — NOT measured win-rates) → UI shows a "KB tahmini" badge. */
+  source?: 'kb_estimate' | 'measured';
   tips: string[];
   /** True when the opponent was inferred (Blind/Normal, no LCU positions). */
   inferred?: boolean;

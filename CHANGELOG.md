@@ -7,6 +7,11 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Lane eşleşmesinde "KB tahmini" dürüstlük rozeti** (Lane-Matchup Epic — Slice 1) — Lane eşleşme panelindeki
+  faz-avantaj barları (erken/orta/geç) artık dürüstçe "KB tahmini" rozetiyle etiketli: bu barlar ölçülen kazanma
+  oranı DEĞİL, arketip güç-eğrisinden türetilen tahmin (`lane_matchup_from_json` ölçülen matchup verisine hiç
+  bakmıyor — her zaman heuristic). Core `LaneMatchup`'a `source` alanı ("kb_estimate") eklendi; tooltip mekaniği
+  açıklıyor. Scoring/engine DEĞİŞMEDİ (engine purity korundu — yalnız read etiketi). tr/en parite + core/renderer testleri.
 - **Maç Geçmişi sekmesi** (Match-History Browser Epic — Slice 1) — Lobby'ye 4. sekme
   ("Maç Geçmişi"): yerel DB'deki son 20 maç şampiyon ikonu, rol, galibiyet/mağlubiyet,
   relatif tarih, KDA, CS/dk ve vision ile listeleniyor; karnesi olan maçlar "İncelendi"
