@@ -53,6 +53,14 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
   veya DDragon başarısını düşürmez. (B-02)
 
 ### Düzeltildi
+- **Bayat edge matchup/build verisi de "düşük güven" işaretlenir** — `syncEdgeRates`'in
+  tazelik kontrolü (worker `updated_at` >48s eskiyse `confidence='low'`) yalnız **rates**'e
+  uygulanıyordu; aynı bayat ingestion'dan gelen **matchups** ve **builds** örnek-bazlı
+  confidence'larını koruyordu (potansiyel `medium`/`high`). Durmuş ingestion / dev-key
+  expiry'de bu, bayat counter-pick/build verisini "taze yüksek-güven" gösteriyordu — tam da
+  staleness kontrolünün engellemeye çalıştığı sahte-tazelik. Rates yanıtının kanonik
+  `updated_at`'i (worker `ingest_meta`) üç tabloyu da kapsar; `stale` downgrade'i artık
+  matchups+builds'e de uygulanıyor. TDD (RED→GREEN), yeni regresyon testi. (L-01)
 - **Bozuk `wins > games` matchup satırları ingestion'da elenir** — dış kaynaklardan
   (u.gg `parseUggMatchups`, edge worker `syncEdgeRates`) gelen matchup satırları yalnız
   `games > 0` / geçerli-id için filtreleniyordu; `wins > games` (win_rate >1.0) bozuk

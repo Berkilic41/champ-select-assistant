@@ -108,6 +108,19 @@
   etmiyordu. Wiring (sıfır yeni mantık; diğer 8 PlanRow gibi test'siz, i18n parite kapsar);
   fragile IngameView integration testi oransız bulundu (host-invoke+settings+fake-timer mock).
   ✅ renderer 250 + typecheck + i18n parite. (80aea1f)
+  > WS3 overlay polish'in tüm gerçek açıkları kapandı; daha fazlası churn olurdu.
+
+## Canlı-veri yolu sağlamlaştırma (2026-06-17, lider kararı — roadmap #1)
+> Kullanıcı "lider olarak sonraki hamle" diye sordu → lider canlı-veriyi seçti (en yüksek değer
+> tavanı; prod-key dış-engeli yalnız ingestion cron'unu kapsar, okuma+wiring+dürüstlük+test otonom).
+> Koddan denetim: worker okuma yolu + app edge-sync OLGUN; gerçek açık = staleness dürüstlük asimetrisi.
+- **Iter 23 (L-01)** — bayat edge matchup/build confidence dürüstlüğü: `syncEdgeRates`'in
+  staleness downgrade'i (>48s→'low') yalnız rates'e uygulanıyordu; matchups+builds aynı bayat
+  ingestion'dan örnek-bazlı 'medium'/'high' görünüyordu → durmuş ingestion/dev-key expiry'de
+  sahte-tazelik. Koddan teyit: rates yanıtının kanonik `updated_at`'i (worker `ingest_meta`)
+  üç tabloyu kapsar; `stale` flag matchups(641)+builds(678) confidence'ına da uygulandı.
+  TDD-first: önce RED (games=800 bayat matchup 'medium' kalıyordu) → fix → GREEN. ✅ desktop
+  159 + typecheck. (c72dd1c)
 
 > **Lider değerlendirmesi (2026-06-17):** 4 keşif turu + her adayın koddan-teyidi sonrası
 > güvenli + değerli + doğrulanabilir backlog TÜKENDİ. Olgun kod tabanı (~620+ test, clippy

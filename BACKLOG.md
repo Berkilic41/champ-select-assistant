@@ -6,7 +6,16 @@
 > **21 doğrulanmış bulgu**, adversaryal koddan-teyit) çıktısıdır.
 
 ## Aktif
-**Yön: WS3 — overlay / in-game UX polish** (kullanıcı 2026-06-17 seçti; otonom-yapılabilir, ürün-engeli yok).
+**Yön: canlı-veri yolu sağlamlaştırma** (lider kararı 2026-06-17: roadmap #1, prod-key dış-engeli yalnız
+ingestion cron'unu kapsar; okuma yolu + app-wiring + dürüstlük + test otonom-yapılabilir).
+- **L-01 done** — bayat edge matchup/build confidence dürüstlüğü (c72dd1c): staleness downgrade
+  (>48s→'low') yalnız rates'e uygulanıyordu; matchups+builds aynı bayat ingestion'dan 'medium'/'high'
+  görünüyordu → sahte-tazelik. `stale` flag üçüne de uygulandı. TDD RED→GREEN. desktop 159 + typecheck.
+> Worker okuma yolu (`/v1/{health,rates,matchups,builds}`, secret-gated ingest, constant-time auth,
+> leak'siz hata, cron labeled-log) ve app edge-sync (3 endpoint, B-41 bozuk-satır guard'ları) OLGUN+test'li.
+
+**Önceki yön: WS3 — overlay / in-game UX polish** (2026-06-17 TAMAMLANDI: W-01 power-curve viz, W-02 canlı
+faz işaretçisi, W-03 hesaplanan-ama-gizli alanlar). Tüm gerçek overlay açıkları kapandı.
 - **W-01 done** — in-game güç eğrisi görsel çubuğu (PowerCurveBar): core `IngamePlan`'a
   `power_early/mid/late` (91aaa12) + renderer 3-segment HUD çubuğu (64f4c27). Glance "şu an
   güçlü müyüm?" — spike_note'u görselleştirir, redundant değil. core 505 + renderer 247 +
