@@ -69,14 +69,31 @@ describe("getLearningProgress (Epic #4 — öğrenme hedefi ilerlemesi)", () => 
     snap.run(PUUID, 1, 3000, 5, t);
     snap.run(PUUID, 99, 100, 2, t); // tercihsiz → hariç
 
+    // Maç sonuçları (games/WR): Garen pencere-içi 4 maç (3 galibiyet) + 1 pencere-dışı (hariç).
+    const m = db.prepare(
+      "INSERT INTO matches (match_id, puuid, champion_id, position, win, kills, deaths, assists, duration_secs, queue_id, played_at) VALUES (?, ?, ?, 'MIDDLE', ?, 5, 2, 7, 1800, 420, ?)",
+    );
+    m.run("M1", PUUID, 86, 1, t - 1_000);
+    m.run("M2", PUUID, 86, 1, t - 2_000);
+    m.run("M3", PUUID, 86, 1, t - 3_000);
+    m.run("M4", PUUID, 86, 0, t - 4_000);
+    m.run("M5", PUUID, 86, 1, t - 40 * 86_400); // pencere-dışı → sayılmaz
+    // LeeSin: hiç maç yok → games 0. Annie (1, 'never'): listede yok zaten.
+
     const res = getLearningProgress(db, PUUID, 30);
     expect(res).toHaveLength(2);
     // gain DESC: Garen (500) önce, LeeSin (0) sonra.
     expect(res[0].champion_key).toBe("Garen");
     expect(res[0].points_gained).toBe(500);
     expect(res[0].current_level).toBe(6);
+    // Maç istatistiği: pencere-içi 4 maç, 3 galibiyet (pencere-dışı M5 hariç).
+    expect(res[0].games_played).toBe(4);
+    expect(res[0].wins).toBe(3);
     expect(res[1].champion_key).toBe("LeeSin");
     expect(res[1].points_gained).toBe(0);
+    // Maçı olmayan hedef → games/wins 0 (gizlenmez, dürüst 0).
+    expect(res[1].games_played).toBe(0);
+    expect(res[1].wins).toBe(0);
     // 'never' ve tercihsiz şampiyonlar listede yok.
     expect(res.map((r) => r.champion_id)).not.toContain(1);
     expect(res.map((r) => r.champion_id)).not.toContain(99);

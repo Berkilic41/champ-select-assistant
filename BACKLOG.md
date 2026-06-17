@@ -23,8 +23,13 @@ makul varsay (→ DECISIONS ADR-004). Test+typecheck+desktop testleri geçmeden 
     (user_preferences.learning ⋈ mastery_snapshots; gained>=0 dahil) + `get_learning_progress` kaydı +
     i18n poolCoach.learningTitle/learningGain/learningNoMove (tr/en). `.pool-progress` CSS yeniden kullanıldı
     (yeni CSS yok). Core değişmedi. renderer 273 + host 164 + typecheck 0 + i18n parite; player komutlarının ilk testi.
-  - **Slice 2 (aday, ertelendi)** — havuz-derinlik/kapsam ZAMAN-İÇİ trendi (mastery_snapshots pool-aggregate);
-    learning hedefinde maç-sayısı/WR (matches join). Daha büyük, ayrı tur.
+  - **Slice 2 done** — öğrenme hedefinde gerçek maç-sonucu: kart artık mastery-puanı yanında o hedefte son-30g
+    oynanan **maç sayısı + WR** gösterir ("N maç · %WR"). Host `getLearningProgress` aynı pencerede `matches`'ten
+    `games_played`+`wins` ekler (additive; mastery-snapshot'lı hedef seti korunur). İnce-örneklem dürüstlüğü:
+    games≥3 → WR; 1–2 maç → yalnız sayı (B-18 emsali); games=0 → alt-satır gizli. recommend→işaretle→pratik→SONUÇ
+    döngüsünü kapatır. i18n learningGames/learningWinRate (tr/en) + `.pool-progress__sub` nötr stil. Core DEĞİŞMEDİ.
+    host 164 + renderer 273 + typecheck 0 + i18n parite. → ADR-007.
+  - **Slice 3 (aday, ertelendi)** — havuz-derinlik/kapsam ZAMAN-İÇİ trendi (mastery_snapshots pool-aggregate). Daha büyük, ayrı tur.
 - **EPIC #3: Post-game Gelişim Koçluğu** (gelişim geri-bildirimi; core DEĞİŞMEZ — engine purity).
   - **Slice 1 done** — Maç Sonu Karnesinde hedef-tutturma serisi görseli: focus_goals met/missed geçmişi ✓/✗
     dot dizisiyle (önceden yalnız streak SAYISI). Yeni host `get_focus_history` (met/missed, en yeni önce,

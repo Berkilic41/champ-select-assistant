@@ -7,6 +7,13 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Öğrenme hedefinde gerçek maç sonucu (maç sayısı + WR)** (Havuz Gelişim Epic — Slice 2) — "Öğrenme
+  hedeflerin" kartı artık mastery-puanı kazancının yanında o hedefte son 30 günde oynanan **gerçek maç sayısı
+  ve kazanma oranını** da gösteriyor (ör. "4 maç · %75") — mastery sadece "grind"i ölçer; WR pratiğin işe
+  yarayıp yaramadığını söyler, böylece recommend→işaretle→pratik→**sonuç** döngüsü kapanır. İnce-örneklem
+  dürüstlüğü: 1–2 maçta yalnız sayı (gürültülü WR uydurulmaz), 0 maçta alt-satır gizli. Host
+  `get_learning_progress` aynı pencerede `matches`'ten games/wins ekler. Core değişmedi (engine purity);
+  tr/en parite (`poolCoach.learningGames`/`learningWinRate`) + host/renderer testleri.
 - **Havuz koçunda öğrenme-hedefi ilerleme kartı** (Havuz Gelişim Epic — Slice 1) — Havuz koçu artık
   kullanıcının "Öğreniyorum" işaretlediği (ChampionDetailCard) şampiyonların son 30 günlük mastery
   ilerlemesini ayrı "Öğrenme hedeflerin" bölümünde gösteriyor ("+N puan · Sv X" ya da işaretli-ama-hareket-yok).

@@ -239,6 +239,10 @@
   font-size: var(--font-size-xs);
   color: var(--color-success, #22c55e);
 }
+/* Maç/WR alt-satırı: mastery-kazanç (yeşil) satırından ayrışsın diye nötr. */
+.pool-progress__copy .pool-progress__sub {
+  color: var(--text-secondary);
+}
 
 .pool-builder__grid {
   display: grid;

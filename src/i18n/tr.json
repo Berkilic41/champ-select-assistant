@@ -629,6 +629,8 @@
     "learningTitle": "Öğrenme hedeflerin",
     "learningGain": "+{{pts}} puan · Sv {{level}}",
     "learningNoMove": "İşaretli — henüz hareket yok",
+    "learningGames": "{{n}} maç",
+    "learningWinRate": "{{n}} maç · %{{wr}}",
     "training": {
       "blind_safe": "Blind-safe temel",
       "counter_pick": "Tepki/counter pick",

@@ -12,12 +12,14 @@ import './PoolBuilder.css';
 const ROLES = ['top', 'jungle', 'middle', 'bottom', 'utility'] as const;
 type Role = (typeof ROLES)[number];
 
-/** Host get_learning_progress satırı (elle; user_preferences ⋈ mastery_snapshots). */
+/** Host get_learning_progress satırı (elle; user_preferences ⋈ mastery_snapshots ⋈ matches). */
 interface LearningProgressEntry {
   champion_id: number;
   champion_key: string;
   points_gained: number;
   current_level: number;
+  games_played: number;
+  wins: number;
 }
 
 /**
@@ -130,6 +132,16 @@ export const PoolBuilder: React.FC = () => {
                         })
                       : t('poolCoach.learningNoMove')}
                   </span>
+                  {l.games_played > 0 && (
+                    <span className="pool-progress__sub">
+                      {l.games_played >= 3
+                        ? t('poolCoach.learningWinRate', {
+                            n: l.games_played,
+                            wr: Math.round((l.wins / l.games_played) * 100),
+                          })
+                        : t('poolCoach.learningGames', { n: l.games_played })}
+                    </span>
+                  )}
                 </div>
               </div>
             ))}

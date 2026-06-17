@@ -88,13 +88,19 @@ export interface LearningProgressEntry {
   champion_key: string;
   points_gained: number;
   current_level: number;
+  /** Son `days` günde bu hedefte oynanan maç sayısı (matches; 0 olabilir). */
+  games_played: number;
+  /** Aynı penceredeki galibiyet sayısı (WR = wins/games_played; renderer hesaplar). */
+  wins: number;
 }
 
 /**
  * Kullanıcının "Öğreniyorum" işaretlediği (user_preferences.preference='learning')
- * şampiyonların son `days` gündeki mastery ilerlemesi. gained=0 olanlar da döner
- * ("işaretli ama henüz hareket yok"). recommend→işaretle→ilerleme döngüsünü kapatır.
- * Sadece mastery_snapshot verisi olan learning hedefleri döner (gelecekte LEFT JOIN).
+ * şampiyonların son `days` gündeki mastery ilerlemesi + gerçek maç sonucu (games/wins).
+ * gained=0 olanlar da döner ("işaretli ama henüz hareket yok"). Mastery-puanı yalnız
+ * grind'i ölçer; games/WR pratiğin işe yarayıp yaramadığını gösterir → recommend→işaretle
+ * →pratik→SONUÇ döngüsünü kapatır. Sadece mastery_snapshot verisi olan learning hedefleri
+ * döner (gelecekte LEFT JOIN); maç istatistiği aynı pencerede `matches`'ten eşlenir.
  */
 export function getLearningProgress(
   db: DatabaseSync,
@@ -126,12 +132,33 @@ export function getLearningProgress(
     gained: number;
     current_level: number;
   }[];
-  return rows.map((r) => ({
-    champion_id: Number(r.champion_id),
-    champion_key: keys.get(Number(r.champion_id)) ?? "",
-    points_gained: Number(r.gained),
-    current_level: Number(r.current_level),
-  }));
+  // Aynı pencerede oynanan maç sayısı + galibiyet (win IN (0,1) NOT NULL → SUM=wins).
+  const matchStats = db
+    .prepare(
+      `SELECT champion_id, COUNT(*) AS games, SUM(win) AS wins
+       FROM matches
+       WHERE puuid = ? AND played_at >= ? AND champion_id IN (${placeholders})
+       GROUP BY champion_id`,
+    )
+    .all(puuid, since, ...ids) as unknown as {
+    champion_id: number;
+    games: number;
+    wins: number;
+  }[];
+  const statByChamp = new Map(
+    matchStats.map((s) => [Number(s.champion_id), s]),
+  );
+  return rows.map((r) => {
+    const stat = statByChamp.get(Number(r.champion_id));
+    return {
+      champion_id: Number(r.champion_id),
+      champion_key: keys.get(Number(r.champion_id)) ?? "",
+      points_gained: Number(r.gained),
+      current_level: Number(r.current_level),
+      games_played: stat ? Number(stat.games) : 0,
+      wins: stat ? Number(stat.wins) : 0,
+    };
+  });
 }
 
 /** Son maçlardan performans-trend raporu — satırlar host'tan, rapor core'dan. */

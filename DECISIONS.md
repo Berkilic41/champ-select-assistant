@@ -2,6 +2,21 @@
 
 > Format: bağlam → karar → gerekçe → sonuç. En yeni üstte.
 
+## ADR-007 — Havuz Gelişim Epic #4 Slice 2: öğrenme hedefine gerçek maç-sonucu (games/WR) (2026-06-17)
+- **Bağlam:** S1 öğrenme-hedefi kartı yalnız mastery-puanı kazancını gösteriyordu. Mastery-puanı "grind"i (oynama
+  süresi) ölçer ama pratiğin işe yarayıp yaramadığını söylemez — oyuncu çok oynayıp hâlâ kaybediyor olabilir.
+  `matches` tablosu puuid+champion_id+played_at indeksli ve `win IN (0,1) NOT NULL` → gerçek sonuç hazır.
+- **Karar:** `getLearningProgress` aynı `days` penceresinde her hedef için `matches`'ten `games_played`+`wins`
+  ekler (mastery snapshot'lı hedef seti korunur — additive); PoolBuilder kartında ikinci nötr alt-satır gösterir.
+  **İnce-örneklem dürüstlüğü:** `games_played >= 3` → "N maç · %WR"; 1–2 maç → yalnız "N maç" (gürültülü %0/%100
+  WR uydurulmaz, B-18 StatsView emsali); `games_played == 0` → alt-satır hiç gösterilmez (dürüst gizleme).
+- **Gerekçe:** recommend→işaretle→pratik→**SONUÇ** döngüsünü kapatır (S1 sadece pratik niyetini gösteriyordu);
+  host-query + renderer, **core DEĞİŞMEZ (engine purity)**; aynı pencere mastery ile tutarlı; matchup plumbing
+  (Lane #2) ya da timeline (Post-game #2) gerektirmeyen en yüksek (değer ÷ risk) Slice-2 adayı.
+- **Sonuç:** `LearningProgressEntry`'ye `games_played`+`wins`; ikinci `matches` GROUP BY sorgusu + JS merge;
+  i18n `poolCoach.learningGames`/`learningWinRate` (tr/en parite, `{{n}}`/`{{wr}}`); `.pool-progress__sub` nötr
+  stil. host 164 + renderer 273 + typecheck 0 + i18n parite yeşil. core/WASM el değmedi.
+
 ## ADR-006 — Post-game koçluk Epic #3: hedef-tutturma serisi görseli ilk dilim seçildi (2026-06-17)
 - **Bağlam:** Epic #3 için Explore ajanı 7 boşluk önerdi; koddan doğrulandı: form-per-metric ZATEN TrendPanel'de
   (redundant); CS@10/farm lesson'ı postgame.rs'te BİLİNÇLİ kapalı (jungle/support için yanlış-alarm → dürüstlük

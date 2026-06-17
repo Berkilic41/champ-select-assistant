@@ -11,7 +11,14 @@
   boşsa gizli). i18n poolCoach.learningTitle/learningGain/learningNoMove (tr/en). Engine purity (core el değmedi).
   Test: yeni player.test.ts getLearningProgress (learning-filtre/0-gain/never+tercihsiz-hariç/boş) + PoolBuilder render.
   ✅ renderer 273 + host 164 + typecheck 0 + i18n parite. (commit hazırlanıyor)
-- **Sıradaki:** Epic #4 Slice 2 (havuz-derinlik zaman-trendi / learning maç-sayısı — büyük) ya da kalan Epic adayları.
+- **Iter Slice-2 (done)** — öğrenme hedefine gerçek maç-sonucu (games/WR). Host `getLearningProgress` aynı `days`
+  penceresinde `matches`'ten ikinci GROUP BY ile `games_played`+`wins` ekler (JS merge; mastery-snapshot'lı hedef
+  seti korunur — additive). PoolBuilder: ikinci nötr alt-satır (`.pool-progress__sub`) — games≥3 "N maç · %WR",
+  1–2 maç "N maç" (ince-örneklem dürüstlüğü, WR uydurulmaz), games=0 gizli. i18n poolCoach.learningGames/
+  learningWinRate (tr/en, `{{n}}`/`{{wr}}`). Engine purity (core el değmedi). Test: player.test.ts'e matches seed +
+  games/wins + pencere-dışı-hariç assert'leri; PoolBuilder.test.tsx WR/sayı/gizleme assert'leri. ADR-007.
+  ✅ renderer 273 + host 164 + typecheck 0 + i18n parite. (commit hazırlanıyor)
+- **Sıradaki:** Epic #4 Slice 3 (havuz-derinlik zaman-trendi — büyük) ya da kalan Epic Slice-2'leri (Lane #2 ölçülen-plumbing / In-game #2 teamfight-note).
 
 ## Büyük geliştirme modu — EPIC #5: In-game Overlay Makro/Objective (2026-06-17)
 > Mesaj-beklemeden otonom devam. Post-game S1 bitti → koddan-doğrulanmış temiz in-game adayı.

@@ -629,6 +629,8 @@
     "learningTitle": "Your learning targets",
     "learningGain": "+{{pts}} pts · Lv {{level}}",
     "learningNoMove": "Marked — no movement yet",
+    "learningGames": "{{n}} games",
+    "learningWinRate": "{{n}} games · {{wr}}% WR",
     "training": {
       "blind_safe": "Blind-safe anchor",
       "counter_pick": "Reactive counter pick",
