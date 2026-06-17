@@ -126,7 +126,8 @@
     "filterChampion": "Şampiyon",
     "filterResult": "Sonuç",
     "filterAll": "Tümü",
-    "noFilterMatch": "Bu filtreye uygun maç yok"
+    "noFilterMatch": "Bu filtreye uygun maç yok",
+    "summary": "{{wins}}G {{losses}}M · %{{wr}} · {{kda}} KDA"
   },
   "champSelect": {
     "yourTeam": "Takımın",

@@ -7,6 +7,11 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Maç Geçmişinde özet başlığı** (Match-History Epic — Slice 4) — Maç Geçmişi listesi artık gösterilen
+  (filtrelenmiş) maçların **galibiyet/mağlubiyet rekorunu + kazanma oranını + toplam KDA'sını** bir bakışta
+  veriyor (ör. "12G 8M · %60 · 2.85 KDA"). Filtrelerle birleşince doğrudan değerli: bir şampiyon/rol seçince
+  "o şampiyonda/rolde rekorum" anında görünür. Saf renderer — zaten çekilmiş maçlardan hesaplanır (yeni Riot
+  çağrısı/host sorgusu yok). tr/en parite (`matchHistory.summary`) + renderer testi.
 - **Lane eşleşmesinde ölçülen kazanma oranı satırı** (Lane-Matchup Epic — Slice 2) — Lane eşleşme paneli artık
   (veri varsa) rakibe karşı **ölçülen genel kazanma oranını** ayrı dürüst bir satırda gösteriyor (ör. "Ölçülen:
   %48 · 2.200 maç"), `champion_matchups` verisinden. Bu, tahmini faz barlarından (KB tahmini) **ayrı** tutulur:

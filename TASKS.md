@@ -90,8 +90,11 @@
   seçenek). Client-side `filtered` (yeni fetch yok); eşleşme yoksa `matchHistory.noFilterMatch`. i18n filters/
   filterRole/filterChampion/filterResult/filterAll (tr/en). GOTCHA: option metni satır metniyle çakışır → testte
   `within(getByRole('list'))` ile kapsa. ✅ renderer 266 + host 161 + typecheck 0 + i18n parite. (commit hazırlanıyor)
-- **EPIC TAMAM (Match-History MVP):** liste + detay + filtre. Sonraki Epic önceliği: lane-matchup veri-dürüstlüğü (#2)
-  — core `ScoringContext`→`lane_matchup_from_json`'a matchup plumbing + LaneMatchupPanel "KB tahmini" rozeti.
+- **Iter Slice-4 (done)** — özet başlığı: MatchHistoryView'da gösterilen (filtrelenmiş) maçların rekor+WR+toplam
+  KDA'sı (`{{wins}}G {{losses}}M · %{{wr}} · {{kda}} KDA`). Saf renderer — `filtered`'tan hesaplanır (yeni host
+  çağrısı yok); filtrelerle birleşince "bu şampiyon/rolde rekorum". i18n matchHistory.summary (tr/en). Test: özet
+  hem genel hem filtre-sonrası doğrulanır (locale-bağımsız: KDA toFixed(2)). ✅ renderer 278 + typecheck 0 + i18n parite.
+- **EPIC MVP+ TAMAM (Match-History):** liste + detay + filtre + özet. Lane-matchup #2 de S2'ye kadar bitti (ADR-009).
 
 ## Ürün geliştirme modu (2026-06-17, kullanıcı direktifi)
 > "Artık yalnızca bugfix/audit değil — otonom ürün geliştirme lideri. Her iterasyonda fırsat keşfet,

@@ -178,6 +178,37 @@ describe('MatchHistoryView', () => {
     expect(rowList().queryByText('5/2/7')).not.toBeInTheDocument();
   });
 
+  it('shows a record/WR/KDA summary that reflects the active filters (Slice 4)', async () => {
+    mockInvoke.mockImplementation((cmd: string) => {
+      if (cmd === 'get_active_summoner_puuid') return Promise.resolve('p');
+      if (cmd === 'get_match_history')
+        return Promise.resolve([
+          SAMPLE, // Garen / win / 5-2-7
+          {
+            ...SAMPLE,
+            match_id: 'M2',
+            champion_key: 'Ahri',
+            position: 'middle',
+            win: 0,
+            has_review: 0,
+            kills: 1,
+            deaths: 9,
+            assists: 3,
+          },
+        ]);
+      return Promise.resolve(null);
+    });
+    render(<MatchHistoryView />);
+    await waitFor(() => expect(screen.getByRole('list')).toBeInTheDocument());
+
+    // İki maç: 1G 1M · %50 · KDA = (5+7+1+3)/(2+9) = 16/11 = 1.45.
+    expect(screen.getByText('1G 1M · %50 · 1.45 KDA')).toBeInTheDocument();
+
+    // Galibiyet filtrele → yalnız Garen: 1G 0M · %100 · KDA = 12/2 = 6.00.
+    fireEvent.change(screen.getByLabelText('Sonuç'), { target: { value: 'win' } });
+    expect(screen.getByText('1G 0M · %100 · 6.00 KDA')).toBeInTheDocument();
+  });
+
   it('shows a no-filter-match message when filters exclude every match (Slice 3)', async () => {
     mockInvoke.mockImplementation((cmd: string) => {
       if (cmd === 'get_active_summoner_puuid') return Promise.resolve('p');

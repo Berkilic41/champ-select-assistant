@@ -118,6 +118,22 @@ export const MatchHistoryView: React.FC = () => {
     return true;
   });
 
+  // Gösterilen (filtrelenmiş) maçların özeti: rekor + WR + toplam KDA. Filtrelerle
+  // birleşince "bu şampiyonda/rolde rekorum" sinyali. Saf renderer (yeni fetch yok).
+  const wins = filtered.filter((m) => m.win === 1).length;
+  const sumK = filtered.reduce((s, m) => s + m.kills, 0);
+  const sumD = filtered.reduce((s, m) => s + m.deaths, 0);
+  const sumA = filtered.reduce((s, m) => s + m.assists, 0);
+  const summary =
+    filtered.length > 0
+      ? t('matchHistory.summary', {
+          wins,
+          losses: filtered.length - wins,
+          wr: Math.round((wins / filtered.length) * 100),
+          kda: ((sumK + sumA) / Math.max(sumD, 1)).toFixed(2),
+        })
+      : '';
+
   return (
     <div className="match-history-wrap">
       <div className="match-history__filters" role="group" aria-label={t('matchHistory.filters')}>
@@ -162,6 +178,8 @@ export const MatchHistoryView: React.FC = () => {
       {filtered.length === 0 ? (
         <p className="match-history__empty">{t('matchHistory.noFilterMatch')}</p>
       ) : (
+        <>
+        <p className="match-history__summary">{summary}</p>
         <ul className="match-history" aria-label={t('matchHistory.title')}>
           {filtered.map((m) => {
             const cspm = csPerMin(m.cs, m.duration_secs);
@@ -223,6 +241,7 @@ export const MatchHistoryView: React.FC = () => {
             );
           })}
         </ul>
+        </>
       )}
     </div>
   );

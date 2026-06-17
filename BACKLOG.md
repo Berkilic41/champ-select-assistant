@@ -71,7 +71,10 @@ makul varsay (→ DECISIONS ADR-004). Test+typecheck+desktop testleri geçmeden 
   - **Slice 3 done** — filtreler: rol + şampiyon + sonuç (3 açılır `<select>`, yalnız listede var-olan seçenekler);
     client-side, yeni fetch yok; eşleşme yoksa dürüst "Bu filtreye uygun maç yok". renderer 266 + host 161 +
     typecheck 0; +2 renderer test; i18n `matchHistory.filters/filterRole/filterChampion/filterResult/filterAll/noFilterMatch`.
-  - **EPIC TAMAM** — Match-History MVP (liste + detay paneli + filtreler) bitti. Sonraki Epic: lane-matchup veri-dürüstlüğü (#2).
+  - **Slice 4 done** — özet başlığı: gösterilen (filtrelenmiş) maçların rekor+WR+toplam KDA'sı ("12G 8M · %60 ·
+    2.85 KDA"). Saf renderer (zaten çekilen entry'lerden; yeni fetch yok); filtrelerle birleşince "bu şampiyonda/
+    rolde rekorum" sinyali. i18n matchHistory.summary (tr/en). renderer 278 + typecheck 0 + i18n parite.
+  - **MVP+ TAMAM** — Match-History (liste + detay + filtreler + özet). Sonraki Epic: lane-matchup veri-dürüstlüğü (#2).
 
 **MOD: Otonom ürün geliştirme (2026-06-17 kullanıcı direktifi).** Artık bugfix/audit değil — her
 iterasyonda fırsat keşfet → P0/P1 yoksa en yüksek-değerli KÜÇÜK özelliği seç → uygula+test+dokümante+commit.
