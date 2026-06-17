@@ -10,6 +10,12 @@
 BÜYÜK yönü Epic seç, MVP'ye böl, her tur tek dikey dilim (salt kozmetik yok). Öncelik: 1) match-history
 2) lane-matchup dürüstlük 3) post-game koçluk 4) havuz gelişim 5) in-game makro. Kapsam belirsizse sorma,
 makul varsay (→ DECISIONS ADR-004). Test+typecheck+desktop testleri geçmeden bitmiş sayılmaz.
+- **DISCOVERY-6 done (gerçek yeniden-keşif #2, 2026-06-18)** — "hazırlanmış-ama-bağlanmamış" damarı sürdü:
+  `ChampionDetail.mobility` (high/medium/low/none) + `utility_tags` (16 sabit tag) core'da arketipten hesaplanıp
+  payload'da AMA hiçbir bileşende render edilmiyordu (yalnız test mock'unda). ChampionDetailCard'a mobility rozeti
+  + "Takım katkısı" bölümü (etiketler WIN_LABELS desenli modül-map → ağır i18n yok; +2 bölüm-etiketi i18n key).
+  Saf renderer, sıfır fabrikasyon (KB). +1 test. renderer 282 + typecheck 0 + i18n parite. Ajan yanlış-alarmları
+  (heroCard.scoreBreakdown/dataSources i18n = defaultValue fallback, kozmetik → ertelendi).
 - **DISCOVERY-5 done (gerçek yeniden-keşif, 2026-06-18)** — bilinen thin-adaylar tükendiğinde 2 Explore ajanı +
   koddan-teyit ile gerçek boşluk arandı. BULUNDU: `DraftPlan.blind_pick_safety` + `execution_difficulty` core'da
   hesaplanıp payload'a giriyor AMA hiçbir champ-select yüzeyinde render edilmiyordu; `draftPlan.{pickSafety,

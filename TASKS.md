@@ -2,6 +2,18 @@
 
 > Tek seferde tek küçük görev. Tarih: 2026-06-16.
 
+## Discovery-6 — gerçek yeniden-keşif #2 (2026-06-18)
+> "Hazırlanmış-ama-bağlanmamış" damarı sürdü (Explore + koddan-teyit).
+- **Iter (done)** — ChampionDetailCard "Hareketlilik + Takım katkısı": KODDAN doğrulandı — `ChampionDetail.mobility`
+  (high/medium/low/none) + `utility_tags` (16 sabit tag) core'da arketipten hesaplanıp payload'da AMA hiçbir
+  bileşende render edilmiyordu (recommendation.ts:363,366 tipte var; yalnız test mock'unda). Karta mobility rozeti
+  (.cdc-badges'e) + "Takım katkısı" bölümü (.cdc-badge reuse). Etiketler WIN_LABELS desenli modül-map
+  (MOBILITY_LABELS/UTILITY_LABELS, locale-agnostic LoL-jargon + birkaç TR) → ağır i18n yok; +2 bölüm-etiketi
+  (champDetail.mobility/utility tr/en). Saf renderer (core/host/CSS değişmedi). +1 test (mobility 'high' + engage/
+  frontline). ✅ renderer 282 + typecheck 0 + i18n parite. Sıfır fabrikasyon (KB deterministik). GOTCHA: Bash `cd`
+  cwd'yi değiştirdi → pnpm/git için MUTLAK `-C` yol kullan (yoksa champ-select-assistant/champ-select-assistant ENOENT).
+- **Sıradaki:** yüzey gerçekten tükendiyse churn üretme — kullanıcıya yön sorusu (ML/LLM, canlı-veri prod-key, overlay HUD).
+
 ## Discovery-5 — gerçek yeniden-keşif (2026-06-18)
 > Bilinen thin-aday listesi tükendi → 2 Explore ajanı + koddan-teyit ile TÜM kod tabanı tarandı.
 - **Iter (done)** — DeepDiveTab "Pick profili": KODDAN doğrulandı — `DraftPlan.blind_pick_safety` (0-1, KB) +

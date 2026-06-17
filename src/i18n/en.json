@@ -555,7 +555,9 @@
     "powerCurve": "Power curve",
     "early": "Early",
     "mid": "Mid",
-    "late": "Late"
+    "late": "Late",
+    "mobility": "Mobility",
+    "utility": "Team utility"
   },
   "draftFlow": {
     "title": "Draft Flow",

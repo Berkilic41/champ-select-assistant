@@ -555,7 +555,9 @@
     "powerCurve": "Güç Eğrisi",
     "early": "Erken",
     "mid": "Orta",
-    "late": "Geç"
+    "late": "Geç",
+    "mobility": "Hareketlilik",
+    "utility": "Takım katkısı"
   },
   "draftFlow": {
     "title": "Draft Akışı",

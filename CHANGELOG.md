@@ -7,6 +7,13 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Şampiyon detayında hareketlilik + takım katkısı** (champ-select) — Şampiyon detay kartı artık KB'den
+  gelen **mobility** (Hareketlilik: High/Medium/Low/None) rozetini ve **utility_tags** (Takım katkısı:
+  Engage/Peel/Ön saf/Alan kontrolü/… ) bölümünü gösteriyor — "bu şampiyon takımın engage/peel/disengage
+  ihtiyacını karşılar mı, ne kadar hareketli?" sorusunu draft'ta yanıtlar. Veri zaten core'da hesaplanıp
+  payload'da (`ChampionDetail.mobility` + `utility_tags`, arketipten) AMA hiçbir yerde render edilmiyordu.
+  Saf renderer (core/host/CSS değişmedi; `.cdc-badge` reuse, etiketler WIN_LABELS desenli modül-map); +2 i18n
+  bölüm-etiketi (tr/en parite) + test. Sıfır fabrikasyon (KB-türevli).
 - **Draft derin-incelemede "Pick profili"** (champ-select) — Öneri detay sekmesi (DeepDiveTab) artık seçilen
   şampiyonun **blind-pick güvenliğini** ("Blind pick güvenli / Orta / Güvenli değil") ve **execution zorluğunu**
   ("Kolay / Orta / Zor (n/5)") bantlı etiketlerle gösteriyor — pick-anında "bunu körlemesine seçmek güvenli mi,

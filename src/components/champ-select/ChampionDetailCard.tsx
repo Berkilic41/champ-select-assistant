@@ -26,6 +26,34 @@ const WIN_LABELS: Record<string, string> = {
   duel: 'Duel',
 };
 
+/** KB mobility tier → short label (used as-is in TR/EN, like WIN_LABELS). */
+const MOBILITY_LABELS: Record<string, string> = {
+  high: 'High',
+  medium: 'Medium',
+  low: 'Low',
+  none: 'None',
+};
+
+/** KB utility tag → short label (LoL terms as-is; a few translated). */
+const UTILITY_LABELS: Record<string, string> = {
+  engage: 'Engage',
+  disengage: 'Disengage',
+  peel: 'Peel',
+  poke: 'Poke',
+  pick: 'Pick',
+  roam: 'Roam',
+  siege: 'Siege',
+  vision: 'Vision',
+  frontline: 'Ön saf',
+  waveclear: 'Dalga temizleme',
+  zone_control: 'Alan kontrolü',
+  split_pressure: 'Split baskısı',
+  anti_tank: 'Tank kıran',
+  healing: 'İyileştirme',
+  shielding: 'Kalkan',
+  objective_control: 'Objektif kontrolü',
+};
+
 function pct(v: number): number {
   return Math.round(Math.max(0, Math.min(1, v)) * 100);
 }
@@ -179,9 +207,21 @@ export const ChampionDetailCard: React.FC<Props> = ({ championId, championKey, o
               <span className="cdc-badge">{WIN_LABELS[detail.win_condition] ?? detail.win_condition}</span>
               <span className="cdc-badge">{t('champDetail.difficulty')}: {detail.execution_difficulty}/5</span>
               <span className="cdc-badge">{detail.has_hard_cc ? t('champDetail.hasCc') : t('champDetail.noCc')}</span>
+              <span className="cdc-badge">{t('champDetail.mobility')}: {MOBILITY_LABELS[detail.mobility] ?? detail.mobility}</span>
             </div>
 
             <PreferenceToggles championId={championId} />
+
+            {detail.utility_tags.length > 0 && (
+              <div className="cdc-section">
+                <span className="cdc-label">{t('champDetail.utility')}</span>
+                <div className="cdc-badges">
+                  {detail.utility_tags.map((tag) => (
+                    <span key={tag} className="cdc-badge">{UTILITY_LABELS[tag] ?? tag}</span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="cdc-section">
               <span className="cdc-label">{t('champDetail.powerCurve')}</span>
