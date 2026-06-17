@@ -2,6 +2,17 @@
 
 > Tek seferde tek küçük görev. Tarih: 2026-06-16.
 
+## Discovery-5 — gerçek yeniden-keşif (2026-06-18)
+> Bilinen thin-aday listesi tükendi → 2 Explore ajanı + koddan-teyit ile TÜM kod tabanı tarandı.
+- **Iter (done)** — DeepDiveTab "Pick profili": KODDAN doğrulandı — `DraftPlan.blind_pick_safety` (0-1, KB) +
+  `execution_difficulty` (1-5, KB) core'da hesaplanıp payload'da AMA hiçbir champ-select bileşeninde render
+  edilmiyordu (yalnız test mock'larında); `draftPlan.*` bant i18n anahtarları DA hazır-ama-kullanılmıyordu →
+  hazırlanmış özelliğin render'ı tamamlandı. DeepDiveTab'a bantlı etiket bölümü (blindSafetyLabel eşik 0.6=core
+  BLIND_SAFE_THRESHOLD/compute_blind_unsafety; execDifficultyLabel 1-2 kolay/3 orta/4-5 zor). Saf renderer
+  (core/host/CSS değişmedi; hero-card__quick-tags reuse). +1 i18n (pickProfile) + 2 test (riskli/zor + güvenli/kolay).
+  ✅ renderer 281 + typecheck 0 + i18n parite. Sıfır fabrikasyon (KB deterministik). → CHANGELOG/BACKLOG Discovery-5.
+- **Sıradaki:** yüzey gerçekten tükendiyse churn üretme — kullanıcıya yön sorusu (ML/LLM, canlı-veri prod-key, overlay HUD).
+
 ## Büyük geliştirme modu — EPIC #4: Havuz Gelişim Sistemi (2026-06-17)
 > Mesaj-beklemeden otonom devam. In-game Makro S1 bitti → priority-#4 havuz gelişim.
 - **Iter Slice-1 (done)** — öğrenme-hedefi ilerleme kartı. Host `getLearningProgress` (player.ts; user_preferences

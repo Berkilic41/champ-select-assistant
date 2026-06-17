@@ -10,6 +10,13 @@
 BÜYÜK yönü Epic seç, MVP'ye böl, her tur tek dikey dilim (salt kozmetik yok). Öncelik: 1) match-history
 2) lane-matchup dürüstlük 3) post-game koçluk 4) havuz gelişim 5) in-game makro. Kapsam belirsizse sorma,
 makul varsay (→ DECISIONS ADR-004). Test+typecheck+desktop testleri geçmeden bitmiş sayılmaz.
+- **DISCOVERY-5 done (gerçek yeniden-keşif, 2026-06-18)** — bilinen thin-adaylar tükendiğinde 2 Explore ajanı +
+  koddan-teyit ile gerçek boşluk arandı. BULUNDU: `DraftPlan.blind_pick_safety` + `execution_difficulty` core'da
+  hesaplanıp payload'a giriyor AMA hiçbir champ-select yüzeyinde render edilmiyordu; `draftPlan.{pickSafety,
+  execDifficulty,safetySafe/Medium/Risky,execEasy/Medium/Hard}` i18n bantları DA hazırdı (kullanılmıyordu) →
+  hazırlanmış-ama-bağlanmamış özellik. DeepDiveTab'a "Pick profili" bölümü (bantlı etiketler, eşik 0.6=core
+  BLIND_SAFE_THRESHOLD). Saf renderer, sıfır fabrikasyon (KB-türevli), +1 i18n key (pickProfile) + 2 test.
+  renderer 281 + typecheck 0 + i18n parite. Ajan yanlış-alarmları (combo-history/macro-timeline=veri yok) elendi.
 - **EPIC #5: In-game Overlay Makro/Objective** (renderer; core/host DEĞİŞMEZ).
   - **Slice 1 done** — objective mutlak doğuş saati (@mm:ss) geri sayımın altında. `next_spawn_secs` zaten
     payload'da (macro_timers.rs:56, generated ObjectiveTimer) ama IngameView yalnız `countdown(seconds_until)`

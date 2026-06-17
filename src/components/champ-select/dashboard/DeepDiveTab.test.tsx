@@ -96,4 +96,37 @@ describe('DeepDiveTab', () => {
     render(<DeepDiveTab rec={baseRec} />);
     expect(screen.queryByText('Koç notu')).not.toBeInTheDocument();
   });
+
+  it('surfaces the KB pick profile: low blind-safety → risky band, high difficulty → hard band', () => {
+    const plan: DraftPlan = {
+      combo_with: [],
+      win_condition: 'x',
+      team_role: 'carry',
+      damage_profile: 'AP',
+      blind_pick_safety: 0.3, // < 0.6 → riskli
+      execution_difficulty: 5, // >= 4 → zor (5/5)
+      threats: [],
+      fills_team_need: [],
+    };
+    render(<DeepDiveTab rec={{ ...baseRec, draft_plan: plan }} />);
+    expect(screen.getByText('Pick profili')).toBeInTheDocument();
+    expect(screen.getByText('Güvenli değil (blind)')).toBeInTheDocument();
+    expect(screen.getByText('Zor (5/5)')).toBeInTheDocument();
+  });
+
+  it('shows the blind-safe + easy bands for a high-safety low-difficulty pick', () => {
+    const plan: DraftPlan = {
+      combo_with: [],
+      win_condition: 'x',
+      team_role: 'carry',
+      damage_profile: 'AP',
+      blind_pick_safety: 0.9, // >= 0.6 → güvenli
+      execution_difficulty: 1, // <= 2 → kolay
+      threats: [],
+      fills_team_need: [],
+    };
+    render(<DeepDiveTab rec={{ ...baseRec, draft_plan: plan }} />);
+    expect(screen.getByText('Blind pick güvenli')).toBeInTheDocument();
+    expect(screen.getByText('Kolay')).toBeInTheDocument();
+  });
 });

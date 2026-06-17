@@ -35,6 +35,21 @@ function formatSourceTime(value?: number | null): string {
   return new Date(value * 1000).toLocaleDateString();
 }
 
+/** KB blind-pick güvenliği (0..1) → bant etiketi. Eşik 0.6 = core BLIND_SAFE_THRESHOLD
+ *  (scoring `compute_blind_unsafety` de <0.60'ı ilk-pick'te riskli sayar). */
+function blindSafetyLabel(v: number, t: TFunction): string {
+  if (v >= 0.6) return t('draftPlan.safetySafe');
+  if (v >= 0.4) return t('draftPlan.safetyMedium');
+  return t('draftPlan.safetyRisky');
+}
+
+/** KB execution zorluğu (1..5) → bant etiketi (KB-türevli, mekanik; comfort değil). */
+function execDifficultyLabel(n: number, t: TFunction): string {
+  if (n >= 4) return t('draftPlan.execHard', { n });
+  if (n === 3) return t('draftPlan.execMedium');
+  return t('draftPlan.execEasy');
+}
+
 function buildCoachPillars(rec: Recommendation, t: TFunction): CoachPillar[] {
   const plan = rec.draft_plan;
   const decisionText = (rec.decision_sentence ?? '').trim() || rec.reason;
@@ -178,6 +193,20 @@ export const DeepDiveTab = React.memo(function DeepDiveTab({ rec, draftSimulatio
             late: Math.round(rec.phase_matchup[2] * 100),
           })}
         </p>
+      )}
+
+      {plan && (
+        <div className="hero-detail-section">
+          <span className="hero-card__plan-label">{t('draftPlan.pickProfile')}</span>
+          <div className="hero-card__quick-tags">
+            <span className="hero-card__quick-tag">
+              {t('draftPlan.pickSafety')}: <strong>{blindSafetyLabel(plan.blind_pick_safety, t)}</strong>
+            </span>
+            <span className="hero-card__quick-tag">
+              {t('draftPlan.execDifficulty')}: <strong>{execDifficultyLabel(plan.execution_difficulty, t)}</strong>
+            </span>
+          </div>
+        </div>
       )}
 
       {plan && plan.fills_team_need.length > 0 && (

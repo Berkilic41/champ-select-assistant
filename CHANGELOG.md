@@ -7,6 +7,13 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Draft derin-incelemede "Pick profili"** (champ-select) — Öneri detay sekmesi (DeepDiveTab) artık seçilen
+  şampiyonun **blind-pick güvenliğini** ("Blind pick güvenli / Orta / Güvenli değil") ve **execution zorluğunu**
+  ("Kolay / Orta / Zor (n/5)") bantlı etiketlerle gösteriyor — pick-anında "bunu körlemesine seçmek güvenli mi,
+  mekanik olarak ne kadar zor?" sorusunu yanıtlar. Veri zaten core'da hesaplanıyordu (`DraftPlan.blind_pick_safety`
+  + `execution_difficulty`, KB arketipinden — mekanik, comfort değil) ama hiçbir champ-select yüzeyinde render
+  edilmiyordu; i18n bantları da hazırdı (kullanılmıyordu). Eşik 0.6 = core BLIND_SAFE_THRESHOLD ile hizalı.
+  Saf renderer (core/host değişmedi); tr/en parite + 2 test. Sıfır fabrikasyon (KB-türevli deterministik).
 - **Maç Geçmişinde "daha fazla yükle"** (Match-History Epic — Slice 5) — Maç Geçmişi artık ilk 20 maçla sınırlı
   değil: liste sonundaki "Daha fazla yükle" butonu sonraki 20'şerlik sayfayı getiriyor (host `get_match_history`
   limit parametresi zaten vardı). Tam sayfa döndüğünde buton görünür, daha az dönünce (hepsi yüklendi) gizlenir.
