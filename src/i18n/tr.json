@@ -432,6 +432,8 @@
       "no_data": "Hedef: {{label}} — bu maçta ölçülemedi"
     },
     "streak": "Seri: {{n}}",
+    "focusHistoryTitle": "Son hedef serisi",
+    "focusHistoryAria": "Son {{total}} hedeften {{met}} tutturuldu",
     "nextFocus": "Sonraki maç hedefi: {{label}}",
     "baselineShort": "(ort. {{v}})",
     "locked": "Riot anahtarıyla açılır",

@@ -10,6 +10,15 @@
 BÜYÜK yönü Epic seç, MVP'ye böl, her tur tek dikey dilim (salt kozmetik yok). Öncelik: 1) match-history
 2) lane-matchup dürüstlük 3) post-game koçluk 4) havuz gelişim 5) in-game makro. Kapsam belirsizse sorma,
 makul varsay (→ DECISIONS ADR-004). Test+typecheck+desktop testleri geçmeden bitmiş sayılmaz.
+- **EPIC #3: Post-game Gelişim Koçluğu** (gelişim geri-bildirimi; core DEĞİŞMEZ — engine purity).
+  - **Slice 1 done** — Maç Sonu Karnesinde hedef-tutturma serisi görseli: focus_goals met/missed geçmişi ✓/✗
+    dot dizisiyle (önceden yalnız streak SAYISI). Yeni host `get_focus_history` (met/missed, en yeni önce,
+    superseded hariç) + GameReviewCard dot satırı + i18n `review.focusHistoryTitle`/`focusHistoryAria` (tr/en).
+    Explore 7 boşluk önerdi; koddan elendi: form-per-metric TrendPanel'de, CS@10 lesson bilinçli kapalı (honest),
+    off-role/combo-outcome/macro-timeline core/timeline (ertelendi → ADR-006). renderer 270 + host 162 +
+    typecheck 0 + i18n parite; GameReviewCard'ın ilk testi. core değişmedi.
+  - **Slice 2+ (aday, ertelendi)** — off-role zayıflık hedefi · combo-outcome feedback · macro/objective timeline
+    (timeline ingestion gerekir) — daha büyük/core, ayrı tur.
 - **EPIC #2: Lane-Matchup Veri-Dürüstlüğü** (core read etiketi; scoring DEĞİŞMEZ — engine purity).
   - **Slice 1 done** — LaneMatchup faz-avantaj barları artık dürüstçe "KB tahmini" etiketli. Koddan doğrulandı:
     `lane_matchup_from_json` (json_api.rs) phase_advantage'ı YALNIZ arketip `power_curve`'den (`adv()`) üretiyor,

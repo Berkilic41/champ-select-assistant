@@ -11,6 +11,7 @@ import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import {
   focusStreak,
   generateGameReviews,
+  getFocusHistory,
   getGameReviewByMatchId,
   getGameReviews,
   getMatchHistory,
@@ -129,6 +130,28 @@ describe("koç döngüsü (game_review.rs + game-review.ts)", () => {
     expect((found!.review as { champion_key: string }).champion_key).toBe("Garen");
     // Karnesi olmayan match_id → null.
     expect(getGameReviewByMatchId(db, "NOPE")).toBeNull();
+  });
+
+  it("returns recent met/missed focus history newest-first, excluding superseded (Epic #3)", () => {
+    const db = seededDb();
+    const ins = db.prepare(
+      `INSERT INTO focus_goals (puuid, queue_group, metric, target, direction, label, created_at, result)
+       VALUES (?, ?, ?, 5.0, 'at_least', ?, ?, ?)`,
+    );
+    ins.run(PUUID, "soloq", "cs_per_min", "CS hedefi", 100, "met");
+    ins.run(PUUID, "soloq", "kda", "KDA hedefi", 200, "missed");
+    ins.run(PUUID, "soloq", "vision_score", "Vizyon hedefi", 300, "superseded"); // hariç
+    ins.run(PUUID, "soloq", "deaths_per_10", "Ölüm hedefi", 400, "met");
+
+    const hist = getFocusHistory(db, PUUID, "soloq", 8);
+    // superseded hariç → 3 sonuç; en yeni (created_at DESC) önce.
+    expect(hist).toHaveLength(3);
+    expect(hist.map((h) => h.result)).toEqual(["met", "missed", "met"]);
+    expect(hist[0].metric).toBe("deaths_per_10");
+    expect(hist[0].label).toBe("Ölüm hedefi");
+    // limit uygulanır; farklı grup → boş.
+    expect(getFocusHistory(db, PUUID, "soloq", 2)).toHaveLength(2);
+    expect(getFocusHistory(db, PUUID, "flex", 8)).toHaveLength(0);
   });
 
   it("generates reviews oldest-first, runs the goal loop, and is idempotent", () => {

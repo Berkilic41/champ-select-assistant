@@ -432,6 +432,8 @@
       "no_data": "Goal: {{label}} — not measurable this game"
     },
     "streak": "Streak: {{n}}",
+    "focusHistoryTitle": "Recent goal streak",
+    "focusHistoryAria": "{{met}} of the last {{total}} goals hit",
     "nextFocus": "Next game focus: {{label}}",
     "baselineShort": "(avg {{v}})",
     "locked": "Unlocks with a Riot key",

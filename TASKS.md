@@ -2,6 +2,19 @@
 
 > Tek seferde tek küçük görev. Tarih: 2026-06-16.
 
+## Büyük geliştirme modu — EPIC #3: Post-game Gelişim Koçluğu (2026-06-17)
+> Mesaj-beklemeden otonom devam. Lane-Matchup Slice 1 bitti → öncelik #3 post-game gelişim koçluğu.
+- **Keşif** — 1 Explore ajanı (post-game envanter) + lider koddan-doğrulama. 7 boşluk önerildi; ELENENLER:
+  form-per-metric (TrendPanel'de zaten), CS@10 lesson (postgame.rs bilinçli kapalı — jungle/support honest),
+  off-role/combo/macro (core/timeline, büyük). SEÇİLEN: hedef-tutturma serisi görseli (veri hazır, küçük, core'suz).
+- **Iter Slice-1 (done)** — GameReviewCard'a hedef-tutturma serisi (✓/✗ dot). Host `getFocusHistory` (focus_goals
+  met/missed, en yeni önce, superseded hariç) + `get_focus_history` kaydı. GameReviewCard: `focusHistory` state +
+  fetch + dot satırı (reverse → eski→yeni; role=img+aria, dot=aria-hidden+tooltip label). CSS `.grc-goal-dot`.
+  i18n review.focusHistoryTitle/Aria (tr/en). Core DEĞİŞMEDİ (engine purity). Testler: host getFocusHistory
+  (sıralama/superseded-hariç/limit/grup) + GameReviewCard ilk testi (dot sayısı/met-missed). ✅ renderer 270 +
+  host 162 + typecheck 0 + i18n parite. (commit hazırlanıyor)
+- **Sıradaki:** Slice 2 adayları (off-role hedef / combo-outcome / macro-timeline — büyük/core, ayrı tur) ya da Epic #4 (havuz gelişim).
+
 ## Büyük geliştirme modu — EPIC #2: Lane-Matchup Veri-Dürüstlüğü (2026-06-17)
 > Mesaj-beklemeden otonom devam. Match-History Epic bitti → öncelik #2 lane-matchup dürüstlük.
 - **Iter Slice-1 (done)** — LaneMatchup barlarına "KB tahmini" kaynak etiketi. Koddan doğrulandı: phase_advantage

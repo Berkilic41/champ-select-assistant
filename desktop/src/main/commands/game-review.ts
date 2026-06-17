@@ -141,6 +141,41 @@ export function focusStreak(db: DatabaseSync, puuid: string, group: string): num
   return streak;
 }
 
+export interface FocusHistoryEntry {
+  result: string; // 'met' | 'missed'
+  label: string;
+  metric: string;
+}
+
+/**
+ * Son N kapanmış odak hedefi (Epic #3 — gelişim koçluğu). En yeni önce; yalnız
+ * met/missed (superseded/no_data hariç) — hedef-tutturma serisini görselleştirmek
+ * için. focusStreak yalnız SAYI veriyordu; bu paterni (✓✗✓) çıkarır. Core değişmez.
+ */
+export function getFocusHistory(
+  db: DatabaseSync,
+  puuid: string,
+  group: string,
+  limit = 8,
+): FocusHistoryEntry[] {
+  const rows = db
+    .prepare(
+      `SELECT result, label, metric FROM focus_goals
+       WHERE puuid = ? AND queue_group = ? AND result IN ('met','missed')
+       ORDER BY created_at DESC LIMIT ?`,
+    )
+    .all(puuid, group, limit) as unknown as {
+    result: string;
+    label: string;
+    metric: string;
+  }[];
+  return rows.map((r) => ({
+    result: String(r.result),
+    label: String(r.label),
+    metric: String(r.metric),
+  }));
+}
+
 export interface StoredReview {
   match_id: string;
   queue_group: string;

@@ -46,6 +46,12 @@
 .grc-focus-check--no_data { color: var(--text-muted); }
 .grc-streak { margin-left: auto; font-weight: var(--weight-semibold); }
 
+/* Epic #3: hedef-tutturma serisi — son hedeflerin ✓/✗ dizisi (gelişim koçluğu). */
+.grc-streak-history { display: inline-flex; align-items: center; gap: 4px; cursor: help; }
+.grc-goal-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); flex-shrink: 0; }
+.grc-goal-dot--met { background: var(--success, #4caf50); }
+.grc-goal-dot--missed { background: color-mix(in srgb, var(--danger, #f44336) 55%, transparent); }
+
 .grc-lines { display: flex; flex-direction: column; gap: 3px; list-style: none; margin: 0; padding: 0; }
 .grc-line { display: flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-xs); }
 .grc-metric { color: var(--text-secondary); flex: 1; }

@@ -34,6 +34,12 @@ interface MatchNote {
   updated_at: number;
 }
 
+interface FocusHistoryEntry {
+  result: string; // 'met' | 'missed'
+  label: string;
+  metric: string;
+}
+
 interface Props {
   /** Belirli bir maçın karnesi (Maç Geçmişi detay paneli — Slice 2). Verilmezse
    *  mevcut "en yeni maç" davranışı (StatsView'da prop'suz kullanım). */
@@ -49,6 +55,7 @@ export const GameReviewCard: React.FC<Props> = ({ matchId }) => {
   const [tags, setTags] = useState<string[]>([]);
   const [noteSaved, setNoteSaved] = useState(false);
   const [noteError, setNoteError] = useState(false);
+  const [focusHistory, setFocusHistory] = useState<FocusHistoryEntry[]>([]);
   const noteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -82,6 +89,13 @@ export const GameReviewCard: React.FC<Props> = ({ matchId }) => {
           setNote(existing.note);
           setTags(existing.tags);
         }
+        // Epic #3: hedef-tutturma serisi (gelişim koçluğu görseli).
+        const history = await invoke<FocusHistoryEntry[]>('get_focus_history', {
+          puuid: p,
+          group: current.queue_group,
+          limit: 8,
+        });
+        if (alive) setFocusHistory(history ?? []);
       } catch {
         /* karne üretilemedi (motor/DB yok) — kart sessizce gizli kalır */
       }
@@ -161,6 +175,27 @@ export const GameReviewCard: React.FC<Props> = ({ matchId }) => {
             })}
           </span>
           {streak > 1 && <span className="grc-streak">{t('review.streak', { n: streak })}</span>}
+        </div>
+      )}
+
+      {focusHistory.length > 0 && (
+        <div
+          className="grc-streak-history"
+          role="img"
+          aria-label={t('review.focusHistoryAria', {
+            met: focusHistory.filter((g) => g.result === 'met').length,
+            total: focusHistory.length,
+          })}
+          title={t('review.focusHistoryTitle')}
+        >
+          {[...focusHistory].reverse().map((g, i) => (
+            <span
+              key={i}
+              className={`grc-goal-dot grc-goal-dot--${g.result === 'met' ? 'met' : 'missed'}`}
+              title={g.label}
+              aria-hidden="true"
+            />
+          ))}
         </div>
       )}
 

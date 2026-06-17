@@ -2,6 +2,18 @@
 
 > Format: bağlam → karar → gerekçe → sonuç. En yeni üstte.
 
+## ADR-006 — Post-game koçluk Epic #3: hedef-tutturma serisi görseli ilk dilim seçildi (2026-06-17)
+- **Bağlam:** Epic #3 için Explore ajanı 7 boşluk önerdi; koddan doğrulandı: form-per-metric ZATEN TrendPanel'de
+  (redundant); CS@10/farm lesson'ı postgame.rs'te BİLİNÇLİ kapalı (jungle/support için yanlış-alarm → dürüstlük
+  tasarımı, eklersem honest-design bozulur); off-role per-rol stat + combo-outcome + macro-timeline core/timeline
+  değişikliği ister (geniş → ertelendi).
+- **Karar:** İlk dilim = hedef-tutturma serisi görseli (GameReviewCard'da ✓/✗ dot dizisi). focus_goals met/missed
+  geçmişi VAR ama yalnız streak SAYISI gösteriliyordu (GameReviewCard streak span). Yeni host `get_focus_history`.
+- **Gerekçe:** Veri hazır, küçük+güvenli, yüksek motivasyon/geri-bildirim değeri, **core değişmez (engine purity)**;
+  honest-design'ı (CS lesson'ı kapalı tutma) bozmaz.
+- **Sonuç:** `get_focus_history` + GameReviewCard dot satırı; renderer 270 + host 162 yeşil. Sonraki adaylar
+  (off-role hedef, combo-outcome, macro-timeline) daha büyük/core → ayrı tur.
+
 ## ADR-005 — Lane-matchup faz-avantajı dürüstçe "KB tahmini" etiketlenir (2026-06-17)
 - **Bağlam:** `lane_matchup_from_json` phase_advantage'ı YALNIZ arketip `power_curve`'den (`adv()`) hesaplıyor —
   ölçülen matchup verisine hiç bakmıyor — ama panel barları kaynak etiketsiz gösteriyordu → kullanıcı bunları

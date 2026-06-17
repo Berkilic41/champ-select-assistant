@@ -39,6 +39,7 @@ import {
 import { syncRecommendationFeedback } from "./commands/feedback-flush";
 import {
   generateGameReviews,
+  getFocusHistory,
   getGameReviewByMatchId,
   getGameReviews,
   getMatchHistory,
@@ -483,6 +484,15 @@ export function buildCommandRegistry(
   // Epic Slice 2: tek maçın karnesi (detay paneli).
   commands.set("get_game_review", (args) =>
     getGameReviewByMatchId(requireDb(ctx), String(args?.matchId ?? "")),
+  );
+  // Epic #3: hedef-tutturma serisi (gelişim koçluğu görseli).
+  commands.set("get_focus_history", (args) =>
+    getFocusHistory(
+      requireDb(ctx),
+      String(args?.puuid ?? ""),
+      String(args?.group ?? ""),
+      typeof args?.limit === "number" ? args.limit : 8,
+    ),
   );
   // D3 tercihler + D4 meta trend.
   commands.set("get_champion_preferences", (args) =>

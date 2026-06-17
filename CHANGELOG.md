@@ -7,6 +7,12 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Maç sonu karnesinde hedef-tutturma serisi görseli** (Post-game Koçluk Epic — Slice 1) — Maç Sonu Karnesi
+  artık son odak hedeflerinin (focus_goal) tutturma paternini küçük ✓/✗ noktalarıyla gösteriyor (yeşil=tuttu,
+  kırmızı=kaçtı, tooltip'te hedef metni). Önceden yalnız streak SAYISI vardı; artık serinin ŞEKLİ (ör. ✓✓✗✓)
+  görünür — oyuncu hedef-döngüsünün gerçek etkisini bir bakışta okur. Yeni host `get_focus_history`
+  (focus_goals'tan met/missed, en yeni önce; superseded/no_data hariç). Core değişmedi (engine purity);
+  tr/en parite + host/renderer testleri (GameReviewCard'ın ilk testi).
 - **Lane eşleşmesinde "KB tahmini" dürüstlük rozeti** (Lane-Matchup Epic — Slice 1) — Lane eşleşme panelindeki
   faz-avantaj barları (erken/orta/geç) artık dürüstçe "KB tahmini" rozetiyle etiketli: bu barlar ölçülen kazanma
   oranı DEĞİL, arketip güç-eğrisinden türetilen tahmin (`lane_matchup_from_json` ölçülen matchup verisine hiç
