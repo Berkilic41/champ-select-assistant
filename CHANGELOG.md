@@ -7,6 +7,12 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Ayarlarda temalı "değişiklikleri at" onayı** — kaydedilmemiş değişikliklerle ayar
+  panelini kapatma denemesi (X düğmesi / Escape / arka-plana tık) artık native
+  `window.confirm` yerine uygulamanın koyu temasıyla uyumlu, odaklanabilir bir
+  `role="alertdialog"` gösteriyor ("Düzenlemeye dön" / "Değişiklikleri at"). Native
+  tarayıcı dialog'unun görsel kopukluğu giderildi (daha profesyonel). Escape önce
+  onayı kapatır; footer "İptal" hâlâ doğrudan atar. Renderer-only, tr/en parite + test. (P-06)
 - **Combo panosunda gerçek track-record** — `ComboBoard` artık her müttefik combo'su için
   oyuncunun o eşle **gerçek co-pick geçmişini** (≥2 maç → "Geçmişin: N maç · %WR") teorik
   güç çubuğunun yanında gösteriyor. Veri `get_combo_outcomes`'tan (zaten HeroCard'ın yalnız

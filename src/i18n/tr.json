@@ -769,6 +769,8 @@
     "total": "Toplam: {{total}}",
     "totalInvalid": "!= 1.00",
     "cancel": "İptal",
-    "save": "Kaydet"
+    "save": "Kaydet",
+    "keepEditing": "Düzenlemeye dön",
+    "discardChanges": "Değişiklikleri at"
   }
 }

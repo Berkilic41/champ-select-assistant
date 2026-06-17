@@ -149,6 +149,47 @@
 .sp-btn--save:hover:not(:disabled) { filter: brightness(1.08); }
 .sp-btn--save:disabled { opacity: 0.5; cursor: not-allowed; filter: none; box-shadow: none; }
 
+/* Unsaved-changes discard confirmation (themed; replaces native window.confirm) */
+.settings-confirm {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: rgba(7, 9, 13, 0.55);
+}
+.settings-confirm__box {
+  background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-5);
+  width: 360px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.settings-confirm__msg {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+}
+.settings-confirm__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+.sp-btn--discard {
+  background: color-mix(in srgb, var(--danger, #e5484d) 18%, transparent);
+  color: var(--danger, #e5484d);
+  border-color: color-mix(in srgb, var(--danger, #e5484d) 40%, transparent);
+}
+.sp-btn--discard:hover { filter: brightness(1.1); }
+
 /* Language selector */
 .sp-lang-row { display: flex; gap: var(--space-2); }
 .sp-lang-btn {

@@ -127,6 +127,30 @@ describe('SettingsPanel feedback sync', () => {
     expect(screen.getByRole('dialog')).toHaveAccessibleName();
   });
 
+  it('guards unsaved changes with a themed discard dialog (not native confirm)', () => {
+    invokeMock.mockResolvedValue(null);
+    const onClose = vi.fn();
+    render(<SettingsPanel settings={DEFAULT_SETTINGS} onSave={vi.fn()} onClose={onClose} />);
+
+    // Make the draft dirty (toggle language off the default).
+    fireEvent.click(screen.getByRole('button', { name: 'EN' }));
+
+    // Closing now surfaces the themed confirm — onClose is NOT called yet.
+    fireEvent.click(screen.getByRole('button', { name: 'Kapat' }));
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+
+    // "Keep editing" dismisses the dialog without closing.
+    fireEvent.click(screen.getByRole('button', { name: 'Düzenlemeye dön' }));
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+
+    // Re-open and discard → closes.
+    fireEvent.click(screen.getByRole('button', { name: 'Kapat' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Değişiklikleri at' }));
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it('moves focus into the dialog on open and restores it to the trigger on close', () => {
     invokeMock.mockResolvedValue(null);
     const trigger = document.createElement('button');

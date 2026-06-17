@@ -16,7 +16,11 @@ kod tabanında çok "açık" abarttı; drills/win-prob/combo-history zaten rende
 - **P-03 done** — ComboBoard'da gerçek co-pick track-record: her müttefik combo'su için oyuncunun o eşle
   geçmişi (≥2 maç → "Geçmişin: N maç · %WR"), `get_combo_outcomes`'tan (HeroCard yalnız birincil combo'yu
   gösteriyordu). my-key locked analizden; eşleşmezse gizli (graceful, yanlış-veri yok). Wrapper'da memo +
-  ChampSelectScreen pass-through → ComboBoard tek `trackRecord` prop. Renderer-only, tr/en parite, +3 test. renderer 256.
+  ChampSelectScreen pass-through → ComboBoard tek `trackRecord` prop. Renderer-only, tr/en parite, +3 test. renderer 256. (7ed31d6)
+- **P-06 done** — Ayarlar paneli native `window.confirm` → temalı discard dialog (Agent-3 bulgusu, koddan teyitli:
+  SettingsPanel:58,66 window.confirm kullanıyordu). Dirty kapatma (X/Escape/backdrop) `role="alertdialog"` gösterir;
+  Escape önce onayı kapatır; footer İptal doğrudan atar. Geniş (tüm ayar kullanıcıları) + profesyonel + renderer-only.
+  `.settings-confirm` CSS, tr/en `settings.keepEditing`/`discardChanges` parite, +1 test (dirty→dialog→dön/at). renderer 257.
 - **Aday kuyruğu (koddan teyitli; ajanlar olgun kodda abarttı):** P-02 LLM-koç "Bağlantı test et" (host-fetch,
   gizlilik copy'si ZATEN var → yalnız test-butonu kaldı, dar kitle) · P-04 klavye-kısayol yardımı (HeroCard
   selectHint kısmen kapsıyor) · P-05 lobby Performance Snapshot (GameReviewCard kısmen kapsıyor). ELENEN: pool

@@ -769,6 +769,8 @@
     "total": "Total: {{total}}",
     "totalInvalid": "!= 1.00",
     "cancel": "Cancel",
-    "save": "Save"
+    "save": "Save",
+    "keepEditing": "Keep editing",
+    "discardChanges": "Discard changes"
   }
 }

@@ -20,9 +20,14 @@
   tek `trackRecord` prop'u (wrapper'da memo + ChampSelectScreen pass-through) iletildi. my-key=`lockedAnalysis.champion_key`;
   eşleşmezse graceful gizli (yanlış-veri YOK). pairKey host kuralıyla aynı (inline). ≥2 maç gate'i. Renderer-only,
   `.combo-board__record` CSS, tr/en `comboBoard.trackRecord` parite, +3 test (gösterir/yok/<2-maç). ✅ renderer 256 + typecheck + i18n. (commit bekliyor)
-- **Sıradaki:** P-02 (LLM "Bağlantı test et" — host-fetch, dar kitle) · P-04 (klavye yardımı) · P-05 (lobby snapshot).
-  Lider notu: küçük-özellik yüzeyi büyük ölçüde tükendi; kalanlar dar/kısmen-kapsalı. Sonraki tur ya kalan dar
-  adayı ya da daha BÜYÜK bir özellik (match-history browser) için onay gerekebilir.
+- **Iter P-06 (done)** — Ayarlar paneli native `window.confirm` → temalı discard dialog. Lider seçimi: P-02
+  (LLM test) fonksiyonel ama dar+5-dosya-IPC; confirm-modal GENİŞ (tüm ayar kullanıcıları)+profesyonel+renderer-only
+  (düşük mimari risk) → tercih edildi. Agent-3 bulgusu KODDAN teyit (SettingsPanel:58,66 gerçekten window.confirm).
+  `confirmingClose` state + Escape-önce-onayı-kapat; footer İptal dokunulmadı (explicit discard). `.settings-confirm`
+  CSS, tr/en parite, +1 test. ✅ renderer 257 + typecheck + i18n. (commit bekliyor)
+- **Sıradaki:** P-02 (LLM "Bağlantı test et" — dar kitle) · P-04 (klavye yardımı) · P-05 (lobby snapshot) — hepsi
+  dar/kısmen-kapsalı. **Lider notu: küçük-özellik yüzeyi neredeyse tükendi (P-01/P-03/P-06 son temiz olanlardı).**
+  Sonraki tur ya kalan dar adayı ya da daha BÜYÜK bir özellik (match-history browser) için yön/onay önerilecek.
 
 ## Tamamlanan iterasyonlar
 - **Iter 0** — Sistem kurulumu (7 yönetim dosyası + döngü). ✅

@@ -54,21 +54,32 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
     () => JSON.stringify(draft) !== JSON.stringify(settings),
     [draft, settings],
   );
-  const handleClose = () => {
-    if (dirty && !window.confirm(t('app.unsavedConfirm'))) return;
-    onClose();
+  // Themed discard guard: native window.confirm breaks the dark-theme modal's
+  // visual continuity, so a dirty close attempt (X / Escape / backdrop) surfaces
+  // an in-panel confirmation instead. The explicit footer "İptal" still discards.
+  const [confirmingClose, setConfirmingClose] = React.useState(false);
+  const requestClose = () => {
+    if (dirty) setConfirmingClose(true);
+    else onClose();
   };
 
-  // Close on Escape (respects the same unsaved-changes guard as the X button).
+  // Close on Escape: dismiss the confirm dialog first, then guard the dirty close.
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
-      if (dirty && !window.confirm(t('app.unsavedConfirm'))) return;
+      if (confirmingClose) {
+        setConfirmingClose(false);
+        return;
+      }
+      if (dirty) {
+        setConfirmingClose(true);
+        return;
+      }
       onClose();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [dirty, onClose, t]);
+  }, [dirty, onClose, confirmingClose]);
 
   // Weights are RELATIVE — the engine normalizes by their sum, so they never
   // need to add up to 100%. Show each factor's live effective share instead.
@@ -133,7 +144,7 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
         });
 
   return (
-    <div className="settings-overlay" onClick={handleClose}>
+    <div className="settings-overlay" onClick={requestClose}>
       <div
         ref={panelRef}
         className="settings-panel"
@@ -144,7 +155,7 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
       >
         <div className="settings-panel__header">
           <h2 id="settings-panel-title">{t('settings.title')}</h2>
-          <button className="settings-panel__close" onClick={handleClose} aria-label={t('app.close')}>
+          <button className="settings-panel__close" onClick={requestClose} aria-label={t('app.close')}>
             <X size={18} />
           </button>
         </div>
@@ -381,6 +392,37 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
           </button>
         </div>
       </div>
+      {confirmingClose && (
+        <div
+          className="settings-confirm"
+          onClick={e => { e.stopPropagation(); setConfirmingClose(false); }}
+        >
+          <div
+            className="settings-confirm__box"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="settings-confirm-msg"
+            onClick={e => e.stopPropagation()}
+          >
+            <p id="settings-confirm-msg" className="settings-confirm__msg">
+              {t('app.unsavedConfirm')}
+            </p>
+            <div className="settings-confirm__actions">
+              <button
+                type="button"
+                className="sp-btn sp-btn--cancel"
+                onClick={() => setConfirmingClose(false)}
+                autoFocus
+              >
+                {t('settings.keepEditing')}
+              </button>
+              <button type="button" className="sp-btn sp-btn--discard" onClick={onClose}>
+                {t('settings.discardChanges')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
