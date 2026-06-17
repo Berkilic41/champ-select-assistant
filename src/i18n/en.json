@@ -574,7 +574,9 @@
     "inferred": "Inferred opponent",
     "inferredHint": "No position data — opponent guessed from archetype fit",
     "kbEstimate": "KB estimate",
-    "kbEstimateHint": "Phase advantage is estimated from archetype power curves — not a measured win rate"
+    "kbEstimateHint": "Phase advantage is estimated from archetype power curves — not a measured win rate",
+    "measured": "Measured: {{wr}}% · {{n}} games",
+    "measuredHint": "Measured win-rate vs this opponent in this lane (champion_matchups) — separate from the phase bars, overall rate"
   },
   "poolBuilder": {
     "empty": "No suggestions for this role",

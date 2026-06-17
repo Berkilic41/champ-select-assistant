@@ -43,4 +43,33 @@ describe('LaneMatchupPanel', () => {
     render(<LaneMatchupPanel matchup={m} />);
     expect(screen.queryByText('KB tahmini')).not.toBeInTheDocument();
   });
+
+  it('shows a separate measured win-rate line when present (Lane S2)', () => {
+    const m: LaneMatchup = {
+      opponent_key: 'Zed',
+      opponent_name: 'Zed',
+      phase_advantage: [0.7, 0.5, 0.3],
+      source: 'kb_estimate',
+      tips: [],
+      measured_win_rate: 0.58,
+      measured_games: 220,
+    };
+    render(<LaneMatchupPanel matchup={m} />);
+    // Ölçülen WR ayrı dürüst satır (%58 · 220 maç).
+    expect(screen.getByText('Ölçülen: %58 · 220 maç')).toBeInTheDocument();
+    // Faz barları HÂLÂ KB tahmini — ölçülen satır onları değiştirmez (fabrikasyon yok).
+    expect(screen.getByText('KB tahmini')).toBeInTheDocument();
+  });
+
+  it('omits the measured line when there is no measured win-rate (honest)', () => {
+    const m: LaneMatchup = {
+      opponent_key: 'Zed',
+      opponent_name: 'Zed',
+      phase_advantage: [0.7, 0.5, 0.3],
+      source: 'kb_estimate',
+      tips: [],
+    };
+    render(<LaneMatchupPanel matchup={m} />);
+    expect(screen.queryByText(/Ölçülen:/)).not.toBeInTheDocument();
+  });
 });

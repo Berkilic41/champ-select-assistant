@@ -7,7 +7,14 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
-- **Off-rol zayıflık kartı** (Post-game Koçluk Epic — Slice 2) — İstatistik sekmesi artık oyuncunun **ana rolünden
+- **Lane eşleşmesinde ölçülen kazanma oranı satırı** (Lane-Matchup Epic — Slice 2) — Lane eşleşme paneli artık
+  (veri varsa) rakibe karşı **ölçülen genel kazanma oranını** ayrı dürüst bir satırda gösteriyor (ör. "Ölçülen:
+  %48 · 2.200 maç"), `champion_matchups` verisinden. Bu, tahmini faz barlarından (KB tahmini) **ayrı** tutulur:
+  tek genel oran 3 faza BÖLÜNMEZ (faz-bazlı ölçüm yok → bölmek fabrikasyon olurdu). Yalnız yeterli örneklemde
+  (≥20 maç) gösterilir; altında gürültü olduğu için gizli. Core'a `LaneMatchup.measured_win_rate`/`measured_games`
+  + `TeamContextInput.matchups` eklendi; host `getLaneMatchup` matchup verisini geçirir. **Scoring DEĞİŞMEDİ**
+  (engine purity — yalnız json_api presentation read-side); tr/en parite (`laneMatchup.measured`) + core/renderer testleri.
+- **Off-rol zayıflık kartı** (Post-game Koçluk Epic — Slice 2) — İstatistik sekmesi artık oyuncunun **ana rolünden İstatistik sekmesi artık oyuncunun **ana rolünden
   daha düşük kazanma oranlı off-rollerini** dürüstçe gösteriyor (ör. ana rol Orta %70 iken "Üst: %20 · 5 maç").
   En çok oynanan rol "ana rol" sayılır; ondan düşük WR'li ve ≥3 maçlık off-roller en zayıf önce listelenir —
   "hangi rol seni aşağı çekiyor?" sorusunu tek bakışta yanıtlar. Tamamen ölçülen veri (`matches.position`+`win`),

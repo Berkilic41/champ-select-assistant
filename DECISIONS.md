@@ -2,6 +2,23 @@
 
 > Format: bağlam → karar → gerekçe → sonuç. En yeni üstte.
 
+## ADR-009 — Lane-Matchup Epic #2 Slice 2: ölçülen WR AYRI dürüst satır (faz barları tahmin kalır) (2026-06-17)
+- **Bağlam:** ADR-008 Lane S2'nin doğru yolunu reçete etti: ölçülen tek genel win_rate'i faz barlarına BÖLME
+  (fabrikasyon); ayrı dürüst satır göster. Plumbing parçaları zaten vardı: host `matchupsForPosition` (recommendations
+  bunu kullanıyor), core `MatchupKeyEntry`/`MatchupEntry {win_rate, games}`. `lane_matchup_from_json` zaten my_id/
+  opp_id/my_pos hesaplıyordu — eksik tek şey input'a matchups'ı geçirmek + lookup.
+- **Karar:** `TeamContextInput`'a `matchups: Option<Vec<MatchupKeyEntry>>` (serde default — diğer team-context
+  uçları None'la geriye-uyumlu); `LaneMatchup`'a `measured_win_rate`/`measured_games` (skip_serializing_if). Lookup:
+  (my_id, opp_id) eşleşmesi + `games >= MEASURED_MATCHUP_MIN_GAMES=20` (altı gürültü → gizli). Host getLaneMatchup
+  context'e `matchupsForPosition(db, myPos)` ekler. LaneMatchupPanel ayrı `lane-matchup__measured` satırı (tone'lu);
+  **faz barları source="kb_estimate" KALIR**.
+- **Gerekçe:** Gerçek ölçülen sinyal (öncelik #2 tema), **sıfır fabrikasyon** (genel oran genel olarak gösterilir,
+  faza bölünmez), örneklem-eşikli dürüstlük (B-18 hattı), **engine purity korunur**: yalnız `json_api.rs` presentation
+  read-side değişti — `scoring.rs`/`engine.rs`/`recommendation.rs` (compute_recommendations) EL DEĞMEDİ, skor değişmez.
+- **Sonuç:** core 571 (506 lib + 65 entegrasyon) + clippy temiz + WASM rebuild + host 168 + renderer 277 + typecheck 0
+  + i18n parite. Kontrollü core testi (Garen vs Darius fixture, games 2200→görünür / 5→gizli / matchups-yok→gizli).
+  recommendation.ts measured alanlarını elle aynalar (LaneMatchup ts-rs DEĞİL — `source?`/`inferred?` deseni).
+
 ## ADR-008 — Post-game Epic #3 Slice 2: off-rol zayıflık kartı; Lane S2 dürüstlük tuzağı nedeniyle elendi (2026-06-17)
 - **Bağlam:** Kalan Slice-2 adayları koddan-doğrulandı. **Lane-Matchup S2 (ölçülen plumbing) ELENDİ:** ölçülen
   matchup yalnız TEK genel win_rate verir; bunu 3 ayrı faz-barına (erken/orta/geç) bölmek **fabrikasyon** olur

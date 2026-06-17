@@ -58,7 +58,16 @@
   ("kb_estimate") + recommendation.ts `source?` + LaneMatchupPanel rozeti (tooltip) + i18n kbEstimate/Hint (tr/en)
   + core/renderer testleri. Engine purity korundu (yalnız read etiketi; engine.rs/scoring.rs el değmedi). WASM rebuild
   (core/pkg gitignore). ✅ core 570 + renderer 268 + host 161 + clippy + typecheck 0 + i18n parite. (commit hazırlanıyor)
-- **Sıradaki:** Slice 2 (ölçülen matchup plumbing → source="measured"; geniş core, ayrı tur) ya da Epic #3 (post-game koçluk).
+- **Iter Slice-2 (done, ADR-009)** — ölçülen genel WR AYRI dürüst satır. KODDAN doğrulandı: ADR-008'in faz-fabrikasyon
+  tuzağından kaçınıldı — tek genel win_rate faza bölünmez, ayrı "Ölçülen: %X · N maç" satırı; faz barları "KB tahmini"
+  kalır. Plumbing parçaları hazırdı (host `matchupsForPosition`, core `MatchupKeyEntry`/`MatchupEntry`). Core:
+  `TeamContextInput.matchups` (serde default) + `LaneMatchup.measured_win_rate/games` (skip-if-none) + lane_matchup_from_json
+  lookup (my_id/opp_id eşleşmesi + games≥20). Host: getLaneMatchup context'e `matchupsForPosition(db,myPos)`. Renderer:
+  recommendation.ts interface + LaneMatchupPanel tone'lu satır + `.lane-matchup__measured` CSS. i18n laneMatchup.measured/
+  measuredHint (tr/en). **Engine purity** (json_api presentation; scoring/engine.rs/recommendation.rs el değmedi). Test:
+  kontrollü core (Garen vs Darius; 2200→görünür/5→gizli/yok→gizli) + LaneMatchupPanel 2 test. ✅ core 571 + clippy + WASM +
+  host 168 + renderer 277 + typecheck 0 + i18n parite. (commit hazırlanıyor)
+- **Sıradaki:** kalan Slice-3'ler — Havuz S3 (derinlik-trendi) / combo-outcome post-game feedback / Lane S3 (matchup tips zenginleştirme).
 
 ## Büyük geliştirme modu — EPIC: Match-History Browser (2026-06-17, kullanıcı direktifi)
 > "Küçük-yüzey tükendiyse durma. En yüksek-değerli büyük yönü Epic seç, MVP'ye böl, ilk dikey dilimi uygula.

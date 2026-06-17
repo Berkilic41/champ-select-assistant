@@ -54,6 +54,26 @@
   border-radius: var(--radius-pill, 999px); padding: 1px 7px; cursor: help; white-space: nowrap;
 }
 
+/* Lane S2: ölçülen matchup WR (faz barlarından ayrı, dürüst tek satır). */
+.lane-matchup__measured {
+  align-self: flex-start;
+  font-size: var(--font-size-xs); font-weight: var(--weight-semibold);
+  border-radius: var(--radius-pill, 999px); padding: 1px 8px; cursor: help; white-space: nowrap;
+  border: 1px solid transparent;
+}
+.lane-matchup__measured--up {
+  color: var(--success); background: color-mix(in srgb, var(--success) 14%, transparent);
+  border-color: color-mix(in srgb, var(--success) 32%, transparent);
+}
+.lane-matchup__measured--down {
+  color: var(--danger); background: color-mix(in srgb, var(--danger) 14%, transparent);
+  border-color: color-mix(in srgb, var(--danger) 32%, transparent);
+}
+.lane-matchup__measured--even {
+  color: var(--text-secondary); background: color-mix(in srgb, var(--text-secondary) 12%, transparent);
+  border-color: color-mix(in srgb, var(--text-secondary) 30%, transparent);
+}
+
 .lane-matchup__tips { list-style: none; display: flex; flex-direction: column; gap: 3px; }
 .lane-matchup__tip {
   font-size: var(--font-size-sm);

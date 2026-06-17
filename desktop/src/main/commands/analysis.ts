@@ -20,6 +20,7 @@ import {
   championRatesForPosition,
   championRoleMap,
   masteryTopForPuuid,
+  matchupsForPosition,
 } from "../repos";
 
 /** Tek şampiyonun tam koçluk analizi (kilitli/hover pick). null = KB'de yok. */
@@ -107,7 +108,23 @@ export function getLaneMatchup(
   db: DatabaseSync,
   sessionJson: unknown,
 ): unknown {
-  return engine.laneMatchup(teamContext(engine, db, sessionJson));
+  const ctx = teamContext(engine, db, sessionJson);
+  // Ölçülen matchup (champion_matchups) — core dürüst "ölçülen" satırı için
+  // my-pos'un matchup'larını okur (faz barları yine KB tahmini kalır).
+  const session = ctx.session as {
+    queue_id?: number;
+    local_player?: { assigned_position?: string };
+  };
+  const myPos =
+    session.queue_id === 450
+      ? "aram"
+      : (session.local_player?.assigned_position ?? "").toLowerCase();
+  const matchups = orWarnDefault(
+    () => matchupsForPosition(db, myPos),
+    "champion_matchups",
+    [],
+  );
+  return engine.laneMatchup({ ...ctx, matchups });
 }
 
 export function getCounterItems(

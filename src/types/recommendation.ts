@@ -328,6 +328,12 @@ export interface LaneMatchup {
   tips: string[];
   /** True when the opponent was inferred (Blind/Normal, no LCU positions). */
   inferred?: boolean;
+  /** Measured overall win-rate vs this opponent (champion_matchups), 0..1 — only
+   *  present when the sample is sufficient. Shown as a separate honest "measured"
+   *  line, NOT the phase bars (which stay KB estimates). */
+  measured_win_rate?: number;
+  /** Sample size behind measured_win_rate (games). */
+  measured_games?: number;
 }
 
 /** Single decisive read on the draft (favorability + dodge + top action). */

@@ -52,10 +52,12 @@ makul varsay (→ DECISIONS ADR-004). Test+typecheck+desktop testleri geçmeden 
     sabit; ileride "measured") + recommendation.ts `source?` + LaneMatchupPanel "KB tahmini" rozeti (tooltip'li)
     + i18n `laneMatchup.kbEstimate`/`kbEstimateHint` (tr/en). core 570 + renderer 268 + host 161 + clippy temiz +
     typecheck 0 + i18n parite. WASM rebuild (core/pkg gitignore). engine.rs/scoring.rs el değmedi.
-  - **Slice 2 (ertelendi — DÜRÜSTLÜK TUZAĞI, ADR-008)** — ölçülen matchup verisini `lane_matchup_from_json`'a plumb
-    etmek teknik olarak küçük AMA ölçülen veri yalnız TEK genel win_rate verir; bunu 3 faz-barına (erken/orta/geç)
-    bölmek FABRİKASYON olur (faz-bazlı ölçüm yok). Doğru yapılırsa: ölçülen genel WR'yi AYRI dürüst satır göster,
-    faz barlarını "KB tahmini" bırak (source="measured" per-faz DEĞİL). Ayrı/dikkatli tur.
+  - **Slice 2 done (ADR-009)** — ölçülen genel WR AYRI dürüst satır. ADR-008'in reçetesi uygulandı: `champion_matchups`
+    ölçülen win_rate'i LaneMatchupPanel'de "Ölçülen: %X · N maç" satırı (tone'lu) olarak gösterilir — faz barlarına
+    BÖLÜNMEZ (fabrikasyon yok), barlar "KB tahmini" kalır. Core `LaneMatchup.measured_win_rate/games` (skip-if-none) +
+    `TeamContextInput.matchups` (serde default, geriye-uyumlu) + lookup (games≥20 eşiği); host getLaneMatchup
+    `matchupsForPosition` geçirir. **Scoring/engine EL DEĞMEDİ** (yalnız json_api presentation). i18n laneMatchup.measured
+    (tr/en). core 571 + clippy + WASM + host 168 + renderer 277 + typecheck 0 + i18n parite. Kontrollü core testi.
 - **EPIC: Match-History Browser** (yerel DB; cloud/yeni Riot çağrısı YOK).
   - **Slice 1 done** — "Maç Geçmişi" liste sekmesi: yeni host `get_match_history` (`recentMatches` JOIN +
     `game_reviews` EXISTS has_review) + `MatchHistoryView` (4. lobby sekmesi). Şampiyon/rol/sonuç/tarih/KDA/

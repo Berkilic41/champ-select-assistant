@@ -57,6 +57,17 @@ export const LaneMatchupPanel: React.FC<Props> = ({ matchup }) => {
           </div>
         ))}
       </div>
+      {typeof matchup.measured_win_rate === 'number' && (
+        <span
+          className={`lane-matchup__measured lane-matchup__measured--${tone(matchup.measured_win_rate)}`}
+          title={t('laneMatchup.measuredHint')}
+        >
+          {t('laneMatchup.measured', {
+            wr: pct(matchup.measured_win_rate),
+            n: (matchup.measured_games ?? 0).toLocaleString(),
+          })}
+        </span>
+      )}
       {matchup.source === 'kb_estimate' && (
         <span className="lane-matchup__estimate" title={t('laneMatchup.kbEstimateHint')}>
           {t('laneMatchup.kbEstimate')}

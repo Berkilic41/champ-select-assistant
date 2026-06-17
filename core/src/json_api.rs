@@ -810,6 +810,10 @@ pub struct TeamContextInput {
     pub role_map: HashMap<u32, Vec<String>>,
     #[serde(default)]
     pub items: Vec<ItemData>,
+    /// Only `lane_matchup_from_json` consumes this: measured `champion_matchups`
+    /// rows for the local player's lane (the host fills it via `matchupsForPosition`).
+    #[serde(default)]
+    pub matchups: Option<Vec<MatchupKeyEntry>>,
 }
 
 /// Command-layer parity (`get_game_plan` / `get_team_comp` / `get_draft_verdict`):
@@ -1194,7 +1198,20 @@ pub struct LaneMatchup {
     /// True when the opponent was inferred (Blind/Normal — no LCU positions) by
     /// archetype fit rather than read directly. UI labels it "Tahmini rakip".
     pub inferred: bool,
+    /// Measured win-rate vs this exact opponent in this lane, from `champion_matchups`
+    /// (None unless the sample meets `MEASURED_MATCHUP_MIN_GAMES`). This is an OVERALL
+    /// rate, shown as a separate honest "measured" line — NOT decomposed into
+    /// `phase_advantage` (there is no per-phase measurement; splitting one rate into
+    /// three bars would be fabrication). The phase bars stay `source = "kb_estimate"`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub measured_win_rate: Option<f32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub measured_games: Option<u32>,
 }
+
+/// Minimum sample before a measured matchup win-rate is shown — below this a rate
+/// is statistical noise, so we stay silent rather than present a misleading number.
+const MEASURED_MATCHUP_MIN_GAMES: u32 = 20;
 
 /// Per-phase lane matchup vs the visible (or inferred) lane opponent. JSON
 /// `null` when there's no lane (ARAM), no pick, no opponent, or missing KB data.
@@ -1252,6 +1269,18 @@ pub fn lane_matchup_from_json(input_json: &str) -> Result<String, String> {
             (a / s).clamp(0.0, 1.0)
         }
     };
+    // Measured matchup (champion_matchups): an OVERALL rate shown as a separate honest
+    // line — only when the sample is meaningful. Never decomposed into the phase bars.
+    let (measured_win_rate, measured_games) = input
+        .matchups
+        .as_ref()
+        .and_then(|ms| {
+            ms.iter()
+                .find(|m| m.champion_id == my_id && m.opponent_id == opp_id)
+                .map(|m| &m.entry)
+                .filter(|e| e.games >= MEASURED_MATCHUP_MIN_GAMES)
+        })
+        .map_or((None, None), |e| (Some(e.win_rate), Some(e.games)));
     let out = LaneMatchup {
         opponent_key: opp_rec.key.clone(),
         opponent_name: opp_rec.name.clone(),
@@ -1264,6 +1293,8 @@ pub fn lane_matchup_from_json(input_json: &str) -> Result<String, String> {
         source: "kb_estimate".to_string(),
         tips: build_matchup_tips(cand, opp_arch, &my_pos),
         inferred,
+        measured_win_rate,
+        measured_games,
     };
     serde_json::to_string(&out).map_err(|e| format!("lane matchup serialize failed: {e}"))
 }
@@ -3872,6 +3903,46 @@ mod tests {
             // Faz avantajı arketip power_curve türevi → dürüstçe "kb_estimate" etiketli.
             assert_eq!(lane_v["source"], "kb_estimate");
         }
+    }
+
+    #[test]
+    fn lane_matchup_surfaces_measured_winrate_when_sample_is_sufficient() {
+        let base: serde_json::Value = serde_json::from_str(RECOMMENDATIONS_FIXTURE).unwrap();
+        // Garen (86) top'u kilitle; rakip Darius (122) top'ta görünür → lane resolmeli.
+        let mut session = base["session"].clone();
+        session["local_player"]["champion_id"] = serde_json::json!(86);
+        let team_input = serde_json::json!({
+            "session": session,
+            "all_champions": base["all_champions"],
+            "role_map": base["role_map"],
+            // Fixture matchups: 86 vs 122 → win_rate 0.48, games 2200 (eşik üstü).
+            "matchups": base["matchups"],
+        });
+        let lane: serde_json::Value =
+            serde_json::from_str(&lane_matchup_from_json(&team_input.to_string()).unwrap()).unwrap();
+        assert!(lane.is_object(), "Garen vs Darius lane çözülmeli");
+        assert_eq!(lane["opponent_key"], "Darius");
+        // Ölçülen WR dürüstçe görünür (games 2200 ≥ eşik).
+        assert_eq!(lane["measured_games"].as_u64(), Some(2200));
+        assert!((lane["measured_win_rate"].as_f64().unwrap() - 0.48).abs() < 1e-6);
+        // Faz barları HÂLÂ tahmin (tek genel WR faza bölünmedi → fabrikasyon yok).
+        assert_eq!(lane["source"], "kb_estimate");
+
+        // Eşik altı örneklem (<20) → ölçülen GÖSTERİLMEZ (gürültü uydurulmaz).
+        let mut thin = team_input.clone();
+        thin["matchups"] = serde_json::json!([
+            { "champion_id": 86, "opponent_id": 122, "win_rate": 0.48, "games": 5 }
+        ]);
+        let lane_thin: serde_json::Value =
+            serde_json::from_str(&lane_matchup_from_json(&thin.to_string()).unwrap()).unwrap();
+        assert!(lane_thin.get("measured_win_rate").is_none());
+
+        // Matchups hiç yokken de measured alanları yok (geriye dönük uyum).
+        let mut none = team_input.clone();
+        none.as_object_mut().unwrap().remove("matchups");
+        let lane_none: serde_json::Value =
+            serde_json::from_str(&lane_matchup_from_json(&none.to_string()).unwrap()).unwrap();
+        assert!(lane_none.get("measured_win_rate").is_none());
     }
 
     #[test]
