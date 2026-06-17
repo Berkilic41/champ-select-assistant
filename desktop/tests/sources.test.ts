@@ -481,6 +481,54 @@ describe("edge rates source (cloudflare-worker /v1/rates app-wiring)", () => {
     expect(row.confidence).toBe("low");
   });
 
+  it("downgrades stale cloud_edge matchups and builds too, not just rates", async () => {
+    const db = migratedDb();
+    db.prepare(
+      "INSERT INTO summoners (puuid, game_name, tag_line, region, cached_at) VALUES ('p1', 'Me', 'TR', 'eun1', 5)",
+    ).run();
+    // Üçü de AYNI bayat ingestion'dan gelir (rates yanıtı kanonik updated_at'i
+    // taşır). 800 örnek normalde 'medium' olurdu; bayatken hiçbiri 'taze
+    // yüksek-güven' görünmemeli — aksi halde durmuş ingestion'da counter-pick
+    // tavsiyesi otoriter görünür.
+    const n = await syncEdgeRates(db, "https://edge.example/", async (url) => {
+      if (url.includes("/v1/matchups")) {
+        return {
+          patch: "16.11",
+          region: "eun1",
+          matchups: [
+            { champion_id: 86, opponent_id: 103, role: "top", games: 800, wins: 420, win_rate: 420 / 800 },
+          ],
+        };
+      }
+      if (url.includes("/v1/builds")) {
+        return {
+          patch: "16.11",
+          region: "eun1",
+          builds: [
+            { champion_id: 86, role: "top", item_ids: [3078], rune_ids: [8000], summoner_spells: [4, 12], games: 800, wins: 420, win_rate: 420 / 800 },
+          ],
+        };
+      }
+      return {
+        patch: "16.11",
+        region: "eun1",
+        total_games: 800,
+        updated_at: 1, // 1970 → bayat
+        rates: [{ champion_id: 86, role: "top", games: 800, win_rate: 0.52, pick_rate: 0.1, ban_rate: 0.05 }],
+      };
+    });
+    expect(n).toEqual({ rates: 1, matchups: 1, builds: 1 });
+    const conf = (table: string): string =>
+      (
+        db
+          .prepare(`SELECT confidence FROM ${table} WHERE source = 'cloud_edge'`)
+          .get() as { confidence: string }
+      ).confidence;
+    expect(conf("champion_rates")).toBe("low");
+    expect(conf("champion_matchups")).toBe("low");
+    expect(conf("builds")).toBe("low");
+  });
+
   it("syncEdgeRates keeps rates when matchups/builds endpoints fail (best-effort)", async () => {
     const db = migratedDb();
     const n = await syncEdgeRates(db, "https://edge.example", async (url) => {

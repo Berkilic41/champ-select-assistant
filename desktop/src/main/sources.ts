@@ -638,7 +638,8 @@ export async function syncEdgeRates(
           win_rate: Number(m.win_rate),
           sample_size: Number(m.games),
           source: "cloud_edge",
-          confidence: confidenceFromMatches(Number(m.games)),
+          // Aynı bayat ingestion → rates ile aynı dürüstlük: stale ise 'low'.
+          confidence: stale ? "low" : confidenceFromMatches(Number(m.games)),
         }));
     }
   } catch {
@@ -675,7 +676,8 @@ export async function syncEdgeRates(
           pick_rate: 0,
           sample_size: Number(b.games),
           source: "cloud_edge",
-          confidence: confidenceFromMatches(Number(b.games)),
+          // Aynı bayat ingestion → rates ile aynı dürüstlük: stale ise 'low'.
+          confidence: stale ? "low" : confidenceFromMatches(Number(b.games)),
         }));
     }
   } catch {
