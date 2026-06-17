@@ -127,7 +127,8 @@
     "filterResult": "Sonuç",
     "filterAll": "Tümü",
     "noFilterMatch": "Bu filtreye uygun maç yok",
-    "summary": "{{wins}}G {{losses}}M · %{{wr}} · {{kda}} KDA"
+    "summary": "{{wins}}G {{losses}}M · %{{wr}} · {{kda}} KDA",
+    "loadMore": "Daha fazla yükle"
   },
   "champSelect": {
     "yourTeam": "Takımın",

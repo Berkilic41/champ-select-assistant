@@ -209,6 +209,30 @@ describe('MatchHistoryView', () => {
     expect(screen.getByText('1G 0M · %100 · 6.00 KDA')).toBeInTheDocument();
   });
 
+  it('shows a "load more" button on a full page and grows the list on click (Slice 5)', async () => {
+    const page1 = Array.from({ length: 20 }, (_, i) => ({ ...SAMPLE, match_id: `P${i}`, has_review: 0 }));
+    const page2 = Array.from({ length: 25 }, (_, i) => ({ ...SAMPLE, match_id: `P${i}`, has_review: 0 }));
+    mockInvoke.mockImplementation((cmd: string, args?: { limit?: number }) => {
+      if (cmd === 'get_active_summoner_puuid') return Promise.resolve('p');
+      if (cmd === 'get_match_history')
+        return Promise.resolve(args?.limit && args.limit > 20 ? page2 : page1);
+      return Promise.resolve(null);
+    });
+    render(<MatchHistoryView />);
+
+    // İlk sayfa tam 20 (=limit) → "daha fazla yükle" görünür; liste 20 satır.
+    const more = await screen.findByRole('button', { name: 'Daha fazla yükle' });
+    expect(within(screen.getByRole('list')).getAllByRole('listitem')).toHaveLength(20);
+
+    fireEvent.click(more);
+
+    // İkinci fetch 25 (<40=yeni limit) → liste büyür, buton kaybolur (artık daha yok).
+    await waitFor(() =>
+      expect(within(screen.getByRole('list')).getAllByRole('listitem')).toHaveLength(25),
+    );
+    expect(screen.queryByRole('button', { name: 'Daha fazla yükle' })).not.toBeInTheDocument();
+  });
+
   it('shows a no-filter-match message when filters exclude every match (Slice 3)', async () => {
     mockInvoke.mockImplementation((cmd: string) => {
       if (cmd === 'get_active_summoner_puuid') return Promise.resolve('p');

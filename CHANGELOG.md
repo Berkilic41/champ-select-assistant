@@ -7,6 +7,11 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Maç Geçmişinde "daha fazla yükle"** (Match-History Epic — Slice 5) — Maç Geçmişi artık ilk 20 maçla sınırlı
+  değil: liste sonundaki "Daha fazla yükle" butonu sonraki 20'şerlik sayfayı getiriyor (host `get_match_history`
+  limit parametresi zaten vardı). Tam sayfa döndüğünde buton görünür, daha az dönünce (hepsi yüklendi) gizlenir.
+  Saf renderer + mevcut host komutu (yeni Riot çağrısı/cloud yok); özet ve filtreler büyüyen liste üzerinde
+  yeniden hesaplanır. tr/en parite (`matchHistory.loadMore`) + renderer testi.
 - **Maç Geçmişinde özet başlığı** (Match-History Epic — Slice 4) — Maç Geçmişi listesi artık gösterilen
   (filtrelenmiş) maçların **galibiyet/mağlubiyet rekorunu + kazanma oranını + toplam KDA'sını** bir bakışta
   veriyor (ör. "12G 8M · %60 · 2.85 KDA"). Filtrelerle birleşince doğrudan değerli: bir şampiyon/rol seçince

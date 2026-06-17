@@ -94,7 +94,11 @@
   KDA'sı (`{{wins}}G {{losses}}M · %{{wr}} · {{kda}} KDA`). Saf renderer — `filtered`'tan hesaplanır (yeni host
   çağrısı yok); filtrelerle birleşince "bu şampiyon/rolde rekorum". i18n matchHistory.summary (tr/en). Test: özet
   hem genel hem filtre-sonrası doğrulanır (locale-bağımsız: KDA toFixed(2)). ✅ renderer 278 + typecheck 0 + i18n parite.
-- **EPIC MVP+ TAMAM (Match-History):** liste + detay + filtre + özet. Lane-matchup #2 de S2'ye kadar bitti (ADR-009).
+- **Iter Slice-5 (done)** — "daha fazla yükle": MatchHistoryView'a `limit`/`hasMore` state + buton; host
+  `get_match_history` limit param zaten vardı → saf renderer. `fetching && matches=0` yalnız ilk yüklemede tam-ekran
+  (load-more sırasında liste kalır); `hasMore = rows.length >= limit` (tam sayfa → daha var). i18n matchHistory.loadMore
+  (tr/en). Test: ilk sayfa 20→buton+20 satır, tıkla→25 satır+buton kaybolur. ✅ renderer 279 + typecheck 0 + i18n parite.
+- **EPIC MVP++ TAMAM (Match-History):** liste + detay + filtre + özet + sayfalama. Lane-matchup #2 de S2'ye kadar bitti (ADR-009).
 
 ## Ürün geliştirme modu (2026-06-17, kullanıcı direktifi)
 > "Artık yalnızca bugfix/audit değil — otonom ürün geliştirme lideri. Her iterasyonda fırsat keşfet,

@@ -127,7 +127,8 @@
     "filterResult": "Result",
     "filterAll": "All",
     "noFilterMatch": "No matches for this filter",
-    "summary": "{{wins}}W {{losses}}L · {{wr}}% · {{kda}} KDA"
+    "summary": "{{wins}}W {{losses}}L · {{wr}}% · {{kda}} KDA",
+    "loadMore": "Load more"
   },
   "champSelect": {
     "yourTeam": "Your Team",

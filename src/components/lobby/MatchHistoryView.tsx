@@ -44,8 +44,11 @@ export const MatchHistoryView: React.FC = () => {
   const { t } = useTranslation();
   const puuid = useActiveSummonerPuuid();
   const [matches, setMatches] = useState<MatchHistoryEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [fetching, setFetching] = useState(true);
   const [error, setError] = useState(false);
+  // Slice 5: "daha fazla yükle" — limit arttıkça host daha çok maç döndürür.
+  const [limit, setLimit] = useState(HISTORY_LIMIT);
+  const [hasMore, setHasMore] = useState(false);
   // Slice 2: seçili maç → detay paneli (GameReviewCard). null = liste.
   const [selected, setSelected] = useState<string | null>(null);
   // Slice 3: client-side filtreler (çekilen liste üzerinde; yeni fetch yok).
@@ -56,30 +59,35 @@ export const MatchHistoryView: React.FC = () => {
   useEffect(() => {
     if (!puuid) return;
     let cancelled = false;
-    setLoading(true);
+    setFetching(true);
     setError(false);
-    invoke<MatchHistoryEntry[]>('get_match_history', { puuid, limit: HISTORY_LIMIT })
+    invoke<MatchHistoryEntry[]>('get_match_history', { puuid, limit })
       .then((rows) => {
         if (cancelled) return;
-        setMatches(rows ?? []);
-        setLoading(false);
+        const list = rows ?? [];
+        setMatches(list);
+        // Tam sayfa döndüyse muhtemelen daha var → "daha fazla" göster.
+        setHasMore(list.length >= limit);
+        setFetching(false);
       })
       .catch(() => {
         // Sessiz hata yutma yok (P-07 deseni): fetch reddi → "veri alınamadı".
         if (cancelled) return;
         setMatches([]);
         setError(true);
-        setLoading(false);
+        setHasMore(false);
+        setFetching(false);
       });
     return () => {
       cancelled = true;
     };
-  }, [puuid]);
+  }, [puuid, limit]);
 
-  if (loading || !puuid) {
+  // Tam-ekran "yükleniyor" yalnız İLK yüklemede; "daha fazla" sırasında liste kalır.
+  if ((fetching && matches.length === 0) || !puuid) {
     return <p className="match-history__empty">{t('matchHistory.loading')}</p>;
   }
-  if (error) {
+  if (error && matches.length === 0) {
     return <p className="match-history__empty">{t('app.dataError')}</p>;
   }
   if (matches.length === 0) {
@@ -242,6 +250,17 @@ export const MatchHistoryView: React.FC = () => {
           })}
         </ul>
         </>
+      )}
+
+      {hasMore && (
+        <button
+          type="button"
+          className="match-history__more"
+          onClick={() => setLimit((l) => l + HISTORY_LIMIT)}
+          disabled={fetching}
+        >
+          {fetching ? t('matchHistory.loading') : t('matchHistory.loadMore')}
+        </button>
       )}
     </div>
   );

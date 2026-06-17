@@ -24,6 +24,27 @@
   padding: 2px var(--space-1, 6px);
 }
 
+/* Slice 5: "daha fazla yükle" — 20-cap ötesi maçları açar. */
+.match-history__more {
+  align-self: center;
+  margin-top: var(--space-1, 6px);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill, 999px);
+  padding: 4px var(--space-3, 16px);
+  cursor: pointer;
+}
+.match-history__more:hover:not(:disabled) {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+.match-history__more:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 .match-history__row {
   display: flex;
   align-items: center;

@@ -74,7 +74,10 @@ makul varsay (→ DECISIONS ADR-004). Test+typecheck+desktop testleri geçmeden 
   - **Slice 4 done** — özet başlığı: gösterilen (filtrelenmiş) maçların rekor+WR+toplam KDA'sı ("12G 8M · %60 ·
     2.85 KDA"). Saf renderer (zaten çekilen entry'lerden; yeni fetch yok); filtrelerle birleşince "bu şampiyonda/
     rolde rekorum" sinyali. i18n matchHistory.summary (tr/en). renderer 278 + typecheck 0 + i18n parite.
-  - **MVP+ TAMAM** — Match-History (liste + detay + filtreler + özet). Sonraki Epic: lane-matchup veri-dürüstlüğü (#2).
+  - **Slice 5 done** — "daha fazla yükle": limit state (+20/sayfa) + buton; host `get_match_history` limit param zaten
+    vardı. Tam sayfa (rows.length>=limit) → buton görünür, az dönünce gizli. "daha fazla" sırasında liste kalır
+    (fetching && matches=0 yalnız ilk yükleme tam-ekran). Saf renderer + mevcut host. i18n loadMore (tr/en). renderer 279.
+  - **MVP++ TAMAM** — Match-History (liste + detay + filtreler + özet + sayfalama). Sonraki Epic: lane-matchup (#2, S2'ye kadar bitti).
 
 **MOD: Otonom ürün geliştirme (2026-06-17 kullanıcı direktifi).** Artık bugfix/audit değil — her
 iterasyonda fırsat keşfet → P0/P1 yoksa en yüksek-değerli KÜÇÜK özelliği seç → uygula+test+dokümante+commit.
