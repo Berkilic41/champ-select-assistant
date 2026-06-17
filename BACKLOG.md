@@ -20,7 +20,10 @@ makul varsay (→ DECISIONS ADR-004). Test+typecheck+desktop testleri geçmeden 
     `GameReviewCard matchId={id}` ile tam karne (lines/went_right/to_fix/focus) detayda; "← Maçlara dön" listeye döner.
     Host `get_game_review` (by match_id) + GameReviewCard opsiyonel `matchId` (prop'suz "en yeni" StatsView'da korundu).
     renderer 264 + host 161 + typecheck 0; +1 host +2 renderer test; i18n `matchHistory.back`/`openReview`.
-  - **Slice 3 todo** — filtreler: champion + rol (PoolBuilder rol-buton deseni) + win/loss; client-side.
+  - **Slice 3 done** — filtreler: rol + şampiyon + sonuç (3 açılır `<select>`, yalnız listede var-olan seçenekler);
+    client-side, yeni fetch yok; eşleşme yoksa dürüst "Bu filtreye uygun maç yok". renderer 266 + host 161 +
+    typecheck 0; +2 renderer test; i18n `matchHistory.filters/filterRole/filterChampion/filterResult/filterAll/noFilterMatch`.
+  - **EPIC TAMAM** — Match-History MVP (liste + detay paneli + filtreler) bitti. Sonraki Epic: lane-matchup veri-dürüstlüğü (#2).
 
 **MOD: Otonom ürün geliştirme (2026-06-17 kullanıcı direktifi).** Artık bugfix/audit değil — her
 iterasyonda fırsat keşfet → P0/P1 yoksa en yüksek-değerli KÜÇÜK özelliği seç → uygula+test+dokümante+commit.

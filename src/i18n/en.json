@@ -119,7 +119,13 @@
     "vision": "Vision",
     "reviewed": "Reviewed",
     "back": "Back to matches",
-    "openReview": "Open {{champion}} review"
+    "openReview": "Open {{champion}} review",
+    "filters": "Filters",
+    "filterRole": "Role",
+    "filterChampion": "Champion",
+    "filterResult": "Result",
+    "filterAll": "All",
+    "noFilterMatch": "No matches for this filter"
   },
   "champSelect": {
     "yourTeam": "Your Team",

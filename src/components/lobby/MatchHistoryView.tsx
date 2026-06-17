@@ -48,6 +48,10 @@ export const MatchHistoryView: React.FC = () => {
   const [error, setError] = useState(false);
   // Slice 2: seçili maç → detay paneli (GameReviewCard). null = liste.
   const [selected, setSelected] = useState<string | null>(null);
+  // Slice 3: client-side filtreler (çekilen liste üzerinde; yeni fetch yok).
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [champFilter, setChampFilter] = useState('all');
+  const [resultFilter, setResultFilter] = useState('all');
 
   useEffect(() => {
     if (!puuid) return;
@@ -97,67 +101,129 @@ export const MatchHistoryView: React.FC = () => {
     );
   }
 
+  // Çekilen liste üzerinde mevcut rol/şampiyon seçenekleri (yalnız var olanlar).
+  const presentRoles = Array.from(
+    new Set(matches.map((m) => (m.position ?? '').toLowerCase()).filter(Boolean)),
+  );
+  const presentChamps = Array.from(
+    new Set(matches.map((m) => m.champion_key).filter(Boolean)),
+  ).sort();
+
+  const filtered = matches.filter((m) => {
+    const role = (m.position ?? '').toLowerCase();
+    if (roleFilter !== 'all' && role !== roleFilter) return false;
+    if (champFilter !== 'all' && m.champion_key !== champFilter) return false;
+    if (resultFilter === 'win' && m.win !== 1) return false;
+    if (resultFilter === 'loss' && m.win === 1) return false;
+    return true;
+  });
+
   return (
-    <ul className="match-history" aria-label={t('matchHistory.title')}>
-      {matches.map((m) => {
-        const cspm = csPerMin(m.cs, m.duration_secs);
-        const role = (m.position ?? '').toLowerCase();
-        const won = m.win === 1;
-        const reviewed = m.has_review === 1;
-        const open = () => setSelected(m.match_id);
-        return (
-          <li
-            key={m.match_id}
-            className={`match-history__row match-history__row--${won ? 'win' : 'loss'}${reviewed ? ' match-history__row--clickable' : ''}`}
-            {...(reviewed
-              ? {
-                  role: 'button',
-                  tabIndex: 0,
-                  onClick: open,
-                  onKeyDown: (e: React.KeyboardEvent) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      open();
+    <div className="match-history-wrap">
+      <div className="match-history__filters" role="group" aria-label={t('matchHistory.filters')}>
+        <select
+          className="match-history__filter"
+          aria-label={t('matchHistory.filterRole')}
+          value={roleFilter}
+          onChange={(e) => setRoleFilter(e.target.value)}
+        >
+          <option value="all">{t('matchHistory.filterAll')}</option>
+          {presentRoles.map((r) => (
+            <option key={r} value={r}>
+              {t(`poolBuilder.role_${r}`, { defaultValue: r })}
+            </option>
+          ))}
+        </select>
+        <select
+          className="match-history__filter"
+          aria-label={t('matchHistory.filterChampion')}
+          value={champFilter}
+          onChange={(e) => setChampFilter(e.target.value)}
+        >
+          <option value="all">{t('matchHistory.filterAll')}</option>
+          {presentChamps.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+        <select
+          className="match-history__filter"
+          aria-label={t('matchHistory.filterResult')}
+          value={resultFilter}
+          onChange={(e) => setResultFilter(e.target.value)}
+        >
+          <option value="all">{t('matchHistory.filterAll')}</option>
+          <option value="win">{t('matchHistory.win')}</option>
+          <option value="loss">{t('matchHistory.loss')}</option>
+        </select>
+      </div>
+
+      {filtered.length === 0 ? (
+        <p className="match-history__empty">{t('matchHistory.noFilterMatch')}</p>
+      ) : (
+        <ul className="match-history" aria-label={t('matchHistory.title')}>
+          {filtered.map((m) => {
+            const cspm = csPerMin(m.cs, m.duration_secs);
+            const role = (m.position ?? '').toLowerCase();
+            const won = m.win === 1;
+            const reviewed = m.has_review === 1;
+            const open = () => setSelected(m.match_id);
+            return (
+              <li
+                key={m.match_id}
+                className={`match-history__row match-history__row--${won ? 'win' : 'loss'}${reviewed ? ' match-history__row--clickable' : ''}`}
+                {...(reviewed
+                  ? {
+                      role: 'button',
+                      tabIndex: 0,
+                      onClick: open,
+                      onKeyDown: (e: React.KeyboardEvent) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          open();
+                        }
+                      },
+                      'aria-label': t('matchHistory.openReview', { champion: m.champion_key }),
                     }
-                  },
-                  'aria-label': t('matchHistory.openReview', { champion: m.champion_key }),
-                }
-              : {})}
-          >
-            <ChampionIcon championKey={m.champion_key} size="md" />
-            <div className="match-history__head">
-              <span className="match-history__champ">{m.champion_key || `#${m.champion_id}`}</span>
-              <span className="match-history__meta">
-                {role ? t(`poolBuilder.role_${role}`, { defaultValue: role }) : DASH}
-                {' · '}
-                {t(`review.queue.${queueGroup(m.queue_id)}`, { defaultValue: queueGroup(m.queue_id) })}
-                {' · '}
-                {relativeTime(m.played_at, t)}
-              </span>
-            </div>
-            <span className={`match-history__result match-history__result--${won ? 'win' : 'loss'}`}>
-              {won ? t('matchHistory.win') : t('matchHistory.loss')}
-            </span>
-            <div className="match-history__stats">
-              <span className="match-history__stat">
-                <span className="match-history__stat-label">{t('matchHistory.kda')}</span>
-                {m.kills}/{m.deaths}/{m.assists}
-              </span>
-              <span className="match-history__stat">
-                <span className="match-history__stat-label">{t('matchHistory.csPerMin')}</span>
-                {cspm === null ? DASH : cspm.toFixed(1)}
-              </span>
-              <span className="match-history__stat">
-                <span className="match-history__stat-label">{t('matchHistory.vision')}</span>
-                {m.vision_score === null ? DASH : m.vision_score}
-              </span>
-            </div>
-            {m.has_review === 1 && (
-              <span className="match-history__reviewed">{t('matchHistory.reviewed')}</span>
-            )}
-          </li>
-        );
-      })}
-    </ul>
+                  : {})}
+              >
+                <ChampionIcon championKey={m.champion_key} size="md" />
+                <div className="match-history__head">
+                  <span className="match-history__champ">{m.champion_key || `#${m.champion_id}`}</span>
+                  <span className="match-history__meta">
+                    {role ? t(`poolBuilder.role_${role}`, { defaultValue: role }) : DASH}
+                    {' · '}
+                    {t(`review.queue.${queueGroup(m.queue_id)}`, { defaultValue: queueGroup(m.queue_id) })}
+                    {' · '}
+                    {relativeTime(m.played_at, t)}
+                  </span>
+                </div>
+                <span className={`match-history__result match-history__result--${won ? 'win' : 'loss'}`}>
+                  {won ? t('matchHistory.win') : t('matchHistory.loss')}
+                </span>
+                <div className="match-history__stats">
+                  <span className="match-history__stat">
+                    <span className="match-history__stat-label">{t('matchHistory.kda')}</span>
+                    {m.kills}/{m.deaths}/{m.assists}
+                  </span>
+                  <span className="match-history__stat">
+                    <span className="match-history__stat-label">{t('matchHistory.csPerMin')}</span>
+                    {cspm === null ? DASH : cspm.toFixed(1)}
+                  </span>
+                  <span className="match-history__stat">
+                    <span className="match-history__stat-label">{t('matchHistory.vision')}</span>
+                    {m.vision_score === null ? DASH : m.vision_score}
+                  </span>
+                </div>
+                {m.has_review === 1 && (
+                  <span className="match-history__reviewed">{t('matchHistory.reviewed')}</span>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
   );
 };

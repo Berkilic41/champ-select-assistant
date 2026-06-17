@@ -124,3 +124,25 @@
 .match-history__back:hover {
   color: var(--text-primary);
 }
+
+/* Slice 3: client-side filtreler (rol / şampiyon / sonuç). */
+.match-history-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 12px);
+}
+
+.match-history__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1, 6px);
+}
+
+.match-history__filter {
+  background: var(--surface-2, var(--color-bg-panel));
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle, var(--color-border));
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: var(--font-size-xs, 12px);
+}

@@ -119,7 +119,13 @@
     "vision": "Vizyon",
     "reviewed": "İncelendi",
     "back": "Maçlara dön",
-    "openReview": "{{champion}} karnesini aç"
+    "openReview": "{{champion}} karnesini aç",
+    "filters": "Filtreler",
+    "filterRole": "Rol",
+    "filterChampion": "Şampiyon",
+    "filterResult": "Sonuç",
+    "filterAll": "Tümü",
+    "noFilterMatch": "Bu filtreye uygun maç yok"
   },
   "champSelect": {
     "yourTeam": "Takımın",

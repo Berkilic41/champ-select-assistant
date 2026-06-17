@@ -19,8 +19,11 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
   (klavye erişilebilir, `role="button"`) o maçın tam karnesi mevcut `GameReviewCard` ile detay panelinde
   açılıyor; "← Maçlara dön" ile listeye dönülüyor. `GameReviewCard` opsiyonel `matchId` prop'uyla belirli
   maçı çeker (yeni host `get_game_review` by match_id; karnesiz maçlar tıklanamaz; StatsView'daki prop'suz
-  "en yeni" davranışı korunur). +1 host (review-by-id) + 2 renderer test. Sonraki: champion/rol/win-loss
-  filtreleri (Slice 3).
+  "en yeni" davranışı korunur). +1 host (review-by-id) + 2 renderer test.
+- **Maç Geçmişi — filtreler** (Match-History Epic — Slice 3) — liste üstüne rol, şampiyon ve sonuç
+  (galibiyet/mağlubiyet) için üç açılır filtre (yalnız listede VAR olan rol/şampiyonlar seçenek olur);
+  filtreleme tamamen client-side (yeni fetch yok). Hiçbir maç eşleşmezse dürüst "Bu filtreye uygun maç
+  yok" mesajı. tr/en parite + 2 renderer test. **Match-History MVP (liste + detay + filtre) tamamlandı.**
 - **Havuz koçunda dürüst veri-hatası durumu** — `PoolBuilder` öneri fetch'i
   (`get_pool_suggestions`) reddedildiğinde artık sessizce "bu rol için öneri yok"
   demiyor; backend/DB hatasını kardeş kartlarla (RankCard/TrendPanel/WeeklySummaryCard)

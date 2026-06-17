@@ -19,7 +19,12 @@
   detay (GameReviewCard + "← Maçlara dön"). i18n `matchHistory.back`/`openReview` (tr/en). GOTCHA: RTL accessible-
   name (openReview aria-label) ile satır bulunur; back butonu "← " önekli → regex. ✅ renderer 264 + host 161 +
   typecheck 0 + i18n parite. (commit hazırlanıyor)
-- **Sıradaki:** Slice 3 (champion/rol/win-loss filtreleri, client-side; PoolBuilder rol-buton deseni).
+- **Iter Slice-3 (done)** — filtreler: rol/şampiyon/sonuç 3 açılır `<select>` (yalnız listede var-olan rol+şampiyon
+  seçenek). Client-side `filtered` (yeni fetch yok); eşleşme yoksa `matchHistory.noFilterMatch`. i18n filters/
+  filterRole/filterChampion/filterResult/filterAll (tr/en). GOTCHA: option metni satır metniyle çakışır → testte
+  `within(getByRole('list'))` ile kapsa. ✅ renderer 266 + host 161 + typecheck 0 + i18n parite. (commit hazırlanıyor)
+- **EPIC TAMAM (Match-History MVP):** liste + detay + filtre. Sonraki Epic önceliği: lane-matchup veri-dürüstlüğü (#2)
+  — core `ScoringContext`→`lane_matchup_from_json`'a matchup plumbing + LaneMatchupPanel "KB tahmini" rozeti.
 
 ## Ürün geliştirme modu (2026-06-17, kullanıcı direktifi)
 > "Artık yalnızca bugfix/audit değil — otonom ürün geliştirme lideri. Her iterasyonda fırsat keşfet,
