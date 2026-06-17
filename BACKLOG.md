@@ -11,6 +11,9 @@
   `power_early/mid/late` (91aaa12) + renderer 3-segment HUD çubuğu (64f4c27). Glance "şu an
   güçlü müyüm?" — spike_note'u görselleştirir, redundant değil. core 505 + renderer 247 +
   desktop 158 + i18n parite + WASM rebuild temiz.
+- **W-02 done** — güç çubuğu canlı oyun fazına bağlandı (7eb7b6c): `currentPhase`=`macro.phase`
+  (GAME_PHASES≡POWER_PHASES) → o kolon "şu an buradasın" (▾)+teal; isKnownPhase guard;
+  ariaNow tr/en. Statik referans → canlı "neredeyim". renderer 250 + typecheck + i18n.
 
 > Önceki tur (Discovery-4) KAPANDI: B-41+B-46+B-47 done; B-45 wontfix (yanlış alarm);
 > B-42/B-43/B-44 deferred; B-24 wontfix (motor-e2e zaten oracle seviyesinde kapsalı).

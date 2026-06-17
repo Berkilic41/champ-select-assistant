@@ -97,6 +97,11 @@
   4 izole test (named export). ✅ renderer 247 + typecheck + WASM rebuild + desktop 158. (64f4c27)
   > Teyit: spike_window/matchup_tips/opponent core'da ZATEN tam+test'li+render'lı (memory
   > notu kısmen bayatmış); gerçek açık "HUD görsel" → power-curve viz (yeni glance-değeri).
+- **Iter 21 (W-02)** — güç çubuğu canlı oyun fazına bağlandı: `currentPhase`=`macro.phase`
+  (koddan teyit: `GAME_PHASES`≡`POWER_PHASES`=erken/mid/late, mapping gerekmez) → o kolon
+  "şu an buradasın" (▾)+teal; `isKnownPhase` guard bilinmeyen fazı yok sayar; `ariaNow` aria
+  fazı içerir; tr/en parite; 3 yeni izole test (işaretçi/yok/bilinmeyen). Renderer-only (core
+  değişmedi → WASM rebuild gerekmez). ✅ renderer 250 + typecheck + i18n. (7eb7b6c)
 
 > **Lider değerlendirmesi (2026-06-17):** 4 keşif turu + her adayın koddan-teyidi sonrası
 > güvenli + değerli + doğrulanabilir backlog TÜKENDİ. Olgun kod tabanı (~620+ test, clippy

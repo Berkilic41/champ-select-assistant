@@ -14,7 +14,10 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
   metinsel `spike_note`'u görsel olarak tamamlar. Core `IngamePlan`'a `power_early/
   mid/late` alanları yüzeye çıkarıldı (arketipten birebir, e2e testle kilitli);
   PowerCurveBar a11y için tek `role=img` + yüzdeli `aria-label` (çubuklar
-  dekoratif), tr/en parite, 4 izole birim testi. (WS3 — overlay polish)
+  dekoratif), tr/en parite, izole birim testleri. Ayrıca **canlı oyun fazı
+  işaretçisi**: `macro.phase` (erken/orta/geç) o kolonu "şu an buradasın" (▾) +
+  teal-vurgu ile işaretler → statik referans canlı "neredeyim"e döner; aria-label
+  fazı da içerir. (WS3 — overlay polish; W-01 + W-02)
 - **Sürekli otonom geliştirme sistemi** — repo kökünde yönetim dosyaları
   (`AGENTS`, `PROJECT_STATE`, `BACKLOG`, `TASKS`, `DECISIONS`, `QUALITY_CHECKS`)
   ve Inspect→Discover→Prioritize→Delegate→Implement→Verify→Document→Continue
