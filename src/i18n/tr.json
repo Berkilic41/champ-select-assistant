@@ -293,6 +293,7 @@
     "localOnly": "Yerel",
     "scoreDelta": "Delta {{score}}",
     "risk": "Risk {{level}}",
+    "whyThis": "Neden bu?",
     "whyNot": "Neden alternatif?",
     "riskLevel": {
       "low": "düşük",

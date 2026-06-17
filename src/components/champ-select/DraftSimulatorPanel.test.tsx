@@ -43,4 +43,30 @@ describe('DraftSimulatorPanel', () => {
     expect(screen.getByText('Hasar dengesi')).toBeInTheDocument();
     expect(screen.getByText(/Alternatif düşün/)).toBeInTheDocument();
   });
+
+  it('shows the why_this_move rationale for the pick', () => {
+    render(<DraftSimulatorPanel results={[result]} />);
+    expect(screen.getByText('Neden bu?')).toBeInTheDocument();
+    expect(screen.getByText(/Engage tarafına somut katkı/)).toBeInTheDocument();
+  });
+
+  it('appends the signed numeric delta to factor chips when present', () => {
+    const withDeltas: DraftSimResult = {
+      ...result,
+      deltas: [
+        { factor: 'engage', before: 0.4, after: 0.57, delta: 0.17 },
+        { factor: 'damage_balance', before: 0.6, after: 0.55, delta: -0.05 },
+      ],
+    };
+    render(<DraftSimulatorPanel results={[withDeltas]} />);
+    expect(screen.getByText('Engage +0.17')).toBeInTheDocument();
+    expect(screen.getByText('Hasar dengesi -0.05')).toBeInTheDocument();
+    // 'frontline' has no delta entry → bare label, no suffix (backward compatible).
+    expect(screen.getByText('Ön saf')).toBeInTheDocument();
+  });
+
+  it('hides the why_this_move line when it is empty', () => {
+    render(<DraftSimulatorPanel results={[{ ...result, why_this_move: '' }]} />);
+    expect(screen.queryByText('Neden bu?')).not.toBeInTheDocument();
+  });
 });

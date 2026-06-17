@@ -293,6 +293,7 @@
     "localOnly": "Local",
     "scoreDelta": "Delta {{score}}",
     "risk": "Risk {{level}}",
+    "whyThis": "Why this?",
     "whyNot": "Why alternative?",
     "riskLevel": {
       "low": "low",

@@ -2,6 +2,22 @@
 
 > Tek seferde tek küçük görev. Tarih: 2026-06-16.
 
+## Ürün geliştirme modu (2026-06-17, kullanıcı direktifi)
+> "Artık yalnızca bugfix/audit değil — otonom ürün geliştirme lideri. Her iterasyonda fırsat keşfet,
+> P0/P1 yoksa en yüksek kullanıcı-değerli küçük özelliği seç, uygula+test+dokümante+commit, sonra devam."
+- **Keşif** — 3 Explore ajanı (feature inventory / latent intelligence / professional polish) + lider
+  koddan-çapraz-doğrulama. Ajanlar olgun kod tabanında çok "açık" abarttı; ELENENLER: drills (PoolBuilder'da
+  render'lı), win-prob (HeroCard'da), combo-history (HeroCard'da). Büyükler ertelendi (match-history,
+  opponent-scouting=ToS).
+- **Iter P-01 (done)** — draft simülatörü koçluk derinliği: GOTCHA — DraftSimulatorPanel.test.tsx ZATEN
+  vardı (Glob yanlış-negatif verdi; grep yakaladı → mevcut test genişletildi, yeni dosya YOK). Koddan
+  doğrulandı: `DraftSimResult.why_this_move` + `deltas` hesaplanıp render edilmiyordu. Eklendi: her pick
+  "Neden bu?" gerekçesi + faktör chip'lerine işaretli delta (`signedScore` yeniden kullanıldı). Renderer-only
+  (core değişmedi), `.draft-sim__why-this` CSS, tr/en `draftSimulator.whyThis` parite, +3 test.
+  ✅ renderer 253 + typecheck 0 + i18n parite.
+- **Sıradaki:** P-02 (LLM-koç "Bağlantı test et"+gizlilik copy) · P-03 (ComboBoard track-record) ·
+  P-04 (klavye-kısayol yardımı) · P-05 (lobby Performance Snapshot) — her biri uygulamadan önce koddan teyit.
+
 ## Tamamlanan iterasyonlar
 - **Iter 0** — Sistem kurulumu (7 yönetim dosyası + döngü). ✅
 - **Iter 1** — B-01 image fallback (`BanIcon`+`CounterItemIcon`). ✅ 214 test.

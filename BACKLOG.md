@@ -6,7 +6,18 @@
 > **21 doğrulanmış bulgu**, adversaryal koddan-teyit) çıktısıdır.
 
 ## Aktif
-**Yön: canlı-veri yolu sağlamlaştırma** (lider kararı 2026-06-17: roadmap #1, prod-key dış-engeli yalnız
+**MOD: Otonom ürün geliştirme (2026-06-17 kullanıcı direktifi).** Artık bugfix/audit değil — her
+iterasyonda fırsat keşfet → P0/P1 yoksa en yüksek-değerli KÜÇÜK özelliği seç → uygula+test+dokümante+commit.
+Keşif: 3 Explore ajanı (feature/latent-intelligence/polish) + lider koddan-çapraz-doğrulama (ajanlar olgun
+kod tabanında çok "açık" abarttı; drills/win-prob/combo-history zaten render'lı → reddedildi).
+- **P-01 done** — draft simülatöründe daha derin koçluk: `DraftSimulatorPanel` core'un hesapladığı ama
+  gösterilmeyen `why_this_move` (her pick "Neden bu?" gerekçesi) + faktör `deltas` (chip'lerde sayısal
+  büyüklük, ör. "Engage +0.17") alanlarını yüzeye çıkardı. Renderer-only, tr/en parite, +3 test. renderer 253.
+- **Aday kuyruğu (her biri uygulamadan önce koddan teyit):** P-02 LLM-koç "Bağlantı test et"+gizlilik copy ·
+  P-03 ComboBoard tarihsel track-record (`combo-outcomes.ts`) · P-04 klavye-kısayol yardım katmanı ·
+  P-05 lobby "Performance Snapshot" (`postgame.rs` metrikleri). Büyük/ertelenen: match-history, opponent-scouting (ToS).
+
+**Önceki yön: canlı-veri yolu sağlamlaştırma** (lider kararı 2026-06-17: roadmap #1, prod-key dış-engeli yalnız
 ingestion cron'unu kapsar; okuma yolu + app-wiring + dürüstlük + test otonom-yapılabilir).
 - **L-01 done** — bayat edge matchup/build confidence dürüstlüğü (c72dd1c): staleness downgrade
   (>48s→'low') yalnız rates'e uygulanıyordu; matchups+builds aynı bayat ingestion'dan 'medium'/'high'

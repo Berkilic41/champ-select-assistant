@@ -95,14 +95,16 @@
 }
 
 .draft-sim__coach,
-.draft-sim__why-not {
+.draft-sim__why-not,
+.draft-sim__why-this {
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--font-size-xs);
   line-height: 1.35;
 }
 
-.draft-sim__why-not span {
+.draft-sim__why-not span,
+.draft-sim__why-this span {
   color: var(--text-primary);
   font-weight: var(--weight-semibold);
 }

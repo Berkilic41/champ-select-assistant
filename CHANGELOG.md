@@ -7,6 +7,13 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Draft simülatöründe daha derin koçluk** — `DraftSimulatorPanel` artık core'un
+  çoktan hesapladığı ama gösterilmeyen iki alanı yüzeye çıkarıyor: (1) **`why_this_move`**
+  — her aday pick için "Neden bu?" stratejik gerekçesi (önceden yalnız rank-0'ın
+  "Neden alternatif?"i vardı), (2) **faktör sayısal delta'ları** — improved/worsened
+  faktör chip'leri artık büyüklüğü de gösteriyor (ör. "Engage +0.17"), `result.deltas`'tan;
+  delta yoksa salt-isim (geriye uyumlu). Renderer-only, sıfır core değişikliği; tr/en
+  parite + 3 yeni birim testi. (P-01)
 - **In-game güç eğrisi görsel çubuğu** — overlay oyun-plan kartına 3 segmentli
   (erken/orta/geç) bir HUD çubuğu eklendi; her segment, oynanan şampiyonun arketip
   `power_curve` değeriyle (0..1) orantılı yükseklikte ve zirve faz teal ile
