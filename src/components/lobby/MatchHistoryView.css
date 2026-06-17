@@ -92,3 +92,35 @@
   padding: 1px 8px;
   white-space: nowrap;
 }
+
+/* Slice 2: karnesi olan satırlar tıklanabilir → detay paneli. */
+.match-history__row--clickable {
+  cursor: pointer;
+}
+.match-history__row--clickable:hover {
+  border-color: var(--accent, #5b8edd);
+  background: var(--surface-2, var(--color-bg-panel));
+}
+.match-history__row--clickable:focus-visible {
+  outline: 2px solid var(--accent, #5b8edd);
+  outline-offset: 2px;
+}
+
+.match-history__detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 12px);
+}
+
+.match-history__back {
+  align-self: flex-start;
+  background: var(--surface-2, transparent);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle, var(--color-border));
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.match-history__back:hover {
+  color: var(--text-primary);
+}

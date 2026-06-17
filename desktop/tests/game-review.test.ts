@@ -11,6 +11,7 @@ import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import {
   focusStreak,
   generateGameReviews,
+  getGameReviewByMatchId,
   getGameReviews,
   getMatchHistory,
   getMatchNote,
@@ -112,6 +113,22 @@ describe("koç döngüsü (game_review.rs + game-review.ts)", () => {
     expect(hist.find((r) => r.match_id === "TR1_r7")!.has_review).toBe(0);
     // limit uygulanır.
     expect(getMatchHistory(db, PUUID, 3)).toHaveLength(3);
+  });
+
+  it("fetches a single match review by match_id, null when absent (Slice 2)", () => {
+    const db = seededDb();
+    db.prepare(
+      `INSERT INTO game_reviews (match_id, puuid, queue_group, created_at, review_json)
+       VALUES ('TR1_r5', ?, 'soloq', 0, '{"champion_key":"Garen","win":true}')`,
+    ).run(PUUID);
+
+    const found = getGameReviewByMatchId(db, "TR1_r5");
+    expect(found).not.toBeNull();
+    expect(found!.match_id).toBe("TR1_r5");
+    expect(found!.queue_group).toBe("soloq");
+    expect((found!.review as { champion_key: string }).champion_key).toBe("Garen");
+    // Karnesi olmayan match_id → null.
+    expect(getGameReviewByMatchId(db, "NOPE")).toBeNull();
   });
 
   it("generates reviews oldest-first, runs the goal loop, and is idempotent", () => {

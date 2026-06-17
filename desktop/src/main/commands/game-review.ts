@@ -168,6 +168,31 @@ export function getGameReviews(db: DatabaseSync, puuid: string, limit = 3): Stor
   }));
 }
 
+/**
+ * Tek maçın karnesi (Maç Geçmişi detay paneli — Epic Slice 2). Yoksa null.
+ * match_id PK olduğu için en fazla bir satır döner.
+ */
+export function getGameReviewByMatchId(
+  db: DatabaseSync,
+  matchId: string,
+): StoredReview | null {
+  const row = db
+    .prepare(
+      `SELECT match_id, queue_group, created_at, review_json FROM game_reviews
+       WHERE match_id = ?`,
+    )
+    .get(matchId) as
+    | { match_id: string; queue_group: string; created_at: number; review_json: string }
+    | undefined;
+  if (!row) return null;
+  return {
+    match_id: String(row.match_id),
+    queue_group: String(row.queue_group),
+    created_at: Number(row.created_at),
+    review: JSON.parse(String(row.review_json)),
+  };
+}
+
 // ── C4: Trend raporu ─────────────────────────────────────────────────────────
 
 export interface TrendResult {

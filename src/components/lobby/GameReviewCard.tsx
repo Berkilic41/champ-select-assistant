@@ -34,7 +34,13 @@ interface MatchNote {
   updated_at: number;
 }
 
-export const GameReviewCard: React.FC = () => {
+interface Props {
+  /** Belirli bir maçın karnesi (Maç Geçmişi detay paneli — Slice 2). Verilmezse
+   *  mevcut "en yeni maç" davranışı (StatsView'da prop'suz kullanım). */
+  matchId?: string;
+}
+
+export const GameReviewCard: React.FC<Props> = ({ matchId }) => {
   const { t } = useTranslation();
   const [latest, setLatest] = useState<StoredReview | null>(null);
   const [streak, setStreak] = useState(0);
@@ -52,13 +58,19 @@ export const GameReviewCard: React.FC = () => {
         const p = await invoke<string | null>('get_active_summoner_puuid');
         if (!p) return;
         if (alive) setPuuid(p);
-        const gen = await invoke<GenerateResult>('generate_game_reviews', { puuid: p });
-        if (!alive) return;
-        setStreak(gen.streak);
-        let current = gen.latest;
-        if (!current) {
-          const stored = await invoke<StoredReview[]>('get_game_reviews', { puuid: p, limit: 1 });
-          current = stored[0] ?? null;
+        let current: StoredReview | null;
+        if (matchId) {
+          // Detay paneli: belirli maçın karnesi (yeniden üretme/streak YOK).
+          current = await invoke<StoredReview | null>('get_game_review', { matchId });
+        } else {
+          const gen = await invoke<GenerateResult>('generate_game_reviews', { puuid: p });
+          if (!alive) return;
+          setStreak(gen.streak);
+          current = gen.latest;
+          if (!current) {
+            const stored = await invoke<StoredReview[]>('get_game_reviews', { puuid: p, limit: 1 });
+            current = stored[0] ?? null;
+          }
         }
         if (!alive || !current) return;
         setLatest(current);
@@ -77,7 +89,7 @@ export const GameReviewCard: React.FC = () => {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [matchId]);
 
   const toggleTag = (tag: string) =>
     setTags((cur) => (cur.includes(tag) ? cur.filter((x) => x !== tag) : [...cur, tag]));

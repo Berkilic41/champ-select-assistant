@@ -16,8 +16,10 @@ makul varsay (→ DECISIONS ADR-004). Test+typecheck+desktop testleri geçmeden 
     CS-dk/vision + "İncelendi" rozeti; P-07 dürüst loading/error/empty; cs null→"—". Saf host+renderer
     (core/ts-rs/WASM değişmedi). renderer 262 + host 160 + typecheck 0; tr/en parite; +4 renderer +1 host test.
     Varsayımlar ADR-004 (A1–A7). GOTCHA: played_at Unix SANİYE (×1000); getByText doğrudan-metin-düğümü → rol regex.
-  - **Slice 2 todo** — satıra tıkla → detay paneli; `GameReviewCard`'a `matchId`/`review` prop refactor (şu an
-    "en yeni"e sabit) → tam review verdict (lines/went_right/to_fix/focus). Host `getGameReviewByMatchId` veya filter.
+  - **Slice 2 done** — satıra tıkla → detay paneli: karnesi olan satır (`role="button"`+klavye) tıklanınca
+    `GameReviewCard matchId={id}` ile tam karne (lines/went_right/to_fix/focus) detayda; "← Maçlara dön" listeye döner.
+    Host `get_game_review` (by match_id) + GameReviewCard opsiyonel `matchId` (prop'suz "en yeni" StatsView'da korundu).
+    renderer 264 + host 161 + typecheck 0; +1 host +2 renderer test; i18n `matchHistory.back`/`openReview`.
   - **Slice 3 todo** — filtreler: champion + rol (PoolBuilder rol-buton deseni) + win/loss; client-side.
 
 **MOD: Otonom ürün geliştirme (2026-06-17 kullanıcı direktifi).** Artık bugfix/audit değil — her

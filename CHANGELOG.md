@@ -14,8 +14,13 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
   + `game_reviews` EXISTS işareti — **yeni Riot çağrısı / cloud YOK, sadece local DB**).
   Dürüst durumlar (P-07 deseni): yükleniyor / veri alınamadı / boş ayrı. CS/dk hesaplanır,
   eski (cs null) maçlarda "—". Saf host+renderer (core/ts-rs/WASM değişmedi); tr/en parite,
-  +4 renderer testi + 1 host testi (sıralama/JOIN/has_review). Sonraki dilimler: maça
-  tıklayınca game-review detay paneli (Slice 2), champion/rol/win-loss filtreleri (Slice 3).
+  +4 renderer testi + 1 host testi (sıralama/JOIN/has_review).
+- **Maç Geçmişi — karne detay paneli** (Match-History Epic — Slice 2) — "İncelendi" satırına tıklayınca
+  (klavye erişilebilir, `role="button"`) o maçın tam karnesi mevcut `GameReviewCard` ile detay panelinde
+  açılıyor; "← Maçlara dön" ile listeye dönülüyor. `GameReviewCard` opsiyonel `matchId` prop'uyla belirli
+  maçı çeker (yeni host `get_game_review` by match_id; karnesiz maçlar tıklanamaz; StatsView'daki prop'suz
+  "en yeni" davranışı korunur). +1 host (review-by-id) + 2 renderer test. Sonraki: champion/rol/win-loss
+  filtreleri (Slice 3).
 - **Havuz koçunda dürüst veri-hatası durumu** — `PoolBuilder` öneri fetch'i
   (`get_pool_suggestions`) reddedildiğinde artık sessizce "bu rol için öneri yok"
   demiyor; backend/DB hatasını kardeş kartlarla (RankCard/TrendPanel/WeeklySummaryCard)

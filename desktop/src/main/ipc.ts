@@ -39,6 +39,7 @@ import {
 import { syncRecommendationFeedback } from "./commands/feedback-flush";
 import {
   generateGameReviews,
+  getGameReviewByMatchId,
   getGameReviews,
   getMatchHistory,
   getMatchNote,
@@ -478,6 +479,10 @@ export function buildCommandRegistry(
       String(args?.puuid ?? ""),
       typeof args?.limit === "number" ? args.limit : 20,
     ),
+  );
+  // Epic Slice 2: tek maçın karnesi (detay paneli).
+  commands.set("get_game_review", (args) =>
+    getGameReviewByMatchId(requireDb(ctx), String(args?.matchId ?? "")),
   );
   // D3 tercihler + D4 meta trend.
   commands.set("get_champion_preferences", (args) =>

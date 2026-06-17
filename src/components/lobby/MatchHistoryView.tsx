@@ -5,6 +5,7 @@ import type { TFunction } from 'i18next';
 import { useActiveSummonerPuuid } from '../../hooks/useActiveSummonerPuuid';
 import type { MatchHistoryEntry } from '../../types/match-history';
 import { ChampionIcon } from '../shared/ChampionIcon';
+import { GameReviewCard } from './GameReviewCard';
 import './MatchHistoryView.css';
 
 const HISTORY_LIMIT = 20;
@@ -45,6 +46,8 @@ export const MatchHistoryView: React.FC = () => {
   const [matches, setMatches] = useState<MatchHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  // Slice 2: seçili maç → detay paneli (GameReviewCard). null = liste.
+  const [selected, setSelected] = useState<string | null>(null);
 
   useEffect(() => {
     if (!puuid) return;
@@ -79,14 +82,48 @@ export const MatchHistoryView: React.FC = () => {
     return <p className="match-history__empty">{t('matchHistory.empty')}</p>;
   }
 
+  if (selected) {
+    return (
+      <div className="match-history__detail">
+        <button
+          type="button"
+          className="match-history__back"
+          onClick={() => setSelected(null)}
+        >
+          ← {t('matchHistory.back')}
+        </button>
+        <GameReviewCard matchId={selected} />
+      </div>
+    );
+  }
+
   return (
     <ul className="match-history" aria-label={t('matchHistory.title')}>
       {matches.map((m) => {
         const cspm = csPerMin(m.cs, m.duration_secs);
         const role = (m.position ?? '').toLowerCase();
         const won = m.win === 1;
+        const reviewed = m.has_review === 1;
+        const open = () => setSelected(m.match_id);
         return (
-          <li key={m.match_id} className={`match-history__row match-history__row--${won ? 'win' : 'loss'}`}>
+          <li
+            key={m.match_id}
+            className={`match-history__row match-history__row--${won ? 'win' : 'loss'}${reviewed ? ' match-history__row--clickable' : ''}`}
+            {...(reviewed
+              ? {
+                  role: 'button',
+                  tabIndex: 0,
+                  onClick: open,
+                  onKeyDown: (e: React.KeyboardEvent) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      open();
+                    }
+                  },
+                  'aria-label': t('matchHistory.openReview', { champion: m.champion_key }),
+                }
+              : {})}
+          >
             <ChampionIcon championKey={m.champion_key} size="md" />
             <div className="match-history__head">
               <span className="match-history__champ">{m.champion_key || `#${m.champion_id}`}</span>

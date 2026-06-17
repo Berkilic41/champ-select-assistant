@@ -13,7 +13,13 @@
   i18n `matchHistory.*`/`lobby.tabMatchHistory` (tr/en). GOTCHA: played_at Unix SANİYE (×1000); RTL getByText doğrudan-
   metin-düğümü eşler → rol meta satırında regex. Testler: host getMatchHistory (sıralama/JOIN/has_review/limit) + 4
   renderer (satır/rozet-gizleme/boş/hata). ✅ renderer 262 + host 160 + typecheck 0 + i18n parite. (commit hazırlanıyor)
-- **Sıradaki:** Slice 2 (detay paneli — `GameReviewCard` `matchId`/`review` refactor) → Slice 3 (champion/rol/win-loss filtreleri).
+- **Iter Slice-2 (done)** — karne detay paneli. Host `getGameReviewByMatchId` + `get_game_review` kaydı.
+  GameReviewCard opsiyonel `matchId` (verilince get_game_review; yeniden-üretme/streak yok; prop'suz "en yeni"
+  StatsView'da korundu). MatchHistoryView: has_review satırı `role="button"`+Enter/Space → `selected` state →
+  detay (GameReviewCard + "← Maçlara dön"). i18n `matchHistory.back`/`openReview` (tr/en). GOTCHA: RTL accessible-
+  name (openReview aria-label) ile satır bulunur; back butonu "← " önekli → regex. ✅ renderer 264 + host 161 +
+  typecheck 0 + i18n parite. (commit hazırlanıyor)
+- **Sıradaki:** Slice 3 (champion/rol/win-loss filtreleri, client-side; PoolBuilder rol-buton deseni).
 
 ## Ürün geliştirme modu (2026-06-17, kullanıcı direktifi)
 > "Artık yalnızca bugfix/audit değil — otonom ürün geliştirme lideri. Her iterasyonda fırsat keşfet,

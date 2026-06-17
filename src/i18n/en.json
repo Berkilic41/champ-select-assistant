@@ -117,7 +117,9 @@
     "kda": "KDA",
     "csPerMin": "CS/min",
     "vision": "Vision",
-    "reviewed": "Reviewed"
+    "reviewed": "Reviewed",
+    "back": "Back to matches",
+    "openReview": "Open {{champion}} review"
   },
   "champSelect": {
     "yourTeam": "Your Team",
