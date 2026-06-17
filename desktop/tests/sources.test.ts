@@ -183,6 +183,24 @@ describe("u.gg parsers (ugg.rs parity)", () => {
     const b = parseUggOverview(JSON.parse(`{"1":{"8":{"1":[[],""]}}}`), 1, "16.11", "all");
     expect(b.rates).toHaveLength(0);
   });
+
+  it("emits primary runes but empty secondary for a truncated (<6) perk page", () => {
+    // u.gg bazen kırpık perk sayfası döndürür (burada 5 perk). Örneklem tabanı
+    // geçilse bile secondary_runes YALNIZ tam 6-perk sayfasında dolar; kısa
+    // sayfada perks[4]/perks[5] out-of-bounds (undefined) SIZMAMALI, boş kalmalı.
+    // Off-by-one kalkanı: guard yanlışlıkla >=5 olsaydı [8300,9111,undefined] olurdu.
+    const truncated = JSON.parse(`{"12":{"8":{"1":[[
+      [260,150,8000,8300,[8010,8009,8014,8017,9111]],[260,150,[4,11]],[1,1,[1102]],[260,150,[6692,3047]],
+      [1,1,["Q"],"Q"],[[],[],[],[],[],[]],[150,260],false,[260,150,["5005","5008"]],[],[],[],[0]
+    ],"t"]}}}`);
+    const { builds } = parseUggOverview(truncated, 1, "16.11", "all");
+    expect(builds).toHaveLength(1); // 260 ≥ 200 tabanı → satır üretilir
+    const b = builds[0];
+    // primary yine üretilir: [keystone, primary_tree]
+    expect(b.rune_ids).toEqual([8010, 8000]);
+    // 5 < 6 → secondary atlanır, undefined sızmaz
+    expect(b.secondary_runes).toEqual([]);
+  });
 });
 
 describe("Leaguepedia parsers (leaguepedia.rs parity)", () => {

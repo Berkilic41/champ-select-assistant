@@ -56,8 +56,14 @@
 - **B-42 deferred** — KODDAN DOĞRULANDI: "süresiz offline" çerçevesi yanlış (döngü B-21
   ile korunlu); kalan marjinal floating-promise hijyeni, düzgün test watcher-injection
   refactor'ı ister → oransız. Uydurma değer yerine dürüst erteleme.
-- **Kalan teyit-bekleyen:** B-43/44 (renderer seq-guard) · B-45 (IPC cast — engine.parseSession
-  zaten core-validate mi?) · B-47 (saf perk-sınır testi) · B-24 (ertelenmiş motor-e2e).
+- **Iter 18** — **B-47** parseUggOverview kırpık-perk sınır testi: eşik-üstü (260≥200) ama
+  5-perk sayfa → primary `rune_ids`=[8010,8000] üretilir, `secondary_runes`=[] kalır
+  (`perks.length>=6` guard'ı; off-by-one `>=5` olsaydı [8300,9111,undefined] sızardı).
+  Saf test, sıfır prod-kodu. ✅ desktop 158 test + typecheck temiz. (CHANGELOG'a yazılmaz — davranış değişmedi, B-46 emsali.)
+- **Discovery-4 KAPANDI** — kalan adayların koddan-disposition'u: **B-45 wontfix** (yanlış alarm:
+  cast'ın altı null-safe + core yeniden-doğruluyor) · **B-43/B-44 deferred** (renderer effect-race;
+  self-correcting + deterministik race-test'i oransız ağır harness). Kalan tek açık iş: **B-24**
+  (yüksek-efor motor-e2e fixture, taze bağlam ister).
 
 ## Durum — backlog esas olarak TÜKENDİ (2026-06-16, ~30 commit)
 
