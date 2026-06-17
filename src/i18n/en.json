@@ -34,6 +34,7 @@
     "waiting": "Waiting for a game…",
     "reminders": "Reminders",
     "now": "now",
+    "spawnAtHint": "Estimated spawn game-clock",
     "objective": {
       "dragon": "Dragon",
       "baron": "Baron",

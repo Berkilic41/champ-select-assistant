@@ -41,6 +41,15 @@ function stateKind(state: string): string {
   return 'pending';
 }
 
+/** Mutlak oyun-saati (mm:ss) — objective doğuş saati için (countdown'un "now"
+ *  özel-durumu olmadan; negatif → "0:00"). */
+export function gameClock(secs: number): string {
+  const v = Math.max(secs, 0);
+  const m = Math.floor(v / 60);
+  const s = v % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
 // Policy-safe: only the player's own game time + public neutral-objective takes from the
 // official Live Client Data API. No hidden info (enemy cooldowns / wards / summoners).
 export const IngameView: React.FC<Props> = ({ summonerName }) => {
@@ -216,7 +225,14 @@ export const IngameView: React.FC<Props> = ({ summonerName }) => {
                 <span className={`overlay-objective-state overlay-objective-state--${stateKind(o.state)}`}>
                   {t(`overlay.state.${o.state}`, { defaultValue: o.state })}
                 </span>
-                <span className="overlay-objective-count">{countdown(o.seconds_until)}</span>
+                <div className="overlay-objective-timing">
+                  <span className="overlay-objective-count">{countdown(o.seconds_until)}</span>
+                  {o.state !== 'up' && o.seconds_until > 0 && (
+                    <span className="overlay-objective-at" title={t('overlay.spawnAtHint')}>
+                      @{gameClock(o.next_spawn_secs)}
+                    </span>
+                  )}
+                </div>
               </li>
             ))}
           </ul>

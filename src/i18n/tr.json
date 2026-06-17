@@ -34,6 +34,7 @@
     "waiting": "Oyun bekleniyor…",
     "reminders": "Hatırlatmalar",
     "now": "şimdi",
+    "spawnAtHint": "Tahmini doğuş oyun-saati",
     "objective": {
       "dragon": "Ejder",
       "baron": "Baron",

@@ -10,6 +10,18 @@
 BÜYÜK yönü Epic seç, MVP'ye böl, her tur tek dikey dilim (salt kozmetik yok). Öncelik: 1) match-history
 2) lane-matchup dürüstlük 3) post-game koçluk 4) havuz gelişim 5) in-game makro. Kapsam belirsizse sorma,
 makul varsay (→ DECISIONS ADR-004). Test+typecheck+desktop testleri geçmeden bitmiş sayılmaz.
+- **EPIC #5: In-game Overlay Makro/Objective** (renderer; core/host DEĞİŞMEZ).
+  - **Slice 1 done** — objective mutlak doğuş saati (@mm:ss) geri sayımın altında. `next_spawn_secs` zaten
+    payload'da (macro_timers.rs:56, generated ObjectiveTimer) ama IngameView yalnız `countdown(seconds_until)`
+    gösteriyordu. `gameClock` modül-export + birim test; `overlay.spawnAtHint` tr/en. state≠up koşullu.
+    renderer 272 + typecheck 0 + i18n parite. core/host değişmedi. Lider seçimi: geniş kitle (tüm in-game
+    kullanıcısı) + minik + sıfır-risk → öğrenme-progress'ten (dar kitle, orta efor) önce.
+- **EPIC #4: Havuz Gelişim Sistemi** (renderer+host-query; core DEĞİŞMEZ).
+  - **Slice 1 (aday, KODDAN DOĞRULANDI)** — öğrenme-hedefi ilerleme kartı: kullanıcının "Öğreniyorum"
+    işaretlediği (ChampionDetailCard.tsx:95-96 set_champion_preference 'learning') şampiyonların mastery
+    ilerlemesi PoolBuilder'da gösterilmiyor (get_mastery_progress top-5/learning-filtresiz, player.ts:51-84).
+    Yeni host `getLearningProgress` (user_preferences.learning ⋈ mastery_snapshots) + PoolBuilder "Öğrenme
+    hedeflerin" bölümü + i18n. Recommend→işaretle→ilerleme döngüsünü kapatır. Sıradaki tur.
 - **EPIC #3: Post-game Gelişim Koçluğu** (gelişim geri-bildirimi; core DEĞİŞMEZ — engine purity).
   - **Slice 1 done** — Maç Sonu Karnesinde hedef-tutturma serisi görseli: focus_goals met/missed geçmişi ✓/✗
     dot dizisiyle (önceden yalnız streak SAYISI). Yeni host `get_focus_history` (met/missed, en yeni önce,

@@ -2,6 +2,16 @@
 
 > Tek seferde tek küçük görev. Tarih: 2026-06-16.
 
+## Büyük geliştirme modu — EPIC #5: In-game Overlay Makro/Objective (2026-06-17)
+> Mesaj-beklemeden otonom devam. Post-game S1 bitti → koddan-doğrulanmış temiz in-game adayı.
+- **Iter Slice-1 (done)** — objective satırına mutlak doğuş saati (@mm:ss). Koddan doğrulandı: `next_spawn_secs`
+  zaten ObjectiveTimer payload'ında (macro_timers.rs:56) ama IngameView:219 yalnız `countdown(seconds_until)`
+  gösteriyordu. `gameClock(secs)` modül-export (mm:ss + negatif→0:00) + IngameView render (state≠up && seconds_until>0)
+  + `.overlay-objective-timing` grid hücresi (3-kolon korundu) + i18n `overlay.spawnAtHint` (tr/en) + gameClock testi.
+  Renderer+i18n-only (core/host el değmedi). ✅ renderer 272 + typecheck 0 + i18n parite. (commit hazırlanıyor)
+- **Lider seçimi:** geniş kitle (tüm in-game) + minik + sıfır-risk → priority-#4 öğrenme-progress'ten önce (dar kitle/orta efor).
+- **Sıradaki:** Epic #4 Slice 1 (öğrenme-hedefi ilerleme kartı — koddan doğrulandı, getLearningProgress host + PoolBuilder bölümü).
+
 ## Büyük geliştirme modu — EPIC #3: Post-game Gelişim Koçluğu (2026-06-17)
 > Mesaj-beklemeden otonom devam. Lane-Matchup Slice 1 bitti → öncelik #3 post-game gelişim koçluğu.
 - **Keşif** — 1 Explore ajanı (post-game envanter) + lider koddan-doğrulama. 7 boşluk önerildi; ELENENLER:

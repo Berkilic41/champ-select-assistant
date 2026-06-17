@@ -7,6 +7,11 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **In-game objective mutlak doğuş saati** (Overlay Makro Epic — Slice 1) — Oyun-içi overlay'de obje
+  zamanlayıcıları (ejder/baron vb.) artık geri sayımın yanında mutlak doğuş oyun-saatini de gösteriyor
+  (ör. "1:30" altında "@24:00") — oyuncu kendi oyun-saatiyle toplama yapmadan "ne zaman doğacak"ı bir bakışta
+  okur. Veri (`next_spawn_secs`) zaten payload'daydı ama render edilmiyordu; yalnız doğmamış objelerde
+  (state≠up). Renderer+i18n (core/host DEĞİŞMEDİ); `overlay.spawnAtHint` tr/en parite + `gameClock` birim testi.
 - **Maç sonu karnesinde hedef-tutturma serisi görseli** (Post-game Koçluk Epic — Slice 1) — Maç Sonu Karnesi
   artık son odak hedeflerinin (focus_goal) tutturma paternini küçük ✓/✗ noktalarıyla gösteriyor (yeşil=tuttu,
   kırmızı=kaçtı, tooltip'te hedef metni). Önceden yalnız streak SAYISI vardı; artık serinin ŞEKLİ (ör. ✓✓✗✓)

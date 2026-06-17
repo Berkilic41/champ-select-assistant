@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
-import { PowerCurveBar } from './IngameView';
+import { PowerCurveBar, gameClock } from './IngameView';
 
 describe('PowerCurveBar', () => {
   it('renders three phase columns with labels', () => {
@@ -66,5 +66,17 @@ describe('PowerCurveBar', () => {
     expect(container.querySelectorAll('.overlay-power-now')).toHaveLength(0);
     const aria = container.querySelector('.overlay-power')?.getAttribute('aria-label') ?? '';
     expect(aria).not.toContain('şu an');
+  });
+});
+
+describe('gameClock (objective absolute spawn time — Epic #5)', () => {
+  it('formats seconds as mm:ss game-clock with zero-padded seconds', () => {
+    expect(gameClock(1440)).toBe('24:00'); // Baron @ 24:00
+    expect(gameClock(65)).toBe('1:05');
+    expect(gameClock(0)).toBe('0:00');
+  });
+
+  it('clamps negative values to 0:00 (defensive)', () => {
+    expect(gameClock(-5)).toBe('0:00');
   });
 });
