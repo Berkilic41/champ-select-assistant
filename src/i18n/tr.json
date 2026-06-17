@@ -513,7 +513,8 @@
     "type_pick_potential": "Pick",
     "type_zone_control": "Zone kontrol",
     "type_peel_chain": "Peel zinciri",
-    "type_wombo": "Wombo"
+    "type_wombo": "Wombo",
+    "trackRecord": "Geçmişin: {{n}} maç · %{{wr}}"
   },
   "champDetail": {
     "noData": "Bu şampiyon için detay verisi yok",

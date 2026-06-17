@@ -24,4 +24,24 @@ describe('ComboBoard', () => {
     expect(screen.getByText('Shockwave Trap')).toBeInTheDocument();
     expect(screen.getByText(/Nocturne R karanlık/)).toBeInTheDocument();
   });
+
+  it('shows the co-pick track record for an ally with history (>=2 games)', () => {
+    render(
+      <ComboBoard combos={[combo()]} trackRecord={{ Orianna: { games: 5, wins: 3 } }} />,
+    );
+    // 3/5 → %60; keyed by ally_champion_key.
+    expect(screen.getByText(/5 maç.*60/)).toBeInTheDocument();
+  });
+
+  it('hides the track record when there is no entry for the ally', () => {
+    render(<ComboBoard combos={[combo()]} trackRecord={{ Garen: { games: 9, wins: 5 } }} />);
+    expect(screen.queryByText(/Geçmişin/)).not.toBeInTheDocument();
+  });
+
+  it('hides the track record below the 2-game floor', () => {
+    render(
+      <ComboBoard combos={[combo()]} trackRecord={{ Orianna: { games: 1, wins: 1 } }} />,
+    );
+    expect(screen.queryByText(/Geçmişin/)).not.toBeInTheDocument();
+  });
 });

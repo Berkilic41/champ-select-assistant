@@ -49,5 +49,12 @@
   line-height: var(--line-height-normal);
 }
 
+.combo-board__record {
+  font-size: 10px;
+  font-weight: var(--weight-semibold);
+  color: var(--teal-bright);
+  font-variant-numeric: tabular-nums;
+}
+
 .combo-board__track { height: 4px; background: var(--surface-4); border-radius: var(--radius-pill); overflow: hidden; }
 .combo-board__fill { height: 100%; border-radius: var(--radius-pill); background: linear-gradient(90deg, var(--gold), var(--gold-bright)); }

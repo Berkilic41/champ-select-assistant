@@ -15,8 +15,14 @@
   "Neden bu?" gerekçesi + faktör chip'lerine işaretli delta (`signedScore` yeniden kullanıldı). Renderer-only
   (core değişmedi), `.draft-sim__why-this` CSS, tr/en `draftSimulator.whyThis` parite, +3 test.
   ✅ renderer 253 + typecheck 0 + i18n parite.
-- **Sıradaki:** P-02 (LLM-koç "Bağlantı test et"+gizlilik copy) · P-03 (ComboBoard track-record) ·
-  P-04 (klavye-kısayol yardımı) · P-05 (lobby Performance Snapshot) — her biri uygulamadan önce koddan teyit.
+- **Iter P-03 (done)** — ComboBoard'da gerçek co-pick track-record. GOTCHA — `comboOutcomes` ZATEN
+  ChampSelectWrapper'da fetch'leniyordu (yalnız HeroCard birincil combo'su için kullanılıyordu); ComboBoard'a
+  tek `trackRecord` prop'u (wrapper'da memo + ChampSelectScreen pass-through) iletildi. my-key=`lockedAnalysis.champion_key`;
+  eşleşmezse graceful gizli (yanlış-veri YOK). pairKey host kuralıyla aynı (inline). ≥2 maç gate'i. Renderer-only,
+  `.combo-board__record` CSS, tr/en `comboBoard.trackRecord` parite, +3 test (gösterir/yok/<2-maç). ✅ renderer 256 + typecheck + i18n. (commit bekliyor)
+- **Sıradaki:** P-02 (LLM "Bağlantı test et" — host-fetch, dar kitle) · P-04 (klavye yardımı) · P-05 (lobby snapshot).
+  Lider notu: küçük-özellik yüzeyi büyük ölçüde tükendi; kalanlar dar/kısmen-kapsalı. Sonraki tur ya kalan dar
+  adayı ya da daha BÜYÜK bir özellik (match-history browser) için onay gerekebilir.
 
 ## Tamamlanan iterasyonlar
 - **Iter 0** — Sistem kurulumu (7 yönetim dosyası + döngü). ✅

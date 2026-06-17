@@ -66,6 +66,8 @@ interface Props {
   teamComp?: TeamCompBoardData | null;
   /** Ally combos for the local player's pick. */
   comboBoard?: ComboBoardEntry[];
+  /** Player's co-pick history per ally (ally_champion_key → {games,wins}); ≥2-game pairs only. */
+  comboTrackRecord?: Record<string, { games: number; wins: number }>;
   /** Single decisive draft verdict. */
   draftVerdict?: DraftVerdict | null;
   /** Defensive counter-itemization vs enemy comp. */
@@ -108,7 +110,7 @@ export function selectDraftForkIds(
 }
 
 export const ChampSelectScreen: React.FC<Props> = ({
-  session, role = '', roleSource = 'none', onRoleChange, recommendations, lockedRec, gamePlan, counterPicks = [], teamComp, comboBoard = [], draftVerdict, counterItems = [], laneMatchup, dataRegistryReport, pipelineQualityReport, dataTrajectory, draftBrainQualityReport, feedbackObservabilityReport, feedbackAnalytics, draftSimulation, performanceReport, champMap, loading, phaseView, recError, banSuggestions,
+  session, role = '', roleSource = 'none', onRoleChange, recommendations, lockedRec, gamePlan, counterPicks = [], teamComp, comboBoard = [], comboTrackRecord, draftVerdict, counterItems = [], laneMatchup, dataRegistryReport, pipelineQualityReport, dataTrajectory, draftBrainQualityReport, feedbackObservabilityReport, feedbackAnalytics, draftSimulation, performanceReport, champMap, loading, phaseView, recError, banSuggestions,
   onFeedbackSubmitted,
   onHoverChampion,
 }) => {
@@ -192,7 +194,7 @@ export const ChampSelectScreen: React.FC<Props> = ({
           buildNote={lockedRec.build_note}
         />
       )}
-      <ComboBoard combos={comboBoard} />
+      <ComboBoard combos={comboBoard} trackRecord={comboTrackRecord} />
       <CounterItemsPanel items={counterItems} />
       <LaneMatchupPanel matchup={laneMatchup} />
       <GamePlanPanel plan={gamePlan} />

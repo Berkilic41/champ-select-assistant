@@ -7,6 +7,11 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Combo panosunda gerçek track-record** — `ComboBoard` artık her müttefik combo'su için
+  oyuncunun o eşle **gerçek co-pick geçmişini** (≥2 maç → "Geçmişin: N maç · %WR") teorik
+  güç çubuğunun yanında gösteriyor. Veri `get_combo_outcomes`'tan (zaten HeroCard'ın yalnız
+  BİRİNCİL combo'su için çekiliyordu); my-key locked analizden, eşleşmezse satır gizli
+  (yeni oyuncuda boş — sahte istatistik yok). Renderer-only, tr/en parite + 3 yeni test. (P-03)
 - **Draft simülatöründe daha derin koçluk** — `DraftSimulatorPanel` artık core'un
   çoktan hesapladığı ama gösterilmeyen iki alanı yüzeye çıkarıyor: (1) **`why_this_move`**
   — her aday pick için "Neden bu?" stratejik gerekçesi (önceden yalnız rank-0'ın

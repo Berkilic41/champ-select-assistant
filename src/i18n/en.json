@@ -513,7 +513,8 @@
     "type_pick_potential": "Pick",
     "type_zone_control": "Zone control",
     "type_peel_chain": "Peel chain",
-    "type_wombo": "Wombo"
+    "type_wombo": "Wombo",
+    "trackRecord": "Your record: {{n}} games · {{wr}}%"
   },
   "champDetail": {
     "noData": "No detail data for this champion",

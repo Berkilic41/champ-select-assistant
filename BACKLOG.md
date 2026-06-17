@@ -12,10 +12,16 @@ Keşif: 3 Explore ajanı (feature/latent-intelligence/polish) + lider koddan-ça
 kod tabanında çok "açık" abarttı; drills/win-prob/combo-history zaten render'lı → reddedildi).
 - **P-01 done** — draft simülatöründe daha derin koçluk: `DraftSimulatorPanel` core'un hesapladığı ama
   gösterilmeyen `why_this_move` (her pick "Neden bu?" gerekçesi) + faktör `deltas` (chip'lerde sayısal
-  büyüklük, ör. "Engage +0.17") alanlarını yüzeye çıkardı. Renderer-only, tr/en parite, +3 test. renderer 253.
-- **Aday kuyruğu (her biri uygulamadan önce koddan teyit):** P-02 LLM-koç "Bağlantı test et"+gizlilik copy ·
-  P-03 ComboBoard tarihsel track-record (`combo-outcomes.ts`) · P-04 klavye-kısayol yardım katmanı ·
-  P-05 lobby "Performance Snapshot" (`postgame.rs` metrikleri). Büyük/ertelenen: match-history, opponent-scouting (ToS).
+  büyüklük, ör. "Engage +0.17") alanlarını yüzeye çıkardı. Renderer-only, tr/en parite, +3 test. renderer 253. (bdf64ef)
+- **P-03 done** — ComboBoard'da gerçek co-pick track-record: her müttefik combo'su için oyuncunun o eşle
+  geçmişi (≥2 maç → "Geçmişin: N maç · %WR"), `get_combo_outcomes`'tan (HeroCard yalnız birincil combo'yu
+  gösteriyordu). my-key locked analizden; eşleşmezse gizli (graceful, yanlış-veri yok). Wrapper'da memo +
+  ChampSelectScreen pass-through → ComboBoard tek `trackRecord` prop. Renderer-only, tr/en parite, +3 test. renderer 256.
+- **Aday kuyruğu (koddan teyitli; ajanlar olgun kodda abarttı):** P-02 LLM-koç "Bağlantı test et" (host-fetch,
+  gizlilik copy'si ZATEN var → yalnız test-butonu kaldı, dar kitle) · P-04 klavye-kısayol yardımı (HeroCard
+  selectHint kısmen kapsıyor) · P-05 lobby Performance Snapshot (GameReviewCard kısmen kapsıyor). ELENEN: pool
+  progression/drills (PoolBuilder'da built), win-prob/combo-history (HeroCard'da), role-prompt copy (değeri zaten belirtiyor).
+  Büyük/ertelenen: match-history browser, opponent-scouting (ToS). **Not: küçük-özellik yüzeyi büyük ölçüde tükendi.**
 
 **Önceki yön: canlı-veri yolu sağlamlaştırma** (lider kararı 2026-06-17: roadmap #1, prod-key dış-engeli yalnız
 ingestion cron'unu kapsar; okuma yolu + app-wiring + dürüstlük + test otonom-yapılabilir).

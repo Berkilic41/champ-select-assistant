@@ -150,6 +150,22 @@ export const ChampSelectWrapper: React.FC<Props> = ({ addToast }) => {
     });
   }, [recommendations, winProbReport, comboOutcomes]);
 
+  // P-03: ComboBoard'a oyuncunun bu pick'le her müttefikteki gerçek co-pick
+  // kaydı (ally_key → {games,wins}, ≥2 maç). HeroCard yalnız BİRİNCİL combo'yu
+  // gösteriyordu; board tüm combo'lar için geçmişi gösterir. My-key locked
+  // analizden; eşleşmezse (kilitsiz/farklı pick) satır gizli — yanlış veri yok.
+  const comboTrackRecord = useMemo(() => {
+    const myKey = lockedAnalysis?.champion_key ?? '';
+    if (!myKey || !comboOutcomes || comboBoard.length === 0) return undefined;
+    const pk = (a: string, b: string) => [a.toLowerCase(), b.toLowerCase()].sort().join('|');
+    const out: Record<string, { games: number; wins: number }> = {};
+    for (const c of comboBoard) {
+      const r = comboOutcomes[pk(myKey, c.ally_champion_key)];
+      if (r && r.games >= 2) out[c.ally_champion_key] = r;
+    }
+    return Object.keys(out).length > 0 ? out : undefined;
+  }, [lockedAnalysis?.champion_key, comboOutcomes, comboBoard]);
+
   // FAZ 4 / Sprint 1: her öneri için grounded koçluk notu (pluggable seam;
   // candidate yok → deterministik). DeepDive'da gösterilir. win_prob/combo_history
   // zaten rec'e iliştirildi; core'a aktarılır.
@@ -240,6 +256,7 @@ export const ChampSelectWrapper: React.FC<Props> = ({ addToast }) => {
         counterPicks={counterPicks}
         teamComp={teamComp}
         comboBoard={comboBoard}
+        comboTrackRecord={comboTrackRecord}
         draftVerdict={draftVerdict}
         counterItems={counterItems}
         laneMatchup={laneMatchup}
