@@ -14,6 +14,9 @@
 - **W-02 done** — güç çubuğu canlı oyun fazına bağlandı (7eb7b6c): `currentPhase`=`macro.phase`
   (GAME_PHASES≡POWER_PHASES) → o kolon "şu an buradasın" (▾)+teal; isKnownPhase guard;
   ariaNow tr/en. Statik referans → canlı "neredeyim". renderer 250 + typecheck + i18n.
+- **W-03 done** — hesaplanan-ama-gizli plan alanları yüzeye çıktı (80aea1f): `damage_profile`
+  (hasar tipi) role'den sonra PlanRow; `level` KDA satırına önek (Sv/Lv). Wiring (yeni mantık
+  yok, test'li PlanRow/KDA + i18n parite). renderer 250 + typecheck.
 
 > Önceki tur (Discovery-4) KAPANDI: B-41+B-46+B-47 done; B-45 wontfix (yanlış alarm);
 > B-42/B-43/B-44 deferred; B-24 wontfix (motor-e2e zaten oracle seviyesinde kapsalı).

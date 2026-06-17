@@ -102,6 +102,12 @@
   "şu an buradasın" (▾)+teal; `isKnownPhase` guard bilinmeyen fazı yok sayar; `ariaNow` aria
   fazı içerir; tr/en parite; 3 yeni izole test (işaretçi/yok/bilinmeyen). Renderer-only (core
   değişmedi → WASM rebuild gerekmez). ✅ renderer 250 + typecheck + i18n. (7eb7b6c)
+- **Iter 22 (W-03)** — kullanıcı "kalan küçük overlay işleri" dedi → hesaplanan-ama-gizli plan
+  alanları: `damage_profile` (hasar tipi) role'den sonra PlanRow (boş-string guard); `level`
+  KDA satırına önek (Sv/Lv). Koddan teyit: ikisi de core'da üretiliyor, IngameView render
+  etmiyordu. Wiring (sıfır yeni mantık; diğer 8 PlanRow gibi test'siz, i18n parite kapsar);
+  fragile IngameView integration testi oransız bulundu (host-invoke+settings+fake-timer mock).
+  ✅ renderer 250 + typecheck + i18n parite. (80aea1f)
 
 > **Lider değerlendirmesi (2026-06-17):** 4 keşif turu + her adayın koddan-teyidi sonrası
 > güvenli + değerli + doğrulanabilir backlog TÜKENDİ. Olgun kod tabanı (~620+ test, clippy

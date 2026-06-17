@@ -18,6 +18,9 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
   işaretçisi**: `macro.phase` (erken/orta/geç) o kolonu "şu an buradasın" (▾) +
   teal-vurgu ile işaretler → statik referans canlı "neredeyim"e döner; aria-label
   fazı da içerir. (WS3 — overlay polish; W-01 + W-02)
+- **Overlay plan kartı: hesaplanan-ama-gizli alanlar** — core'un ürettiği ama UI'ın
+  düşürdüğü iki alan artık gösteriliyor: `damage_profile` (hasar tipi) takım-rolünden
+  sonra bir satır, `level` (oyuncu seviyesi) KDA önekinde (Sv/Lv). (WS3 — W-03)
 - **Sürekli otonom geliştirme sistemi** — repo kökünde yönetim dosyaları
   (`AGENTS`, `PROJECT_STATE`, `BACKLOG`, `TASKS`, `DECISIONS`, `QUALITY_CHECKS`)
   ve Inspect→Discover→Prioritize→Delegate→Implement→Verify→Document→Continue
