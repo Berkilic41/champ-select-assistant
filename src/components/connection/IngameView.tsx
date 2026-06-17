@@ -163,6 +163,7 @@ export const IngameView: React.FC<Props> = ({ summonerName }) => {
               early={plan.power_early}
               mid={plan.power_mid}
               late={plan.power_late}
+              currentPhase={macro?.phase}
             />
           </div>
           <PlanRow label={t('overlay.plan.win')} text={plan.win_condition} />
@@ -238,35 +239,51 @@ const PlanRow: React.FC<{ label: string; text: string }> = ({ label, text }) => 
 );
 
 const POWER_PHASES = ['early', 'mid', 'late'] as const;
+type PowerPhase = (typeof POWER_PHASES)[number];
 
 const pct = (v: number): number => Math.round(Math.max(0, Math.min(1, v)) * 100);
 
+const isKnownPhase = (p?: string): p is PowerPhase =>
+  p === 'early' || p === 'mid' || p === 'late';
+
 // Glance-edilebilir güç eğrisi: 3 dikey çubuk (erken/orta/geç), her biri
 // arketipin 0..1 gücüyle orantılı yükseklikte; zirve faz(lar)ı vurgulanır.
-// Metinsel spike_note'u görsel bir HUD öğesiyle tamamlar. role=img + aria-label
-// ile SR'a tek özet olarak duyurulur (a11y: B-29 Timer deseni gibi).
+// `currentPhase` verilirse (canlı oyun fazı) o kolon "şu an buradasın" işaretiyle
+// vurgulanır → statik referans canlı "neredeyim"e döner. Metinsel spike_note'u
+// görsel bir HUD öğesiyle tamamlar. role=img + aria-label ile SR'a tek özet
+// olarak duyurulur (a11y: B-29 Timer deseni gibi), çubuklar dekoratif.
 export const PowerCurveBar: React.FC<{
   early: number;
   mid: number;
   late: number;
-}> = ({ early, mid, late }) => {
+  currentPhase?: string;
+}> = ({ early, mid, late, currentPhase }) => {
   const { t } = useTranslation();
   const vals = { early, mid, late };
   const peak = Math.max(early, mid, late);
+  const baseAria = t('overlay.plan.power.aria', {
+    early: pct(early),
+    mid: pct(mid),
+    late: pct(late),
+  });
+  const aria = isKnownPhase(currentPhase)
+    ? t('overlay.plan.power.ariaNow', {
+        base: baseAria,
+        phase: t(`overlay.plan.power.${currentPhase}`),
+      })
+    : baseAria;
   return (
-    <div
-      className="overlay-power"
-      role="img"
-      aria-label={t('overlay.plan.power.aria', {
-        early: pct(early),
-        mid: pct(mid),
-        late: pct(late),
-      })}
-    >
+    <div className="overlay-power" role="img" aria-label={aria}>
       {POWER_PHASES.map((phase) => {
         const isPeak = peak > 0 && vals[phase] >= peak - 1e-6;
+        const isCurrent = currentPhase === phase;
         return (
-          <div key={phase} className="overlay-power-col" aria-hidden="true">
+          <div
+            key={phase}
+            className={`overlay-power-col${isCurrent ? ' overlay-power-col--current' : ''}`}
+            aria-hidden="true"
+          >
+            {isCurrent && <span className="overlay-power-now">▾</span>}
             <div className="overlay-power-track">
               <div
                 className={`overlay-power-fill${isPeak ? ' overlay-power-fill--peak' : ''}`}

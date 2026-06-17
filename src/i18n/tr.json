@@ -69,7 +69,8 @@
         "early": "Erken",
         "mid": "Orta",
         "late": "Geç",
-        "aria": "Güç eğrisi — erken %{{early}}, orta %{{mid}}, geç %{{late}}"
+        "aria": "Güç eğrisi — erken %{{early}}, orta %{{mid}}, geç %{{late}}",
+        "ariaNow": "{{base}} — şu an {{phase}}"
       },
       "lane": "Erken (lane)",
       "wave": "Dalga",

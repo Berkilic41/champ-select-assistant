@@ -69,7 +69,8 @@
         "early": "Early",
         "mid": "Mid",
         "late": "Late",
-        "aria": "Power curve — early {{early}}%, mid {{mid}}%, late {{late}}%"
+        "aria": "Power curve — early {{early}}%, mid {{mid}}%, late {{late}}%",
+        "ariaNow": "{{base}} — now {{phase}}"
       },
       "lane": "Early (lane)",
       "wave": "Wave",

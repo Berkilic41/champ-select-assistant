@@ -37,4 +37,34 @@ describe('PowerCurveBar', () => {
     // SR reads the single summary, not each bar.
     expect(container.querySelectorAll('.overlay-power-col[aria-hidden="true"]')).toHaveLength(3);
   });
+
+  it('marks the live phase column with a "you are here" indicator', () => {
+    const { container } = render(
+      <PowerCurveBar early={0.3} mid={0.9} late={0.6} currentPhase="mid" />,
+    );
+    const current = container.querySelectorAll('.overlay-power-col--current');
+    expect(current).toHaveLength(1);
+    expect(current[0].textContent).toContain('Orta');
+    expect(container.querySelectorAll('.overlay-power-now')).toHaveLength(1);
+    const aria = container.querySelector('.overlay-power')?.getAttribute('aria-label') ?? '';
+    expect(aria).toContain('şu an');
+  });
+
+  it('renders no live-phase marker without currentPhase', () => {
+    const { container } = render(<PowerCurveBar early={0.3} mid={0.9} late={0.6} />);
+    expect(container.querySelectorAll('.overlay-power-col--current')).toHaveLength(0);
+    expect(container.querySelectorAll('.overlay-power-now')).toHaveLength(0);
+    const aria = container.querySelector('.overlay-power')?.getAttribute('aria-label') ?? '';
+    expect(aria).not.toContain('şu an');
+  });
+
+  it('ignores an unknown phase value (defensive)', () => {
+    const { container } = render(
+      <PowerCurveBar early={0.3} mid={0.9} late={0.6} currentPhase="garbage" />,
+    );
+    expect(container.querySelectorAll('.overlay-power-col--current')).toHaveLength(0);
+    expect(container.querySelectorAll('.overlay-power-now')).toHaveLength(0);
+    const aria = container.querySelector('.overlay-power')?.getAttribute('aria-label') ?? '';
+    expect(aria).not.toContain('şu an');
+  });
 });

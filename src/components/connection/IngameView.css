@@ -166,12 +166,26 @@
 }
 
 .overlay-power-col {
+  position: relative;
   display: flex;
   flex: 1;
   max-width: 44px;
   flex-direction: column;
   align-items: center;
   gap: 3px;
+}
+
+/* "Şu an buradasın" işareti — track hizasını bozmamak için absolute. */
+.overlay-power-now {
+  position: absolute;
+  top: -11px;
+  font-size: 10px;
+  line-height: 1;
+  color: var(--teal-bright, #2dd4bf);
+}
+.overlay-power-col--current .overlay-power-label {
+  color: var(--teal-bright, #2dd4bf);
+  font-weight: var(--weight-bold);
 }
 
 .overlay-power-track {
