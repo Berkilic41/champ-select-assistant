@@ -7,6 +7,14 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Koç notunda kaynak şeffaflığı** (ML/LLM Koçluk Epic — Slice 1) — Öneri detayındaki "Koç notu" artık notun
+  **kaynağını** dürüstçe gösteriyor: LLM ürettiyse **"LLM"** rozeti; LLM önerisi audit'i geçemeyip deterministik
+  nota düşüldüyse **"LLM reddedildi"** rozeti (tooltip açıklamalı); düz deterministik (varsayılan) notta rozet yok.
+  Kullanıcı bir koçluk notunun yapay-zekâ mı yoksa deterministik motor mu olduğunu artık görebiliyor (veri-dürüstlüğü
+  DNA'sı + LLM fazının güven temeli). `CoachNarrative.source`/`external_rejected` zaten core audit'inde hesaplanıyordu
+  ama render edilmiyordu. Saf renderer (core/host değişmedi; motor purity korunur — LLM yalnız anlatım seam'i);
+  tr/en parite + 3 test. NOT: LLM koçluk pipeline'ı zaten tam bağlıydı (Settings'e OpenAI-uyumlu endpoint gir → audit'li
+  LLM notu + deterministik fallback) → bkz ADR-010.
 - **Şampiyon detayında hareketlilik + takım katkısı** (champ-select) — Şampiyon detay kartı artık KB'den
   gelen **mobility** (Hareketlilik: High/Medium/Low/None) rozetini ve **utility_tags** (Takım katkısı:
   Engage/Peel/Ön saf/Alan kontrolü/… ) bölümünü gösteriyor — "bu şampiyon takımın engage/peel/disengage

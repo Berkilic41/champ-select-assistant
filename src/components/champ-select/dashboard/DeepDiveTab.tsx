@@ -91,7 +91,22 @@ export const DeepDiveTab = React.memo(function DeepDiveTab({ rec, draftSimulatio
           geçmiş LLM adayı; tüm sinyalleri tek paragrafta sentezler). */}
       {rec.coach_narrative?.text && (
         <div className="hero-detail-section">
-          <span className="hero-card__plan-label">{t('heroCard.coachNote')}</span>
+          <span className="hero-card__plan-label">
+            {t('heroCard.coachNote')}
+            {rec.coach_narrative.source === 'external' && (
+              <span className="hero-detail-coach-badge hero-detail-coach-badge--llm">
+                {t('heroCard.coachNoteLlm')}
+              </span>
+            )}
+            {rec.coach_narrative.external_rejected && (
+              <span
+                className="hero-detail-coach-badge hero-detail-coach-badge--rejected"
+                title={t('heroCard.coachNoteRejectedHint')}
+              >
+                {t('heroCard.coachNoteRejected')}
+              </span>
+            )}
+          </span>
           <div className="hero-detail-coach-card hero-detail-coach-card--neutral">
             <p>{rec.coach_narrative.text}</p>
           </div>

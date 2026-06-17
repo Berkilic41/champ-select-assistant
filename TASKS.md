@@ -2,6 +2,16 @@
 
 > Tek seferde tek küçük görev. Tarih: 2026-06-16.
 
+## EPIC: ML/LLM Koçluk Fazı (2026-06-18, kullanıcı AskUserQuestion ile seçti)
+> Yön soruldu (güvenli küçük-yüzey tükendi) → ML/LLM seçildi. Keşif: pipeline ZATEN tam bağlı+test'li.
+- **Iter Slice-1 (done, ADR-010)** — koç-notu kaynak şeffaflığı rozeti. KODDAN doğrulandı: LLM koçluk pipeline'ı
+  zaten TAM (core coach_narrator+validate_external audit; host llm-narrator.ts OpenAI-uyumlu fetch + coach-narrative.ts;
+  settings coach_llm_endpoint/model + UI; DeepDiveTab render; 6 test) AMA `CoachNarrative.source`/`external_rejected`
+  render edilmiyordu. DeepDiveTab koç-notu başlığına rozet: external→"LLM", rejected→"LLM reddedildi"(tooltip), düz
+  deterministik→yok. i18n heroCard.coachNoteLlm/coachNoteRejected/Hint (tr/en). `.hero-detail-coach-badge` CSS. Saf
+  renderer (motor purity korunur). +3 test (external/rejected/düz). ✅ renderer 285 + typecheck 0 + i18n parite.
+- **Sıradaki:** Slice 2 (Settings "Bağlantı test et" butonu — kurulum sürtünmesi) ya da zengin promptlar / LLM geri-bildirimi.
+
 ## Discovery-6 — gerçek yeniden-keşif #2 (2026-06-18)
 > "Hazırlanmış-ama-bağlanmamış" damarı sürdü (Explore + koddan-teyit).
 - **Iter (done)** — ChampionDetailCard "Hareketlilik + Takım katkısı": KODDAN doğrulandı — `ChampionDetail.mobility`

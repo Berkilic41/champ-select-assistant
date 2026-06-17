@@ -129,4 +129,54 @@ describe('DeepDiveTab', () => {
     expect(screen.getByText('Blind pick güvenli')).toBeInTheDocument();
     expect(screen.getByText('Kolay')).toBeInTheDocument();
   });
+
+  it('badges the coach note as LLM when the source is external (ML/LLM phase)', () => {
+    render(
+      <DeepDiveTab
+        rec={{
+          ...baseRec,
+          coach_narrative: {
+            text: 'Erken oyunda dalga kontrolünü koru.',
+            source: 'external',
+            external_rejected: false,
+          },
+        }}
+      />,
+    );
+    expect(screen.getByText('LLM')).toBeInTheDocument();
+    expect(screen.queryByText('LLM reddedildi')).not.toBeInTheDocument();
+  });
+
+  it('flags when the LLM candidate was rejected by the audit (fell back to deterministic)', () => {
+    render(
+      <DeepDiveTab
+        rec={{
+          ...baseRec,
+          coach_narrative: {
+            text: 'Güvenli oyna, tempoyu koru.',
+            source: 'deterministic',
+            external_rejected: true,
+          },
+        }}
+      />,
+    );
+    expect(screen.getByText('LLM reddedildi')).toBeInTheDocument();
+  });
+
+  it('shows no provenance badge for a plain deterministic coach note', () => {
+    render(
+      <DeepDiveTab
+        rec={{
+          ...baseRec,
+          coach_narrative: {
+            text: 'Matchup penceren iyi.',
+            source: 'deterministic',
+            external_rejected: false,
+          },
+        }}
+      />,
+    );
+    expect(screen.queryByText('LLM')).not.toBeInTheDocument();
+    expect(screen.queryByText('LLM reddedildi')).not.toBeInTheDocument();
+  });
 });

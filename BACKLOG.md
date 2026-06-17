@@ -6,6 +6,15 @@
 > **21 doğrulanmış bulgu**, adversaryal koddan-teyit) çıktısıdır.
 
 ## Aktif
+**EPIC: ML/LLM Koçluk Fazı (2026-06-18, kullanıcı AskUserQuestion ile seçti).** Güvenli küçük-yüzey tükenince
+yön soruldu → ML/LLM seçildi. Keşif: pipeline ZATEN tam bağlı+test'li (coach_narrator+audit, host llm-narrator,
+settings, render, 6 test); MVP çalışıyor. Motor purity by-design korunur (LLM yalnız anlatım seam'i; scoring değişmez).
+- **Slice 1 done (ADR-010)** — koç-notu kaynak şeffaflığı: `CoachNarrative.source`/`external_rejected` (computed-but-
+  unrendered) DeepDiveTab koç-notu başlığına rozet (external→"LLM"; rejected→"LLM reddedildi"+tooltip; düz deterministik→
+  rozet yok). Renderer+i18n+CSS; core/host EL DEĞMEDİ. renderer 285 + typecheck 0 + i18n parite. +3 test.
+- **Slice 2+ (aday)** — Settings "Bağlantı test et" butonu (P-02; kurulum sürtünmesi) · daha zengin grounded promptlar ·
+  LLM-notu kullanıcı geri-bildirimi (beğen/beğenme → prompt iyileştirme sinyali).
+
 **MOD: Büyük geliştirme — EPIC (2026-06-17 kullanıcı direktifi).** Küçük-yüzey tükendi → en yüksek-değerli
 BÜYÜK yönü Epic seç, MVP'ye böl, her tur tek dikey dilim (salt kozmetik yok). Öncelik: 1) match-history
 2) lane-matchup dürüstlük 3) post-game koçluk 4) havuz gelişim 5) in-game makro. Kapsam belirsizse sorma,

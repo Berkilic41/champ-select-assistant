@@ -2,6 +2,24 @@
 
 > Format: bağlam → karar → gerekçe → sonuç. En yeni üstte.
 
+## ADR-010 — ML/LLM Koçluk Epic: pipeline ZATEN bağlıymış; Slice 1 = kaynak şeffaflığı (2026-06-18)
+- **Bağlam:** Güvenli küçük-geliştirme yüzeyi tükenince kullanıcıya AskUserQuestion ile yön soruldu → **"ML/LLM
+  koçluk fazı"** seçildi. Keşif (Explore + koddan-teyit) ŞAŞIRTICI bulgu: LLM koçluk pipeline'ı ZATEN TAM BAĞLI +
+  test'li: core `coach_narrator::narrate` + `validate_external` audit (boy/abartı/grounding); host `llm-narrator.ts`
+  (OpenAI-uyumlu fetch, 6s timeout) + `coach-narrative.ts`; settings `coach_llm_endpoint/model` + SettingsPanel UI;
+  DeepDiveTab "Koç notu" render'ı; 6 host testi. MVP çalışıyor: Settings'e endpoint gir → audit'li LLM notu + hata/
+  timeout/red → deterministik fallback. **Motor purity korunuyor by-design** (LLM yalnız anlatım seam'i; scoring DEĞİŞMEZ).
+- **Karar:** Epic'in ilk dikey dilimi = **kaynak ŞEFFAFLIĞI**. `CoachNarrative.source` ("external"/"deterministic")
+  + `external_rejected` HESAPLANIYOR ama hiçbir yerde render edilmiyordu (computed-but-unrendered). DeepDiveTab koç-notu
+  başlığına rozet: source="external" → "LLM"; external_rejected → "LLM reddedildi" (tooltip: audit'i geçemedi→deterministik);
+  düz deterministik (varsayılan) → ROZET YOK (gürültü değil). Renderer+i18n+CSS; core/host EL DEĞMEDİ.
+- **Gerekçe:** ML/LLM fazının GÜVEN temeli = kullanıcı notun AI mı, deterministik mi, yoksa LLM-reddedilip-fallback mı
+  olduğunu görmeli (veri-dürüstlüğü DNA'sı: measured/estimate, missing_signals hattı). Pipeline zaten çalıştığından en
+  yüksek değer ŞEFFAFLIK; sahte-değer/scaffolding-churn değil. Rozet yalnız LLM dahil olduğunda görünür (varsayım: düz
+  deterministik notta rozet basmak gürültü olur — çoğu kullanıcının LLM'i yok).
+- **Sonuç:** renderer 285 + typecheck 0 + i18n parite. Sonraki Slice adayları: (2) Settings "Bağlantı test et" butonu
+  (P-02; kurulum sürtünmesi), (3) daha zengin grounded promptlar / ek fact'ler, (4) LLM-notu için kullanıcı geri-bildirimi.
+
 ## ADR-009 — Lane-Matchup Epic #2 Slice 2: ölçülen WR AYRI dürüst satır (faz barları tahmin kalır) (2026-06-17)
 - **Bağlam:** ADR-008 Lane S2'nin doğru yolunu reçete etti: ölçülen tek genel win_rate'i faz barlarına BÖLME
   (fabrikasyon); ayrı dürüst satır göster. Plumbing parçaları zaten vardı: host `matchupsForPosition` (recommendations

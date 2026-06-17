@@ -196,6 +196,27 @@
   line-height: var(--line-height-normal);
 }
 
+/* ML/LLM fazı: koç-notu kaynak şeffaflığı rozeti (LLM üretti / LLM reddedildi). */
+.hero-detail-coach-badge {
+  margin-left: var(--space-1, 6px);
+  font-size: 0.6rem;
+  font-weight: var(--weight-semibold);
+  border-radius: var(--radius-pill, 999px);
+  padding: 1px 7px;
+  vertical-align: middle;
+}
+.hero-detail-coach-badge--llm {
+  color: var(--teal-bright, #2dd4bf);
+  background: color-mix(in srgb, var(--teal-bright, #2dd4bf) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--teal-bright, #2dd4bf) 32%, transparent);
+}
+.hero-detail-coach-badge--rejected {
+  color: var(--warning, #ffb74d);
+  background: color-mix(in srgb, var(--warning, #ffb74d) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--warning, #ffb74d) 32%, transparent);
+  cursor: help;
+}
+
 .hero-detail-threats { list-style: none; display: flex; flex-direction: column; gap: 3px; }
 .hero-detail-threat {
   font-size: var(--font-size-sm);
