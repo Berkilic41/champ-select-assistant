@@ -236,6 +236,13 @@ pub struct IngamePlan {
     pub win_condition: String,
     pub team_role: String,
     pub damage_profile: String,
+    /// Arketipin güç eğrisi (her biri 0..1) — overlay'de erken/orta/geç güç
+    /// çubuğu olarak görselleştirilir, böylece metinsel `spike_note` glance
+    /// edilebilir bir HUD görseliyle tamamlanır. Plan kurulduğunda arketip her
+    /// zaman elimizde olduğundan Option değil.
+    pub power_early: f32,
+    pub power_mid: f32,
+    pub power_late: f32,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub spike_note: Option<String>,
     /// Matchup'a özel güç penceresi (iki power_curve karşılaştırması) — yalnız
@@ -314,6 +321,9 @@ fn build_ingame_plan(
         win_condition: narrative::build_win_condition_text(&arch.win_condition),
         team_role: narrative::build_team_role_text(arch),
         damage_profile: narrative::build_damage_profile_label(&arch.damage_profile),
+        power_early: arch.power_curve.early,
+        power_mid: arch.power_curve.mid,
+        power_late: arch.power_curve.late,
         spike_note: narrative::build_spike_note(arch),
         spike_window,
         lane_note,
@@ -601,6 +611,13 @@ mod tests {
         );
         assert_eq!(plan.cs_per_min, Some(7.0)); // 70 CS / 10 min
         assert!(!plan.win_condition.is_empty());
+
+        // Güç eğrisi alanları arketipten birebir yüzeye çıkmalı (overlay güç
+        // çubuğu bunları kullanır) — defaultlanmadığını kilitle.
+        let garen_arch = kb.get_archetype("Garen").expect("Garen in KB");
+        assert_eq!(plan.power_early, garen_arch.power_curve.early);
+        assert_eq!(plan.power_mid, garen_arch.power_curve.mid);
+        assert_eq!(plan.power_late, garen_arch.power_curve.late);
 
         // Unknown champion (not in the table) → quiet None.
         let none = compute_ingame_plan(&raw, &[], &kb);
