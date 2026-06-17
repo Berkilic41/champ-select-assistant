@@ -7,7 +7,10 @@ import type { DatabaseSync } from "node:sqlite";
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import { getLearningProgress } from "../src/main/commands/player";
+import {
+  getLearningProgress,
+  getOffRolePerformance,
+} from "../src/main/commands/player";
 import { openDatabase, runMigrations } from "../src/main/db";
 
 const MIGRATIONS_DIR = join(__dirname, "..", "resources", "migrations");
@@ -102,5 +105,64 @@ describe("getLearningProgress (Epic #4 — öğrenme hedefi ilerlemesi)", () => 
   it("returns empty when there are no learning preferences", () => {
     const db = seededDb();
     expect(getLearningProgress(db, PUUID, 30)).toHaveLength(0);
+  });
+});
+
+describe("getOffRolePerformance (Epic #3 — off-rol zayıflığı)", () => {
+  function seedMatch(
+    db: DatabaseSync,
+    id: string,
+    position: string,
+    win: number,
+  ): void {
+    db.prepare(
+      "INSERT INTO matches (match_id, puuid, champion_id, position, win, kills, deaths, assists, duration_secs, queue_id, played_at) VALUES (?, ?, 86, ?, ?, 5, 4, 6, 1800, 420, 0)",
+    ).run(id, PUUID, position, win);
+  }
+
+  it("flags off-roles weaker than the main role, ignoring thin (<3) and stronger roles", () => {
+    const db = seededDb();
+    // Ana rol: middle 10 maç 7 galibiyet (WR %70).
+    for (let i = 0; i < 10; i++) seedMatch(db, `MID${i}`, "MIDDLE", i < 7 ? 1 : 0);
+    // Zayıf off-rol: top 5 maç 1 galibiyet (WR %20) → ana rolden düşük + örneklem yeter.
+    for (let i = 0; i < 5; i++) seedMatch(db, `TOP${i}`, "TOP", i < 1 ? 1 : 0);
+    // İnce off-rol: jungle 2 maç → <3 hariç.
+    for (let i = 0; i < 2; i++) seedMatch(db, `JG${i}`, "JUNGLE", 0);
+    // Güçlü off-rol: bottom 4 maç 4 galibiyet (WR %100) → ana rolden düşük DEĞİL, hariç.
+    for (let i = 0; i < 4; i++) seedMatch(db, `BOT${i}`, "BOTTOM", 1);
+    // ARAM (rolsüz) → 5 SR rolünden biri değil, hariç.
+    seedMatch(db, "ARAM0", "", 1);
+
+    const res = getOffRolePerformance(db, PUUID);
+    expect(res).not.toBeNull();
+    expect(res!.main_role).toBe("middle");
+    expect(res!.main_games).toBe(10);
+    expect(res!.main_wins).toBe(7);
+    // Yalnız top zayıf off-rol olarak döner (jungle ince, bottom güçlü → hariç).
+    expect(res!.off_roles).toHaveLength(1);
+    expect(res!.off_roles[0].position).toBe("top");
+    expect(res!.off_roles[0].games).toBe(5);
+    expect(res!.off_roles[0].wins).toBe(1);
+  });
+
+  it("returns null when no off-role is weaker than the main role", () => {
+    const db = seededDb();
+    for (let i = 0; i < 6; i++) seedMatch(db, `MID${i}`, "MIDDLE", i < 3 ? 1 : 0); // WR %50
+    for (let i = 0; i < 4; i++) seedMatch(db, `TOP${i}`, "TOP", 1); // WR %100 (daha iyi)
+    expect(getOffRolePerformance(db, PUUID)).toBeNull();
+  });
+
+  it("returns null when the main role itself is thin (<3 games)", () => {
+    const db = seededDb();
+    seedMatch(db, "MID0", "MIDDLE", 1);
+    seedMatch(db, "TOP0", "TOP", 0);
+    expect(getOffRolePerformance(db, PUUID)).toBeNull();
+  });
+
+  it("returns null with no ranked-role matches at all (ARAM only)", () => {
+    const db = seededDb();
+    seedMatch(db, "ARAM0", "", 1);
+    seedMatch(db, "ARAM1", "", 0);
+    expect(getOffRolePerformance(db, PUUID)).toBeNull();
   });
 });

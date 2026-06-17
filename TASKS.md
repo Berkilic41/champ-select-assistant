@@ -41,7 +41,15 @@
   i18n review.focusHistoryTitle/Aria (tr/en). Core DEĞİŞMEDİ (engine purity). Testler: host getFocusHistory
   (sıralama/superseded-hariç/limit/grup) + GameReviewCard ilk testi (dot sayısı/met-missed). ✅ renderer 270 +
   host 162 + typecheck 0 + i18n parite. (commit hazırlanıyor)
-- **Sıradaki:** Slice 2 adayları (off-role hedef / combo-outcome / macro-timeline — büyük/core, ayrı tur) ya da Epic #4 (havuz gelişim).
+- **Iter Slice-2 (done)** — off-rol zayıflık kartı. KODDAN doğrulandı: Lane S2 (ölçülen plumbing) ELENDİ — tek genel
+  win_rate'i 3 faz-barına bölmek fabrikasyon (ADR-008); In-game S2 zaten render'lı (iş yok); Havuz S3 soyut. SEÇİLEN:
+  off-rol zayıflık — tamamen ölçülen veri, host-query+renderer (ajan "core" dedi, koddan core'suz yapıldı). Host
+  `getOffRolePerformance` (matches GROUP BY LOWER(position); ana rol=en-çok-oynanan ≥3 maç; off=ana-dışı ≥3 maç +
+  WR<ana, en zayıf önce; yoksa null) + `get_off_role_performance` kaydı. Renderer `OffRoleCard` (`.grc-card` reuse)
+  StatsView'da TrendPanel'den sonra. i18n offRole.title/mainRole/hint/roleStat (tr/en). Engine purity (core el değmedi).
+  Test: player.test.ts 4 off-role testi (zayıf-flag/ince-hariç/güçlü-hariç/main-ince-null/ARAM-null) + OffRoleCard.test.tsx
+  (render/dürüst-gizle). ✅ host 168 + renderer 275 + typecheck 0 + i18n parite. (commit hazırlanıyor)
+- **Sıradaki:** kalan Slice-2/3'ler — Lane S2 (dürüst ölçülen-WR ayrı satır, ADR-008) / Havuz S3 (derinlik-trendi) / combo-outcome feedback.
 
 ## Büyük geliştirme modu — EPIC #2: Lane-Matchup Veri-Dürüstlüğü (2026-06-17)
 > Mesaj-beklemeden otonom devam. Match-History Epic bitti → öncelik #2 lane-matchup dürüstlük.

@@ -7,6 +7,13 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Off-rol zayıflık kartı** (Post-game Koçluk Epic — Slice 2) — İstatistik sekmesi artık oyuncunun **ana rolünden
+  daha düşük kazanma oranlı off-rollerini** dürüstçe gösteriyor (ör. ana rol Orta %70 iken "Üst: %20 · 5 maç").
+  En çok oynanan rol "ana rol" sayılır; ondan düşük WR'li ve ≥3 maçlık off-roller en zayıf önce listelenir —
+  "hangi rol seni aşağı çekiyor?" sorusunu tek bakışta yanıtlar. Tamamen ölçülen veri (`matches.position`+`win`),
+  uydurma yok; anlamlı zayıflık yoksa kart gizli; ARAM/Arena (rolsüz) doğal olarak hariç. Yeni host
+  `get_off_role_performance` (matches GROUP BY position). Core değişmedi (engine purity); tr/en parite
+  (`offRole.*`) + host/renderer testleri. (Not: Lane-Matchup S2 ölçülen-veri faz-fabrikasyon riski nedeniyle elendi → ADR-008.)
 - **Öğrenme hedefinde gerçek maç sonucu (maç sayısı + WR)** (Havuz Gelişim Epic — Slice 2) — "Öğrenme
   hedeflerin" kartı artık mastery-puanı kazancının yanında o hedefte son 30 günde oynanan **gerçek maç sayısı
   ve kazanma oranını** da gösteriyor (ör. "4 maç · %75") — mastery sadece "grind"i ölçer; WR pratiğin işe

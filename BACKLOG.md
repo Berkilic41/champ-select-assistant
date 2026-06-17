@@ -37,8 +37,14 @@ makul varsay (→ DECISIONS ADR-004). Test+typecheck+desktop testleri geçmeden 
     Explore 7 boşluk önerdi; koddan elendi: form-per-metric TrendPanel'de, CS@10 lesson bilinçli kapalı (honest),
     off-role/combo-outcome/macro-timeline core/timeline (ertelendi → ADR-006). renderer 270 + host 162 +
     typecheck 0 + i18n parite; GameReviewCard'ın ilk testi. core değişmedi.
-  - **Slice 2+ (aday, ertelendi)** — off-role zayıflık hedefi · combo-outcome feedback · macro/objective timeline
-    (timeline ingestion gerekir) — daha büyük/core, ayrı tur.
+  - **Slice 2 done** — off-rol zayıflık kartı: İstatistik sekmesinde ana rolden (en çok oynanan) daha düşük WR'li
+    off-roller ("Üst: %20 · 5 maç") en zayıf önce. KODDAN doğrulandı: ajan "core gerekir" dedi ama tamamen ölçülen
+    veriyle (`matches.position`+`win`) **host-query+renderer** (core'suz) yapıldı. Host `getOffRolePerformance`
+    (GROUP BY LOWER(position); ana rol ≥3 maç; off ≥3 maç + WR<ana; yoksa null) + `OffRoleCard` (`.grc-card` reuse,
+    TrendPanel deseni) StatsView'da. ARAM/Arena rolsüz → 5 SR rolü filtresiyle hariç. Sıfır fabrikasyon (tüm WR ölçülen).
+    i18n offRole.* (tr/en). Core DEĞİŞMEDİ. host 168 + renderer 275 + typecheck 0 + i18n parite. → ADR-008.
+  - **Slice 3+ (aday, ertelendi)** — combo-outcome feedback · macro/objective timeline (timeline ingestion gerekir)
+    — daha büyük/core, ayrı tur.
 - **EPIC #2: Lane-Matchup Veri-Dürüstlüğü** (core read etiketi; scoring DEĞİŞMEZ — engine purity).
   - **Slice 1 done** — LaneMatchup faz-avantaj barları artık dürüstçe "KB tahmini" etiketli. Koddan doğrulandı:
     `lane_matchup_from_json` (json_api.rs) phase_advantage'ı YALNIZ arketip `power_curve`'den (`adv()`) üretiyor,
@@ -46,8 +52,10 @@ makul varsay (→ DECISIONS ADR-004). Test+typecheck+desktop testleri geçmeden 
     sabit; ileride "measured") + recommendation.ts `source?` + LaneMatchupPanel "KB tahmini" rozeti (tooltip'li)
     + i18n `laneMatchup.kbEstimate`/`kbEstimateHint` (tr/en). core 570 + renderer 268 + host 161 + clippy temiz +
     typecheck 0 + i18n parite. WASM rebuild (core/pkg gitignore). engine.rs/scoring.rs el değmedi.
-  - **Slice 2 (ertelendi)** — ölçülen matchup verisini `lane_matchup_from_json`'a plumb et (input→ScoringContext) →
-    veri varsa source="measured"; geniş core değişikliği, ayrı/dikkatli tur.
+  - **Slice 2 (ertelendi — DÜRÜSTLÜK TUZAĞI, ADR-008)** — ölçülen matchup verisini `lane_matchup_from_json`'a plumb
+    etmek teknik olarak küçük AMA ölçülen veri yalnız TEK genel win_rate verir; bunu 3 faz-barına (erken/orta/geç)
+    bölmek FABRİKASYON olur (faz-bazlı ölçüm yok). Doğru yapılırsa: ölçülen genel WR'yi AYRI dürüst satır göster,
+    faz barlarını "KB tahmini" bırak (source="measured" per-faz DEĞİL). Ayrı/dikkatli tur.
 - **EPIC: Match-History Browser** (yerel DB; cloud/yeni Riot çağrısı YOK).
   - **Slice 1 done** — "Maç Geçmişi" liste sekmesi: yeni host `get_match_history` (`recentMatches` JOIN +
     `game_reviews` EXISTS has_review) + `MatchHistoryView` (4. lobby sekmesi). Şampiyon/rol/sonuç/tarih/KDA/

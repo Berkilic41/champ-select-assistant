@@ -510,6 +510,12 @@
     "games": "{{n}} maç",
     "partial": "Yön hükmü için en az 8 maç gerekir — şimdilik yalnız eğri."
   },
+  "offRole": {
+    "title": "Off-rol zayıflığı",
+    "mainRole": "Ana rol: {{role}} · %{{wr}}",
+    "hint": "Ana rolünden daha düşük kazanma oranlı roller — bunlara çalış ya da ana role tutun.",
+    "roleStat": "%{{wr}} · {{n}} maç"
+  },
   "teamComp": {
     "title": "Takım Kompozisyonu",
     "ally": "Bizim Takım",

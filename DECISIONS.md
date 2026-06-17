@@ -2,6 +2,21 @@
 
 > Format: bağlam → karar → gerekçe → sonuç. En yeni üstte.
 
+## ADR-008 — Post-game Epic #3 Slice 2: off-rol zayıflık kartı; Lane S2 dürüstlük tuzağı nedeniyle elendi (2026-06-17)
+- **Bağlam:** Kalan Slice-2 adayları koddan-doğrulandı. **Lane-Matchup S2 (ölçülen plumbing) ELENDİ:** ölçülen
+  matchup yalnız TEK genel win_rate verir; bunu 3 ayrı faz-barına (erken/orta/geç) bölmek **fabrikasyon** olur
+  (faz-bazlı ölçüm yok) → veri-dürüstlüğü DNA'sını bozar (ADR-005 zaten barların "tahmin" olduğunu söylüyor).
+  In-game S2 (teamfight-note): tüm IngamePlan alanları zaten render'lı → iş yok. Havuz S3: daha soyut/düşük değer.
+- **Karar:** Off-rol zayıflık kartı (Post-game #3 S2). Ajan "core gerekir" dedi ama KODDAN doğrulandı: tamamen
+  ölçülen veriyle (`matches.position`+`win`) **host-query+renderer**, core'a hiç dokunmadan yapılabilir (daha temiz).
+  Host `getOffRolePerformance`: `matches` GROUP BY LOWER(position); ana rol = en çok oynanan; off-roller = ana-rol
+  dışı, ≥3 maç, **ana rolden DÜŞÜK WR'li** (en zayıf önce); anlamlı zayıflık yoksa null. `OffRoleCard` StatsView'da
+  (`.grc-card` yeniden kullanıldı, TrendPanel deseni). ARAM/Arena rolsüz → 5 SR rolü filtresiyle doğal hariç.
+- **Gerekçe:** Yüksek değer ("hangi rol seni aşağı çekiyor?"), **sıfır fabrikasyon riski** (tüm WR ölçülen),
+  **engine purity korunur (core el değmedi)**, host-query+renderer (en düşük risk). Lane S2'nin faz-tuzağının tersi.
+- **Sonuç:** host 168 + renderer 275 + typecheck 0 + i18n parite yeşil. core/WASM el değmedi. Lane S2 ileride
+  yapılırsa: ölçülen genel WR'yi AYRI dürüst satır olarak göster (faz barlarını "KB tahmini" bırak) — fabrikasyon yok.
+
 ## ADR-007 — Havuz Gelişim Epic #4 Slice 2: öğrenme hedefine gerçek maç-sonucu (games/WR) (2026-06-17)
 - **Bağlam:** S1 öğrenme-hedefi kartı yalnız mastery-puanı kazancını gösteriyordu. Mastery-puanı "grind"i (oynama
   süresi) ölçer ama pratiğin işe yarayıp yaramadığını söylemez — oyuncu çok oynayıp hâlâ kaybediyor olabilir.

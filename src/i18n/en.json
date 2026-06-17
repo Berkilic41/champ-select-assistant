@@ -510,6 +510,12 @@
     "games": "{{n}} games",
     "partial": "Direction verdicts need at least 8 games — curve only for now."
   },
+  "offRole": {
+    "title": "Off-role weakness",
+    "mainRole": "Main role: {{role}} · {{wr}}%",
+    "hint": "Roles where you win less than your main — work these or stick to your main.",
+    "roleStat": "{{wr}}% · {{n}} games"
+  },
   "teamComp": {
     "title": "Team Composition",
     "ally": "Your Team",

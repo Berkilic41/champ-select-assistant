@@ -12,6 +12,7 @@ import { ChampionStats, MasteryEntry } from '../../types/riot';
 import { GameReviewCard } from './GameReviewCard';
 import { RankCard } from './RankCard';
 import { TrendPanel } from './TrendPanel';
+import { OffRoleCard } from './OffRoleCard';
 import { WeeklySummaryCard } from './WeeklySummaryCard';
 import './StatsView.css';
 
@@ -64,6 +65,8 @@ export const StatsView: React.FC<Props> = ({ stats, masteries, champMap }) => {
       <GameReviewCard />
       {/* C4: baskın rol+queue trend okuması. */}
       <TrendPanel />
+      {/* Post-game Slice 2: ana rolden zayıf off-rol uyarısı (anlamlı zayıflık yoksa gizli). */}
+      <OffRoleCard />
       {/* F3: haftalık koç özeti. */}
       <WeeklySummaryCard />
       {totalGames > 0 && (

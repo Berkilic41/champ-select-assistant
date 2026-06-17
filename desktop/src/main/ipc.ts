@@ -74,6 +74,7 @@ import {
   getLearningProgress,
   getMasteries,
   getMasteryProgress,
+  getOffRolePerformance,
   getPerformanceReport,
   getPlayerStats,
   submitRecommendationFeedback,
@@ -443,6 +444,10 @@ export function buildCommandRegistry(
       requireDb(ctx),
       String(args?.puuid ?? ""),
     ),
+  );
+  // Epic #3: rol-bazlı off-rol zayıflığı (post-game gelişim koçluğu).
+  commands.set("get_off_role_performance", (args) =>
+    getOffRolePerformance(requireDb(ctx), String(args?.puuid ?? "")),
   );
   commands.set("submit_recommendation_feedback", (args) =>
     submitRecommendationFeedback(

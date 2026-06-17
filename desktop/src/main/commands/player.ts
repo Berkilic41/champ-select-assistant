@@ -161,6 +161,73 @@ export function getLearningProgress(
   });
 }
 
+export interface RolePerformance {
+  position: string;
+  games: number;
+  wins: number;
+}
+
+export interface OffRoleReport {
+  main_role: string;
+  main_games: number;
+  main_wins: number;
+  /** Ana rol dışında, ≥3 maçlık ve ana rolden DÜŞÜK WR'li roller; en zayıf önce. */
+  off_roles: RolePerformance[];
+}
+
+/**
+ * Oyuncunun rol-bazlı kazanma oranı: en çok oynadığı rol "ana rol", ondan daha
+ * düşük WR'li off-roller "zayıf" sayılır. Tamamen ölçülen veri (matches.position +
+ * win) — uydurma yok. ARAM/Arena (rolsüz) doğal olarak hariç (position 5 SR rolünden
+ * biri değil). Anlamlı bir off-rol zayıflığı yoksa null (kart gösterilmez).
+ */
+export function getOffRolePerformance(
+  db: DatabaseSync,
+  puuid: string,
+): OffRoleReport | null {
+  const rows = db
+    .prepare(
+      `SELECT LOWER(position) AS position, COUNT(*) AS games, SUM(win) AS wins
+       FROM matches
+       WHERE puuid = ?
+         AND LOWER(position) IN ('top','jungle','middle','bottom','utility')
+       GROUP BY LOWER(position)`,
+    )
+    .all(puuid) as unknown as {
+    position: string;
+    games: number;
+    wins: number;
+  }[];
+  if (rows.length === 0) return null;
+  const norm = rows.map((r) => ({
+    position: String(r.position),
+    games: Number(r.games),
+    wins: Number(r.wins),
+  }));
+  // En çok oynanan rol = ana rol (beraberlik → daha çok galibiyet).
+  const main = norm
+    .slice()
+    .sort((a, b) => b.games - a.games || b.wins - a.wins)[0];
+  // Ana rol de yeterli örneklem istemeli; yoksa veri tümüyle ince → dürüst null.
+  if (main.games < 3) return null;
+  const mainWr = main.wins / main.games;
+  const offRoles = norm
+    .filter(
+      (r) =>
+        r.position !== main.position &&
+        r.games >= 3 &&
+        r.wins / r.games < mainWr,
+    )
+    .sort((a, b) => a.wins / a.games - b.wins / b.games);
+  if (offRoles.length === 0) return null;
+  return {
+    main_role: main.position,
+    main_games: main.games,
+    main_wins: main.wins,
+    off_roles: offRoles,
+  };
+}
+
 /** Son maçlardan performans-trend raporu — satırlar host'tan, rapor core'dan. */
 export function getPerformanceReport(
   engine: Engine,
