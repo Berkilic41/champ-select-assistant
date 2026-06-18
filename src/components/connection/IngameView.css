@@ -68,6 +68,15 @@
   border-color: var(--teal-dim);
 }
 
+/* Overlay HUD cilası: kompakt modda yalnız görseller kaldığından layout sıkılaşır
+   → 400px yüzen pencerede daha yoğun, daha hızlı bir bakış-at HUD. Yalnız boşluk/
+   padding (token'lı); öğeler/renkler aynı. */
+.ingame-view--compact { gap: var(--space-2); }
+.ingame-view--compact .overlay-plan { gap: var(--space-1); padding: var(--space-2); }
+.ingame-view--compact .overlay-plan-head { gap: var(--space-1); }
+.ingame-view--compact .overlay-macro { gap: var(--space-2); }
+.ingame-view--compact .overlay-phase { gap: var(--space-2); }
+
 .ingame-tip {
   display: flex;
   flex-direction: column;

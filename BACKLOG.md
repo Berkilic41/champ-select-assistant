@@ -17,8 +17,10 @@ overlay penceresi ELENDİ (ToS/anti-cheat riski + yüksek sürtünme → ADR-011
   optional-default deseni → eski ayarlar resetlenmez) + SettingsPanel checkbox + IngameView başlangıç `useState(settings.
   compact_overlay)` + ayar-yüklenince-senkron effect. Açıksa in-game doğrudan kompakt başlar (her maç toggle yok); kullanıcı
   yine toggle'layabilir. Host+renderer (core el değmedi). host 178 + renderer 289 + typecheck 0 + i18n parite; +settings.test.ts (2) +IngameView init-compact.
-- **Slice 3+ (aday)** — sıkı kompakt-layout CSS (daha küçük font/spacing) · objective-only minimal mod. **NOT: overlay HUD'un
-  ToS-güvenli renderer yüzeyi büyük ölçüde işlendi.**
+- **Slice 3 done** — kompakt-HUD cilası (kullanıcı AskUserQuestion'da "Overlay HUD'u cilala" seçti — düşük-değer flag'lendi
+  ama kullanıcı talebi anti-churn'ü geçer). Kompaktta plan-head metin etiketleri (rol/"vs") gizli (ikonlar bağlamı taşır)
+  + `.ingame-view--compact` sıkı gap/padding. Saf renderer/CSS (core/host el değmedi). renderer 289 + typecheck 0; compact
+  toggle testi rol-etiketi gizliliğini de doğrular. **NOT: overlay HUD ToS-güvenli yüzeyi tükendi — sonrası kozmetik.**
 
 **EPIC: ML/LLM Koçluk Fazı (2026-06-18, kullanıcı AskUserQuestion ile seçti).** Güvenli küçük-yüzey tükenince
 yön soruldu → ML/LLM seçildi. Keşif: pipeline ZATEN tam bağlı+test'li (coach_narrator+audit, host llm-narrator,

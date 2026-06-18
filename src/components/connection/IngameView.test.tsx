@@ -133,13 +133,15 @@ describe('IngameView compact HUD toggle (Overlay HUD Epic)', () => {
     });
     const { container } = render(<IngameView />);
 
-    // Detaylı (varsayılan): yoğun plan metni görünür; görseller (güç eğrisi) de var.
+    // Detaylı (varsayılan): yoğun plan metni + rol etiketi görünür; görseller de var.
     expect(await screen.findByText('Erken tempo kur ve kuleyi al.')).toBeInTheDocument();
+    expect(screen.getByText('Üst')).toBeInTheDocument(); // rol etiketi (cilā: kompaktta gizli)
     expect(container.querySelector('.overlay-power')).toBeInTheDocument();
 
-    // "Kompakt"a geç → yoğun plan metni gizlenir, glanceable görseller KALIR.
+    // "Kompakt"a geç → yoğun plan metni + rol/"vs" etiketleri gizlenir, görseller KALIR.
     fireEvent.click(screen.getByRole('button', { name: 'Kompakt' }));
     expect(screen.queryByText('Erken tempo kur ve kuleyi al.')).not.toBeInTheDocument();
+    expect(screen.queryByText('Üst')).not.toBeInTheDocument(); // kompaktta rol etiketi gizli
     expect(container.querySelector('.overlay-power')).toBeInTheDocument();
 
     // "Detaylı"ya geri dön → metin yeniden görünür.

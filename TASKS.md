@@ -19,7 +19,12 @@
   Test: yeni settings.test.ts (round-trip + eski-ayar optional-default, diğerleri korunur) + IngameView init-compact
   (get_settings compact_overlay:true → "Detaylı" toggle + plan metni gizli). ✅ host 178 + renderer 289 + typecheck 0.
   GOTCHA: testler DEFAULT_SETTINGS spread kullanıyor → AppSettings'e alan eklemek mevcut mock'ları bozmadı.
-- **Sıradaki:** Slice 3 (sıkı kompakt-CSS) düşük-değer. Overlay HUD ToS-güvenli renderer yüzeyi büyük ölçüde işlendi → muhtemel yön sorusu.
+- **Iter Slice-3 (done)** — kompakt-HUD cilası. Kullanıcı AskUserQuestion'da "Overlay HUD'u cilala" seçti (düşük-değer
+  flag'lendi; kullanıcı talebi anti-churn'ü geçer). Kompaktta plan-head rol/"vs" metin etiketleri `{!compact && ...}` ile
+  gizli (ikon/isim/KDA kalır — ikonlar bağlam taşır) + `.ingame-view--compact` sıkı gap/padding (token'lı, öğe/renk aynı).
+  Saf renderer/CSS (core/host el değmedi). Test: compact toggle testi rol-etiketi ("Üst") detayda görünür/kompaktta gizli.
+  ✅ renderer 289 + typecheck 0.
+- **Sıradaki:** Overlay HUD ToS-güvenli yüzeyi TÜKENDİ (sonrası kozmetik). Yön sorusu: canlı-veri / kalite-sağlamlaştırma / başka.
 
 ## EPIC: ML/LLM Koçluk Fazı (2026-06-18, kullanıcı AskUserQuestion ile seçti)
 > Yön soruldu (güvenli küçük-yüzey tükendi) → ML/LLM seçildi. Keşif: pipeline ZATEN tam bağlı+test'li.

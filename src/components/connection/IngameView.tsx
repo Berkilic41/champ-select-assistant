@@ -161,12 +161,13 @@ export const IngameView: React.FC<Props> = ({ summonerName }) => {
           <div className="overlay-plan-head">
             <ChampionIcon championKey={plan.champion_key} size="sm" />
             <span className="overlay-plan-champ">{plan.champion_name}</span>
-            {plan.position && (
+            {/* Kompakt HUD: metin etiketleri (rol / "vs") gizli — ikonlar bağlamı taşır. */}
+            {!compact && plan.position && (
               <span className="overlay-plan-pos">
                 {t(`overlay.position.${plan.position}`, { defaultValue: plan.position })}
               </span>
             )}
-            {plan.opponent_name && (
+            {!compact && plan.opponent_name && (
               <span className="overlay-plan-vs">
                 {t('overlay.plan.vs', { name: plan.opponent_name })}
               </span>

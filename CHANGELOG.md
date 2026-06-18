@@ -6,7 +6,11 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 
 ## [Unreleased]
 
-### Eklendi
+### Geliştirildi
+- **Kompakt HUD daha sıkı/glanceable** (Overlay HUD Epic — Slice 3) — Kompakt modda artık plan başlığındaki metin
+  etiketleri (rol "Üst" + "vs Rakip") gizleniyor — şampiyon/rakip ikonları bağlamı zaten taşıyor — ve layout boşlukları
+  sıkılaşıyor (`.ingame-view--compact` daha küçük gap/padding). 400px'te yüzen pencere daha yoğun, daha hızlı okunan bir
+  bakış-at HUD oluyor. Saf renderer/CSS (core/host değişmedi); kompakt-toggle testi rol etiketinin gizlenmesini de doğrular.
 - **Kompakt HUD tercihi artık kalıcı** (Overlay HUD Epic — Slice 2) — Ayarlar'a "Oyun-içi kompakt HUD (yalnız
   görseller)" seçeneği eklendi. Açıkken in-game overlay her maça doğrudan kompakt modda (yalnız glanceable görseller)
   başlıyor — artık her maç elle toggle'lamaya gerek yok. Kullanıcı maç-içinde yine "Detaylı"ya geçebiliyor. Ayar JSON
