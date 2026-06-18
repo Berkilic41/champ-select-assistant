@@ -58,6 +58,24 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
   // visual continuity, so a dirty close attempt (X / Escape / backdrop) surfaces
   // an in-panel confirmation instead. The explicit footer "İptal" still discards.
   const [confirmingClose, setConfirmingClose] = React.useState(false);
+
+  // ML/LLM Slice 2: LLM endpoint bağlantı testi (kurulum doğrulama). Dirty-state'i
+  // etkilemez (draft'a yazmaz); girilen taslak endpoint/model'i test eder.
+  const [llmTest, setLlmTest] = React.useState<{ status: 'idle' | 'testing' | 'ok' | 'error' }>({
+    status: 'idle',
+  });
+  const testLlm = async () => {
+    setLlmTest({ status: 'testing' });
+    try {
+      const res = await invoke<{ ok: boolean; reason?: string }>('test_coach_llm', {
+        endpoint: draft.coach_llm_endpoint,
+        model: draft.coach_llm_model,
+      });
+      setLlmTest({ status: res?.ok ? 'ok' : 'error' });
+    } catch {
+      setLlmTest({ status: 'error' });
+    }
+  };
   const requestClose = () => {
     if (dirty) setConfirmingClose(true);
     else onClose();
@@ -275,6 +293,28 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
             value={draft.coach_llm_model}
             onChange={e => update({ coach_llm_model: e.target.value })}
           />
+          <div className="sp-llm-test-row">
+            <button
+              type="button"
+              className="sp-llm-test"
+              onClick={testLlm}
+              disabled={llmTest.status === 'testing' || !draft.coach_llm_endpoint.trim()}
+            >
+              {llmTest.status === 'testing'
+                ? t('settings.coachLlmTesting')
+                : t('settings.coachLlmTest')}
+            </button>
+            {llmTest.status === 'ok' && (
+              <span className="sp-llm-status sp-llm-status--ok" role="status">
+                {t('settings.coachLlmOk')}
+              </span>
+            )}
+            {llmTest.status === 'error' && (
+              <span className="sp-llm-status sp-llm-status--error" role="status">
+                {t('settings.coachLlmFail')}
+              </span>
+            )}
+          </div>
         </section>
 
         <section className="sp-section">

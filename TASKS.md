@@ -10,7 +10,14 @@
   render edilmiyordu. DeepDiveTab koç-notu başlığına rozet: external→"LLM", rejected→"LLM reddedildi"(tooltip), düz
   deterministik→yok. i18n heroCard.coachNoteLlm/coachNoteRejected/Hint (tr/en). `.hero-detail-coach-badge` CSS. Saf
   renderer (motor purity korunur). +3 test (external/rejected/düz). ✅ renderer 285 + typecheck 0 + i18n parite.
-- **Sıradaki:** Slice 2 (Settings "Bağlantı test et" butonu — kurulum sürtünmesi) ya da zengin promptlar / LLM geri-bildirimi.
+- **Iter Slice-2 (done)** — Settings "Bağlantı test et" butonu. KODDAN doğrulandı: host `fetchLlmCandidate`/`FetchFn`
+  seam zaten var. Yeni host `testCoachLlm` (minimal "ping" + max_tokens 1 → kullanıcı/oyun verisi YOK; OpenAI-uyumlu
+  `choices` array doğrulaması; `{ok, reason: empty|http|bad_response|network}`; default fetch=globalThis.fetch) +
+  `test_coach_llm` ipc kaydı + SettingsPanel buton (mevcut endpoint/model input'larının altına; dirty-state'i etkilemez,
+  draft endpoint'i test eder) + ✓/✗ durum + `.sp-llm-*` CSS + i18n (coachLlmTest/Testing/Ok/Fail tr/en). Engine purity
+  (core el değmedi). Test: coach-narrative.test.ts'e 5 testCoachLlm testi (ok/http/bad/network/boş-endpoint, mock FetchFn).
+  ✅ host 173 + renderer 285 + typecheck 0 + i18n parite. GOTCHA: cwd kaymışsa pnpm/git MUTLAK `-C` yol.
+- **Sıradaki:** Slice 3 (zengin grounded promptlar / LLM-notu geri-bildirimi) ya da ML/LLM yüzeyi tükendiyse yön sorusu.
 
 ## Discovery-6 — gerçek yeniden-keşif #2 (2026-06-18)
 > "Hazırlanmış-ama-bağlanmamış" damarı sürdü (Explore + koddan-teyit).

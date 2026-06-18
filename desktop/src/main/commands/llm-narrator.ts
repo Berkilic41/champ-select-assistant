@@ -107,3 +107,48 @@ export async function fetchLlmCandidate(
     clearTimeout(timer);
   }
 }
+
+/** Bağlantı testi sonucu. `reason` hata türü (i18n/log için), ok=true ise yok. */
+export interface LlmTestResult {
+  ok: boolean;
+  /** 'empty' | 'http' | 'network' | 'bad_response' */
+  reason?: string;
+}
+
+/**
+ * LLM endpoint'ine MİNİMAL bir "ping" isteği atıp ulaşılabilirliği + OpenAI-uyumlu
+ * yanıt biçimini doğrular. Kullanıcı/oyun verisi GÖNDERMEZ (yalnız "ping", max_tokens 1).
+ * Kullanıcı endpoint'i girdikten sonra champ-select'i beklemeden kurulumu doğrular.
+ */
+export async function testCoachLlm(
+  endpoint: string,
+  model: string,
+  fetchFn: FetchFn = globalThis.fetch as unknown as FetchFn,
+  timeoutMs = 6000,
+): Promise<LlmTestResult> {
+  const url = endpoint.trim();
+  if (!url) return { ok: false, reason: "empty" };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetchFn(url, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        model: model.trim() || "default",
+        messages: [{ role: "user", content: "ping" }],
+        max_tokens: 1,
+        stream: false,
+      }),
+      signal: controller.signal,
+    });
+    if (!res.ok) return { ok: false, reason: "http" };
+    const json = (await res.json()) as { choices?: unknown };
+    if (Array.isArray(json?.choices)) return { ok: true };
+    return { ok: false, reason: "bad_response" };
+  } catch {
+    return { ok: false, reason: "network" }; // ağ/timeout/abort
+  } finally {
+    clearTimeout(timer);
+  }
+}

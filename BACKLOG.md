@@ -12,8 +12,13 @@ settings, render, 6 test); MVP çalışıyor. Motor purity by-design korunur (LL
 - **Slice 1 done (ADR-010)** — koç-notu kaynak şeffaflığı: `CoachNarrative.source`/`external_rejected` (computed-but-
   unrendered) DeepDiveTab koç-notu başlığına rozet (external→"LLM"; rejected→"LLM reddedildi"+tooltip; düz deterministik→
   rozet yok). Renderer+i18n+CSS; core/host EL DEĞMEDİ. renderer 285 + typecheck 0 + i18n parite. +3 test.
-- **Slice 2+ (aday)** — Settings "Bağlantı test et" butonu (P-02; kurulum sürtünmesi) · daha zengin grounded promptlar ·
-  LLM-notu kullanıcı geri-bildirimi (beğen/beğenme → prompt iyileştirme sinyali).
+- **Slice 2 done** — Settings "Bağlantı test et" butonu: girilen LLM endpoint+model'i champ-select'i beklemeden
+  doğrular (minimal "ping" isteği, kullanıcı/oyun verisi YOK; dürüst ✓/✗ durum). Yeni host `testCoachLlm` (llm-narrator.ts;
+  FetchFn seam → test edilebilir; OpenAI-uyumlu yanıt biçimi doğrulaması) + `test_coach_llm` ipc + SettingsPanel buton/durum
+  + `.sp-llm-*` CSS + i18n coachLlmTest/Testing/Ok/Fail (tr/en). Engine purity (core el değmedi). host 173 + renderer 285 +
+  typecheck 0 + i18n parite; +5 host test (ok/http/bad-response/network/boş).
+- **Slice 3+ (aday)** — daha zengin grounded promptlar (llm-narrator.ts buildCoachUserPrompt'a ek fact) · LLM-notu kullanıcı
+  geri-bildirimi (beğen/beğenme → prompt sinyali) · SettingsPanel buton davranış testi (renderer; thin-wire, host 5-test'li).
 
 **MOD: Büyük geliştirme — EPIC (2026-06-17 kullanıcı direktifi).** Küçük-yüzey tükendi → en yüksek-değerli
 BÜYÜK yönü Epic seç, MVP'ye böl, her tur tek dikey dilim (salt kozmetik yok). Öncelik: 1) match-history

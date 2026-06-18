@@ -7,6 +7,13 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **LLM koçluk için "Bağlantı test et"** (ML/LLM Koçluk Epic — Slice 2) — Ayarlar'daki LLM koçluk bölümüne, girilen
+  endpoint'in (ve model'in) çalışıp çalışmadığını champ-select'i beklemeden doğrulayan bir buton eklendi: tıklayınca
+  endpoint'e **minimal bir "ping" isteği** atılır (kullanıcı/oyun verisi GÖNDERİLMEZ, yalnız "ping" + max_tokens 1)
+  ve dürüst sonuç gösterilir ("✓ Bağlandı" / "Bağlanılamadı — endpoint ve model'i kontrol et"). Kurulum sürtünmesini
+  azaltır (önceden endpoint'in doğru olup olmadığı ancak champ-select'te belli oluyordu). Yeni host `test_coach_llm`
+  (mevcut `FetchFn` seam'iyle test edilebilir; OpenAI-uyumlu yanıt biçimini doğrular). Engine purity (core değişmedi);
+  host+renderer; tr/en parite + 5 host testi (ok/http/bad-response/network/boş-endpoint).
 - **Koç notunda kaynak şeffaflığı** (ML/LLM Koçluk Epic — Slice 1) — Öneri detayındaki "Koç notu" artık notun
   **kaynağını** dürüstçe gösteriyor: LLM ürettiyse **"LLM"** rozeti; LLM önerisi audit'i geçemeyip deterministik
   nota düşüldüyse **"LLM reddedildi"** rozeti (tooltip açıklamalı); düz deterministik (varsayılan) notta rozet yok.

@@ -85,6 +85,7 @@ import { getWinProbEstimates } from "./commands/win-prob";
 import { trainLocalModelPack } from "./commands/model-training";
 import { getComboOutcomes } from "./commands/combo-outcomes";
 import { getCoachNarrative, type CoachNarrativeInput } from "./commands/coach-narrative";
+import { testCoachLlm } from "./commands/llm-narrator";
 import type { RecsCache } from "./commands/outcomes";
 import {
   getDdragonVersion,
@@ -256,6 +257,10 @@ export function buildCommandRegistry(
       requireDb(ctx),
       (args ?? {}) as unknown as CoachNarrativeInput,
     ),
+  );
+  // ML/LLM Slice 2: LLM endpoint bağlantı testi (kurulum doğrulama).
+  commands.set("test_coach_llm", (args) =>
+    testCoachLlm(String(args?.endpoint ?? ""), String(args?.model ?? "")),
   );
 
   // champ_select.rs (analiz kümesi) — tüm karar mantığı core WASM'da.

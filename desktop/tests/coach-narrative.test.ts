@@ -11,7 +11,7 @@ import type { DatabaseSync } from "node:sqlite";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 
 import { getCoachNarrative } from "../src/main/commands/coach-narrative";
-import type { FetchFn } from "../src/main/commands/llm-narrator";
+import { testCoachLlm, type FetchFn } from "../src/main/commands/llm-narrator";
 import { DEFAULT_SETTINGS, saveSettings } from "../src/main/commands/settings";
 import { openDatabase, runMigrations } from "../src/main/db";
 import { Engine } from "../src/main/engine";
@@ -172,5 +172,51 @@ describe("getCoachNarrative (FAZ 4)", () => {
     expect(n.source).toBe("deterministic");
     expect(n.external_rejected).toBe(false); // aday hiç üretilmedi (LLM null)
     expect(n.text).toContain("Lee Sin");
+  });
+});
+
+describe("testCoachLlm (ML/LLM Slice 2 — bağlantı testi)", () => {
+  const okFetch: FetchFn = async () => ({
+    ok: true,
+    json: async () => ({ choices: [{ message: { content: "pong" } }] }),
+  });
+  const httpErrFetch: FetchFn = async () => ({ ok: false, json: async () => ({}) });
+  const badShapeFetch: FetchFn = async () => ({ ok: true, json: async () => ({ unexpected: true }) });
+  const throwFetch: FetchFn = async () => {
+    throw new Error("ECONNREFUSED");
+  };
+
+  it("returns ok for a valid OpenAI-compatible response", async () => {
+    expect(await testCoachLlm("http://x/v1/chat/completions", "llama3", okFetch)).toEqual({
+      ok: true,
+    });
+  });
+
+  it("reports an http error when the endpoint returns !ok", async () => {
+    expect(await testCoachLlm("http://x", "m", httpErrFetch)).toEqual({ ok: false, reason: "http" });
+  });
+
+  it("reports bad_response when the shape is not OpenAI-compatible", async () => {
+    expect(await testCoachLlm("http://x", "m", badShapeFetch)).toEqual({
+      ok: false,
+      reason: "bad_response",
+    });
+  });
+
+  it("reports a network error when fetch throws (honest, no silent success)", async () => {
+    expect(await testCoachLlm("http://x", "m", throwFetch)).toEqual({
+      ok: false,
+      reason: "network",
+    });
+  });
+
+  it("returns empty without making a request when the endpoint is blank", async () => {
+    let called = false;
+    const spyFetch: FetchFn = async () => {
+      called = true;
+      return { ok: true, json: async () => ({ choices: [] }) };
+    };
+    expect(await testCoachLlm("   ", "m", spyFetch)).toEqual({ ok: false, reason: "empty" });
+    expect(called).toBe(false);
   });
 });
