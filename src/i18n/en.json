@@ -35,6 +35,8 @@
     "reminders": "Reminders",
     "now": "now",
     "spawnAtHint": "Estimated spawn game-clock",
+    "compact": "Compact",
+    "detailed": "Detailed",
     "objective": {
       "dragon": "Dragon",
       "baron": "Baron",

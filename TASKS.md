@@ -2,6 +2,17 @@
 
 > Tek seferde tek küçük görev. Tarih: 2026-06-16.
 
+## EPIC: Overlay HUD Görselleri (2026-06-18, kullanıcı AskUserQuestion ile seçti)
+> Keşif: in-game ana pencerede ama overlay-modu (sağ-üst 400px+always-on-top) zaten var. Gerçek şeffaf pencere ELE (ToS, ADR-011).
+- **Iter Slice-1 (done, ADR-011)** — IngameView "Kompakt HUD" toggle. KODDAN doğrulandı: HUD görselleri (PowerCurveBar,
+  objective timer'lar, faz, KDA) zaten IngameView'da ama yoğun plan-metni (win/role/damage/spike/lane/wave/matchup/mid/late)
+  ile 400px overlay-pencerede sıkışık. Header'a "Kompakt/Detaylı" toggle (`compact` local state); kompaktta plan-text
+  satırları `{!compact && <>...</>}` ile gizli, görseller + macro kalır. `.ingame-compact-toggle` CSS (margin-left:auto →
+  title sola, buton+minimize sağa), i18n overlay.compact/detailed (tr/en). Saf renderer (core/host el değmedi — windowing var).
+  Test: integration (mock get_settings/get_ingame_plan/get_macro_state → detay metni görünür → Kompakt tıkla → metin gizli,
+  .overlay-power kalır → Detaylı tıkla → geri). GOTCHA: useSettings get_settings mock'lanmalı (yoksa undefined.then). ✅ renderer 288.
+- **Sıradaki:** Slice 2 (kompakt tercihi kalıcı setting / in-game auto-kompakt / sıkı CSS) ya da yön sorusu.
+
 ## EPIC: ML/LLM Koçluk Fazı (2026-06-18, kullanıcı AskUserQuestion ile seçti)
 > Yön soruldu (güvenli küçük-yüzey tükendi) → ML/LLM seçildi. Keşif: pipeline ZATEN tam bağlı+test'li.
 - **Iter Slice-1 (done, ADR-010)** — koç-notu kaynak şeffaflığı rozeti. KODDAN doğrulandı: LLM koçluk pipeline'ı

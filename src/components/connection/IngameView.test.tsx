@@ -1,6 +1,10 @@
-import { describe, it, expect } from 'vitest';
-import { render } from '@testing-library/react';
-import { PowerCurveBar, gameClock } from './IngameView';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { invoke } from '../../lib/host';
+import { IngameView, PowerCurveBar, gameClock } from './IngameView';
+import { DEFAULT_SETTINGS } from '../../hooks/useSettings';
+
+const mockInvoke = invoke as ReturnType<typeof vi.fn>;
 
 describe('PowerCurveBar', () => {
   it('renders three phase columns with labels', () => {
@@ -78,5 +82,68 @@ describe('gameClock (objective absolute spawn time — Epic #5)', () => {
 
   it('clamps negative values to 0:00 (defensive)', () => {
     expect(gameClock(-5)).toBe('0:00');
+  });
+});
+
+const PLAN = {
+  champion_key: 'Garen',
+  champion_name: 'Garen',
+  position: 'top',
+  opponent_name: 'Darius',
+  opponent_key: 'Darius',
+  level: 6,
+  kills: 3,
+  deaths: 1,
+  assists: 2,
+  cs: 80,
+  cs_per_min: 6.5,
+  power_early: 0.7,
+  power_mid: 0.6,
+  power_late: 0.4,
+  win_condition: 'Erken tempo kur ve kuleyi al.',
+  team_role: 'Frontline',
+  damage_profile: 'AD',
+  spike_note: '',
+  spike_window: '',
+  lane_note: '',
+  wave_note: '',
+  matchup_tips: [],
+  mid_plan: '',
+  late_plan: '',
+};
+const MACRO = {
+  live: true,
+  state: {
+    phase: 'mid',
+    phase_note: 'Objektiflere bas.',
+    objectives: [{ objective: 'dragon', state: 'pending', seconds_until: 120, next_spawn_secs: 300 }],
+    reminders: ['Ward al'],
+  },
+};
+
+describe('IngameView compact HUD toggle (Overlay HUD Epic)', () => {
+  beforeEach(() => mockInvoke.mockReset());
+
+  it('toggles between the detailed plan text and a compact glanceable HUD', async () => {
+    mockInvoke.mockImplementation((cmd: string) => {
+      if (cmd === 'get_settings') return Promise.resolve(DEFAULT_SETTINGS);
+      if (cmd === 'get_ingame_plan') return Promise.resolve(PLAN);
+      if (cmd === 'get_macro_state') return Promise.resolve(MACRO);
+      return Promise.resolve(undefined);
+    });
+    const { container } = render(<IngameView />);
+
+    // Detaylı (varsayılan): yoğun plan metni görünür; görseller (güç eğrisi) de var.
+    expect(await screen.findByText('Erken tempo kur ve kuleyi al.')).toBeInTheDocument();
+    expect(container.querySelector('.overlay-power')).toBeInTheDocument();
+
+    // "Kompakt"a geç → yoğun plan metni gizlenir, glanceable görseller KALIR.
+    fireEvent.click(screen.getByRole('button', { name: 'Kompakt' }));
+    expect(screen.queryByText('Erken tempo kur ve kuleyi al.')).not.toBeInTheDocument();
+    expect(container.querySelector('.overlay-power')).toBeInTheDocument();
+
+    // "Detaylı"ya geri dön → metin yeniden görünür.
+    fireEvent.click(screen.getByRole('button', { name: 'Detaylı' }));
+    expect(screen.getByText('Erken tempo kur ve kuleyi al.')).toBeInTheDocument();
   });
 });

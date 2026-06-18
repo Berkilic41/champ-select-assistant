@@ -35,6 +35,8 @@
     "reminders": "Hatırlatmalar",
     "now": "şimdi",
     "spawnAtHint": "Tahmini doğuş oyun-saati",
+    "compact": "Kompakt",
+    "detailed": "Detaylı",
     "objective": {
       "dragon": "Ejder",
       "baron": "Baron",

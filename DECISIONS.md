@@ -2,6 +2,23 @@
 
 > Format: bağlam → karar → gerekçe → sonuç. En yeni üstte.
 
+## ADR-011 — Overlay HUD Epic: gerçek şeffaf pencere ELE (ToS); Slice 1 = kompakt HUD toggle (2026-06-18)
+- **Bağlam:** ML/LLM derinleştirme hızlı-kazançları bitince AskUserQuestion → kullanıcı **"Overlay HUD görselleri"**
+  seçti. Keşif (Explore + koddan-teyit): in-game görünüm (IngameView) ANA pencerede render ediliyor AMA zaten bir
+  "overlay modu" var — `set_overlay_mode` maça girince pencereyi sağ-üst 400×720 + always-on-top yapıyor (window.ts).
+  HUD görselleri (PowerCurveBar, objective timer'lar, faz chip, KDA) ZATEN IngameView'da, ama yoğun metin plan-satırları
+  (win/role/damage/spike/lane/wave/matchup/mid/late) ile birlikte → 400px'te sıkışık, glance-edilemiyor.
+- **Karar:** Gerçek şeffaf/click-through Electron overlay penceresi (transparent BrowserWindow + setIgnoreMouseEvents)
+  **ELENDİ**: yüksek sürtünme (ayrı pencere yaşam-döngüsü, state sync, oyun-penceresi takibi) + **ToS/anti-cheat riski**
+  (şeffaf always-on-top injection gibi görünebilir). İlk dilim = **kompakt HUD toggle**: IngameView'da yoğun plan metnini
+  gizleyip yalnız glanceable görselleri (header/KDA, güç eğrisi, objective'ler, faz) bırakan yerel toggle. Mevcut overlay-mode
+  windowing'i (sağ-üst yüzen pencere) gerçek bir HUD'a çevirir.
+- **Gerekçe:** Geniş kitle (tüm in-game), saf renderer (core/host EL DEĞMEZ — windowing zaten var), ToS-güvenli (yeni
+  pencere/şeffaflık yok; yalnız CSS/koşullu render), mevcut görselleri (PowerCurveBar) yeniden kullanır. Fabrikasyon yok.
+- **Sonuç:** IngameView `compact` toggle + `.ingame-compact-toggle` + i18n overlay.compact/detailed (tr/en); plan-text
+  satırları `{!compact && …}`. renderer 288 + typecheck 0 + i18n parite. Sonraki dilim adayları: kompakt tercihini
+  kalıcılaştır (setting) · in-game'e girince auto-kompakt · daha sıkı kompakt-layout CSS.
+
 ## ADR-010 — ML/LLM Koçluk Epic: pipeline ZATEN bağlıymış; Slice 1 = kaynak şeffaflığı (2026-06-18)
 - **Bağlam:** Güvenli küçük-geliştirme yüzeyi tükenince kullanıcıya AskUserQuestion ile yön soruldu → **"ML/LLM
   koçluk fazı"** seçildi. Keşif (Explore + koddan-teyit) ŞAŞIRTICI bulgu: LLM koçluk pipeline'ı ZATEN TAM BAĞLI +

@@ -6,6 +6,15 @@
 > **21 doğrulanmış bulgu**, adversaryal koddan-teyit) çıktısıdır.
 
 ## Aktif
+**EPIC: Overlay HUD Görselleri (2026-06-18, kullanıcı AskUserQuestion ile seçti).** Keşif: in-game görünüm ana
+pencerede ama zaten overlay-modu var (set_overlay_mode sağ-üst 400×720 + always-on-top). Gerçek şeffaf Electron
+overlay penceresi ELENDİ (ToS/anti-cheat riski + yüksek sürtünme → ADR-011). Saf renderer + ToS-güvenli yön.
+- **Slice 1 done (ADR-011)** — IngameView "Kompakt/Detaylı" HUD toggle: kompaktta yoğun plan metni gizli, yalnız
+  glanceable görseller (header/KDA, güç eğrisi, objective doğuş saatleri, faz) kalır → sağ-üst yüzen pencere gerçek
+  HUD. Yerel toggle (`compact` state) + `.ingame-compact-toggle` CSS + i18n overlay.compact/detailed. Saf renderer
+  (core/host el değmedi — windowing zaten var). renderer 288 + typecheck 0 + i18n parite; +1 integration test.
+- **Slice 2+ (aday)** — kompakt tercihini kalıcılaştır (setting) · in-game'e girince auto-kompakt · sıkı kompakt-layout CSS.
+
 **EPIC: ML/LLM Koçluk Fazı (2026-06-18, kullanıcı AskUserQuestion ile seçti).** Güvenli küçük-yüzey tükenince
 yön soruldu → ML/LLM seçildi. Keşif: pipeline ZATEN tam bağlı+test'li (coach_narrator+audit, host llm-narrator,
 settings, render, 6 test); MVP çalışıyor. Motor purity by-design korunur (LLM yalnız anlatım seam'i; scoring değişmez).

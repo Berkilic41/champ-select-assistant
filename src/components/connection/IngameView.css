@@ -45,6 +45,29 @@
   background: var(--surface-3);
 }
 
+/* Overlay HUD: kompakt/detaylı toggle (title sola, buton+minimize sağa gruplanır). */
+.ingame-compact-toggle {
+  margin-left: auto;
+  margin-right: 6px;
+  font-size: var(--font-size-xs);
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  padding: 2px 8px;
+  cursor: pointer;
+  transition: all var(--motion-normal);
+}
+.ingame-compact-toggle:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+  background: var(--surface-3);
+}
+.ingame-compact-toggle[aria-pressed="true"] {
+  color: var(--teal-bright);
+  border-color: var(--teal-dim);
+}
+
 .ingame-tip {
   display: flex;
   flex-direction: column;

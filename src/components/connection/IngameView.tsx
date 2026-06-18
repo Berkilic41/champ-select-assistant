@@ -58,6 +58,10 @@ export const IngameView: React.FC<Props> = ({ summonerName }) => {
   const [plan, setPlan] = useState<IngamePlan | null>(null);
   const { settings } = useSettings();
   const prevSecsRef = useRef<Record<string, number>>({});
+  // Overlay HUD: kompakt mod yoğun plan metnini gizler, yalnız glanceable görselleri
+  // (header/KDA, güç eğrisi, objective'ler, faz) bırakır → sağ-üstte yüzen pencerede
+  // gerçek bir HUD. Yerel toggle (kalıcılık sonraki dilim).
+  const [compact, setCompact] = useState(false);
 
   // 60sn ve 30sn eşik GEÇİŞLERİNDE tek bip (60: alçak, 30: yüksek ton).
   // Eşik geçişi = önceki poll > eşik && şimdiki ≤ eşik — spam yok.
@@ -129,9 +133,17 @@ export const IngameView: React.FC<Props> = ({ summonerName }) => {
   const macro = data?.live ? data.state : null;
 
   return (
-    <div className="ingame-view">
+    <div className={`ingame-view${compact ? ' ingame-view--compact' : ''}`}>
       <div className="ingame-header">
         <span className="ingame-title">{summonerName ?? t('overlay.title')}</span>
+        <button
+          className="ingame-compact-toggle"
+          onClick={() => setCompact((c) => !c)}
+          aria-pressed={compact}
+          title={compact ? t('overlay.detailed') : t('overlay.compact')}
+        >
+          {compact ? t('overlay.detailed') : t('overlay.compact')}
+        </button>
         <button
           className="ingame-minimize"
           onClick={() => invoke('hide_window')}
@@ -177,29 +189,34 @@ export const IngameView: React.FC<Props> = ({ summonerName }) => {
               currentPhase={macro?.phase}
             />
           </div>
-          <PlanRow label={t('overlay.plan.win')} text={plan.win_condition} />
-          <PlanRow label={t('overlay.plan.role')} text={plan.team_role} />
-          {plan.damage_profile && (
-            <PlanRow label={t('overlay.plan.damage')} text={plan.damage_profile} />
+          {/* Kompakt HUD modunda yoğun plan metni gizli; görseller + macro kalır. */}
+          {!compact && (
+            <>
+              <PlanRow label={t('overlay.plan.win')} text={plan.win_condition} />
+              <PlanRow label={t('overlay.plan.role')} text={plan.team_role} />
+              {plan.damage_profile && (
+                <PlanRow label={t('overlay.plan.damage')} text={plan.damage_profile} />
+              )}
+              {plan.spike_note && <PlanRow label={t('overlay.plan.spike')} text={plan.spike_note} />}
+              {plan.spike_window && (
+                <PlanRow label={t('overlay.plan.spikeWindow')} text={plan.spike_window} />
+              )}
+              {plan.lane_note && <PlanRow label={t('overlay.plan.lane')} text={plan.lane_note} />}
+              {plan.wave_note && <PlanRow label={t('overlay.plan.wave')} text={plan.wave_note} />}
+              {plan.matchup_tips.length > 0 && (
+                <div className="overlay-plan-row">
+                  <span className="overlay-plan-label">{t('overlay.plan.matchup')}</span>
+                  <ul className="overlay-plan-tips">
+                    {plan.matchup_tips.map((tip, i) => (
+                      <li key={i}>{tip}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {plan.mid_plan && <PlanRow label={t('overlay.plan.mid')} text={plan.mid_plan} />}
+              {plan.late_plan && <PlanRow label={t('overlay.plan.late')} text={plan.late_plan} />}
+            </>
           )}
-          {plan.spike_note && <PlanRow label={t('overlay.plan.spike')} text={plan.spike_note} />}
-          {plan.spike_window && (
-            <PlanRow label={t('overlay.plan.spikeWindow')} text={plan.spike_window} />
-          )}
-          {plan.lane_note && <PlanRow label={t('overlay.plan.lane')} text={plan.lane_note} />}
-          {plan.wave_note && <PlanRow label={t('overlay.plan.wave')} text={plan.wave_note} />}
-          {plan.matchup_tips.length > 0 && (
-            <div className="overlay-plan-row">
-              <span className="overlay-plan-label">{t('overlay.plan.matchup')}</span>
-              <ul className="overlay-plan-tips">
-                {plan.matchup_tips.map((tip, i) => (
-                  <li key={i}>{tip}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {plan.mid_plan && <PlanRow label={t('overlay.plan.mid')} text={plan.mid_plan} />}
-          {plan.late_plan && <PlanRow label={t('overlay.plan.late')} text={plan.late_plan} />}
         </div>
       )}
 

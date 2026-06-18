@@ -6,6 +6,15 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 
 ## [Unreleased]
 
+### Eklendi
+- **Oyun-içi "Kompakt HUD" modu** (Overlay HUD Epic — Slice 1) — Oyun-içi overlay'e bir "Kompakt/Detaylı" toggle'ı
+  eklendi. Maça girince pencere zaten sağ-üstte küçük (400px) ve always-on-top yüzüyordu, ama yoğun plan metniyle
+  (win-condition/rol/spike/lane/wave/matchup/mid-late) sıkışıktı. "Kompakt"a geçince bu metin gizleniyor; yalnız
+  **glanceable görseller** kalıyor: şampiyon/KDA başlığı, **güç eğrisi çubuğu**, **objective doğuş saatleri** ve
+  faz — sağ-üstteki yüzen pencere gerçek bir bakış-at HUD'ı oluyor. "Detaylı"ya dönünce tam plan geri geliyor.
+  Saf renderer (mevcut overlay-mode windowing kullanılır; core/host değişmedi); ToS-güvenli (yeni pencere/şeffaflık
+  yok — bkz ADR-011: gerçek şeffaf overlay penceresi ToS riski nedeniyle elendi); tr/en parite + test.
+
 ### Geliştirildi
 - **"Yeniden üret" artık gerçekten farklı bir not üretiyor** (ML/LLM Koçluk Epic — Slice 5) — Koç notu "Yeniden üret"
   butonu artık LLM'e açıkça **"öncekinden farklı bir açıdan, farklı kelimelerle yaz"** talimatı geçiriyor (yalnız
