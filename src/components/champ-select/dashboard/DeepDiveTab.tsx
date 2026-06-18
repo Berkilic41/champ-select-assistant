@@ -1,7 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { Recommendation } from '../../../types/recommendation';
+import { invoke } from '../../../lib/host';
+import { Recommendation, type CoachNarrative } from '../../../types/recommendation';
 import type { DraftSimResult } from '../../../types/generated/DraftSimResult';
 import type { DraftFork } from '../../../types/generated/DraftFork';
 import { StatBar } from '../../shared/ui';
@@ -85,20 +86,43 @@ export const DeepDiveTab = React.memo(function DeepDiveTab({ rec, draftSimulatio
   const plan = rec.draft_plan;
   const coachPillars = buildCoachPillars(rec, t);
 
+  // ML/LLM derinleştirme: koç notunu "yeniden üret" (LLM varsa farklı bir not çeker;
+  // memnun olunmayan/reddedilen notu kullanıcı tazeleyebilir). Şampiyon değişince sıfırla.
+  const [regenerated, setRegenerated] = React.useState<CoachNarrative | null>(null);
+  const [regenerating, setRegenerating] = React.useState(false);
+  React.useEffect(() => setRegenerated(null), [rec.champion_id]);
+  const note = regenerated ?? rec.coach_narrative ?? null;
+  const canRegenerate = !!note && (note.source === 'external' || note.external_rejected);
+  const regenerate = async () => {
+    setRegenerating(true);
+    try {
+      const n = await invoke<CoachNarrative>('get_coach_narrative', {
+        recommendation: rec,
+        win_prob: rec.win_prob ?? null,
+        combo_history: rec.combo_history ?? null,
+      });
+      if (n?.text) setRegenerated(n);
+    } catch {
+      /* hata → mevcut notu koru */
+    } finally {
+      setRegenerating(false);
+    }
+  };
+
   return (
     <div className="hero-detail-panel hero-detail-panel--tab">
       {/* FAZ 4 / Sprint 1: grounded koçluk notu (deterministik ya da audit'i
           geçmiş LLM adayı; tüm sinyalleri tek paragrafta sentezler). */}
-      {rec.coach_narrative?.text && (
+      {note?.text && (
         <div className="hero-detail-section">
           <span className="hero-card__plan-label">
             {t('heroCard.coachNote')}
-            {rec.coach_narrative.source === 'external' && (
+            {note.source === 'external' && (
               <span className="hero-detail-coach-badge hero-detail-coach-badge--llm">
                 {t('heroCard.coachNoteLlm')}
               </span>
             )}
-            {rec.coach_narrative.external_rejected && (
+            {note.external_rejected && (
               <span
                 className="hero-detail-coach-badge hero-detail-coach-badge--rejected"
                 title={t('heroCard.coachNoteRejectedHint')}
@@ -106,9 +130,21 @@ export const DeepDiveTab = React.memo(function DeepDiveTab({ rec, draftSimulatio
                 {t('heroCard.coachNoteRejected')}
               </span>
             )}
+            {canRegenerate && (
+              <button
+                type="button"
+                className="hero-detail-coach-regen"
+                onClick={regenerate}
+                disabled={regenerating}
+              >
+                {regenerating
+                  ? t('heroCard.coachNoteRegenerating')
+                  : t('heroCard.coachNoteRegenerate')}
+              </button>
+            )}
           </span>
           <div className="hero-detail-coach-card hero-detail-coach-card--neutral">
-            <p>{rec.coach_narrative.text}</p>
+            <p>{note.text}</p>
           </div>
         </div>
       )}

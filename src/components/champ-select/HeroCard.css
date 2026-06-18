@@ -216,6 +216,20 @@
   border: 1px solid color-mix(in srgb, var(--warning, #ffb74d) 32%, transparent);
   cursor: help;
 }
+/* ML/LLM derinleştirme: koç notunu yeniden üret (LLM notu beğenilmezse tazele). */
+.hero-detail-coach-regen {
+  margin-left: var(--space-2, 8px);
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill, 999px);
+  padding: 1px 8px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+.hero-detail-coach-regen:hover:not(:disabled) { color: var(--teal-bright); border-color: var(--teal-dim); }
+.hero-detail-coach-regen:disabled { opacity: 0.5; cursor: default; }
 
 .hero-detail-threats { list-style: none; display: flex; flex-direction: column; gap: 3px; }
 .hero-detail-threat {

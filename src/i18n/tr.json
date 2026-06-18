@@ -232,6 +232,8 @@
     "coachNoteLlm": "LLM",
     "coachNoteRejected": "LLM reddedildi",
     "coachNoteRejectedHint": "LLM metni abartılı/temellendirilmemiş bulundu → güvenli deterministik nota düşüldü",
+    "coachNoteRegenerate": "Yeniden üret",
+    "coachNoteRegenerating": "Üretiliyor…",
     "earlyAdvantage": "Erken baskı avantajı",
     "blindSafe": "Blind pick güvenli",
     "comboStrong": "{{ally}} ile güçlü combo",

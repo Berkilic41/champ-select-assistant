@@ -6,6 +6,14 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 
 ## [Unreleased]
 
+### Eklendi
+- **Koç notu "Yeniden üret"** (ML/LLM Koçluk Epic — Slice 4) — LLM kaynaklı koç notunun başlığına bir "Yeniden üret"
+  butonu eklendi: kullanıcı üretilen notu beğenmezse (ya da audit'i geçemeyip deterministik'e düşmüşse) tek tıkla
+  taze bir LLM notu çekebiliyor (LLM doğası gereği her seferinde biraz farklı). Memnuniyetsizliği TÜKETEN gerçek bir
+  etkileşim — sadece veri toplama değil. Buton yalnız LLM süreçte olduğunda görünür (düz deterministik notta gizli,
+  çünkü yeniden-üretmek aynı sonucu verir). Renderer-only (mevcut `get_coach_narrative` re-invoke; core/host değişmedi
+  — engine purity); şampiyon değişince sıfırlanır; tr/en parite + 2 test.
+
 ### Geliştirildi
 - **LLM koçluk notu daha zengin + güvenli temellendirildi** (ML/LLM Koçluk Epic — Slice 3) — Opsiyonel LLM koç
   notu prompt'una üç grounded fact daha eklendi: **rakip kompo özeti** (ör. "AP ağırlıklı · frontline yok"),

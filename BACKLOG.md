@@ -21,8 +21,12 @@ settings, render, 6 test); MVP çalışıyor. Motor purity by-design korunur (LL
   `phase_matchup` (faz avantajı erken/orta/geç ~%), `missing_signals` (veri boşluğu → "iddia ETME" anti-halüsinasyon guard).
   Hepsi recommendation payload'ında MEVCUT (tam rec geçiriliyor — ChampSelectWrapper:181 teyitli); prose plan'lar EKLENMEDİ
   (dairesel olurdu). Host-only (core/renderer el değmedi — engine purity). host 174; +1 birim testi (yeni fact'ler + omit).
-- **Slice 4+ (aday)** — LLM-notu kullanıcı geri-bildirimi (beğen/beğenme → prompt sinyali; ama feedback-loop yoksa thin) ·
-  SettingsPanel buton davranış testi (renderer; thin-wire). **NOT: ML/LLM yüksek-değer yüzeyi de inceliyor** (Slice 3 orta-değer).
+- **Slice 4 done** — koç-notu "Yeniden üret" butonu (kullanıcı AskUserQuestion'da "ML/LLM'i derinleştir" seçti). LLM
+  kaynaklı/reddedilen notta görünür; tıklayınca `get_coach_narrative` re-invoke → taze LLM notu (memnuniyetsizliği TÜKETEN
+  etkileşim, sadece veri-toplama değil). Renderer-only (DeepDiveTab local override state + şampiyon-değişince-reset;
+  core/host el değmedi — engine purity). i18n coachNoteRegenerate/Regenerating + `.hero-detail-coach-regen` CSS. renderer 287; +2 test.
+- **Slice 5+ (aday)** — like/dislike feedback'i TÜKETEN loop (re-prompt varyasyonu/model seçimi) · model preset'leri ·
+  SettingsPanel buton davranış testi. **NOT: ML/LLM hızlı-kazanç yüzeyi büyük ölçüde işlendi** (Slice 1-4 done).
 
 **MOD: Büyük geliştirme — EPIC (2026-06-17 kullanıcı direktifi).** Küçük-yüzey tükendi → en yüksek-değerli
 BÜYÜK yönü Epic seç, MVP'ye böl, her tur tek dikey dilim (salt kozmetik yok). Öncelik: 1) match-history

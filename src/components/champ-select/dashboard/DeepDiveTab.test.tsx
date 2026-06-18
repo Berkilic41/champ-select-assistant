@@ -1,7 +1,10 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { invoke } from '../../../lib/host';
 import { DeepDiveTab } from './DeepDiveTab';
 import type { Recommendation, DraftPlan } from '../../../types/recommendation';
+
+const mockInvoke = invoke as ReturnType<typeof vi.fn>;
 
 const baseRec: Recommendation = {
   champion_id: 238,
@@ -178,5 +181,45 @@ describe('DeepDiveTab', () => {
     );
     expect(screen.queryByText('LLM')).not.toBeInTheDocument();
     expect(screen.queryByText('LLM reddedildi')).not.toBeInTheDocument();
+  });
+
+  it('regenerates the LLM coach note on demand (ML/LLM deepening)', async () => {
+    mockInvoke.mockResolvedValueOnce({
+      text: 'Taze LLM notu: erken tempo kur.',
+      source: 'external',
+      external_rejected: false,
+    });
+    render(
+      <DeepDiveTab
+        rec={{
+          ...baseRec,
+          coach_narrative: { text: 'Eski LLM notu.', source: 'external', external_rejected: false },
+        }}
+      />,
+    );
+    expect(screen.getByText('Eski LLM notu.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Yeniden üret' }));
+    // Yeni not tıklamadan sonra çekilir + gösterilir.
+    expect(await screen.findByText('Taze LLM notu: erken tempo kur.')).toBeInTheDocument();
+    expect(mockInvoke).toHaveBeenCalledWith(
+      'get_coach_narrative',
+      expect.objectContaining({ recommendation: expect.any(Object) }),
+    );
+  });
+
+  it('shows no regenerate button for a plain deterministic note (LLM not involved)', () => {
+    render(
+      <DeepDiveTab
+        rec={{
+          ...baseRec,
+          coach_narrative: {
+            text: 'Deterministik not.',
+            source: 'deterministic',
+            external_rejected: false,
+          },
+        }}
+      />,
+    );
+    expect(screen.queryByRole('button', { name: 'Yeniden üret' })).not.toBeInTheDocument();
   });
 });

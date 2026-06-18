@@ -23,8 +23,14 @@
   iddia ETME): …" (anti-halüsinasyon). Prose plan'lar (mid/late_plan) EKLENMEDİ — zaten koçluk metni, LLM'e vermek dairesel.
   Host-only (core/renderer el değmedi — engine purity). Test: llm-narrator.test.ts'e Slice-3 fact testi + omit-absence.
   ✅ host 174. GOTCHA: cwd kaymışsa pnpm/git MUTLAK `-C`.
-- **Sıradaki:** ML/LLM yüksek-değer yüzeyi inceliyor (Slice 3 orta-değer). Slice 4 (LLM-feedback) thin (feedback-loop yok).
-  Muhtemel: dur + AskUserQuestion yön sorusu (canlı-veri prod-key / overlay HUD / başka).
+- **Iter Slice-4 (done)** — koç-notu "Yeniden üret" (kullanıcı AskUserQuestion'da "ML/LLM'i derinleştir" seçti). DeepDiveTab'a
+  local `regenerated` override state + `regenerate` handler (`invoke('get_coach_narrative', {recommendation: rec, win_prob,
+  combo_history})` → taze not) + buton; `canRegenerate = source==='external' || external_rejected` (düz deterministik'te gizli —
+  yeniden-üretmek aynı sonucu verir); şampiyon değişince override sıfırlanır (useEffect [champion_id]). i18n coachNoteRegenerate/
+  Regenerating + `.hero-detail-coach-regen` CSS. Renderer-only (core/host el değmedi — engine purity; get_coach_narrative idempotent
+  re-invoke). Test: regenerate tıkla→yeni-not + düz-deterministik'te buton-yok (global host-mock src/test/setup.ts). ✅ renderer 287.
+- **Sıradaki:** ML/LLM hızlı-kazanç yüzeyi büyük ölçüde işlendi (Slice 1-4). Slice 5 (feedback-tüketen-loop/model-preset) daha büyük.
+  Muhtemel sonraki tur: dur + AskUserQuestion (ML/LLM-deepen-devam mı, yoksa canlı-veri/overlay-HUD mu).
 
 ## Discovery-6 — gerçek yeniden-keşif #2 (2026-06-18)
 > "Hazırlanmış-ama-bağlanmamış" damarı sürdü (Explore + koddan-teyit).

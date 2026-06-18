@@ -232,6 +232,8 @@
     "coachNoteLlm": "LLM",
     "coachNoteRejected": "LLM rejected",
     "coachNoteRejectedHint": "The LLM text was over-promising or ungrounded → fell back to the safe deterministic note",
+    "coachNoteRegenerate": "Regenerate",
+    "coachNoteRegenerating": "Generating…",
     "earlyAdvantage": "Early-game advantage",
     "blindSafe": "Blind pick safe",
     "comboStrong": "Strong combo with {{ally}}",
