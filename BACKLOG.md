@@ -25,8 +25,12 @@ settings, render, 6 test); MVP çalışıyor. Motor purity by-design korunur (LL
   kaynaklı/reddedilen notta görünür; tıklayınca `get_coach_narrative` re-invoke → taze LLM notu (memnuniyetsizliği TÜKETEN
   etkileşim, sadece veri-toplama değil). Renderer-only (DeepDiveTab local override state + şampiyon-değişince-reset;
   core/host el değmedi — engine purity). i18n coachNoteRegenerate/Regenerating + `.hero-detail-coach-regen` CSS. renderer 287; +2 test.
-- **Slice 5+ (aday)** — like/dislike feedback'i TÜKETEN loop (re-prompt varyasyonu/model seçimi) · model preset'leri ·
-  SettingsPanel buton davranış testi. **NOT: ML/LLM hızlı-kazanç yüzeyi büyük ölçüde işlendi** (Slice 1-4 done).
+- **Slice 5 done** — "Yeniden üret" gerçekten farklılaştı: `vary` bayrağı uçtan uca (DeepDiveTab regenerate vary:true →
+  get_coach_narrative → getCoachNarrative → fetchLlmCandidate → buildCoachUserPrompt → "öncekinden FARKLI bir açıdan, farklı
+  kelimelerle yaz"). Örtük "beğenmedim"i TÜKETEN loop (sadece temperature jitter değil). Host+renderer (core el değmedi —
+  engine purity). host 176 + renderer 287; +2 host test (prompt hint + body pass-through) + DeepDiveTab vary assertion.
+- **Slice 6+ (aday)** — model preset'leri (Ollama localhost vb. hızlı-seç) · açık like/dislike + saklama (ama tüketici-loop
+  yoksa thin). **NOT: ML/LLM derinleştirme yüzeyi de büyük ölçüde işlendi (Slice 1-5). Sıradaki tur muhtemelen yön sorusu.**
 
 **MOD: Büyük geliştirme — EPIC (2026-06-17 kullanıcı direktifi).** Küçük-yüzey tükendi → en yüksek-değerli
 BÜYÜK yönü Epic seç, MVP'ye böl, her tur tek dikey dilim (salt kozmetik yok). Öncelik: 1) match-history

@@ -100,6 +100,7 @@ export const DeepDiveTab = React.memo(function DeepDiveTab({ rec, draftSimulatio
         recommendation: rec,
         win_prob: rec.win_prob ?? null,
         combo_history: rec.combo_history ?? null,
+        vary: true, // öncekinden farklı bir not iste (örtük "beğenmedim")
       });
       if (n?.text) setRegenerated(n);
     } catch {

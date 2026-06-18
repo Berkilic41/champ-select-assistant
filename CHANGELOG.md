@@ -6,6 +6,14 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 
 ## [Unreleased]
 
+### Geliştirildi
+- **"Yeniden üret" artık gerçekten farklı bir not üretiyor** (ML/LLM Koçluk Epic — Slice 5) — Koç notu "Yeniden üret"
+  butonu artık LLM'e açıkça **"öncekinden farklı bir açıdan, farklı kelimelerle yaz"** talimatı geçiriyor (yalnız
+  temperature rastgeleliğine güvenmek yerine). Böylece kullanıcının örtük "beğenmedim" sinyali TÜKETİLİYOR: yeniden-üret
+  anlamlı şekilde farklı bir not getiriyor. `vary` bayrağı uçtan uca geçirildi (DeepDiveTab → `get_coach_narrative` →
+  `getCoachNarrative` → `fetchLlmCandidate` → `buildCoachUserPrompt`). Host+renderer (core değişmedi — engine purity);
+  +2 host testi (prompt hint + request-body pass-through) + DeepDiveTab vary:true assertion.
+
 ### Eklendi
 - **Koç notu "Yeniden üret"** (ML/LLM Koçluk Epic — Slice 4) — LLM kaynaklı koç notunun başlığına bir "Yeniden üret"
   butonu eklendi: kullanıcı üretilen notu beğenmezse (ya da audit'i geçemeyip deterministik'e düşmüşse) tek tıkla

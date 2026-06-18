@@ -43,7 +43,11 @@ const SYSTEM_PROMPT =
   "gibi mutlak dil KULLANMA. Türkçe, en fazla 3 kısa cümle, net ve sakin bir koçluk " +
   "notu yaz. Notta şampiyonun adını mutlaka geçir.";
 
-export function buildCoachUserPrompt(rec: CoachRecFacts, faz3: CoachFaz3): string {
+export function buildCoachUserPrompt(
+  rec: CoachRecFacts,
+  faz3: CoachFaz3,
+  vary = false,
+): string {
   const facts: string[] = [];
   const champ = (rec.champion_name ?? "").trim() || "Bu pick";
   facts.push(`Şampiyon: ${champ}`);
@@ -78,7 +82,11 @@ export function buildCoachUserPrompt(rec: CoachRecFacts, faz3: CoachFaz3): strin
   if (miss && miss.length > 0) {
     facts.push(`Veri boşluğu (bunlar hakkında iddia ETME): ${miss.join(", ")}`);
   }
-  return `Gerçekler:\n${facts.join("\n")}\n\nBu gerçeklere sadık, kısa bir koçluk notu yaz.`;
+  // vary: kullanıcı notu "yeniden üret"tiyse (örtük beğenmedim) → farklı bir not iste.
+  const closing = vary
+    ? "Bu gerçeklere sadık, kısa bir koçluk notu yaz — öncekinden FARKLI bir açıdan, farklı kelimelerle."
+    : "Bu gerçeklere sadık, kısa bir koçluk notu yaz.";
+  return `Gerçekler:\n${facts.join("\n")}\n\n${closing}`;
 }
 
 /**
@@ -92,6 +100,7 @@ export async function fetchLlmCandidate(
   faz3: CoachFaz3,
   fetchFn: FetchFn,
   timeoutMs = 6000,
+  vary = false,
 ): Promise<string | null> {
   const url = endpoint.trim();
   if (!url) return null;
@@ -105,7 +114,7 @@ export async function fetchLlmCandidate(
         model: model.trim() || "default",
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: buildCoachUserPrompt(rec, faz3) },
+          { role: "user", content: buildCoachUserPrompt(rec, faz3, vary) },
         ],
         temperature: 0.4,
         max_tokens: 180,

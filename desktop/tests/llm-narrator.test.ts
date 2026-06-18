@@ -59,6 +59,14 @@ describe("buildCoachUserPrompt", () => {
     expect(prompt).toContain("Veri boşluğu");
     expect(prompt).toContain("meta, matchup");
   });
+
+  it("adds a 'write it differently' instruction when vary is set (regenerate)", () => {
+    const base = buildCoachUserPrompt({ champion_name: "Lee Sin" }, {});
+    const varied = buildCoachUserPrompt({ champion_name: "Lee Sin" }, {}, true);
+    expect(base).not.toContain("FARKLI");
+    expect(varied).toContain("FARKLI");
+    expect(varied).toContain("farklı kelimelerle");
+  });
 });
 
 describe("fetchLlmCandidate", () => {
@@ -92,5 +100,15 @@ describe("fetchLlmCandidate", () => {
       throw new Error("ECONNREFUSED");
     };
     expect(await fetchLlmCandidate("http://x", "m", rec, {}, boom)).toBeNull();
+  });
+
+  it("threads the vary hint into the request body when vary=true (regenerate)", async () => {
+    let body = "";
+    const capture: FetchFn = async (_url, init) => {
+      body = init.body;
+      return { ok: true, json: async () => ({ choices: [{ message: { content: "not" } }] }) };
+    };
+    await fetchLlmCandidate("http://x", "m", rec, {}, capture, 6000, true);
+    expect(body).toContain("FARKLI");
   });
 });

@@ -29,8 +29,14 @@
   yeniden-üretmek aynı sonucu verir); şampiyon değişince override sıfırlanır (useEffect [champion_id]). i18n coachNoteRegenerate/
   Regenerating + `.hero-detail-coach-regen` CSS. Renderer-only (core/host el değmedi — engine purity; get_coach_narrative idempotent
   re-invoke). Test: regenerate tıkla→yeni-not + düz-deterministik'te buton-yok (global host-mock src/test/setup.ts). ✅ renderer 287.
-- **Sıradaki:** ML/LLM hızlı-kazanç yüzeyi büyük ölçüde işlendi (Slice 1-4). Slice 5 (feedback-tüketen-loop/model-preset) daha büyük.
-  Muhtemel sonraki tur: dur + AskUserQuestion (ML/LLM-deepen-devam mı, yoksa canlı-veri/overlay-HUD mu).
+- **Iter Slice-5 (done)** — "Yeniden üret" gerçekten farklı not üretir. `vary` bayrağı uçtan uca: DeepDiveTab regenerate
+  invoke `vary:true` → CoachNarrativeInput.vary → getCoachNarrative `fetchLlmCandidate(...,6000,input.vary)` →
+  fetchLlmCandidate `buildCoachUserPrompt(rec,faz3,vary)` → vary ise closing "öncekinden FARKLI bir açıdan, farklı kelimelerle".
+  Örtük "beğenmedim"i TÜKETEN en küçük gerçek loop. Host+renderer (core el değmedi — engine purity; mevcut çağrılar vary=false
+  default ile bozulmadı). Test: buildCoachUserPrompt vary hint + fetchLlmCandidate body pass-through (capture FetchFn) +
+  DeepDiveTab vary:true assertion. ✅ host 176 + renderer 287 + typecheck 0.
+- **Sıradaki:** ML/LLM derinleştirme yüzeyi büyük ölçüde işlendi (Slice 1-5). Slice 6 (model-preset/açık-feedback) düşük-orta.
+  Muhtemel: dur + AskUserQuestion (ML/LLM-devam mı / canlı-veri prod-key / overlay HUD).
 
 ## Discovery-6 — gerçek yeniden-keşif #2 (2026-06-18)
 > "Hazırlanmış-ama-bağlanmamış" damarı sürdü (Explore + koddan-teyit).

@@ -31,6 +31,8 @@ export interface CoachNarrativeInput {
   combo_history?: { games: number; wins: number } | null;
   /** Dış (LLM) aday prose — yoksa deterministik narrative. */
   candidate?: string | null;
+  /** "Yeniden üret" — LLM'den öncekinden farklı bir not iste (örtük beğenmedim). */
+  vary?: boolean;
 }
 
 export async function getCoachNarrative(
@@ -67,6 +69,8 @@ export async function getCoachNarrative(
           input.recommendation as CoachRecFacts,
           { win_prob: input.win_prob, combo_history: input.combo_history },
           fetchFn ?? (globalThis.fetch as unknown as FetchFn),
+          6000,
+          input.vary ?? false,
         )) ?? undefined;
     }
   }

@@ -203,7 +203,8 @@ describe('DeepDiveTab', () => {
     expect(await screen.findByText('Taze LLM notu: erken tempo kur.')).toBeInTheDocument();
     expect(mockInvoke).toHaveBeenCalledWith(
       'get_coach_narrative',
-      expect.objectContaining({ recommendation: expect.any(Object) }),
+      // vary:true → öncekinden farklı bir not iste (örtük "beğenmedim").
+      expect.objectContaining({ recommendation: expect.any(Object), vary: true }),
     );
   });
 
