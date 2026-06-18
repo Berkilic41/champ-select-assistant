@@ -6,6 +6,14 @@
 > **21 doğrulanmış bulgu**, adversaryal koddan-teyit) çıktısıdır.
 
 ## Aktif
+**HARDENING: Geniş kalite/test sağlamlaştırma (2026-06-18, kullanıcı AskUserQuestion ile seçti).** Olgun kod
+tabanı (Discovery 1-5 + B-01..B-47 kapalı) → odaklı tarama (1 Explore + koddan-teyit) gerçek edge-case guard'ları arar.
+- **H-01 done** — `buildCoachUserPrompt` sınır-guard (llm-narrator.ts): `win_prob.sample_size`/`combo_history.wins`
+  TS-zorunlu olsa da `get_coach_narrative` IPC sınırında input cast'li (runtime-doğrulanmaz) → eksik alan prompt'a
+  "undefined maç/galibiyet" sızdırabilirdi. `Number.isFinite(sample_size)`/`Number.isFinite(wins)` guard'ı (0 geçerli,
+  undefined/null/NaN reddedilir). Pür-defensive (pratikte core hep sağlar → davranış değişmez, CHANGELOG'a yazılmadı,
+  B-47 emsali). Host-only (engine purity); +2 test (eksik-sample_size/wins → "undefined" sızıntısı yok). host 180.
+
 **EPIC: Overlay HUD Görselleri (2026-06-18, kullanıcı AskUserQuestion ile seçti).** Keşif: in-game görünüm ana
 pencerede ama zaten overlay-modu var (set_overlay_mode sağ-üst 400×720 + always-on-top). Gerçek şeffaf Electron
 overlay penceresi ELENDİ (ToS/anti-cheat riski + yüksek sürtünme → ADR-011). Saf renderer + ToS-güvenli yön.

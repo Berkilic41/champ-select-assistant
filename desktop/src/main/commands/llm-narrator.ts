@@ -68,13 +68,15 @@ export function buildCoachUserPrompt(
     facts.push(`Faz avantajın: erken ~%${p(pm[0])} · orta ~%${p(pm[1])} · geç ~%${p(pm[2])}`);
   }
   const wp = faz3.win_prob;
-  if (wp && Number.isFinite(wp.probability)) {
+  // Sınır-guard: IPC'den gelen input cast'li (runtime doğrulanmaz) → eksik
+  // sample_size/wins prompt'a "undefined" sızdırmasın (0 geçerli, isFinite tutar).
+  if (wp && Number.isFinite(wp.probability) && Number.isFinite(wp.sample_size)) {
     facts.push(
       `Bu skor seviyesinde geçmiş kazanma: ~%${Math.round(wp.probability * 100)} (${wp.sample_size} maç)`,
     );
   }
   const ch = faz3.combo_history;
-  if (ch && ch.games > 0) {
+  if (ch && ch.games > 0 && Number.isFinite(ch.wins)) {
     facts.push(`Bu combo'da co-pick geçmişi: ${ch.games} maç, ${ch.wins} galibiyet`);
   }
   // Anti-halüsinasyon: gerçek verisi olmayan sinyalleri LLM'e bildir → uydurmasın.

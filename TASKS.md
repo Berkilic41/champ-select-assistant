@@ -2,6 +2,15 @@
 
 > Tek seferde tek küçük görev. Tarih: 2026-06-16.
 
+## HARDENING — geniş kalite/test sağlamlaştırma (2026-06-18, kullanıcı seçti)
+> Olgun kod tabanı → odaklı Explore + koddan-teyit ile gerçek edge-case guard'ı. Ajan 2 marjinal aday buldu; ikisi de gerçek sınır-kırılganlığı.
+- **Iter H-01 (done)** — buildCoachUserPrompt sınır-guard. KODDAN doğrulandı: `win_prob.sample_size`/`combo_history.wins`
+  TS-zorunlu ama get_coach_narrative IPC sınırında input `as unknown as CoachNarrativeInput` cast'li (runtime doğrulanmaz);
+  renderer pratikte yapısal rec geçirse de malformed input prompt'a "undefined maç" yazabilirdi. `Number.isFinite` guard'ı
+  (sample_size+wins; 0 geçerli kalır, undefined/null/NaN reddedilir). Pür-defensive → davranış değişmez (CHANGELOG'a yazılmaz,
+  B-47 emsali). Host-only (core el değmedi). Test: eksik-sample_size/wins → prompt'ta "undefined" yok + fact eklenmez. ✅ host 180.
+- **Sıradaki:** ek hardening adayları (odaklı tarama "olgun, az-bulgu" dedi) ya da yön sorusu. Anti-churn: marjinal guard'ları zorlamadan.
+
 ## EPIC: Overlay HUD Görselleri (2026-06-18, kullanıcı AskUserQuestion ile seçti)
 > Keşif: in-game ana pencerede ama overlay-modu (sağ-üst 400px+always-on-top) zaten var. Gerçek şeffaf pencere ELE (ToS, ADR-011).
 - **Iter Slice-1 (done, ADR-011)** — IngameView "Kompakt HUD" toggle. KODDAN doğrulandı: HUD görselleri (PowerCurveBar,

@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildCoachUserPrompt,
   fetchLlmCandidate,
+  type CoachFaz3,
   type FetchFn,
 } from "../src/main/commands/llm-narrator";
 
@@ -66,6 +67,21 @@ describe("buildCoachUserPrompt", () => {
     expect(base).not.toContain("FARKLI");
     expect(varied).toContain("FARKLI");
     expect(varied).toContain("farklı kelimelerle");
+  });
+
+  it("omits the win-prob fact when sample_size is missing (no 'undefined' leak)", () => {
+    // Sınır: IPC'den eksik sample_size'lı win_prob gelirse prompt'a "undefined" yazılmamalı.
+    const faz3 = { win_prob: { probability: 0.58 } } as unknown as CoachFaz3;
+    const prompt = buildCoachUserPrompt({ champion_name: "Lee Sin" }, faz3);
+    expect(prompt).not.toContain("undefined");
+    expect(prompt).not.toContain("~%58"); // sample_size yok → fact hiç eklenmez
+  });
+
+  it("omits the combo-history fact when wins is missing (no 'undefined' leak)", () => {
+    const faz3 = { combo_history: { games: 5 } } as unknown as CoachFaz3;
+    const prompt = buildCoachUserPrompt({ champion_name: "Lee Sin" }, faz3);
+    expect(prompt).not.toContain("undefined");
+    expect(prompt).not.toContain("co-pick geçmişi"); // games var ama wins yok → fact yok
   });
 });
 
