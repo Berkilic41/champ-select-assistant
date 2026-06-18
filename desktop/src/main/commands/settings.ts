@@ -23,6 +23,9 @@ export interface AppSettings {
   // chat/completions → veri makineden çıkmaz). Üretilen aday core audit'inden geçer.
   coach_llm_endpoint: string;
   coach_llm_model: string;
+  // Overlay HUD: maça girince in-game görünüm varsayılan olarak kompakt (yalnız
+  // glanceable görseller) açılsın mı. Kapalı = detaylı. Kullanıcı yine toggle'layabilir.
+  compact_overlay: boolean;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -41,6 +44,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   share_anonymous_feedback: false,
   coach_llm_endpoint: "",
   coach_llm_model: "",
+  compact_overlay: false,
 };
 
 /** Rust serde paritesi: bu alanlardan biri eksikse TÜM ayarlar default'a düşer
@@ -107,6 +111,10 @@ export function getSettings(db: DatabaseSync): AppSettings {
       typeof parsed.coach_llm_model === "string"
         ? parsed.coach_llm_model
         : DEFAULT_SETTINGS.coach_llm_model,
+    compact_overlay:
+      typeof parsed.compact_overlay === "boolean"
+        ? parsed.compact_overlay
+        : DEFAULT_SETTINGS.compact_overlay,
   } as AppSettings;
 }
 

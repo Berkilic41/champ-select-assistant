@@ -793,6 +793,7 @@
     },
     "soundSection": "Ses",
     "soundsEnabled": "Sesli makro uyarıları (objektif zamanlayıcıları)",
+    "compactOverlay": "Oyun-içi kompakt HUD (yalnız görseller)",
     "privacySection": "Gizlilik",
     "shareAnonymousFeedback": "Anonim öneri geri bildirimini paylaş",
     "shareAnonymousFeedbackHint": "Kapalıyken hiçbir veri cihazından çıkmaz. Açarsan yalnızca anonim öneri geri bildirimi (şampiyon, verdict, skor — kişisel kimlik YOK) önerileri geliştirmek için gönderilir.",

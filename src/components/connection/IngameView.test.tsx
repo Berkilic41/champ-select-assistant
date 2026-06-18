@@ -146,4 +146,19 @@ describe('IngameView compact HUD toggle (Overlay HUD Epic)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Detaylı' }));
     expect(screen.getByText('Erken tempo kur ve kuleyi al.')).toBeInTheDocument();
   });
+
+  it('starts in compact mode when the compact_overlay setting is on (Slice 2)', async () => {
+    mockInvoke.mockImplementation((cmd: string) => {
+      if (cmd === 'get_settings')
+        return Promise.resolve({ ...DEFAULT_SETTINGS, compact_overlay: true });
+      if (cmd === 'get_ingame_plan') return Promise.resolve(PLAN);
+      if (cmd === 'get_macro_state') return Promise.resolve(MACRO);
+      return Promise.resolve(undefined);
+    });
+    const { container } = render(<IngameView />);
+    // Ayar açık → kompakt başlar: toggle "Detaylı" gösterir, görseller kalır, plan metni gizli.
+    expect(await screen.findByRole('button', { name: 'Detaylı' })).toBeInTheDocument();
+    expect(container.querySelector('.overlay-power')).toBeInTheDocument();
+    expect(screen.queryByText('Erken tempo kur ve kuleyi al.')).not.toBeInTheDocument();
+  });
 });

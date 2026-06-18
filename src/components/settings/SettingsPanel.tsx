@@ -246,6 +246,14 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
             />
             {t('settings.soundsEnabled')}
           </label>
+          <label className="sp-toggle">
+            <input
+              type="checkbox"
+              checked={draft.compact_overlay}
+              onChange={e => update({ compact_overlay: e.target.checked })}
+            />
+            {t('settings.compactOverlay')}
+          </label>
           <div className="sp-row">
             <span>{t('settings.size')}</span>
             <select

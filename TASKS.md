@@ -11,7 +11,15 @@
   title sola, buton+minimize sağa), i18n overlay.compact/detailed (tr/en). Saf renderer (core/host el değmedi — windowing var).
   Test: integration (mock get_settings/get_ingame_plan/get_macro_state → detay metni görünür → Kompakt tıkla → metin gizli,
   .overlay-power kalır → Detaylı tıkla → geri). GOTCHA: useSettings get_settings mock'lanmalı (yoksa undefined.then). ✅ renderer 288.
-- **Sıradaki:** Slice 2 (kompakt tercihi kalıcı setting / in-game auto-kompakt / sıkı CSS) ya da yön sorusu.
+- **Iter Slice-2 (done)** — kompakt tercihi kalıcı. KODDAN doğrulandı: ayarlar JSON blob (`app_config` key='settings'),
+  kolon-migration YOK → `compact_overlay`'i host settings.ts (AppSettings+DEFAULT+getSettings optional-default, coach_llm
+  deseni) + renderer useSettings.ts (AppSettings+DEFAULT_SETTINGS) + SettingsPanel checkbox (sounds_enabled deseni) +
+  IngameView `useState(settings.compact_overlay)` + `useEffect([settings.compact_overlay])` senkron. Ayar açıksa in-game
+  doğrudan kompakt; kullanıcı maç-içi toggle korunur. i18n settings.compactOverlay (tr/en). Host+renderer (core el değmedi).
+  Test: yeni settings.test.ts (round-trip + eski-ayar optional-default, diğerleri korunur) + IngameView init-compact
+  (get_settings compact_overlay:true → "Detaylı" toggle + plan metni gizli). ✅ host 178 + renderer 289 + typecheck 0.
+  GOTCHA: testler DEFAULT_SETTINGS spread kullanıyor → AppSettings'e alan eklemek mevcut mock'ları bozmadı.
+- **Sıradaki:** Slice 3 (sıkı kompakt-CSS) düşük-değer. Overlay HUD ToS-güvenli renderer yüzeyi büyük ölçüde işlendi → muhtemel yön sorusu.
 
 ## EPIC: ML/LLM Koçluk Fazı (2026-06-18, kullanıcı AskUserQuestion ile seçti)
 > Yön soruldu (güvenli küçük-yüzey tükendi) → ML/LLM seçildi. Keşif: pipeline ZATEN tam bağlı+test'li.

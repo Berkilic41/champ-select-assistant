@@ -13,7 +13,12 @@ overlay penceresi ELENDİ (ToS/anti-cheat riski + yüksek sürtünme → ADR-011
   glanceable görseller (header/KDA, güç eğrisi, objective doğuş saatleri, faz) kalır → sağ-üst yüzen pencere gerçek
   HUD. Yerel toggle (`compact` state) + `.ingame-compact-toggle` CSS + i18n overlay.compact/detailed. Saf renderer
   (core/host el değmedi — windowing zaten var). renderer 288 + typecheck 0 + i18n parite; +1 integration test.
-- **Slice 2+ (aday)** — kompakt tercihini kalıcılaştır (setting) · in-game'e girince auto-kompakt · sıkı kompakt-layout CSS.
+- **Slice 2 done** — kompakt tercihi kalıcı: `compact_overlay` ayarı (JSON blob; kolon-migration yok; coach_llm_endpoint
+  optional-default deseni → eski ayarlar resetlenmez) + SettingsPanel checkbox + IngameView başlangıç `useState(settings.
+  compact_overlay)` + ayar-yüklenince-senkron effect. Açıksa in-game doğrudan kompakt başlar (her maç toggle yok); kullanıcı
+  yine toggle'layabilir. Host+renderer (core el değmedi). host 178 + renderer 289 + typecheck 0 + i18n parite; +settings.test.ts (2) +IngameView init-compact.
+- **Slice 3+ (aday)** — sıkı kompakt-layout CSS (daha küçük font/spacing) · objective-only minimal mod. **NOT: overlay HUD'un
+  ToS-güvenli renderer yüzeyi büyük ölçüde işlendi.**
 
 **EPIC: ML/LLM Koçluk Fazı (2026-06-18, kullanıcı AskUserQuestion ile seçti).** Güvenli küçük-yüzey tükenince
 yön soruldu → ML/LLM seçildi. Keşif: pipeline ZATEN tam bağlı+test'li (coach_narrator+audit, host llm-narrator,

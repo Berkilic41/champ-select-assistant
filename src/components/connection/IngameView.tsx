@@ -60,8 +60,10 @@ export const IngameView: React.FC<Props> = ({ summonerName }) => {
   const prevSecsRef = useRef<Record<string, number>>({});
   // Overlay HUD: kompakt mod yoğun plan metnini gizler, yalnız glanceable görselleri
   // (header/KDA, güç eğrisi, objective'ler, faz) bırakır → sağ-üstte yüzen pencerede
-  // gerçek bir HUD. Yerel toggle (kalıcılık sonraki dilim).
-  const [compact, setCompact] = useState(false);
+  // gerçek bir HUD. Başlangıç = compact_overlay ayarı; ayar yüklenince senkronlanır,
+  // kullanıcı yine maç-içinde toggle'layabilir.
+  const [compact, setCompact] = useState(settings.compact_overlay);
+  useEffect(() => setCompact(settings.compact_overlay), [settings.compact_overlay]);
 
   // 60sn ve 30sn eşik GEÇİŞLERİNDE tek bip (60: alçak, 30: yüksek ton).
   // Eşik geçişi = önceki poll > eşik && şimdiki ≤ eşik — spam yok.

@@ -20,6 +20,8 @@ export interface AppSettings {
   // (deterministik). Yerel (Ollama) ise veri makineden çıkmaz.
   coach_llm_endpoint: string;
   coach_llm_model: string;
+  // Overlay HUD: in-game görünüm varsayılan kompakt mı açılsın (host ile senkron).
+  compact_overlay: boolean;
 }
 
 // Normalize the six recommendation weights to sum to 1.0.
@@ -62,6 +64,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   share_anonymous_feedback: false,
   coach_llm_endpoint: '',
   coach_llm_model: '',
+  compact_overlay: false,
 };
 
 export { DEFAULT_SETTINGS };

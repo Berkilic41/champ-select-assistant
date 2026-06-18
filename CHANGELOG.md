@@ -7,6 +7,11 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Kompakt HUD tercihi artık kalıcı** (Overlay HUD Epic — Slice 2) — Ayarlar'a "Oyun-içi kompakt HUD (yalnız
+  görseller)" seçeneği eklendi. Açıkken in-game overlay her maça doğrudan kompakt modda (yalnız glanceable görseller)
+  başlıyor — artık her maç elle toggle'lamaya gerek yok. Kullanıcı maç-içinde yine "Detaylı"ya geçebiliyor. Ayar JSON
+  blob'una eklendi (kolon-migration yok; eski ayarlar resetlenmeden default'lanır). Host+renderer (core değişmedi —
+  engine purity); tr/en parite + host (getSettings round-trip/optional-default) ve renderer (IngameView başlangıç-kompakt) testleri.
 - **Oyun-içi "Kompakt HUD" modu** (Overlay HUD Epic — Slice 1) — Oyun-içi overlay'e bir "Kompakt/Detaylı" toggle'ı
   eklendi. Maça girince pencere zaten sağ-üstte küçük (400px) ve always-on-top yüzüyordu, ama yoğun plan metniyle
   (win-condition/rol/spike/lane/wave/matchup/mid-late) sıkışıktı. "Kompakt"a geçince bu metin gizleniyor; yalnız

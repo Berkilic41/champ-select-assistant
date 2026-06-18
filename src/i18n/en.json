@@ -793,6 +793,7 @@
     },
     "soundSection": "Sound",
     "soundsEnabled": "Macro sound alerts (objective timers)",
+    "compactOverlay": "Compact in-game HUD (visuals only)",
     "privacySection": "Privacy",
     "shareAnonymousFeedback": "Share anonymous recommendation feedback",
     "shareAnonymousFeedbackHint": "When off, nothing leaves your device. When on, only anonymized recommendation feedback (champion, verdict, score — no personal identity) is sent to improve recommendations.",
