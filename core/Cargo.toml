@@ -21,7 +21,7 @@ tracing = "0.1"
 # `.ts` is the single source of truth for the desktop renderer (and later the edge
 # worker). Its export machinery is `#[cfg(test)]`-only, so the WASM artifact stays
 # I/O-free; only the lightweight `TS` trait impl ships in WASM.
-ts-rs = "10"
+ts-rs = "12"
 
 # wasm-bindgen is only needed when compiling to WASM; native builds (desktop
 # crate, `cargo test`) must NOT pull it in.
