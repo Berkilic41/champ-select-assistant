@@ -17,8 +17,12 @@ settings, render, 6 test); MVP çalışıyor. Motor purity by-design korunur (LL
   FetchFn seam → test edilebilir; OpenAI-uyumlu yanıt biçimi doğrulaması) + `test_coach_llm` ipc + SettingsPanel buton/durum
   + `.sp-llm-*` CSS + i18n coachLlmTest/Testing/Ok/Fail (tr/en). Engine purity (core el değmedi). host 173 + renderer 285 +
   typecheck 0 + i18n parite; +5 host test (ok/http/bad-response/network/boş).
-- **Slice 3+ (aday)** — daha zengin grounded promptlar (llm-narrator.ts buildCoachUserPrompt'a ek fact) · LLM-notu kullanıcı
-  geri-bildirimi (beğen/beğenme → prompt sinyali) · SettingsPanel buton davranış testi (renderer; thin-wire, host 5-test'li).
+- **Slice 3 done** — daha zengin + güvenli grounded promptlar: buildCoachUserPrompt'a `enemy_team_summary` (rakip kompo),
+  `phase_matchup` (faz avantajı erken/orta/geç ~%), `missing_signals` (veri boşluğu → "iddia ETME" anti-halüsinasyon guard).
+  Hepsi recommendation payload'ında MEVCUT (tam rec geçiriliyor — ChampSelectWrapper:181 teyitli); prose plan'lar EKLENMEDİ
+  (dairesel olurdu). Host-only (core/renderer el değmedi — engine purity). host 174; +1 birim testi (yeni fact'ler + omit).
+- **Slice 4+ (aday)** — LLM-notu kullanıcı geri-bildirimi (beğen/beğenme → prompt sinyali; ama feedback-loop yoksa thin) ·
+  SettingsPanel buton davranış testi (renderer; thin-wire). **NOT: ML/LLM yüksek-değer yüzeyi de inceliyor** (Slice 3 orta-değer).
 
 **MOD: Büyük geliştirme — EPIC (2026-06-17 kullanıcı direktifi).** Küçük-yüzey tükendi → en yüksek-değerli
 BÜYÜK yönü Epic seç, MVP'ye böl, her tur tek dikey dilim (salt kozmetik yok). Öncelik: 1) match-history

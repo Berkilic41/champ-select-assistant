@@ -17,7 +17,14 @@
   draft endpoint'i test eder) + ✓/✗ durum + `.sp-llm-*` CSS + i18n (coachLlmTest/Testing/Ok/Fail tr/en). Engine purity
   (core el değmedi). Test: coach-narrative.test.ts'e 5 testCoachLlm testi (ok/http/bad/network/boş-endpoint, mock FetchFn).
   ✅ host 173 + renderer 285 + typecheck 0 + i18n parite. GOTCHA: cwd kaymışsa pnpm/git MUTLAK `-C` yol.
-- **Sıradaki:** Slice 3 (zengin grounded promptlar / LLM-notu geri-bildirimi) ya da ML/LLM yüzeyi tükendiyse yön sorusu.
+- **Iter Slice-3 (done)** — zengin + güvenli grounded promptlar. KODDAN doğrulandı: ChampSelectWrapper:181 tam `rec`
+  geçiriyor → enemy_team_summary/phase_matchup/missing_signals prompt'a ulaşır. CoachRecFacts genişletildi +
+  buildCoachUserPrompt'a 3 fact: "Rakip kompo: …", "Faz avantajın: erken/orta/geç ~%…", "Veri boşluğu (bunlar hakkında
+  iddia ETME): …" (anti-halüsinasyon). Prose plan'lar (mid/late_plan) EKLENMEDİ — zaten koçluk metni, LLM'e vermek dairesel.
+  Host-only (core/renderer el değmedi — engine purity). Test: llm-narrator.test.ts'e Slice-3 fact testi + omit-absence.
+  ✅ host 174. GOTCHA: cwd kaymışsa pnpm/git MUTLAK `-C`.
+- **Sıradaki:** ML/LLM yüksek-değer yüzeyi inceliyor (Slice 3 orta-değer). Slice 4 (LLM-feedback) thin (feedback-loop yok).
+  Muhtemel: dur + AskUserQuestion yön sorusu (canlı-veri prod-key / overlay HUD / başka).
 
 ## Discovery-6 — gerçek yeniden-keşif #2 (2026-06-18)
 > "Hazırlanmış-ama-bağlanmamış" damarı sürdü (Explore + koddan-teyit).

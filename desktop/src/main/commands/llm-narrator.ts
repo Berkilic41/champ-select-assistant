@@ -22,6 +22,13 @@ export interface CoachRecFacts {
   core_item_name?: string | null;
   risk_summary?: string | null;
   draft_plan?: { combo_with?: { ally_champion_key?: string }[] } | null;
+  /** Rakip kompo özeti (ör. "AP ağırlıklı · frontline yok") — nota bağlam verir. */
+  enemy_team_summary?: string;
+  /** [erken, orta, geç] faz avantajı 0..1 (0.5 = nötr). */
+  phase_matchup?: [number, number, number] | null;
+  /** Gerçek verisi olmayan sinyaller ('meta'|'matchup'|'build') — LLM bunlar
+   *  hakkında iddia ETMEMELİ (anti-halüsinasyon grounding). */
+  missing_signals?: string[];
 }
 
 /** Test seam: global fetch ile yapısal uyumlu. */
@@ -50,6 +57,12 @@ export function buildCoachUserPrompt(rec: CoachRecFacts, faz3: CoachFaz3): strin
   if (ally) facts.push(`Combo müttefiki: ${ally}`);
   if (rec.core_item_name?.trim()) facts.push(`İlk item: ${rec.core_item_name.trim()}`);
   if (rec.risk_summary?.trim()) facts.push(`Risk: ${rec.risk_summary.trim()}`);
+  if (rec.enemy_team_summary?.trim()) facts.push(`Rakip kompo: ${rec.enemy_team_summary.trim()}`);
+  const pm = rec.phase_matchup;
+  if (pm && pm.length === 3) {
+    const p = (v: number) => Math.round(Math.max(0, Math.min(1, v)) * 100);
+    facts.push(`Faz avantajın: erken ~%${p(pm[0])} · orta ~%${p(pm[1])} · geç ~%${p(pm[2])}`);
+  }
   const wp = faz3.win_prob;
   if (wp && Number.isFinite(wp.probability)) {
     facts.push(
@@ -59,6 +72,11 @@ export function buildCoachUserPrompt(rec: CoachRecFacts, faz3: CoachFaz3): strin
   const ch = faz3.combo_history;
   if (ch && ch.games > 0) {
     facts.push(`Bu combo'da co-pick geçmişi: ${ch.games} maç, ${ch.wins} galibiyet`);
+  }
+  // Anti-halüsinasyon: gerçek verisi olmayan sinyalleri LLM'e bildir → uydurmasın.
+  const miss = rec.missing_signals?.filter((s) => s.trim());
+  if (miss && miss.length > 0) {
+    facts.push(`Veri boşluğu (bunlar hakkında iddia ETME): ${miss.join(", ")}`);
   }
   return `Gerçekler:\n${facts.join("\n")}\n\nBu gerçeklere sadık, kısa bir koçluk notu yaz.`;
 }

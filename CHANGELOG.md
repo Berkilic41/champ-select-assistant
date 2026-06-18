@@ -6,6 +6,14 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 
 ## [Unreleased]
 
+### Geliştirildi
+- **LLM koçluk notu daha zengin + güvenli temellendirildi** (ML/LLM Koçluk Epic — Slice 3) — Opsiyonel LLM koç
+  notu prompt'una üç grounded fact daha eklendi: **rakip kompo özeti** (ör. "AP ağırlıklı · frontline yok"),
+  **faz avantajı** (erken/orta/geç ~%X) ve **veri boşluğu uyarısı** (gerçek verisi olmayan sinyaller — meta/matchup/
+  build — LLM'e "bunlar hakkında iddia ETME" olarak verilir → anti-halüsinasyon/grounding). Daha bağlamlı + daha az
+  uydurma riskli LLM notu (core audit zaten abartıyı keser; bu, üretilen metni baştan daha sağlam temellendirir).
+  Host-only (`llm-narrator.ts` buildCoachUserPrompt; core/renderer değişmedi — engine purity); +1 birim testi.
+
 ### Eklendi
 - **LLM koçluk için "Bağlantı test et"** (ML/LLM Koçluk Epic — Slice 2) — Ayarlar'daki LLM koçluk bölümüne, girilen
   endpoint'in (ve model'in) çalışıp çalışmadığını champ-select'i beklemeden doğrulayan bir buton eklendi: tıklayınca

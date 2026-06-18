@@ -37,6 +37,27 @@ describe("buildCoachUserPrompt", () => {
     expect(prompt).toContain("Yasuo");
     expect(prompt).not.toContain("Lane rakibi");
     expect(prompt).not.toContain("~%");
+    expect(prompt).not.toContain("Rakip kompo");
+    expect(prompt).not.toContain("Veri boşluğu");
+  });
+
+  it("grounds the note with enemy comp, phase advantage and a data-gap guard (Slice 3)", () => {
+    const prompt = buildCoachUserPrompt(
+      {
+        champion_name: "Lee Sin",
+        enemy_team_summary: "AP ağırlıklı · frontline yok",
+        phase_matchup: [0.7, 0.5, 0.3],
+        missing_signals: ["meta", "matchup"],
+      },
+      {},
+    );
+    expect(prompt).toContain("Rakip kompo: AP ağırlıklı · frontline yok");
+    expect(prompt).toContain("Faz avantajın: erken ~%70");
+    expect(prompt).toContain("orta ~%50");
+    expect(prompt).toContain("geç ~%30");
+    // Anti-halüsinasyon: LLM eksik veriyi bilmeli (uydurmasın).
+    expect(prompt).toContain("Veri boşluğu");
+    expect(prompt).toContain("meta, matchup");
   });
 });
 
