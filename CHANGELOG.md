@@ -13,6 +13,11 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
   kayboluyordu; artık uygulama içinde her zaman erişilebilir (yasal gereklilik + Riot uygulama-incelemesiyle hizalı).
   Disclaimer metni tek kaynaktan (`onboarding.disclaimer`) okunur → legal metin iki kopya arasında sürüklenmez. Saf
   renderer (core/host/worker değişmedi — engine purity); +2 i18n anahtarı (tr/en parite) + disclaimer'ı kilitleyen test.
+- **"Hakkında"da uygulama sürümü** — "Hakkında" bölümü artık dağıtılan build'in sürümünü gösteriyor
+  ("Champ Select Assistant · v{x}"). Pending-Review bir uygulamada hangi build'in çalıştığını/incelendiğini ve
+  güncel olup olmadığını görmek için yararlı. Yeni host komutu `get_app_version` (`app.getVersion()` sarmalı) +
+  renderer mount-fetch; sürüm çözülemezse satır yalnız uygulama adını gösterir (graceful). Host+renderer (core/worker
+  değişmedi — engine purity); +2 test (ipc-contract handler + renderer sürüm-render).
 
 ### Geliştirildi
 - **Kompakt HUD daha sıkı/glanceable** (Overlay HUD Epic — Slice 3) — Kompakt modda artık plan başlığındaki metin

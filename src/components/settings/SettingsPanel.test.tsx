@@ -177,4 +177,12 @@ describe('SettingsPanel feedback sync', () => {
     expect(screen.getByText(/Riot Games tarafından onaylanmamıştır/)).toBeInTheDocument();
     expect(screen.getByText(/Data Dragon ve Community Dragon/)).toBeInTheDocument();
   });
+
+  it('shows the app build version in the About section when available', async () => {
+    invokeMock.mockImplementation((cmd) =>
+      Promise.resolve(cmd === 'get_app_version' ? '1.2.3' : null),
+    );
+    render(<SettingsPanel settings={DEFAULT_SETTINGS} onSave={vi.fn()} onClose={vi.fn()} />);
+    expect(await screen.findByText(/Champ Select Assistant · v1\.2\.3/)).toBeInTheDocument();
+  });
 });

@@ -14,6 +14,12 @@
   uygulama adı + `t('onboarding.disclaimer')` (tek-kaynak → drift yok) + veri-atfı. +2 i18n anahtarı
   (aboutSection/aboutAttribution, tr/en parite) + `.sp-about-*` CSS + disclaimer-render testi. Saf renderer
   (core/host/worker el değmedi — engine purity). ✅ renderer 290 + typecheck 0 + i18n parite.
+- **Iter (done)** — "Hakkında"ya uygulama sürümü. Doğal tamamlayıcı: Pending-Review build'de hangi sürümün
+  çalıştığını/incelendiğini görmek gerçek değer. KODDAN doğrulandı: `electron-stub.ts:24` zaten `getVersion → "0.0.0-test"`
+  veriyor → host `get_app_version` (`app.getVersion()` sarmalı, ctx'e dokunmaz) temiz test-edilebilir. ipc.ts kayıt +
+  SettingsPanel mount-fetch (`Promise.resolve(invoke)` ile sarılı → mock promise döndürmese de çökmez; sürüm yoksa yalnız
+  ad) + `get_app_version ? · v{x}`. Host+renderer (core/worker el değmedi). Test: ipc-contract handler ("0.0.0-test") +
+  renderer sürüm-render (get_app_version:'1.2.3' → "· v1.2.3"). ✅ host 181 + renderer 291 + typecheck 0.
 
 ## HARDENING — geniş kalite/test sağlamlaştırma (2026-06-18, kullanıcı seçti)
 > Olgun kod tabanı → odaklı Explore + koddan-teyit ile gerçek edge-case guard'ı. Ajan 2 marjinal aday buldu; ikisi de gerçek sınır-kırılganlığı.

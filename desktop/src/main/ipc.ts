@@ -5,7 +5,7 @@
 
 import type { DatabaseSync } from "node:sqlite";
 
-import { BrowserWindow, ipcMain, type IpcMainInvokeEvent } from "electron";
+import { app, BrowserWindow, ipcMain, type IpcMainInvokeEvent } from "electron";
 
 import {
   completeOnboarding,
@@ -161,6 +161,8 @@ export function buildCommandRegistry(
   const commands = new Map<string, CommandHandler>();
 
   commands.set("get_app_status", () => ctx.status());
+  // Ayarlar → "Hakkında": dağıtılan build'in sürümü (destek/Riot-inceleme bağlamı).
+  commands.set("get_app_version", () => app.getVersion());
 
   // settings.rs
   commands.set("get_settings", () => getSettings(requireDb(ctx)));

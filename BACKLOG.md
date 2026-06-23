@@ -14,8 +14,10 @@ adı + `onboarding.disclaimer` tek-kaynak + veri-kaynağı atfı). Saf renderer 
 - **Yanlış-alarm (gelecek ajanlar re-flag ETMESİN):** `useSummonerData.ts:135-144` Riot-key-yok hatasını "League Client
   açık değil"e maskeler → BU DOĞRU/BİLİNÇLİ: dağıtılan istemcide key YOK by-design (key yalnız sunucu worker'da);
   "RIOT_API_KEY ayarla" birincil kullanıcı için yanlış tavsiye olurdu (docstring + kasıtlı test kilitliyor). Çürütüldü.
-- **Aday (ertelendi):** "Hakkında"da uygulama sürümü (`app.getVersion()`) — host komutu + ipc + contract + test gerektirir;
-  marjinal değer, ayrı tur. Ayrıca TERMS/PRIVACY linkleri `shell.openExternal` ister (host plumbing).
+- **Sürüm satırı (done):** "Hakkında"da uygulama sürümü eklendi — host `get_app_version` (`app.getVersion()`; electron-stub
+  testte "0.0.0-test") + SettingsPanel mount-fetch + "· v{x}" (sürüm yoksa yalnız ad). +2 test (ipc-contract + render). host 181 + renderer 291.
+- **Aday (ertelendi):** "Hakkında"da TERMS/PRIVACY linkleri — `shell.openExternal` host plumbing'i ister + harici-tarayıcı
+  onayı (outward-facing); ayrı tur, marjinal değer.
 
 **HARDENING: Geniş kalite/test sağlamlaştırma (2026-06-18, kullanıcı AskUserQuestion ile seçti).** Olgun kod
 tabanı (Discovery 1-5 + B-01..B-47 kapalı) → odaklı tarama (1 Explore + koddan-teyit) gerçek edge-case guard'ları arar.

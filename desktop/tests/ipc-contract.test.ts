@@ -59,4 +59,13 @@ describe("IPC command-registry contract", () => {
     const missing = [...used].filter((name) => !registered.has(name)).sort();
     expect(missing, `renderer bu komutları çağırıyor ama ipc.ts kaydetmemiş: ${missing.join(", ")}`).toEqual([]);
   });
+
+  it("registers get_app_version and the handler returns the build version", () => {
+    // Ayarlar → "Hakkında" sürüm satırı bu komuta dayanır; handler app.getVersion()'ı
+    // sarar (electron-stub testte "0.0.0-test" döndürür) ve ctx'e dokunmaz.
+    const registry = buildCommandRegistry({} as unknown as IpcContext);
+    const handler = registry.get("get_app_version");
+    expect(handler).toBeDefined();
+    expect(handler!(undefined)).toBe("0.0.0-test");
+  });
 });

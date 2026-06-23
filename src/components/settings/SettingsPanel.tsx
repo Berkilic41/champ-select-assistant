@@ -76,6 +76,16 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
       setLlmTest({ status: 'error' });
     }
   };
+  // Ayarlar → "Hakkında": dağıtılan build sürümü (host app.getVersion()).
+  const [appVersion, setAppVersion] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    Promise.resolve(invoke<string>('get_app_version'))
+      .then((v) => {
+        if (typeof v === 'string' && v.trim()) setAppVersion(v);
+      })
+      .catch(() => {});
+  }, []);
+
   const requestClose = () => {
     if (dirty) setConfirmingClose(true);
     else onClose();
@@ -428,7 +438,9 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
 
         <section className="sp-section">
           <h3 className="sp-section-title">{t('settings.aboutSection')}</h3>
-          <p className="sp-about-name">Champ Select Assistant</p>
+          <p className="sp-about-name">
+            Champ Select Assistant{appVersion ? ` · v${appVersion}` : ''}
+          </p>
           <p className="sp-hint sp-about-disclaimer">{t('onboarding.disclaimer')}</p>
           <p className="sp-hint">{t('settings.aboutAttribution')}</p>
         </section>
