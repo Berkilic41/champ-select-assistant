@@ -243,6 +243,7 @@
     "scoreTeamCounter": "Team Counter",
     "scoreSynergy": "Synergy",
     "scoreMeta": "Meta",
+    "teamRole": "Team Role",
     "phaseLine": "Early {{early}}% · Mid {{mid}}% · Late {{late}}%",
     "enemyLabel": "Enemy: {{summary}}",
     "planLabel": "Game Plan",

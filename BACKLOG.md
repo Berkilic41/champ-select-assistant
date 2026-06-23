@@ -6,6 +6,17 @@
 > **21 doğrulanmış bulgu**, adversaryal koddan-teyit) çıktısıdır.
 
 ## Aktif
+**KEŞİF: Değer-keşfi workflow (2026-06-18, "uygulamayı geliştirmeye devam", ultracode).** 6-mercek paralel keşif +
+2/2 adversaryal koddan-doğrulama (43 ajan, 18 aday → 3 doğrulanmış; sentez ajanı API-hatasından düştü → lider self-verify).
+- **D7-1 done** — HeroCard "Takım Rolü": `team_role` core'da hesaplanıp payload'da, yalnız `IngameView.tsx:199` oyun-içi
+  render ediliyordu → champ-select karar kartına kompakt kimlik-etiketi (additive, plan-slot çalmaz). +1 i18n + render testi.
+  Saf renderer (core/host el değmedi). renderer 292. "Core hesaplar ama render yok" damarı (B-05/DISCOVERY-5/6 deseni) sürüyor.
+- **D7-2 (doğrulanmış, aday)** — TrendPanel faz-kırılımı: post-game trend'i early/mid/late (`duration_secs` 0-15/15-30/30+ bin)
+  böl → 3 mini-panel; faz-spesifik koçluk. Host-query+IPC, M efor, değer 7.1, ince-veri guard zorunlu, core'suz. Ayrı tur.
+- **D7-3 (doğrulanmış ama redundans riski)** — role_fit/risk HeroCard inline (değer 6.5): bir doğrulayıcı KODDAN
+  "kısmen redundant — DeepDive score_breakdown'da zaten 'Rol uyumu'/'Risk yönetimi' var, boşluk yalnız inline" dedi →
+  yapılırsa dikkatli (churn riski); inline-prominence kararı ister.
+
 **ÖZELLİK: Riot uygulama-inceleme uyumu — Ayarlar "Hakkında" (2026-06-18, "Devam").** Kullanıcı Riot incelemesi
 (App ID 841869, Pending Review) için takip mesajı hazırlattı → "Devam". Riot'un zorunlu kıldığı üçüncü-taraf
 disclaimer'ı yalnız onboarding'de bir kez görünüyordu → SettingsPanel "Hakkında" bölümünde kalıcı yapıldı (uygulama

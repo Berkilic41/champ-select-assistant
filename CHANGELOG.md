@@ -7,6 +7,12 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 ## [Unreleased]
 
 ### Eklendi
+- **Champ-select karar kartında "Takım Rolü"** — core'un hesapladığı `team_role` (ör. "Frontline engage", "Diver",
+  "Enchanter") önceden YALNIZ oyun-içi overlay'de görünüyordu; artık HeroCard'da da (30 saniyelik pick penceresi)
+  skorların hemen altında kompakt bir kimlik etiketi olarak görünür. synergy_score'un sayısal "uyum"unu bir rol-adıyla
+  temellendirir ("takımdaki işin ne?"). Mevcut taktik plan satırlarını displace etmez (ayrı satır = additive). Saf
+  renderer (core/host değişmedi — engine purity; `team_role` zaten payload'da, yalnız champ-select render'ı eksikti);
+  +1 i18n anahtarı (tr/en parite) + render testi. [6-mercek değer-keşfi workflow'undan: 18 aday → 3 doğrulanmış.]
 - **Ayarlar → "Hakkında" bölümü (kalıcı Riot disclaimer)** — Ayarlar paneline kalıcı bir "Hakkında" bölümü eklendi:
   uygulama adı + Riot Games'in zorunlu kıldığı üçüncü-taraf disclaimer'ı ("Riot Games tarafından onaylanmamıştır…") +
   veri-kaynağı atfı (Data Dragon / Community Dragon). Disclaimer önceden YALNIZ onboarding sihirbazında bir kez görünüp

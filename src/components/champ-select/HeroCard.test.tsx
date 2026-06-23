@@ -85,6 +85,23 @@ describe('HeroCard', () => {
     expect(screen.getByText('Stretch pick — sınırlı mastery')).toBeInTheDocument();
   });
 
+  it('surfaces the core-computed team role on the decision card (was in-game only)', () => {
+    const planWithRole: DraftPlan = {
+      combo_with: [],
+      win_condition: 'Teamfight odaklı',
+      team_role: 'Frontline engage',
+      damage_profile: 'AP burst',
+      blind_pick_safety: 0.9,
+      execution_difficulty: 3,
+      threats: [],
+      fills_team_need: [],
+      risk_note: '',
+    };
+    render(<HeroCard rec={{ ...mockRec, draft_plan: planWithRole }} />);
+    expect(screen.getByText('Takım Rolü')).toBeInTheDocument();
+    expect(screen.getByText('Frontline engage')).toBeInTheDocument();
+  });
+
   it('shows the calibrated win-prob badge when an estimate is attached', () => {
     render(
       <HeroCard

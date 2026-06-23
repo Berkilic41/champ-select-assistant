@@ -2,6 +2,19 @@
 
 > Tek seferde tek küçük görev. Tarih: 2026-06-16.
 
+## MOD: Otonom — değer-keşfi workflow (2026-06-18, "uygulamayı geliştirmeye devam", ultracode)
+> 6-mercek paralel keşif + her bulgu 2/2 adversaryal koddan-doğrulama workflow'u (43 ajan, 18 aday → 3 doğrulanmış).
+> Sentez ajanı API-hatasından düştü → lider koddan self-verify + sıralama. 3 bulgu da "core hesaplar ama render yok" damarında.
+- **Iter (done)** — HeroCard "Takım Rolü". KODDAN doğrulandı: `DraftPlan.team_role` (recommendation.ts:22, generated/DraftPlan.ts:4)
+  core'da hesaplanıp payload'da AMA champ-select'te HİÇ render edilmiyordu (yalnız `IngameView.tsx:199` oyun-içi; DeepDiveTab
+  kaynağında da yok). HeroCard'a skorların altına kompakt kimlik-etiketi (`plan?.team_role?.trim()` guard; 5-slotlu plan
+  listesini ÇALMAZ = additive, taktik satır displace etmez). +1 i18n (heroCard.teamRole, scoreMeta sonrası, tr/en parite) +
+  `.hero-card__team-role*` CSS (plan-item-label deseni) + render testi (planWithRole → "Takım Rolü" + "Frontline engage").
+  Saf renderer (core/host el değmedi — engine purity). ✅ renderer 292 + typecheck 0 + i18n parite.
+- **Doğrulanmış kuyruk (ertelendi):** (a) TrendPanel faz-kırılımı early/mid/late (duration_secs bin'leri, host-query+IPC,
+  M efor, değer 7.1, ince-veri guard) — ayrı tur. (b) role_fit/risk HeroCard inline (değer 6.5; bir doğrulayıcı "kısmen
+  redundant: DeepDive score_breakdown'da zaten 'Rol uyumu'/'Risk yönetimi' var" dedi → churn riski, dikkatli teyit ister).
+
 ## MOD: Otonom — Riot uygulama-incelemesi uyumu (2026-06-18, "Devam")
 > Kullanıcı Riot uygulama-incelemesi (App ID 841869, Pending Review) için takip mesajı hazırlattı → "Devam".
 > Canlı-veri dürüstlük taraması (1 Explore + koddan-teyit) temiz çıktı: ajanın `useSummonerData` "dishonest"

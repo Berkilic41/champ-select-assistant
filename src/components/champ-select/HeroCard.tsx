@@ -181,6 +181,16 @@ export const HeroCard: React.FC<Props> = ({ rec, onHover, onExpand, pinned }) =>
           <StatBar label={t('heroCard.scoreMeta')} value={rec.meta_score} />
         </div>
 
+        {/* Team role identity — core-computed "what job for the team" (already
+            shown in-game); names the role the synergy_score quantifies, so the
+            player knows their team job BEFORE locking. */}
+        {plan?.team_role?.trim() && (
+          <div className="hero-card__team-role">
+            <span className="hero-card__team-role-label">{t('heroCard.teamRole')}</span>
+            <span>{plan.team_role.trim()}</span>
+          </div>
+        )}
+
         {/* Game plan — inline */}
         {planLines.length > 0 && (
           <div className="hero-card__plan">

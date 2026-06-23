@@ -243,6 +243,7 @@
     "scoreTeamCounter": "Takım Kontr",
     "scoreSynergy": "Sinerji",
     "scoreMeta": "Meta",
+    "teamRole": "Takım Rolü",
     "phaseLine": "Erken {{early}}% · Orta {{mid}}% · Geç {{late}}%",
     "enemyLabel": "Düşman: {{summary}}",
     "planLabel": "Oyun Planı",

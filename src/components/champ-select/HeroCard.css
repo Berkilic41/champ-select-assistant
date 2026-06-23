@@ -97,6 +97,17 @@
 /* Inline score breakdown */
 .hero-card__scores { display: flex; flex-direction: column; gap: 5px; }
 
+/* Team role identity tag (core-computed; mirrors plan-item-label styling) */
+.hero-card__team-role { display: flex; align-items: baseline; gap: var(--space-2); }
+.hero-card__team-role-label {
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--font-size-xs);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 /* Inline game plan */
 .hero-card__plan { display: flex; flex-direction: column; gap: var(--space-1); }
 .hero-card__plan-label {
