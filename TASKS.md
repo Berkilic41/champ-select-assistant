@@ -2,6 +2,19 @@
 
 > Tek seferde tek küçük görev. Tarih: 2026-06-16.
 
+## MOD: Otonom — Riot uygulama-incelemesi uyumu (2026-06-18, "Devam")
+> Kullanıcı Riot uygulama-incelemesi (App ID 841869, Pending Review) için takip mesajı hazırlattı → "Devam".
+> Canlı-veri dürüstlük taraması (1 Explore + koddan-teyit) temiz çıktı: ajanın `useSummonerData` "dishonest"
+> bulgusu YANLIŞ ALARM — dağıtılan istemcide Riot key YOK (by-design, key yalnız sunucu worker'da) → LCU başarısızsa
+> "League Client'ı aç" birincil kullanıcı için DOĞRU tavsiye; "RIOT_API_KEY ayarla" yanlış olurdu (docstring+kasıtlı
+> test bunu kilitliyor). Onun yerine Riot-incelemesiyle hizalı gerçek değer seçildi.
+- **Iter (done)** — Ayarlar → "Hakkında" bölümü. KODDAN doğrulandı: zorunlu Riot üçüncü-taraf disclaimer'ı
+  (`onboarding.disclaimer`; i18n + LICENSE/TERMS/PRIVACY/docs'ta mevcut) YALNIZ `OnboardingWizard.tsx:80`'de (ilk
+  açılış, bir kez) render ediliyordu → uygulama içinde kalıcı erişilemiyordu. SettingsPanel'e "Hakkında" `<section>`:
+  uygulama adı + `t('onboarding.disclaimer')` (tek-kaynak → drift yok) + veri-atfı. +2 i18n anahtarı
+  (aboutSection/aboutAttribution, tr/en parite) + `.sp-about-*` CSS + disclaimer-render testi. Saf renderer
+  (core/host/worker el değmedi — engine purity). ✅ renderer 290 + typecheck 0 + i18n parite.
+
 ## HARDENING — geniş kalite/test sağlamlaştırma (2026-06-18, kullanıcı seçti)
 > Olgun kod tabanı → odaklı Explore + koddan-teyit ile gerçek edge-case guard'ı. Ajan 2 marjinal aday buldu; ikisi de gerçek sınır-kırılganlığı.
 - **Iter H-01 (done)** — buildCoachUserPrompt sınır-guard. KODDAN doğrulandı: `win_prob.sample_size`/`combo_history.wins`

@@ -169,4 +169,12 @@ describe('SettingsPanel feedback sync', () => {
     expect(document.activeElement).toBe(trigger);
     trigger.remove();
   });
+
+  it('shows the persistent Riot third-party disclaimer in the About section', () => {
+    invokeMock.mockResolvedValue(null);
+    render(<SettingsPanel settings={DEFAULT_SETTINGS} onSave={vi.fn()} onClose={vi.fn()} />);
+    expect(screen.getByText('Hakkında')).toBeInTheDocument();
+    expect(screen.getByText(/Riot Games tarafından onaylanmamıştır/)).toBeInTheDocument();
+    expect(screen.getByText(/Data Dragon ve Community Dragon/)).toBeInTheDocument();
+  });
 });

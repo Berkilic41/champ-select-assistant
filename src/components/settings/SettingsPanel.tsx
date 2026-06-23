@@ -426,6 +426,12 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onSave, onClose }) =>
           </div>
         </section>
 
+        <section className="sp-section">
+          <h3 className="sp-section-title">{t('settings.aboutSection')}</h3>
+          <p className="sp-about-name">Champ Select Assistant</p>
+          <p className="sp-hint sp-about-disclaimer">{t('onboarding.disclaimer')}</p>
+          <p className="sp-hint">{t('settings.aboutAttribution')}</p>
+        </section>
 
         <div className="sp-footer">
           <span className="sp-weight-total">{t('settings.weightsRelativeNote')}</span>

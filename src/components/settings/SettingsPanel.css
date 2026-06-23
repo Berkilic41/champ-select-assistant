@@ -75,6 +75,9 @@
 
 .sp-hint { font-size: var(--font-size-xs); color: var(--text-muted); margin: 0; }
 
+.sp-about-name { font-weight: 600; margin: 0; }
+.sp-about-disclaimer { line-height: 1.5; }
+
 .sp-toggle {
   display: flex;
   align-items: center;

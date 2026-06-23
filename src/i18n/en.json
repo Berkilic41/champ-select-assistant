@@ -817,6 +817,8 @@
     "syncFeedbackOffline": "No cloud endpoint; feedback stays local",
     "syncFeedbackNothing": "No feedback due for sync",
     "syncFeedbackFail": "Feedback sync error — retryable",
+    "aboutSection": "About",
+    "aboutAttribution": "Champion, item and rune data provided by Riot's Data Dragon and Community Dragon.",
     "languageSection": "Language",
     "language": "Language",
     "languageTr": "Türkçe",

@@ -817,6 +817,8 @@
     "syncFeedbackOffline": "Cloud endpoint yok; feedback yerelde bekliyor",
     "syncFeedbackNothing": "Gönderilecek feedback yok",
     "syncFeedbackFail": "Feedback sync hatası — tekrar denenebilir",
+    "aboutSection": "Hakkında",
+    "aboutAttribution": "Şampiyon, item ve rün verileri Riot'un Data Dragon ve Community Dragon servislerinden alınır.",
     "languageSection": "Dil",
     "language": "Dil",
     "languageTr": "Türkçe",

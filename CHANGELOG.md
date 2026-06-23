@@ -6,6 +6,14 @@ Format [Keep a Changelog](https://keepachangelog.com/), versiyonlama
 
 ## [Unreleased]
 
+### Eklendi
+- **Ayarlar → "Hakkında" bölümü (kalıcı Riot disclaimer)** — Ayarlar paneline kalıcı bir "Hakkında" bölümü eklendi:
+  uygulama adı + Riot Games'in zorunlu kıldığı üçüncü-taraf disclaimer'ı ("Riot Games tarafından onaylanmamıştır…") +
+  veri-kaynağı atfı (Data Dragon / Community Dragon). Disclaimer önceden YALNIZ onboarding sihirbazında bir kez görünüp
+  kayboluyordu; artık uygulama içinde her zaman erişilebilir (yasal gereklilik + Riot uygulama-incelemesiyle hizalı).
+  Disclaimer metni tek kaynaktan (`onboarding.disclaimer`) okunur → legal metin iki kopya arasında sürüklenmez. Saf
+  renderer (core/host/worker değişmedi — engine purity); +2 i18n anahtarı (tr/en parite) + disclaimer'ı kilitleyen test.
+
 ### Geliştirildi
 - **Kompakt HUD daha sıkı/glanceable** (Overlay HUD Epic — Slice 3) — Kompakt modda artık plan başlığındaki metin
   etiketleri (rol "Üst" + "vs Rakip") gizleniyor — şampiyon/rakip ikonları bağlamı zaten taşıyor — ve layout boşlukları
